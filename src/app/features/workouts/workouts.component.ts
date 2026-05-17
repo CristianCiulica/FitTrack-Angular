@@ -88,6 +88,10 @@ export class WorkoutsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.refreshWorkouts();
+  }
+
+  private refreshWorkouts() {
     this.workoutService.getWorkouts().subscribe(data => {
       this.workouts.set(data);
       this.workoutService.workouts.set(data);
@@ -109,7 +113,10 @@ export class WorkoutsComponent implements OnInit {
     const editing = this.editingWorkout();
     if (editing?.id) {
       this.workoutService.updateWorkout(editing.id, workout).subscribe({
-        next: () => this.message.success('Workout actualizat!'),
+        next: () => {
+          this.message.success('Workout actualizat!');
+          this.refreshWorkouts();
+        },
         error: () => this.message.error('Eroare la actualizare.')
       });
     } else {
@@ -124,7 +131,10 @@ export class WorkoutsComponent implements OnInit {
         notes: workout.notes ?? '',
       };
       this.workoutService.addWorkout(full).subscribe({
-        next: () => this.message.success('Workout adăugat!'),
+        next: () => {
+          this.message.success('Workout adăugat!');
+          this.refreshWorkouts();
+        },
         error: () => this.message.error('Eroare la adăugare.')
       });
     }
@@ -137,7 +147,10 @@ export class WorkoutsComponent implements OnInit {
 
   deleteWorkout(id: string) {
     this.workoutService.deleteWorkout(id).subscribe({
-      next: () => this.message.success('Workout șters!'),
+      next: () => {
+        this.message.success('Workout șters!');
+        this.refreshWorkouts();
+      },
       error: () => this.message.error('Eroare la ștergere.')
     });
   }
