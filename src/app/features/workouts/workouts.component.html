@@ -5,7 +5,8 @@
     [(nzCollapsed)]="isCollapsed"
     [nzWidth]="240"
     [nzCollapsedWidth]="72"
-    class="sidebar">
+    class="sidebar"
+  >
     <div class="sidebar-logo">
       <span class="logo-emoji">💪</span>
       <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
@@ -22,7 +23,7 @@
     </ul>
     <div class="sidebar-footer" *ngIf="!isCollapsed">
       <div class="user-info">
-        <nz-avatar nzIcon="user" style="background:#1d1d1f"></nz-avatar>
+        <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
         <span class="user-name">{{ userName() }}</span>
       </div>
       <button nz-button nzType="text" nzDanger (click)="logout()">
@@ -35,10 +36,10 @@
     <nz-header class="app-header">
       <h2>Workouts</h2>
       <div class="header-actions">
-        <button nz-button (click)="exportExcel()" style="margin-right:8px">
+        <button nz-button (click)="exportExcel()" style="margin-right: 8px">
           <span nz-icon nzType="file-excel"></span> Excel
         </button>
-        <button nz-button (click)="exportPDF()" style="margin-right:8px">
+        <button nz-button (click)="exportPDF()" style="margin-right: 8px">
           <span nz-icon nzType="file-pdf"></span> PDF
         </button>
         <button nz-button nzType="primary" (click)="openAdd()">
@@ -51,7 +52,12 @@
       <!-- Filters -->
       <div class="filters-bar">
         <nz-input-group [nzPrefix]="prefixIcon" class="search-input">
-          <input nz-input placeholder="Caută exercițiu..." [(ngModel)]="searchText" (ngModelChange)="searchText.set($event)" />
+          <input
+            nz-input
+            placeholder="Caută exercițiu..."
+            [(ngModel)]="searchText"
+            (ngModelChange)="searchText.set($event)"
+          />
         </nz-input-group>
         <ng-template #prefixIcon><span nz-icon nzType="search"></span></ng-template>
 
@@ -60,7 +66,8 @@
           (ngModelChange)="filterMuscle.set($event)"
           nzPlaceHolder="Filtrează după mușchi"
           nzAllowClear
-          style="width: 220px">
+          style="width: 220px"
+        >
           <nz-option *ngFor="let m of muscleGroups" [nzValue]="m" [nzLabel]="m"></nz-option>
         </nz-select>
       </div>
@@ -70,10 +77,12 @@
         <nz-table
           #workoutTable
           [nzData]="filteredWorkouts()"
+          [nzNoResult]="hideTableNoResult"
           [nzPageSize]="10"
           nzShowSizeChanger
           [nzPageSizeOptions]="[5, 10, 20]"
-          nzShowQuickJumper>
+          nzShowQuickJumper
+        >
           <thead>
             <tr>
               <th nzColumnKey="exerciseName" [nzSortFn]="true">Exercițiu</th>
@@ -94,25 +103,46 @@
               <td>
                 <nz-tag [nzColor]="muscleColors[w.muscleGroup]">{{ w.muscleGroup }}</nz-tag>
               </td>
-              <td><strong>{{ w.sets }}</strong></td>
-              <td><strong>{{ w.reps }}</strong></td>
-              <td><strong>{{ w.weight }}</strong> kg</td>
+              <td>
+                <strong>{{ w.sets }}</strong>
+              </td>
+              <td>
+                <strong>{{ w.reps }}</strong>
+              </td>
+              <td>
+                <strong>{{ w.weight }}</strong> kg
+              </td>
               <td>{{ w.date }}</td>
               <td>
-                <button nz-button nzType="text" nzSize="small" (click)="openEdit(w)" style="margin-right:4px">
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  (click)="openEdit(w)"
+                  style="margin-right: 4px"
+                >
                   <span nz-icon nzType="edit"></span>
                 </button>
-                <button nz-button nzType="text" nzSize="small" nzDanger
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  nzDanger
                   nz-popconfirm
                   nzPopconfirmTitle="Sigur vrei să ștergi?"
-                  (nzOnConfirm)="deleteWorkout(w.id!)">
+                  (nzOnConfirm)="deleteWorkout(w.id!)"
+                >
                   <span nz-icon nzType="delete"></span>
                 </button>
               </td>
             </tr>
             <tr *ngIf="filteredWorkouts().length === 0">
-              <td colspan="7" style="text-align:center; padding: 48px; color: #6e6e73">
-                <span nz-icon nzType="inbox" style="font-size:48px;display:block;margin-bottom:16px;color:#d1d1d6"></span>
+              <td colspan="7" style="text-align: center; padding: 48px; color: #6e6e73">
+                <span
+                  nz-icon
+                  nzType="inbox"
+                  style="font-size: 48px; display: block; margin-bottom: 16px; color: #d1d1d6"
+                ></span>
                 Niciun workout găsit. Apasă "Adaugă workout" să începi!
               </td>
             </tr>
@@ -127,5 +157,6 @@
   [visible]="modalVisible()"
   [workout]="editingWorkout()"
   (save)="onModalSave($event)"
-  (cancel)="onModalCancel()">
+  (cancel)="onModalCancel()"
+>
 </app-workout-modal>
