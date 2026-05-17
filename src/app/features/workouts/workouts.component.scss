@@ -1,0 +1,116 @@
+.app-layout { min-height: 100vh; }
+
+.sidebar {
+  background: #1d1d1f !important;
+
+  .sidebar-logo {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    .logo-emoji { font-size: 24px; }
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+  }
+
+  .sidebar-menu {
+    background: transparent !important;
+    border: none !important;
+    margin-top: 8px;
+    ::ng-deep .ant-menu-item {
+      color: rgba(255,255,255,0.65) !important;
+      border-radius: 10px !important;
+      margin: 4px 12px !important;
+      width: calc(100% - 24px) !important;
+      &:hover, &.ant-menu-item-selected {
+        background: rgba(255,255,255,0.1) !important;
+        color: #fff !important;
+      }
+    }
+  }
+
+  .sidebar-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 16px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      .user-name {
+        color: rgba(255,255,255,0.8);
+        font-size: 13px;
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+.main-layout { background: #f5f5f7; }
+
+.app-header {
+  background: rgba(255,255,255,0.8) !important;
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  h2 { font-size: 20px; font-weight: 600; color: #1d1d1f; margin: 0; }
+}
+
+.app-content {
+  padding: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+
+  .search-input {
+    max-width: 320px;
+    border-radius: 10px;
+  }
+}
+
+.table-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden;
+
+  .exercise-name {
+    font-weight: 500;
+    color: #1d1d1f;
+  }
+
+  .exercise-notes {
+    font-size: 12px;
+    color: #aeaeb2;
+    margin-top: 2px;
+  }
+}

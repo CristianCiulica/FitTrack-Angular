@@ -1,1 +1,110 @@
-<p>Dashboard works!</p>
+<nz-layout class="app-layout">
+  <!-- Sidebar -->
+  <nz-sider
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzWidth]="240"
+    [nzCollapsedWidth]="72"
+    class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-emoji">💪</span>
+      <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
+    </div>
+    <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
+      <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="dashboard"></span>
+        <span>Dashboard</span>
+      </li>
+      <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="thunderbolt"></span>
+        <span>Workouts</span>
+      </li>
+    </ul>
+    <div class="sidebar-footer" *ngIf="!isCollapsed">
+      <div class="user-info">
+        <nz-avatar nzIcon="user" style="background:#1d1d1f"></nz-avatar>
+        <span class="user-name">{{ userName() }}</span>
+      </div>
+      <button nz-button nzType="text" nzDanger (click)="logout()">
+        <span nz-icon nzType="logout"></span>
+      </button>
+    </div>
+  </nz-sider>
+
+  <!-- Content -->
+  <nz-layout class="main-layout">
+    <nz-header class="app-header">
+      <h2>Dashboard</h2>
+      <div class="header-actions">
+        <button nz-button nzType="text" routerLink="/workouts">
+          <span nz-icon nzType="plus"></span>
+          Workout nou
+        </button>
+      </div>
+    </nz-header>
+
+    <nz-content class="app-content">
+      <!-- Stats cards -->
+      <div class="stats-grid">
+        <nz-card class="stat-card">
+          <div class="stat-icon purple">
+            <span nz-icon nzType="fire" style="font-size:24px"></span>
+          </div>
+          <nz-statistic
+            [nzValue]="totalWorkouts()"
+            nzTitle="Total Workouts">
+          </nz-statistic>
+        </nz-card>
+
+        <nz-card class="stat-card">
+          <div class="stat-icon blue">
+            <span nz-icon nzType="calendar" style="font-size:24px"></span>
+          </div>
+          <nz-statistic
+            [nzValue]="thisWeekWorkouts()"
+            nzTitle="Această săptămână">
+          </nz-statistic>
+        </nz-card>
+
+        <nz-card class="stat-card">
+          <div class="stat-icon green">
+            <span nz-icon nzType="rise" style="font-size:24px"></span>
+          </div>
+          <nz-statistic
+            [nzValue]="totalVolume()"
+            nzTitle="Volum total (kg)"
+            [nzValueStyle]="{ color: '#1d1d1f' }">
+          </nz-statistic>
+        </nz-card>
+
+        <nz-card class="stat-card">
+          <div class="stat-icon orange">
+            <span nz-icon nzType="trophy" style="font-size:24px"></span>
+          </div>
+          <div class="stat-label">Mușchi preferat</div>
+          <div class="stat-value-text">{{ mostUsedMuscle() }}</div>
+        </nz-card>
+      </div>
+
+      <!-- Recent workouts -->
+      <nz-card class="recent-card" nzTitle="Antrenamente recente">
+        <div class="recent-list">
+          <div *ngFor="let w of recentWorkouts()" class="recent-item">
+            <div class="recent-left">
+              <div class="recent-name">{{ w.exerciseName }}</div>
+              <div class="recent-meta">{{ w.sets }} seturi × {{ w.reps }} rep × {{ w.weight }}kg</div>
+            </div>
+            <div class="recent-right">
+              <nz-tag [nzColor]="'default'">{{ w.muscleGroup }}</nz-tag>
+              <div class="recent-date">{{ w.date }}</div>
+            </div>
+          </div>
+          <div *ngIf="recentWorkouts().length === 0" class="empty-state">
+            <span nz-icon nzType="inbox" style="font-size:48px;color:#d1d1d6"></span>
+            <p>Niciun workout încă. <a routerLink="/workouts">Adaugă primul!</a></p>
+          </div>
+        </div>
+      </nz-card>
+    </nz-content>
+  </nz-layout>
+</nz-layout>
