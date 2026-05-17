@@ -85,12 +85,60 @@
         >
           <thead>
             <tr>
-              <th nzColumnKey="exerciseName" [nzSortFn]="true">Exercițiu</th>
-              <th nzColumnKey="muscleGroup" [nzSortFn]="true">Grupă musculară</th>
-              <th nzColumnKey="sets" [nzSortFn]="true">Seturi</th>
-              <th nzColumnKey="reps" [nzSortFn]="true">Repetări</th>
-              <th nzColumnKey="weight" [nzSortFn]="true">Greutate (kg)</th>
-              <th nzColumnKey="date" [nzSortFn]="true">Dată</th>
+              <th
+                nzColumnKey="exerciseName"
+                nzShowSort
+                [nzSortFn]="true"
+                [nzSortOrder]="sortColumn() === 'exerciseName' ? sortDirection() : null"
+                (nzSortOrderChange)="onSortOrderChange('exerciseName', $event)"
+              >
+                Exercițiu
+              </th>
+              <th
+                nzColumnKey="muscleGroup"
+                nzShowSort
+                [nzSortFn]="true"
+                [nzSortOrder]="sortColumn() === 'muscleGroup' ? sortDirection() : null"
+                (nzSortOrderChange)="onSortOrderChange('muscleGroup', $event)"
+              >
+                Grupă musculară
+              </th>
+              <th
+                nzColumnKey="sets"
+                nzShowSort
+                [nzSortFn]="true"
+                [nzSortOrder]="sortColumn() === 'sets' ? sortDirection() : null"
+                (nzSortOrderChange)="onSortOrderChange('sets', $event)"
+              >
+                Seturi
+              </th>
+              <th
+                nzColumnKey="reps"
+                nzShowSort
+                [nzSortFn]="true"
+                [nzSortOrder]="sortColumn() === 'reps' ? sortDirection() : null"
+                (nzSortOrderChange)="onSortOrderChange('reps', $event)"
+              >
+                Repetări
+              </th>
+              <th
+                nzColumnKey="weight"
+                nzShowSort
+                [nzSortFn]="true"
+                [nzSortOrder]="sortColumn() === 'weight' ? sortDirection() : null"
+                (nzSortOrderChange)="onSortOrderChange('weight', $event)"
+              >
+                Greutate (kg)
+              </th>
+              <th
+                nzColumnKey="date"
+                nzShowSort
+                [nzSortFn]="true"
+                [nzSortOrder]="sortColumn() === 'date' ? sortDirection() : null"
+                (nzSortOrderChange)="onSortOrderChange('date', $event)"
+              >
+                Dată
+              </th>
               <th>Acțiuni</th>
             </tr>
           </thead>

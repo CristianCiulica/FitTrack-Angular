@@ -24,7 +24,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
     NzIconModule,
   ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
   form: FormGroup;
