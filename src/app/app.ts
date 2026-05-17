@@ -8,7 +8,7 @@ import { ReminderService } from './core/services/reminder.service';
   imports: [RouterOutlet],
   template: `<router-outlet />`,
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   constructor(private reminderService: ReminderService) {}
 
   ngOnInit(): void {

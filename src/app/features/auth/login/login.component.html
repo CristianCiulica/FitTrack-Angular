@@ -1,0 +1,47 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-icon">💪</span>
+      <h1>FitTrack</h1>
+      <p>Workout Planner & Progress Tracker</p>
+    </div>
+
+    <form nz-form [formGroup]="form" (ngSubmit)="submit()">
+      <nz-form-item>
+        <nz-form-control nzErrorTip="Introduceți un email valid.">
+          <nz-input-group nzPrefixIcon="mail">
+            <input nz-input formControlName="email" placeholder="Email" type="email" />
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control nzErrorTip="Min. 6 caractere: majusculă, minusculă, cifră, caracter special.">
+          <nz-input-group nzPrefixIcon="lock" [nzSuffix]="suffixTemplate">
+            <input nz-input formControlName="password" placeholder="Parolă"
+              [type]="passwordVisible ? 'text' : 'password'" />
+          </nz-input-group>
+          <ng-template #suffixTemplate>
+            <span nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+              (click)="passwordVisible = !passwordVisible" style="cursor:pointer"></span>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-control>
+          <label nz-checkbox formControlName="remember">Ține-mă minte</label>
+        </nz-form-control>
+      </nz-form-item>
+
+      <button nz-button nzType="primary" nzBlock [nzLoading]="loading" type="submit">
+        Autentificare
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <span>Nu ai cont? </span>
+      <a routerLink="/auth/register">Înregistrează-te</a>
+    </div>
+  </div>
+</div>
