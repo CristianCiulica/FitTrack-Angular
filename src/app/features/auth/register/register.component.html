@@ -1,62 +1,104 @@
 <div class="auth-wrapper">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <span class="logo-icon">💪</span>
-      <h1>FitTrack</h1>
-      <p>Creează-ți contul</p>
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-icon">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="white" fill-opacity="0.15"/>
+          <path d="M8 22 L16 10 L24 22" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11 18 L21 18" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="brand-name">FitTrack</span>
     </div>
+    <div class="auth-hero">
+      <h1>Start your<br>fitness<br>journey<br>today.</h1>
+      <p>Join thousands of athletes tracking their progress and achieving their goals.</p>
+    </div>
+    <div class="auth-stats">
+      <div class="stat">
+        <div class="stat-num">10k+</div>
+        <div class="stat-label">Workouts tracked</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">98%</div>
+        <div class="stat-label">Goal achievement</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">500+</div>
+        <div class="stat-label">Exercises</div>
+      </div>
+    </div>
+  </div>
 
-    <form nz-form [formGroup]="form" (ngSubmit)="submit()">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
-        <nz-form-item>
-          <nz-form-control nzErrorTip="Câmp obligatoriu.">
-            <input nz-input formControlName="firstName" placeholder="Prenume" />
-          </nz-form-control>
-        </nz-form-item>
-        <nz-form-item>
-          <nz-form-control nzErrorTip="Câmp obligatoriu.">
-            <input nz-input formControlName="lastName" placeholder="Nume" />
-          </nz-form-control>
-        </nz-form-item>
+  <div class="auth-right">
+    <div class="auth-card">
+      <div class="card-header">
+        <h2>Create account</h2>
+        <p>Start tracking your workouts today</p>
       </div>
 
-      <nz-form-item>
-        <nz-form-control nzErrorTip="Introduceți un email valid.">
-          <nz-input-group nzPrefixIcon="mail">
-            <input nz-input formControlName="email" placeholder="Email" type="email" />
-          </nz-input-group>
-        </nz-form-control>
-      </nz-form-item>
+      <form nz-form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First name</label>
+            <nz-form-item>
+              <nz-form-control nzErrorTip="Required.">
+                <input nz-input formControlName="firstName" placeholder="John" class="apple-input" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div class="form-group">
+            <label>Last name</label>
+            <nz-form-item>
+              <nz-form-control nzErrorTip="Required.">
+                <input nz-input formControlName="lastName" placeholder="Doe" class="apple-input" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
 
-      <nz-form-item>
-        <nz-form-control nzErrorTip="Min. 6 caractere: majusculă, minusculă, cifră, caracter special.">
-          <nz-input-group nzPrefixIcon="lock" [nzSuffix]="suffixTemplate">
-            <input nz-input formControlName="password" placeholder="Parolă"
-              [type]="passwordVisible ? 'text' : 'password'" />
-          </nz-input-group>
-          <ng-template #suffixTemplate>
-            <span nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
-              (click)="passwordVisible = !passwordVisible" style="cursor:pointer"></span>
-          </ng-template>
-        </nz-form-control>
-      </nz-form-item>
+        <div class="form-group">
+          <label>Email</label>
+          <nz-form-item>
+            <nz-form-control nzErrorTip="Introduceți un email valid.">
+              <input nz-input formControlName="email" placeholder="you@example.com" type="email" class="apple-input" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
 
-      <nz-form-item>
-        <nz-form-control [nzErrorTip]="form.hasError('passwordMismatch') ? 'Parolele nu coincid.' : 'Câmp obligatoriu.'">
-          <nz-input-group nzPrefixIcon="lock">
-            <input nz-input formControlName="confirmPassword" placeholder="Confirmă parola" type="password" />
-          </nz-input-group>
-        </nz-form-control>
-      </nz-form-item>
+        <div class="form-group">
+          <label>Password</label>
+          <nz-form-item>
+            <nz-form-control nzErrorTip="Min. 6 caractere: majusculă, minusculă, cifră, caracter special.">
+              <div class="input-wrapper">
+                <input nz-input formControlName="password" placeholder="••••••••"
+                  [type]="passwordVisible ? 'text' : 'password'" class="apple-input" />
+                <button type="button" class="eye-btn" (click)="passwordVisible = !passwordVisible">
+                  <span nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"></span>
+                </button>
+              </div>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
 
-      <button nz-button nzType="primary" nzBlock [nzLoading]="loading" type="submit">
-        Creează cont
-      </button>
-    </form>
+        <div class="form-group">
+          <label>Confirm password</label>
+          <nz-form-item>
+            <nz-form-control [nzErrorTip]="form.hasError('passwordMismatch') ? 'Parolele nu coincid.' : 'Required.'">
+              <input nz-input formControlName="confirmPassword" placeholder="••••••••" type="password" class="apple-input" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
 
-    <div class="auth-footer">
-      <span>Ai deja cont? </span>
-      <a routerLink="/auth/login">Autentifică-te</a>
+        <button nz-button nzType="primary" nzBlock [nzLoading]="loading" type="submit" class="submit-btn">
+          Create account
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <span>Already have an account?</span>
+        <a routerLink="/auth/login">Sign in</a>
+      </div>
     </div>
   </div>
 </div>
