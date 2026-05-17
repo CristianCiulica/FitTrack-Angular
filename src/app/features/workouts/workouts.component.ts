@@ -43,14 +43,14 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
     WorkoutModalComponent,
   ],
   templateUrl: './workouts.component.html',
-  styleUrl: './workouts.component.scss'
+  styleUrls: ['./workouts.component.scss']
 })
 export class WorkoutsComponent implements OnInit {
   workouts = signal<Workout[]>([]);
   searchText = signal('');
   filterMuscle = signal<MuscleGroup | ''>('');
   sortColumn = signal<string>('date');
-  sortDirection = signal<'ascend' | 'descend'>('descend');
+  sortDirection = signal<'ascend' | 'descend' | null>('descend');
   isCollapsed = false;
   modalVisible = signal(false);
   editingWorkout = signal<Workout | null>(null);
@@ -66,8 +66,32 @@ export class WorkoutsComponent implements OnInit {
     if (this.filterMuscle()) {
       data = data.filter(w => w.muscleGroup === this.filterMuscle());
     }
+    // Apply sorting
+    const sc = this.sortColumn();
+    const sd = this.sortDirection();
+    if (sc && sd) {
+      const multiplier = sd === 'ascend' ? 1 : -1;
+      data.sort((a, b) => {
+        let av: any = (a as any)[sc];
+        let bv: any = (b as any)[sc];
+        if (sc === 'date') {
+          av = new Date(av).getTime();
+          bv = new Date(bv).getTime();
+        }
+        if (typeof av === 'string' && typeof bv === 'string') {
+          return av.localeCompare(bv) * multiplier;
+        }
+        return ((av ?? 0) - (bv ?? 0)) * multiplier;
+      });
+    }
+
     return data;
   });
+
+  onSortOrderChange(column: string, direction: string | null) {
+    this.sortColumn.set(column);
+    this.sortDirection.set(direction as 'ascend' | 'descend' | null);
+  }
 
   userName = computed(() => {
     const u = this.authService.currentUser();
@@ -85,7 +109,7 @@ export class WorkoutsComponent implements OnInit {
     private authService: AuthService,
     private exportService: ExportService,
     private message: NzMessageService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.refreshWorkouts();

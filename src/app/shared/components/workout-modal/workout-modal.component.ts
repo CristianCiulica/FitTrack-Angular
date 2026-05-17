@@ -25,7 +25,7 @@ import { Workout, MUSCLE_GROUPS } from '../../../core/models/workout.model';
     NzDatePickerModule,
   ],
   templateUrl: './workout-modal.component.html',
-  styleUrl: './workout-modal.component.scss'
+  styleUrls: ['./workout-modal.component.scss']
 })
 export class WorkoutModalComponent implements OnChanges {
   @Input() visible = false;

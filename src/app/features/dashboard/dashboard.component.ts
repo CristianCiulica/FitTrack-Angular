@@ -32,7 +32,7 @@ import { Workout } from '../../core/models/workout.model';
     NzTagModule,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   workouts = signal<Workout[]>([]);
@@ -64,7 +64,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     private workoutService: WorkoutService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.workoutService.getWorkouts().subscribe(data => {
