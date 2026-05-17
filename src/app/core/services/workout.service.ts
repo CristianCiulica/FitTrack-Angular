@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import {
   Firestore,
   collection,
@@ -20,18 +20,16 @@ import { switchMap } from 'rxjs/operators';
 export class WorkoutService {
   totalWorkouts = signal<number>(0);
   workouts = signal<Workout[]>([]);
+  private readonly firestore = inject(Firestore);
+  private readonly auth = inject(Auth);
+  private readonly authState$ = user(this.auth);
 
   totalVolume = computed(() =>
     this.workouts().reduce((acc, w) => acc + w.sets * w.reps * w.weight, 0),
   );
 
-  constructor(
-    private firestore: Firestore,
-    private auth: Auth,
-  ) {}
-
   getWorkouts(): Observable<Workout[]> {
-    return user(this.auth).pipe(
+    return this.authState$.pipe(
       switchMap((u) => {
         if (!u) return of([]);
         const ref = collection(this.firestore, 'workouts');

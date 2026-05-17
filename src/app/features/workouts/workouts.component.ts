@@ -55,6 +55,7 @@ export class WorkoutsComponent implements OnInit {
   modalVisible = signal(false);
   editingWorkout = signal<Workout | null>(null);
   muscleGroups = MUSCLE_GROUPS;
+  readonly hideTableNoResult: any = null;
 
   filteredWorkouts = computed(() => {
     let data = [...this.workouts()];
