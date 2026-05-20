@@ -1,0 +1,152 @@
+<nz-layout class="app-layout">
+  <!-- Sidebar -->
+  <nz-sider
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzWidth]="240"
+    [nzCollapsedWidth]="72"
+    class="sidebar"
+  >
+    <div class="sidebar-logo">
+      <span class="logo-emoji">💪</span>
+      <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
+    </div>
+    <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
+      <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="dashboard"></span>
+        <span>Dashboard</span>
+      </li>
+      <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="thunderbolt"></span>
+        <span>Workouts</span>
+      </li>
+      <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="play-circle"></span>
+        <span>Start Workout</span>
+      </li>
+    </ul>
+    <div class="sidebar-footer" *ngIf="!isCollapsed">
+      <div class="user-info">
+        <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
+        <span class="user-name">{{ userName() }}</span>
+      </div>
+      <button nz-button nzType="text" nzDanger (click)="logout()">
+        <span nz-icon nzType="logout"></span>
+      </button>
+    </div>
+  </nz-sider>
+
+  <nz-layout class="main-layout">
+    <nz-header class="app-header">
+      <h2>Start Workout</h2>
+      <div class="header-actions">
+        <button nz-button nzDanger (click)="logout()">
+          <span nz-icon nzType="logout"></span> Logout
+        </button>
+      </div>
+    </nz-header>
+
+    <nz-content class="app-content">
+      <div class="container">
+
+        <!-- SETUP STATE -->
+        <ng-container *ngIf="state() === 'setup'">
+          <nz-card nzTitle="Alege un antrenament predefinit">
+            <div class="routines-list">
+              <div
+                class="routine-card"
+                *ngFor="let r of routines; let i = index"
+                [class.selected]="selectedRoutineIndex() === i"
+                (click)="selectedRoutineIndex.set(i); onRoutineSelect(i)">
+                <h3>{{ r.name }}</h3>
+                <p>{{ r.exercises.length }} exerciții</p>
+                <div class="routine-preview">
+                  <nz-tag *ngFor="let ex of r.exercises">{{ ex.name }}</nz-tag>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button nz-button nzType="primary" nzSize="large" (click)="startWorkout()">
+                <span nz-icon nzType="play-circle"></span> Start Antrenament
+              </button>
+            </div>
+          </nz-card>
+        </ng-container>
+
+        <!-- ACTIVE STATE -->
+        <ng-container *ngIf="state() === 'active'">
+          <div class="progress-bar">
+            <span>Progres Antrenament</span>
+            <nz-progress [nzPercent]="progressPercent()"></nz-progress>
+          </div>
+
+          <nz-card class="active-card" *ngIf="currentExercise() as ex">
+            <div class="exercise-header">
+              <h2>{{ ex.name }}</h2>
+              <nz-tag nzColor="blue">{{ ex.muscleGroup }}</nz-tag>
+            </div>
+
+            <div class="stats-row">
+              <div class="stat">
+                <label>Set</label>
+                <div class="value">{{ currentSetIndex() }} / {{ ex.sets }}</div>
+              </div>
+              <div class="stat">
+                <label>Repetări</label>
+                <div class="value">{{ ex.reps }}</div>
+              </div>
+              <div class="stat">
+                <label>Greutate (kg)</label>
+                <div class="value">{{ ex.weight }}</div>
+              </div>
+            </div>
+
+            <div class="action-bar active-action">
+              <button nz-button nzType="primary" nzSize="large" nzBlock (click)="finishSet()">
+                <span nz-icon nzType="check"></span> Finalizează Seria
+              </button>
+            </div>
+          </nz-card>
+
+          <div class="up-next" *ngIf="currentExerciseIndex() + 1 < currentRoutine().exercises.length">
+            <p>Urmează: <strong>{{ currentRoutine().exercises[currentExerciseIndex() + 1].name }}</strong></p>
+          </div>
+        </ng-container>
+
+        <!-- REST STATE -->
+        <ng-container *ngIf="state() === 'rest'">
+          <nz-card class="rest-card">
+            <h2>Pauză</h2>
+            <div class="timer-display">
+              {{ restTimeRemaining() }}s
+            </div>
+
+            <div class="timer-adjust">
+              <button nz-button (click)="addTime(-10)">-10s</button>
+              <button nz-button (click)="addTime(10)">+10s</button>
+            </div>
+
+            <div class="action-bar">
+              <button nz-button nzType="primary" nzSize="large" (click)="skipRest()">
+                <span nz-icon nzType="forward"></span> Sari peste pauză
+              </button>
+            </div>
+          </nz-card>
+        </ng-container>
+
+        <!-- FINISHED STATE -->
+        <ng-container *ngIf="state() === 'finished'">
+          <nz-card class="finish-card">
+            <span nz-icon nzType="check-circle" style="font-size: 64px; color: #52c41a;"></span>
+            <h2>Antrenament Complet!</h2>
+            <p>Felicitări! Datele au fost salvate în istoricul tău de workouts.</p>
+            <button nz-button nzType="primary" (click)="reset()" routerLink="/dashboard">Mergi la Dashboard</button>
+          </nz-card>
+        </ng-container>
+
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>
+

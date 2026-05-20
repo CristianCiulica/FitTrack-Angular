@@ -19,6 +19,10 @@
         <span nz-icon nzType="thunderbolt"></span>
         <span>Workouts</span>
       </li>
+      <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="play-circle"></span>
+        <span>Start Workout</span>
+      </li>
     </ul>
     <div class="sidebar-footer" *ngIf="!isCollapsed">
       <div class="user-info">
@@ -39,6 +43,10 @@
         <button nz-button nzType="text" routerLink="/workouts">
           <span nz-icon nzType="plus"></span>
           Workout nou
+        </button>
+        <button nz-button nzDanger (click)="logout()" style="margin-left: 8px">
+          <span nz-icon nzType="logout"></span>
+          Logout
         </button>
       </div>
     </nz-header>

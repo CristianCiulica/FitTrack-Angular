@@ -1,0 +1,140 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.action-bar {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.active-action {
+  margin-top: 48px;
+}
+
+.routines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.routine-card {
+  padding: 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: #1890ff;
+  }
+
+  &.selected {
+    border-color: #1890ff;
+    background-color: #e6f7ff;
+  }
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: #666;
+    margin-bottom: 12px;
+  }
+
+  .routine-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.progress-bar {
+  margin-bottom: 24px;
+
+  span {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+}
+
+.active-card {
+  text-align: center;
+
+  .exercise-header {
+    margin-bottom: 32px;
+
+    h2 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: space-around;
+    gap: 16px;
+
+    .stat {
+      label {
+        display: block;
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 8px;
+      }
+      .value {
+        font-size: 36px;
+        font-weight: 600;
+        color: #1d1d1f;
+      }
+    }
+  }
+}
+
+.up-next {
+  margin-top: 24px;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+}
+
+.rest-card {
+  text-align: center;
+
+  .timer-display {
+    font-size: 80px;
+    font-weight: bold;
+    color: #1890ff;
+    line-height: 1;
+    margin: 32px 0;
+  }
+
+  .timer-adjust {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+}
+
+.finish-card {
+  text-align: center;
+  padding: 48px 24px;
+
+  h2 {
+    margin: 24px 0 16px;
+  }
+
+  p {
+    color: #666;
+    margin-bottom: 32px;
+  }
+}
+
+@import '../workouts/workouts.component.scss';
+

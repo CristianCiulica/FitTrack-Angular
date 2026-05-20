@@ -22,6 +22,10 @@ import {
   ThunderboltOutline,
   TrophyOutline,
   UserOutline,
+  PlayCircleOutline,
+  CheckCircleOutline,
+  CheckOutline,
+  ForwardOutline,
 } from '@ant-design/icons-angular/icons';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
@@ -56,6 +60,10 @@ export const appConfig: ApplicationConfig = {
       ThunderboltOutline,
       TrophyOutline,
       UserOutline,
+      PlayCircleOutline,
+      CheckCircleOutline,
+      CheckOutline,
+      ForwardOutline,
     ]),
     { provide: NZ_I18N, useValue: en_US },
   ],

@@ -59,7 +59,9 @@ export class WorkoutService {
 
     const raw = localStorage.getItem(this.getStorageKey(userId));
     if (!raw) {
-      return [];
+      const predefinedWorkouts = this.getPredefinedWorkouts(userId);
+      this.saveWorkouts(userId, predefinedWorkouts);
+      return predefinedWorkouts;
     }
 
     try {
@@ -81,5 +83,27 @@ export class WorkoutService {
 
   private createWorkoutId(): string {
     return `w_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  private getPredefinedWorkouts(userId: string): Workout[] {
+    const today = new Date();
+    const formatDate = (daysAgo: number) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() - daysAgo);
+      return d.toISOString().split('T')[0];
+    };
+
+    return [
+      { id: this.createWorkoutId() + '1', userId, exerciseName: 'Bench Press', muscleGroup: 'Chest', sets: 4, reps: 10, weight: 80, date: formatDate(1), notes: 'Mișcare controlată' },
+      { id: this.createWorkoutId() + '2', userId, exerciseName: 'Incline Dumbbell Press', muscleGroup: 'Chest', sets: 3, reps: 12, weight: 30, date: formatDate(1), notes: '' },
+      { id: this.createWorkoutId() + '3', userId, exerciseName: 'Squats', muscleGroup: 'Legs', sets: 4, reps: 8, weight: 100, date: formatDate(2), notes: 'Pauză 2min între seturi' },
+      { id: this.createWorkoutId() + '4', userId, exerciseName: 'Leg Press', muscleGroup: 'Legs', sets: 3, reps: 15, weight: 150, date: formatDate(2), notes: '' },
+      { id: this.createWorkoutId() + '5', userId, exerciseName: 'Pull-ups', muscleGroup: 'Back', sets: 4, reps: 10, weight: 0, date: formatDate(3), notes: 'Bodyweight' },
+      { id: this.createWorkoutId() + '6', userId, exerciseName: 'Barbell Rows', muscleGroup: 'Back', sets: 4, reps: 8, weight: 70, date: formatDate(3), notes: '' },
+      { id: this.createWorkoutId() + '7', userId, exerciseName: 'Overhead Press', muscleGroup: 'Shoulders', sets: 3, reps: 10, weight: 50, date: formatDate(4), notes: '' },
+      { id: this.createWorkoutId() + '8', userId, exerciseName: 'Lateral Raises', muscleGroup: 'Shoulders', sets: 4, reps: 15, weight: 12.5, date: formatDate(4), notes: '' },
+      { id: this.createWorkoutId() + '9', userId, exerciseName: 'Bicep Curls', muscleGroup: 'Arms', sets: 3, reps: 12, weight: 15, date: formatDate(5), notes: '' },
+      { id: this.createWorkoutId() + '10', userId, exerciseName: 'Tricep Pushdowns', muscleGroup: 'Arms', sets: 3, reps: 15, weight: 25, date: formatDate(5), notes: 'Cablu' }
+    ];
   }
 }

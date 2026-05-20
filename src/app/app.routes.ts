@@ -20,5 +20,11 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/workouts/workouts.routes').then((m) => m.workoutsRoutes),
   },
+  {
+    path: 'start-workout',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/start-workout/start-workout.routes').then((m) => m.startWorkoutRoutes),
+  },
   { path: '**', redirectTo: 'auth/login' },
 ];
