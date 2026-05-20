@@ -7,24 +7,28 @@
     [nzCollapsedWidth]="72"
     class="sidebar"
   >
-    <div class="sidebar-logo">
-      <span class="logo-emoji">💪</span>
-      <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
-    </div>
-    <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
-      <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="dashboard"></span>
-        <span>Dashboard</span>
-      </li>
-      <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="thunderbolt"></span>
-        <span>Workouts</span>
-      </li>
-      <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="play-circle"></span>
-        <span>Start Workout</span>
-      </li>
-    </ul>
+      <div class="sidebar-logo">
+        <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
+        <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
+      </div>
+      <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
+        <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="dashboard"></span>
+          <span>Dashboard</span>
+        </li>
+        <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="thunderbolt"></span>
+          <span>Workouts</span>
+        </li>
+        <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="play-circle"></span>
+          <span>Start Workout</span>
+        </li>
+        <li nz-menu-item routerLink="/bmi" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="heart"></span>
+          <span>BMI Calculator</span>
+        </li>
+      </ul>
     <div class="sidebar-footer" *ngIf="!isCollapsed">
       <div class="user-info">
         <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
@@ -102,8 +106,11 @@
               </div>
             </div>
 
-            <div class="action-bar active-action">
-              <button nz-button nzType="primary" nzSize="large" nzBlock (click)="finishSet()">
+            <div class="action-bar active-action" style="display: flex; gap: 16px;">
+              <button nz-button nzDanger nzSize="large" style="flex: 1" (click)="cancelWorkout()">
+                <span nz-icon nzType="close"></span> Oprește
+              </button>
+              <button nz-button nzType="primary" nzSize="large" style="flex: 2" (click)="finishSet()">
                 <span nz-icon nzType="check"></span> Finalizează Seria
               </button>
             </div>
@@ -127,8 +134,11 @@
               <button nz-button (click)="addTime(10)">+10s</button>
             </div>
 
-            <div class="action-bar">
-              <button nz-button nzType="primary" nzSize="large" (click)="skipRest()">
+            <div class="action-bar" style="display: flex; gap: 16px;">
+              <button nz-button nzDanger nzSize="large" style="flex: 1" (click)="cancelWorkout()">
+                <span nz-icon nzType="close"></span> Oprește
+              </button>
+              <button nz-button nzType="primary" nzSize="large" style="flex: 2" (click)="skipRest()">
                 <span nz-icon nzType="forward"></span> Sari peste pauză
               </button>
             </div>

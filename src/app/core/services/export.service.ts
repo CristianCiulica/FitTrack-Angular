@@ -13,10 +13,14 @@ export class ExportService {
     doc.setFontSize(11);
     doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 28);
 
+    const flattened = workouts.flatMap(w =>
+      w.exercises?.map(ex => [w.name, ex.exerciseName, ex.muscleGroup, ex.sets, ex.reps, ex.weight, w.date]) || []
+    );
+
     autoTable(doc, {
       startY: 35,
-      head: [['Exercise', 'Muscle Group', 'Sets', 'Reps', 'Weight (kg)', 'Date']],
-      body: workouts.map((w) => [w.exerciseName, w.muscleGroup, w.sets, w.reps, w.weight, w.date]),
+      head: [['Workout Name', 'Exercise', 'Muscle Group', 'Sets', 'Reps', 'Weight (kg)', 'Date']],
+      body: flattened,
       styles: { fontSize: 9 },
       headStyles: { fillColor: [0, 0, 0] },
     });
@@ -25,15 +29,18 @@ export class ExportService {
   }
 
   exportToExcel(workouts: Workout[]) {
-    const data = workouts.map((w) => ({
-      Exercise: w.exerciseName,
-      'Muscle Group': w.muscleGroup,
-      Sets: w.sets,
-      Reps: w.reps,
-      'Weight (kg)': w.weight,
-      Date: w.date,
-      Notes: w.notes ?? '',
-    }));
+    const data = workouts.flatMap((w) =>
+      w.exercises?.map(ex => ({
+        'Workout Name': w.name,
+        'Exercise': ex.exerciseName,
+        'Muscle Group': ex.muscleGroup,
+        'Sets': ex.sets,
+        'Reps': ex.reps,
+        'Weight (kg)': ex.weight,
+        'Date': w.date,
+        'Notes': w.notes ?? '',
+      })) || []
+    );
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();

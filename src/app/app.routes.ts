@@ -26,5 +26,10 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/start-workout/start-workout.routes').then((m) => m.startWorkoutRoutes),
   },
+  {
+    path: 'bmi',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/bmi/bmi.routes').then((m) => m.bmiRoutes),
+  },
   { path: '**', redirectTo: 'auth/login' },
 ];

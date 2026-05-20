@@ -13,7 +13,10 @@ export class WorkoutService {
   private readonly storagePrefix = 'fittrack_workouts';
 
   totalVolume = computed(() =>
-    this.workouts().reduce((acc, w) => acc + w.sets * w.reps * w.weight, 0),
+    this.workouts().reduce((acc, w) => {
+      const wVol = w.exercises?.reduce((eAcc, e) => eAcc + e.sets * e.reps * e.weight, 0) || 0;
+      return acc + wVol;
+    }, 0),
   );
 
   getWorkouts(): Observable<Workout[]> {
@@ -94,16 +97,52 @@ export class WorkoutService {
     };
 
     return [
-      { id: this.createWorkoutId() + '1', userId, exerciseName: 'Bench Press', muscleGroup: 'Chest', sets: 4, reps: 10, weight: 80, date: formatDate(1), notes: 'Mișcare controlată' },
-      { id: this.createWorkoutId() + '2', userId, exerciseName: 'Incline Dumbbell Press', muscleGroup: 'Chest', sets: 3, reps: 12, weight: 30, date: formatDate(1), notes: '' },
-      { id: this.createWorkoutId() + '3', userId, exerciseName: 'Squats', muscleGroup: 'Legs', sets: 4, reps: 8, weight: 100, date: formatDate(2), notes: 'Pauză 2min între seturi' },
-      { id: this.createWorkoutId() + '4', userId, exerciseName: 'Leg Press', muscleGroup: 'Legs', sets: 3, reps: 15, weight: 150, date: formatDate(2), notes: '' },
-      { id: this.createWorkoutId() + '5', userId, exerciseName: 'Pull-ups', muscleGroup: 'Back', sets: 4, reps: 10, weight: 0, date: formatDate(3), notes: 'Bodyweight' },
-      { id: this.createWorkoutId() + '6', userId, exerciseName: 'Barbell Rows', muscleGroup: 'Back', sets: 4, reps: 8, weight: 70, date: formatDate(3), notes: '' },
-      { id: this.createWorkoutId() + '7', userId, exerciseName: 'Overhead Press', muscleGroup: 'Shoulders', sets: 3, reps: 10, weight: 50, date: formatDate(4), notes: '' },
-      { id: this.createWorkoutId() + '8', userId, exerciseName: 'Lateral Raises', muscleGroup: 'Shoulders', sets: 4, reps: 15, weight: 12.5, date: formatDate(4), notes: '' },
-      { id: this.createWorkoutId() + '9', userId, exerciseName: 'Bicep Curls', muscleGroup: 'Arms', sets: 3, reps: 12, weight: 15, date: formatDate(5), notes: '' },
-      { id: this.createWorkoutId() + '10', userId, exerciseName: 'Tricep Pushdowns', muscleGroup: 'Arms', sets: 3, reps: 15, weight: 25, date: formatDate(5), notes: 'Cablu' }
+      {
+        id: this.createWorkoutId() + '1',
+        userId,
+        name: 'Ziua de Piept & Triceps',
+        date: formatDate(1),
+        notes: 'Antrenament intens de împins',
+        exercises: [
+          { exerciseName: 'Bench Press', muscleGroup: 'Chest', sets: 4, reps: 10, weight: 80 },
+          { exerciseName: 'Incline Dumbbell Press', muscleGroup: 'Chest', sets: 3, reps: 12, weight: 30 },
+          { exerciseName: 'Tricep Pushdowns', muscleGroup: 'Arms', sets: 3, reps: 15, weight: 25 }
+        ]
+      },
+      {
+        id: this.createWorkoutId() + '2',
+        userId,
+        name: 'Ziua de Picioare',
+        date: formatDate(2),
+        notes: 'Pauză 2min între seturi',
+        exercises: [
+          { exerciseName: 'Squats', muscleGroup: 'Legs', sets: 4, reps: 8, weight: 100 },
+          { exerciseName: 'Leg Press', muscleGroup: 'Legs', sets: 3, reps: 15, weight: 150 }
+        ]
+      },
+      {
+        id: this.createWorkoutId() + '3',
+        userId,
+        name: 'Spate & Biceps',
+        date: formatDate(3),
+        notes: 'Focus pe contracție',
+        exercises: [
+          { exerciseName: 'Pull-ups', muscleGroup: 'Back', sets: 4, reps: 10, weight: 0 },
+          { exerciseName: 'Barbell Rows', muscleGroup: 'Back', sets: 4, reps: 8, weight: 70 },
+          { exerciseName: 'Bicep Curls', muscleGroup: 'Arms', sets: 3, reps: 12, weight: 15 }
+        ]
+      },
+      {
+        id: this.createWorkoutId() + '4',
+        userId,
+        name: 'Umeri - Volum',
+        date: formatDate(4),
+        notes: 'Fără pauze mari',
+        exercises: [
+          { exerciseName: 'Overhead Press', muscleGroup: 'Shoulders', sets: 3, reps: 10, weight: 50 },
+          { exerciseName: 'Lateral Raises', muscleGroup: 'Shoulders', sets: 4, reps: 15, weight: 12.5 }
+        ]
+      }
     ];
   }
 }

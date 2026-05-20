@@ -40,7 +40,10 @@ export class DashboardComponent implements OnInit {
 
   totalWorkouts = computed(() => this.workouts().length);
   totalVolume = computed(() =>
-    this.workouts().reduce((acc, w) => acc + w.sets * w.reps * w.weight, 0)
+    this.workouts().reduce((acc, w) => {
+      const vol = w.exercises?.reduce((eAcc, e) => eAcc + e.sets * e.reps * e.weight, 0) || 0;
+      return acc + vol;
+    }, 0)
   );
   thisWeekWorkouts = computed(() => {
     const now = new Date();
@@ -49,7 +52,11 @@ export class DashboardComponent implements OnInit {
   });
   mostUsedMuscle = computed(() => {
     const map = new Map<string, number>();
-    this.workouts().forEach(w => map.set(w.muscleGroup, (map.get(w.muscleGroup) ?? 0) + 1));
+    this.workouts().forEach(w => {
+      w.exercises?.forEach(ex => {
+        map.set(ex.muscleGroup, (map.get(ex.muscleGroup) ?? 0) + 1);
+      });
+    });
     let max = 0, muscle = '-';
     map.forEach((v, k) => { if (v > max) { max = v; muscle = k; } });
     return muscle;

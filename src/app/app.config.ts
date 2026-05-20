@@ -26,6 +26,8 @@ import {
   CheckCircleOutline,
   CheckOutline,
   ForwardOutline,
+  HeartOutline,
+  CloseOutline,
 } from '@ant-design/icons-angular/icons';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
@@ -64,6 +66,8 @@ export const appConfig: ApplicationConfig = {
       CheckCircleOutline,
       CheckOutline,
       ForwardOutline,
+      HeartOutline,
+      CloseOutline,
     ]),
     { provide: NZ_I18N, useValue: en_US },
   ],

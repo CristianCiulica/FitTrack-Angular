@@ -200,24 +200,33 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   private finishWorkout() {
+    this.stopTimer();
     this.state.set('finished');
+  }
 
-    // Save to actual workout history
+  cancelWorkout() {
+    this.stopTimer();
+    this.state.set('setup');
+  }
+
+  saveWorkout() {
+    const workout = this.currentRoutine();
     const dateStr = new Date().toISOString().split('T')[0];
     const uid = this.authService.currentUserId;
 
-    this.currentRoutine().exercises.forEach(ex => {
-      this.workoutService.addWorkout({
-        userId: uid,
+    this.workoutService.addWorkout({
+      userId: uid,
+      name: workout.name,
+      date: dateStr,
+      notes: 'Antrenament automat finalizat',
+      exercises: workout.exercises.map(ex => ({
         exerciseName: ex.name,
         muscleGroup: ex.muscleGroup,
         sets: ex.sets,
         reps: ex.reps,
-        weight: ex.weight,
-        date: dateStr,
-        notes: 'Completat din antrenament automat: ' + this.currentRoutine().name
-      }).subscribe(); // Ignoring sub errors for brevity here
-    });
+        weight: ex.weight
+      }))
+    }).subscribe(); // Ignoring sub errors for brevity here
   }
 
   reset() {

@@ -1,10 +1,11 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
@@ -20,6 +21,7 @@ import { Workout, MUSCLE_GROUPS } from '../../../core/models/workout.model';
     NzFormModule,
     NzInputModule,
     NzButtonModule,
+    NzIconModule,
     NzSelectModule,
     NzInputNumberModule,
     NzDatePickerModule,
@@ -37,7 +39,8 @@ export class WorkoutModalComponent implements OnChanges {
   muscleGroups = MUSCLE_GROUPS;
 
   get isEdit() { return !!this.workout; }
-  get title() { return this.isEdit ? 'Editează workout' : 'Adaugă workout nou'; }
+  get title() { return this.isEdit ? 'Editează antrenament' : 'Adaugă antrenament nou'; }
+  get exercises() { return this.form.get('exercises') as FormArray; }
 
   constructor(private fb: FormBuilder) {
     this.form = this.buildForm();
@@ -47,21 +50,48 @@ export class WorkoutModalComponent implements OnChanges {
     if (changes['visible'] && this.visible) {
       this.form = this.buildForm();
       if (this.workout) {
-        this.form.patchValue(this.workout);
+        this.form.patchValue({
+          name: this.workout.name,
+          date: this.workout.date,
+          notes: this.workout.notes
+        });
+        this.exercises.clear();
+        if (this.workout.exercises && this.workout.exercises.length) {
+          this.workout.exercises.forEach(ex => this.addExercise(ex));
+        } else {
+          this.addExercise();
+        }
       }
     }
   }
 
   buildForm(): FormGroup {
     return this.fb.group({
-      exerciseName: ['', [Validators.required, Validators.minLength(2)]],
-      muscleGroup: [null, Validators.required],
-      sets: [3, [Validators.required, Validators.min(1)]],
-      reps: [10, [Validators.required, Validators.min(1)]],
-      weight: [0, [Validators.required, Validators.min(0)]],
+      name: ['Nume antrenament...', [Validators.required, Validators.minLength(2)]],
       date: [new Date().toISOString().split('T')[0], Validators.required],
       notes: [''],
+      exercises: this.fb.array([this.createExerciseGroup()])
     });
+  }
+
+  createExerciseGroup(ex?: any): FormGroup {
+    return this.fb.group({
+      exerciseName: [ex?.exerciseName || '', [Validators.required, Validators.minLength(2)]],
+      muscleGroup: [ex?.muscleGroup || null, Validators.required],
+      sets: [ex?.sets || 3, [Validators.required, Validators.min(1)]],
+      reps: [ex?.reps || 10, [Validators.required, Validators.min(1)]],
+      weight: [ex?.weight || 0, [Validators.required, Validators.min(0)]]
+    });
+  }
+
+  addExercise(ex?: any) {
+    this.exercises.push(this.createExerciseGroup(ex));
+  }
+
+  removeExercise(index: number) {
+    if (this.exercises.length > 1) {
+      this.exercises.removeAt(index);
+    }
   }
 
   submit() {

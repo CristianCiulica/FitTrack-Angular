@@ -1,0 +1,91 @@
+<nz-layout class="app-layout">
+  <!-- Sidebar -->
+  <nz-sider
+    nzCollapsible
+    [(nzCollapsed)]="isCollapsed"
+    [nzWidth]="240"
+    [nzCollapsedWidth]="72"
+    class="sidebar"
+  >
+    <div class="sidebar-logo">
+      <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
+      <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
+    </div>
+    <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
+      <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="dashboard"></span>
+        <span>Dashboard</span>
+      </li>
+      <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="thunderbolt"></span>
+        <span>Workouts</span>
+      </li>
+      <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="play-circle"></span>
+        <span>Start Workout</span>
+      </li>
+      <li nz-menu-item routerLink="/bmi" routerLinkActive="ant-menu-item-selected">
+        <span nz-icon nzType="heart"></span>
+        <span>BMI Calculator</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer" *ngIf="!isCollapsed">
+      <div class="user-info">
+        <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
+        <span class="user-name">{{ userName() }}</span>
+      </div>
+      <button nz-button nzType="text" nzDanger (click)="logout()">
+        <span nz-icon nzType="logout"></span>
+      </button>
+    </div>
+  </nz-sider>
+
+  <nz-layout class="main-layout">
+    <nz-header class="app-header">
+      <h2>Calculator BMI</h2>
+      <div class="header-actions">
+        <button nz-button nzDanger (click)="logout()">
+          <span nz-icon nzType="logout"></span> Logout
+        </button>
+      </div>
+    </nz-header>
+
+    <nz-content class="app-content">
+      <div class="container">
+        <nz-card class="bmi-card" nzTitle="Calculează-ți Indicele de Masă Corporală">
+
+          <div class="calc-row">
+            <label>Înălțime (cm)</label>
+            <nz-input-number
+              [(ngModel)]="height"
+              [nzMin]="50"
+              [nzMax]="250"
+              [nzStep]="1"
+              style="width: 100%;">
+            </nz-input-number>
+          </div>
+
+          <div class="calc-row">
+            <label>Greutate (kg)</label>
+            <nz-input-number
+              [(ngModel)]="weight"
+              [nzMin]="20"
+              [nzMax]="300"
+              [nzStep]="1"
+              style="width: 100%;">
+            </nz-input-number>
+          </div>
+
+          <div class="result-box">
+            <h3>Rezultat BMI</h3>
+            <div class="bmi-value">{{ bmi() }}</div>
+            <nz-tag [nzColor]="bmiCategory().color">{{ bmiCategory().text }}</nz-tag>
+          </div>
+
+        </nz-card>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>
+

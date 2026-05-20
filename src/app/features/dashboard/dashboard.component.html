@@ -6,24 +6,28 @@
     [nzWidth]="240"
     [nzCollapsedWidth]="72"
     class="sidebar">
-    <div class="sidebar-logo">
-      <span class="logo-emoji">💪</span>
-      <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
-    </div>
-    <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
-      <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="dashboard"></span>
-        <span>Dashboard</span>
-      </li>
-      <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="thunderbolt"></span>
-        <span>Workouts</span>
-      </li>
-      <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
-        <span nz-icon nzType="play-circle"></span>
-        <span>Start Workout</span>
-      </li>
-    </ul>
+      <div class="sidebar-logo">
+        <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
+        <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
+      </div>
+      <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
+        <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="dashboard"></span>
+          <span>Dashboard</span>
+        </li>
+        <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="thunderbolt"></span>
+          <span>Workouts</span>
+        </li>
+        <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="play-circle"></span>
+          <span>Start Workout</span>
+        </li>
+        <li nz-menu-item routerLink="/bmi" routerLinkActive="ant-menu-item-selected">
+          <span nz-icon nzType="heart"></span>
+          <span>BMI Calculator</span>
+        </li>
+      </ul>
     <div class="sidebar-footer" *ngIf="!isCollapsed">
       <div class="user-info">
         <nz-avatar nzIcon="user" style="background:#1d1d1f"></nz-avatar>
@@ -99,11 +103,11 @@
         <div class="recent-list">
           <div *ngFor="let w of recentWorkouts()" class="recent-item">
             <div class="recent-left">
-              <div class="recent-name">{{ w.exerciseName }}</div>
-              <div class="recent-meta">{{ w.sets }} seturi × {{ w.reps }} rep × {{ w.weight }}kg</div>
+              <div class="recent-name">{{ w.name || 'Antrenament fără nume' }}</div>
+              <div class="recent-meta">{{ w.exercises?.length || 0 }} exerciții</div>
             </div>
             <div class="recent-right">
-              <nz-tag [nzColor]="'default'">{{ w.muscleGroup }}</nz-tag>
+              <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixt' }}</nz-tag>
               <div class="recent-date">{{ w.date }}</div>
             </div>
           </div>

@@ -56,15 +56,19 @@ export class WorkoutsComponent implements OnInit {
   editingWorkout = signal<Workout | null>(null);
   muscleGroups = MUSCLE_GROUPS;
   readonly hideTableNoResult: any = null;
+  expandSet = new Set<string>();
 
   filteredWorkouts = computed(() => {
     let data = [...this.workouts()];
     const search = this.searchText().toLowerCase();
     if (search) {
-      data = data.filter(w => w.exerciseName.toLowerCase().includes(search));
+      data = data.filter(w =>
+        w.name.toLowerCase().includes(search) ||
+        w.exercises?.some(ex => ex.exerciseName.toLowerCase().includes(search))
+      );
     }
     if (this.filterMuscle()) {
-      data = data.filter(w => w.muscleGroup === this.filterMuscle());
+      data = data.filter(w => w.exercises?.some(ex => ex.muscleGroup === this.filterMuscle()));
     }
     // Apply sorting
     const sc = this.sortColumn();
@@ -91,6 +95,14 @@ export class WorkoutsComponent implements OnInit {
   onSortOrderChange(column: string, direction: string | null) {
     this.sortColumn.set(column);
     this.sortDirection.set(direction as 'ascend' | 'descend' | null);
+  }
+
+  onExpandChange(id: string, checked: boolean): void {
+    if (checked) {
+      this.expandSet.add(id);
+    } else {
+      this.expandSet.delete(id);
+    }
   }
 
   userName = computed(() => {
@@ -146,13 +158,10 @@ export class WorkoutsComponent implements OnInit {
     } else {
       const full: Omit<Workout, 'id'> = {
         userId: this.authService.currentUserId,
-        exerciseName: workout.exerciseName!,
-        muscleGroup: workout.muscleGroup!,
-        sets: workout.sets!,
-        reps: workout.reps!,
-        weight: workout.weight!,
+        name: workout.name || 'Sesțiune nouă',
         date: workout.date!,
         notes: workout.notes ?? '',
+        exercises: workout.exercises || [],
       };
       this.workoutService.addWorkout(full).subscribe({
         next: () => {
