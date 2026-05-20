@@ -22,6 +22,11 @@ export class AuthService {
 
   currentUser = signal<any>(null);
 
+  constructor() {
+    // Forțează delogarea la fiecare refresh pentru a arăta mereu pagina de Login prima dată
+    signOut(this.auth);
+  }
+
   isLoggedIn$: Observable<boolean> = user(this.auth).pipe(
     map((u) => {
       this.currentUser.set(u);

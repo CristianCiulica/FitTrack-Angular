@@ -3,7 +3,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
   {
     path: 'auth',
     canActivate: [guestGuard],
@@ -20,5 +20,5 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/workouts/workouts.routes').then((m) => m.workoutsRoutes),
   },
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: 'auth/login' },
 ];

@@ -9,6 +9,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -56,6 +57,33 @@ export class LoginComponent {
       error: () => {
         this.message.error('Email sau parola incorecte.');
         this.loading = false;
+      }
+    });
+  }
+
+  demoLogin() {
+    const demo = environment.demoAccount;
+    if (!demo?.email || !demo?.password) {
+      this.message.warning('Contul demo nu este configurat. Seteaza-l in environment.ts.');
+      return;
+    }
+    this.form.patchValue({ email: demo.email, password: demo.password, remember: true });
+    this.loading = true;
+
+    this.auth.login(demo.email, demo.password, true).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => {
+        // Dacă login eșuează (ex. cont inexistent), încearcă să-l creeze automat
+        this.auth.register(demo.email, demo.password, 'Test', 'User').subscribe({
+          next: () => {
+            this.message.success('Cont de test creat automat cu succes!');
+            this.router.navigate(['/dashboard']);
+          },
+          error: () => {
+            this.message.error('Autentificarea cu contul de test a eșuat.');
+            this.loading = false;
+          }
+        });
       }
     });
   }
