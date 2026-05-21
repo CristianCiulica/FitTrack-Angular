@@ -73,6 +73,36 @@
         </div>
       </nz-card>
 
+      <nz-card class="weather-card" nzTitle="Weather & score">
+        <div class="weather-content" *ngIf="weatherLoading">Loading weather...</div>
+        <div class="weather-content" *ngIf="!weatherLoading && weatherError">
+          {{ weatherError }}
+        </div>
+        <div class="weather-content" *ngIf="!weatherLoading && !weatherError && weather">
+          <div class="weather-main">
+            <div>
+              <div class="weather-city">{{ weather.cityLabel }}</div>
+              <div class="weather-meta">
+                {{ weather.conditionLabel }} • {{ weather.temperature | number: '1.0-0' }}°C • Wind {{ weather.windSpeed | number: '1.0-0' }} km/h
+              </div>
+              <div class="weather-meta" *ngIf="weather.aqi !== undefined">
+                Air quality (US AQI): {{ weather.aqi | number: '1.0-0' }}
+              </div>
+              <div class="weather-alert" *ngIf="weather.willRain">
+                Rain likely{{ weather.rainWindow ? ' around ' + weather.rainWindow : '' }} ({{ weather.rainProbability | number: '1.0-0' }}%)
+              </div>
+            </div>
+            <div class="score-pill" [class.great]="scoreTone === 'great'" [class.poor]="scoreTone === 'poor'">
+              <div class="score-value">{{ weather.score }}</div>
+              <div class="score-label">{{ weather.scoreLabel }}</div>
+            </div>
+          </div>
+          <div class="indoor-cta" *ngIf="shouldShowIndoorCta">
+            <a routerLink="/workouts" class="indoor-link">Try an indoor workout?</a>
+          </div>
+        </div>
+      </nz-card>
+
       <div class="stats-grid">
         <nz-card class="stat-card">
           <div class="stat-label">Steps</div>
@@ -98,4 +128,3 @@
     </nz-content>
   </nz-layout>
 </nz-layout>
-

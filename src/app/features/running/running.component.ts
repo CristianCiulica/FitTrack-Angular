@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import * as L from 'leaflet';
@@ -10,6 +10,7 @@ import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../core/services/auth.service';
+import { WeatherService, WeatherSummary } from '../../core/services/weather.service';
 
 const LEAFLET_ICON_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
 const LEAFLET_ICON_RETINA_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
@@ -32,11 +33,16 @@ const LEAFLET_SHADOW_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-s
   templateUrl: './running.component.html',
   styleUrls: ['./running.component.scss'],
 })
-export class RunningComponent implements AfterViewInit, OnDestroy {
+export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   isCollapsed = false;
   isTracking = false;
   mode: 'running' | 'walking' = 'running';
   statusText = 'Tap Start to begin tracking.';
+  cityName = 'Brasov';
+
+  weatherLoading = true;
+  weatherError = '';
+  weather?: WeatherSummary;
 
   distanceMeters = 0;
   steps = 0;
@@ -53,7 +59,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy {
   constructor(
     public authService: AuthService,
     private message: NzMessageService,
+    private weatherService: WeatherService,
   ) {}
+
+  ngOnInit(): void {
+    this.loadWeather();
+  }
 
   ngAfterViewInit(): void {
     this.configureLeafletIcons();
@@ -215,5 +226,31 @@ export class RunningComponent implements AfterViewInit, OnDestroy {
       iconUrl: LEAFLET_ICON_URL,
       shadowUrl: LEAFLET_SHADOW_URL,
     });
+  }
+
+  private loadWeather() {
+    this.weatherLoading = true;
+    this.weatherError = '';
+    this.weatherService.getCityWeather(this.cityName).subscribe({
+      next: (summary) => {
+        this.weather = summary;
+        this.weatherLoading = false;
+      },
+      error: () => {
+        this.weatherError = 'Unable to load weather right now.';
+        this.weatherLoading = false;
+      },
+    });
+  }
+
+  get scoreTone(): 'great' | 'ok' | 'poor' {
+    if (!this.weather) return 'ok';
+    if (this.weather.score >= 80) return 'great';
+    if (this.weather.score < 50) return 'poor';
+    return 'ok';
+  }
+
+  get shouldShowIndoorCta(): boolean {
+    return !!this.weather?.willRain;
   }
 }
