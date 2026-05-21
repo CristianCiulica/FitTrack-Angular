@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { LoadingService } from '../../../core/services/loading.service';
 import { CommonModule } from '@angular/common';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -36,7 +37,8 @@ export class LoginComponent {
     private fb: FormBuilder,
     private auth: AuthService,
     private router: Router,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private loadingService: LoadingService,
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -53,7 +55,10 @@ export class LoginComponent {
     this.loading = true;
     const { email, password, remember } = this.form.value;
     this.auth.login(email, password, remember).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => {
+        this.loadingService.showAfterNextNavigation(1000);
+        this.router.navigate(['/dashboard']);
+      },
       error: () => {
         this.message.error('Incorrect email or password.');
         this.loading = false;
@@ -65,7 +70,10 @@ export class LoginComponent {
     const remember = this.form.get('remember')?.value ?? false;
     this.googleLoading = true;
     this.auth.signInWithGoogle(remember).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => {
+        this.loadingService.showAfterNextNavigation(1000);
+        this.router.navigate(['/dashboard']);
+      },
       error: () => {
         this.message.error('Google sign-in failed. Please try again.');
         this.googleLoading = false;

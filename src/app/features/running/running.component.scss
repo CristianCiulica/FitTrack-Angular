@@ -1,0 +1,80 @@
+@use '../workouts/workouts.component.scss';
+
+.run-card {
+  margin-bottom: 16px;
+}
+
+.run-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.status-text {
+  font-size: 13px;
+  color: #6e6e73;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #6e6e73;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.map-card {
+  overflow: hidden;
+}
+
+.map {
+  width: 100%;
+  height: 420px;
+  border-radius: 16px;
+}
+
+@media (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .run-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .control-buttons,
+  .mode-toggle {
+    justify-content: center;
+  }
+}
+

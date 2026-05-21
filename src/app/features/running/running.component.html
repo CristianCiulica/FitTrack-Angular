@@ -1,5 +1,4 @@
 <nz-layout class="app-layout">
-  <!-- Sidebar -->
   <nz-sider
     nzCollapsible
     [(nzCollapsed)]="isCollapsed"
@@ -33,11 +32,10 @@
         <span>BMI Calculator</span>
       </li>
     </ul>
-
     <div class="sidebar-footer" *ngIf="!isCollapsed">
       <div class="user-info">
         <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
-        <span class="user-name">{{ userName() }}</span>
+        <span class="user-name">{{ authService.currentUser()?.displayName || authService.currentUser()?.email || 'Athlete' }}</span>
       </div>
       <button nz-button nzType="text" nzDanger (click)="logout()">
         <span nz-icon nzType="logout"></span>
@@ -47,7 +45,7 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
-      <h2>BMI Calculator</h2>
+      <h2>Running</h2>
       <div class="header-actions">
         <button nz-button nzDanger (click)="logout()">
           <span nz-icon nzType="logout"></span> Logout
@@ -56,39 +54,48 @@
     </nz-header>
 
     <nz-content class="app-content">
-      <div class="container">
-        <nz-card class="bmi-card" nzTitle="Calculate your Body Mass Index">
-
-          <div class="calc-row">
-            <label>Height (cm)</label>
-            <nz-input-number
-              [(ngModel)]="height"
-              [nzMin]="50"
-              [nzMax]="250"
-              [nzStep]="1"
-              style="width: 100%;">
-            </nz-input-number>
+      <nz-card class="run-card" nzTitle="Running / Walking">
+        <div class="run-controls">
+          <div class="mode-toggle">
+            <button nz-button [nzType]="mode === 'running' ? 'primary' : 'default'" (click)="setMode('running')" [disabled]="isTracking">
+              Running
+            </button>
+            <button nz-button [nzType]="mode === 'walking' ? 'primary' : 'default'" (click)="setMode('walking')" [disabled]="isTracking">
+              Walking
+            </button>
           </div>
-
-          <div class="calc-row">
-            <label>Weight (kg)</label>
-            <nz-input-number
-              [(ngModel)]="weight"
-              [nzMin]="20"
-              [nzMax]="300"
-              [nzStep]="1"
-              style="width: 100%;">
-            </nz-input-number>
+          <div class="control-buttons">
+            <button nz-button nzType="primary" (click)="startTracking()" [disabled]="isTracking">Start</button>
+            <button nz-button (click)="stopTracking()" [disabled]="!isTracking">Stop</button>
+            <button nz-button nzType="text" (click)="resetTracking()">Reset</button>
           </div>
+          <div class="status-text">{{ statusText }}</div>
+        </div>
+      </nz-card>
 
-          <div class="result-box">
-            <h3>BMI Result</h3>
-            <div class="bmi-value">{{ bmi() }}</div>
-            <nz-tag [nzColor]="bmiCategory().color">{{ bmiCategory().text }}</nz-tag>
-          </div>
-
+      <div class="stats-grid">
+        <nz-card class="stat-card">
+          <div class="stat-label">Steps</div>
+          <div class="stat-value">{{ steps }}</div>
+        </nz-card>
+        <nz-card class="stat-card">
+          <div class="stat-label">Distance</div>
+          <div class="stat-value">{{ distanceKm }} km</div>
+        </nz-card>
+        <nz-card class="stat-card">
+          <div class="stat-label">Avg speed</div>
+          <div class="stat-value">{{ avgSpeedDisplay }} km/h</div>
+        </nz-card>
+        <nz-card class="stat-card">
+          <div class="stat-label">Calories</div>
+          <div class="stat-value">{{ caloriesDisplay }} kcal</div>
         </nz-card>
       </div>
+
+      <nz-card class="map-card" nzTitle="Live map">
+        <div id="running-map" class="map"></div>
+      </nz-card>
     </nz-content>
   </nz-layout>
 </nz-layout>
+

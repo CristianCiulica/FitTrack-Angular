@@ -1,15 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { Router, RouterOutlet, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { trigger, transition, style, animate, query, group } from '@angular/animations';
 import { ReminderService } from './core/services/reminder.service';
+import { LoadingService } from './core/services/loading.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [CommonModule, RouterOutlet],
   template: `
     <div class="route-shell" [@routeAnimations]="prepareRoute(outlet)">
       <router-outlet #outlet="outlet" />
+      <div class="loading-overlay" *ngIf="loadingService.isLoading()">
+        <div class="loading-card">
+          <div class="spinner" aria-hidden="true"></div>
+          <div class="loading-text">Loading...</div>
+        </div>
+      </div>
     </div>
   `,
   styleUrls: ['./app.css'],
@@ -32,10 +40,27 @@ import { ReminderService } from './core/services/reminder.service';
   ],
 })
 export class App implements OnInit {
-  constructor(private reminderService: ReminderService) {}
+  constructor(
+    private reminderService: ReminderService,
+    private router: Router,
+    public loadingService: LoadingService,
+  ) {}
 
   ngOnInit(): void {
     this.reminderService.scheduleCheck();
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        const pendingDuration = this.loadingService.consumePendingDuration();
+        if (pendingDuration) {
+          this.loadingService.showFor(pendingDuration);
+        } else {
+          this.loadingService.hide();
+        }
+      }
+      if (event instanceof NavigationCancel || event instanceof NavigationError) {
+        this.loadingService.hide();
+      }
+    });
   }
 
   prepareRoute(outlet: RouterOutlet) {

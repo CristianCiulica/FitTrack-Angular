@@ -31,5 +31,10 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/bmi/bmi.routes').then((m) => m.bmiRoutes),
   },
+  {
+    path: 'running',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/running/running.routes').then((m) => m.runningRoutes),
+  },
   { path: '**', redirectTo: 'auth/login' },
 ];
