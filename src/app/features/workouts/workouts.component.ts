@@ -150,25 +150,25 @@ export class WorkoutsComponent implements OnInit {
     if (editing?.id) {
       this.workoutService.updateWorkout(editing.id, workout).subscribe({
         next: () => {
-          this.message.success('Workout actualizat!');
+          this.message.success('Workout updated!');
           this.refreshWorkouts();
         },
-        error: () => this.message.error('Eroare la actualizare.')
+        error: () => this.message.error('Update failed.')
       });
     } else {
       const full: Omit<Workout, 'id'> = {
         userId: this.authService.currentUserId,
-        name: workout.name || 'Sesțiune nouă',
+        name: workout.name || 'New session',
         date: workout.date!,
         notes: workout.notes ?? '',
         exercises: workout.exercises || [],
       };
       this.workoutService.addWorkout(full).subscribe({
         next: () => {
-          this.message.success('Workout adăugat!');
+          this.message.success('Workout added!');
           this.refreshWorkouts();
         },
-        error: () => this.message.error('Eroare la adăugare.')
+        error: () => this.message.error('Add failed.')
       });
     }
     this.modalVisible.set(false);
@@ -181,10 +181,10 @@ export class WorkoutsComponent implements OnInit {
   deleteWorkout(id: string) {
     this.workoutService.deleteWorkout(id).subscribe({
       next: () => {
-        this.message.success('Workout șters!');
+        this.message.success('Workout deleted!');
         this.refreshWorkouts();
       },
-      error: () => this.message.error('Eroare la ștergere.')
+      error: () => this.message.error('Delete failed.')
     });
   }
 

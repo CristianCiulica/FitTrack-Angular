@@ -100,9 +100,9 @@ export class WorkoutService {
       {
         id: this.createWorkoutId() + '1',
         userId,
-        name: 'Ziua de Piept & Triceps',
+        name: 'Chest & Triceps Day',
         date: formatDate(1),
-        notes: 'Antrenament intens de împins',
+        notes: 'Heavy pressing focus',
         exercises: [
           { exerciseName: 'Bench Press', muscleGroup: 'Chest', sets: 4, reps: 10, weight: 80 },
           { exerciseName: 'Incline Dumbbell Press', muscleGroup: 'Chest', sets: 3, reps: 12, weight: 30 },
@@ -112,9 +112,9 @@ export class WorkoutService {
       {
         id: this.createWorkoutId() + '2',
         userId,
-        name: 'Ziua de Picioare',
+        name: 'Leg Day',
         date: formatDate(2),
-        notes: 'Pauză 2min între seturi',
+        notes: '2 min rest between sets',
         exercises: [
           { exerciseName: 'Squats', muscleGroup: 'Legs', sets: 4, reps: 8, weight: 100 },
           { exerciseName: 'Leg Press', muscleGroup: 'Legs', sets: 3, reps: 15, weight: 150 }
@@ -123,9 +123,9 @@ export class WorkoutService {
       {
         id: this.createWorkoutId() + '3',
         userId,
-        name: 'Spate & Biceps',
+        name: 'Back & Biceps',
         date: formatDate(3),
-        notes: 'Focus pe contracție',
+        notes: 'Focus on contraction',
         exercises: [
           { exerciseName: 'Pull-ups', muscleGroup: 'Back', sets: 4, reps: 10, weight: 0 },
           { exerciseName: 'Barbell Rows', muscleGroup: 'Back', sets: 4, reps: 8, weight: 70 },
@@ -135,9 +135,9 @@ export class WorkoutService {
       {
         id: this.createWorkoutId() + '4',
         userId,
-        name: 'Umeri - Volum',
+        name: 'Shoulders - Volume',
         date: formatDate(4),
-        notes: 'Fără pauze mari',
+        notes: 'Keep rest short',
         exercises: [
           { exerciseName: 'Overhead Press', muscleGroup: 'Shoulders', sets: 3, reps: 10, weight: 50 },
           { exerciseName: 'Lateral Raises', muscleGroup: 'Shoulders', sets: 4, reps: 15, weight: 12.5 }

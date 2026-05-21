@@ -218,7 +218,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       userId: uid,
       name: workout.name,
       date: dateStr,
-      notes: 'Antrenament automat finalizat',
+      notes: 'Auto-finished workout',
       exercises: workout.exercises.map(ex => ({
         exerciseName: ex.name,
         muscleGroup: ex.muscleGroup,

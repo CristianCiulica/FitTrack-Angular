@@ -54,11 +54,11 @@ export class RegisterComponent {
     const { email, password, firstName, lastName } = this.form.value;
     this.auth.register(email, password, firstName, lastName).subscribe({
       next: () => {
-        this.message.success('Cont creat cu succes!');
+        this.message.success('Account created successfully!');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.message.error(err.message ?? 'Eroare la înregistrare.');
+        this.message.error(err.message ?? 'Registration failed.');
         this.loading = false;
       }
     });

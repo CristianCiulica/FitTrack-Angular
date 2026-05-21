@@ -52,10 +52,10 @@ export class BmiComponent {
 
   bmiCategory = computed(() => {
     const value = parseFloat(this.bmi());
-    if (value < 18.5) return { text: 'Subponderal', color: 'orange' };
-    if (value < 25) return { text: 'Greutate normală', color: 'green' };
-    if (value < 30) return { text: 'Supraponderal', color: 'orange' };
-    return { text: 'Obezitate', color: 'red' };
+    if (value < 18.5) return { text: 'Underweight', color: 'orange' };
+    if (value < 25) return { text: 'Healthy weight', color: 'green' };
+    if (value < 30) return { text: 'Overweight', color: 'orange' };
+    return { text: 'Obesity', color: 'red' };
   });
 
   constructor(private authService: AuthService) {}
@@ -64,4 +64,3 @@ export class BmiComponent {
     this.authService.logout().subscribe();
   }
 }
-

@@ -1,13 +1,96 @@
 @import 'ng-zorro-antd/ng-zorro-antd.min.css';
 
+:root {
+  --app-bg: #f5f5f7;
+  --app-bg-accent: #eef4ff;
+  --surface: #ffffff;
+  --surface-muted: #f7f8fb;
+  --border: #e5e5ea;
+  --text: #1d1d1f;
+  --text-muted: #6e6e73;
+  --blue: #0071e3;
+  --blue-strong: #0077ed;
+  --shadow-soft: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
+  background: linear-gradient(180deg, #f7f9ff 0%, var(--app-bg) 40%, var(--app-bg-accent) 100%);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--blue);
+}
+
+a:hover {
+  color: var(--blue-strong);
+}
+
+.ant-layout {
+  background: transparent;
+}
+
+.ant-card,
+.ant-modal-content,
+.ant-table {
+  border-radius: 16px !important;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.ant-card-head {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.ant-btn {
+  border-radius: 12px !important;
+  font-weight: 600;
+}
+
+.ant-btn-primary {
+  background: var(--blue) !important;
+  border-color: var(--blue) !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background: var(--blue-strong) !important;
+  border-color: var(--blue-strong) !important;
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-picker,
+.ant-input-number {
+  border-radius: 10px !important;
+  border: 1.5px solid var(--border) !important;
+  background: var(--surface) !important;
+}
+
+.ant-input:focus,
+.ant-input-affix-wrapper-focused,
+.ant-select-focused .ant-select-selector,
+.ant-input-number-focused,
+.ant-picker-focused {
+  border-color: var(--blue) !important;
+  box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.12) !important;
+}
+
+.ant-table-thead > tr > th {
+  background: var(--surface-muted) !important;
 }

@@ -1,3 +1,5 @@
+@use '../workouts/workouts.component.scss';
+
 .container {
   max-width: 800px;
   margin: 0 auto;
@@ -135,6 +137,3 @@
     margin-bottom: 32px;
   }
 }
-
-@import '../workouts/workouts.component.scss';
-

@@ -39,7 +39,7 @@ export class WorkoutModalComponent implements OnChanges {
   muscleGroups = MUSCLE_GROUPS;
 
   get isEdit() { return !!this.workout; }
-  get title() { return this.isEdit ? 'Editează antrenament' : 'Adaugă antrenament nou'; }
+  get title() { return this.isEdit ? 'Edit workout' : 'Add new workout'; }
   get exercises() { return this.form.get('exercises') as FormArray; }
 
   constructor(private fb: FormBuilder) {
@@ -67,7 +67,7 @@ export class WorkoutModalComponent implements OnChanges {
 
   buildForm(): FormGroup {
     return this.fb.group({
-      name: ['Nume antrenament...', [Validators.required, Validators.minLength(2)]],
+      name: ['Workout name...', [Validators.required, Validators.minLength(2)]],
       date: [new Date().toISOString().split('T')[0], Validators.required],
       notes: [''],
       exercises: this.fb.array([this.createExerciseGroup()])

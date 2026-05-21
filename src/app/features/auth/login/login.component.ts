@@ -29,6 +29,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 export class LoginComponent {
   form: FormGroup;
   loading = false;
+  googleLoading = false;
   passwordVisible = false;
 
   constructor(
@@ -54,9 +55,21 @@ export class LoginComponent {
     this.auth.login(email, password, remember).subscribe({
       next: () => this.router.navigate(['/dashboard']),
       error: () => {
-        this.message.error('Email sau parola incorecte.');
+        this.message.error('Incorrect email or password.');
         this.loading = false;
       }
+    });
+  }
+
+  signInWithGoogle() {
+    const remember = this.form.get('remember')?.value ?? false;
+    this.googleLoading = true;
+    this.auth.signInWithGoogle(remember).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: () => {
+        this.message.error('Google sign-in failed. Please try again.');
+        this.googleLoading = false;
+      },
     });
   }
 }

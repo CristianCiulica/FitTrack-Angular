@@ -9,6 +9,8 @@ import {
   browserSessionPersistence,
   updateProfile,
   user,
+  GoogleAuthProvider,
+  signInWithPopup,
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { from, Observable } from 'rxjs';
@@ -23,7 +25,7 @@ export class AuthService {
   currentUser = signal<any>(null);
 
   constructor() {
-    // Forțează delogarea la fiecare refresh pentru a arăta mereu pagina de Login prima dată
+    // Force sign-out on refresh to show the Login page first.
     signOut(this.auth);
   }
 
@@ -53,6 +55,15 @@ export class AuthService {
 
   logout() {
     return from(signOut(this.auth)).pipe(map(() => this.router.navigate(['/auth/login'])));
+  }
+
+  signInWithGoogle(remember: boolean) {
+    const persistence = remember ? browserLocalPersistence : browserSessionPersistence;
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    return from(
+      setPersistence(this.auth, persistence).then(() => signInWithPopup(this.auth, provider)),
+    );
   }
 
   get currentUserId(): string {

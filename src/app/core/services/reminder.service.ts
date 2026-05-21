@@ -23,8 +23,8 @@ export class ReminderService {
     if (diffDays >= 2) {
       setTimeout(() => {
         this.notification.warning(
-          '💪 E timpul să te antrenezi!',
-          `Nu ai avut niciun workout de ${diffDays} zile.`,
+          '💪 Time to work out!',
+          `You have not logged a workout in ${diffDays} days.`,
           { nzDuration: 6000 },
         );
       }, 2000);

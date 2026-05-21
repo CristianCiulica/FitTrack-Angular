@@ -43,7 +43,7 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
-      <h2>Calculator BMI</h2>
+      <h2>BMI Calculator</h2>
       <div class="header-actions">
         <button nz-button nzDanger (click)="logout()">
           <span nz-icon nzType="logout"></span> Logout
@@ -53,10 +53,10 @@
 
     <nz-content class="app-content">
       <div class="container">
-        <nz-card class="bmi-card" nzTitle="Calculează-ți Indicele de Masă Corporală">
+        <nz-card class="bmi-card" nzTitle="Calculate your Body Mass Index">
 
           <div class="calc-row">
-            <label>Înălțime (cm)</label>
+            <label>Height (cm)</label>
             <nz-input-number
               [(ngModel)]="height"
               [nzMin]="50"
@@ -67,7 +67,7 @@
           </div>
 
           <div class="calc-row">
-            <label>Greutate (kg)</label>
+            <label>Weight (kg)</label>
             <nz-input-number
               [(ngModel)]="weight"
               [nzMin]="20"
@@ -78,7 +78,7 @@
           </div>
 
           <div class="result-box">
-            <h3>Rezultat BMI</h3>
+            <h3>BMI Result</h3>
             <div class="bmi-value">{{ bmi() }}</div>
             <nz-tag [nzColor]="bmiCategory().color">{{ bmiCategory().text }}</nz-tag>
           </div>
@@ -88,4 +88,3 @@
     </nz-content>
   </nz-layout>
 </nz-layout>
-

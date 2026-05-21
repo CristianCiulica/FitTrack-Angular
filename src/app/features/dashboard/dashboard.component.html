@@ -46,7 +46,7 @@
       <div class="header-actions">
         <button nz-button nzType="text" routerLink="/workouts">
           <span nz-icon nzType="plus"></span>
-          Workout nou
+          New workout
         </button>
         <button nz-button nzDanger (click)="logout()" style="margin-left: 8px">
           <span nz-icon nzType="logout"></span>
@@ -74,7 +74,7 @@
           </div>
           <nz-statistic
             [nzValue]="thisWeekWorkouts()"
-            nzTitle="Această săptămână">
+            nzTitle="This week">
           </nz-statistic>
         </nz-card>
 
@@ -84,7 +84,7 @@
           </div>
           <nz-statistic
             [nzValue]="totalVolume()"
-            nzTitle="Volum total (kg)"
+            nzTitle="Total volume (kg)"
             [nzValueStyle]="{ color: '#1d1d1f' }">
           </nz-statistic>
         </nz-card>
@@ -93,27 +93,27 @@
           <div class="stat-icon orange">
             <span nz-icon nzType="trophy" style="font-size:24px"></span>
           </div>
-          <div class="stat-label">Mușchi preferat</div>
+          <div class="stat-label">Favorite muscle</div>
           <div class="stat-value-text">{{ mostUsedMuscle() }}</div>
         </nz-card>
       </div>
 
       <!-- Recent workouts -->
-      <nz-card class="recent-card" nzTitle="Antrenamente recente">
+      <nz-card class="recent-card" nzTitle="Recent workouts">
         <div class="recent-list">
           <div *ngFor="let w of recentWorkouts()" class="recent-item">
             <div class="recent-left">
-              <div class="recent-name">{{ w.name || 'Antrenament fără nume' }}</div>
-              <div class="recent-meta">{{ w.exercises?.length || 0 }} exerciții</div>
+              <div class="recent-name">{{ w.name || 'Untitled workout' }}</div>
+              <div class="recent-meta">{{ w.exercises.length || 0 }} exercises</div>
             </div>
             <div class="recent-right">
-              <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixt' }}</nz-tag>
+              <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}</nz-tag>
               <div class="recent-date">{{ w.date }}</div>
             </div>
           </div>
           <div *ngIf="recentWorkouts().length === 0" class="empty-state">
             <span nz-icon nzType="inbox" style="font-size:48px;color:#d1d1d6"></span>
-            <p>Niciun workout încă. <a routerLink="/workouts">Adaugă primul!</a></p>
+            <p>No workouts yet. <a routerLink="/workouts">Add your first!</a></p>
           </div>
         </div>
       </nz-card>

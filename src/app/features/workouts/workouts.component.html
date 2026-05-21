@@ -51,7 +51,7 @@
           <span nz-icon nzType="file-pdf"></span> PDF
         </button>
         <button nz-button nzType="primary" (click)="openAdd()" style="margin-right: 8px">
-          <span nz-icon nzType="plus"></span> Adaugă workout
+          <span nz-icon nzType="plus"></span> Add workout
         </button>
         <button nz-button nzDanger (click)="logout()">
           <span nz-icon nzType="logout"></span> Logout
@@ -65,7 +65,7 @@
         <nz-input-group [nzPrefix]="prefixIcon" class="search-input">
           <input
             nz-input
-            placeholder="Caută exercițiu..."
+            placeholder="Search exercise..."
             [(ngModel)]="searchText"
             (ngModelChange)="searchText.set($event)"
           />
@@ -75,11 +75,11 @@
         <nz-select
           [(ngModel)]="filterMuscle"
           (ngModelChange)="filterMuscle.set($event)"
-          nzPlaceHolder="Filtrează după mușchi"
+          nzPlaceHolder="Filter by muscle"
           nzAllowClear
           style="width: 220px"
         >
-          <nz-option nzValue="" nzLabel="Toate categoriile"></nz-option>
+          <nz-option nzValue="" nzLabel="All categories"></nz-option>
           <nz-option *ngFor="let m of muscleGroups" [nzValue]="m" [nzLabel]="m"></nz-option>
         </nz-select>
       </div>
@@ -104,13 +104,13 @@
                 [nzSortOrder]="sortColumn() === 'name' ? sortDirection() : null"
                 (nzSortOrderChange)="onSortOrderChange('name', $event)"
               >
-                Antrenament
+                Workout
               </th>
               <th>
-                Nr. Exerciții
+                Exercises
               </th>
               <th>
-                Grupă principală
+                Primary muscle
               </th>
               <th
                 nzColumnKey="date"
@@ -119,10 +119,10 @@
                 [nzSortOrder]="sortColumn() === 'date' ? sortDirection() : null"
                 (nzSortOrderChange)="onSortOrderChange('date', $event)"
               >
-                Dată
+                Date
               </th>
-              <th>Note</th>
-              <th>Acțiuni</th>
+              <th>Notes</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -133,10 +133,10 @@
                   <strong>{{ w.name }}</strong>
                 </td>
                 <td>
-                  {{ w.exercises?.length || 0 }}
+                  {{ w.exercises.length || 0 }}
                 </td>
                 <td>
-                  <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixt' }}</nz-tag>
+                  <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}</nz-tag>
                 </td>
                 <td>{{ w.date }}</td>
                 <td>{{ w.notes }}</td>
@@ -156,7 +156,7 @@
                     nzSize="small"
                     nzDanger
                     nz-popconfirm
-                    nzPopconfirmTitle="Sigur vrei să ștergi?"
+                    nzPopconfirmTitle="Are you sure you want to delete?"
                     (nzOnConfirm)="deleteWorkout(w.id!)"
                   >
                     <span nz-icon nzType="delete"></span>
@@ -167,11 +167,11 @@
                 <nz-table #innerTable [nzData]="w.exercises" nzSize="middle" [nzShowPagination]="false">
                   <thead>
                     <tr>
-                      <th>Exercițiu</th>
-                      <th>Grupă</th>
-                      <th>Seturi</th>
+                      <th>Exercise</th>
+                      <th>Group</th>
+                      <th>Sets</th>
                       <th>Reps</th>
-                      <th>Greutate (kg)</th>
+                      <th>Weight (kg)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -193,7 +193,7 @@
                   nzType="inbox"
                   style="font-size: 48px; display: block; margin-bottom: 16px; color: #d1d1d6"
                 ></span>
-                Niciun workout găsit. Apasă "Adaugă workout" să începi!
+                No workouts found. Click "Add workout" to get started!
               </td>
             </tr>
           </tbody>

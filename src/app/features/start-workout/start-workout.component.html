@@ -55,7 +55,7 @@
 
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
-          <nz-card nzTitle="Alege un antrenament predefinit">
+          <nz-card nzTitle="Choose a predefined workout">
             <div class="routines-list">
               <div
                 class="routine-card"
@@ -63,7 +63,7 @@
                 [class.selected]="selectedRoutineIndex() === i"
                 (click)="selectedRoutineIndex.set(i); onRoutineSelect(i)">
                 <h3>{{ r.name }}</h3>
-                <p>{{ r.exercises.length }} exerciții</p>
+                <p>{{ r.exercises.length }} exercises</p>
                 <div class="routine-preview">
                   <nz-tag *ngFor="let ex of r.exercises">{{ ex.name }}</nz-tag>
                 </div>
@@ -72,7 +72,7 @@
 
             <div class="action-bar">
               <button nz-button nzType="primary" nzSize="large" (click)="startWorkout()">
-                <span nz-icon nzType="play-circle"></span> Start Antrenament
+                <span nz-icon nzType="play-circle"></span> Start workout
               </button>
             </div>
           </nz-card>
@@ -81,7 +81,7 @@
         <!-- ACTIVE STATE -->
         <ng-container *ngIf="state() === 'active'">
           <div class="progress-bar">
-            <span>Progres Antrenament</span>
+            <span>Workout progress</span>
             <nz-progress [nzPercent]="progressPercent()"></nz-progress>
           </div>
 
@@ -97,34 +97,34 @@
                 <div class="value">{{ currentSetIndex() }} / {{ ex.sets }}</div>
               </div>
               <div class="stat">
-                <label>Repetări</label>
+                <label>Reps</label>
                 <div class="value">{{ ex.reps }}</div>
               </div>
               <div class="stat">
-                <label>Greutate (kg)</label>
+                <label>Weight (kg)</label>
                 <div class="value">{{ ex.weight }}</div>
               </div>
             </div>
 
             <div class="action-bar active-action" style="display: flex; gap: 16px;">
               <button nz-button nzDanger nzSize="large" style="flex: 1" (click)="cancelWorkout()">
-                <span nz-icon nzType="close"></span> Oprește
+                <span nz-icon nzType="close"></span> Stop
               </button>
               <button nz-button nzType="primary" nzSize="large" style="flex: 2" (click)="finishSet()">
-                <span nz-icon nzType="check"></span> Finalizează Seria
+                <span nz-icon nzType="check"></span> Finish set
               </button>
             </div>
           </nz-card>
 
           <div class="up-next" *ngIf="currentExerciseIndex() + 1 < currentRoutine().exercises.length">
-            <p>Urmează: <strong>{{ currentRoutine().exercises[currentExerciseIndex() + 1].name }}</strong></p>
+            <p>Up next: <strong>{{ currentRoutine().exercises[currentExerciseIndex() + 1].name }}</strong></p>
           </div>
         </ng-container>
 
         <!-- REST STATE -->
         <ng-container *ngIf="state() === 'rest'">
           <nz-card class="rest-card">
-            <h2>Pauză</h2>
+            <h2>Rest</h2>
             <div class="timer-display">
               {{ restTimeRemaining() }}s
             </div>
@@ -136,10 +136,10 @@
 
             <div class="action-bar" style="display: flex; gap: 16px;">
               <button nz-button nzDanger nzSize="large" style="flex: 1" (click)="cancelWorkout()">
-                <span nz-icon nzType="close"></span> Oprește
+                <span nz-icon nzType="close"></span> Stop
               </button>
               <button nz-button nzType="primary" nzSize="large" style="flex: 2" (click)="skipRest()">
-                <span nz-icon nzType="forward"></span> Sari peste pauză
+                <span nz-icon nzType="forward"></span> Skip rest
               </button>
             </div>
           </nz-card>
@@ -149,9 +149,9 @@
         <ng-container *ngIf="state() === 'finished'">
           <nz-card class="finish-card">
             <span nz-icon nzType="check-circle" style="font-size: 64px; color: #52c41a;"></span>
-            <h2>Antrenament Complet!</h2>
-            <p>Felicitări! Datele au fost salvate în istoricul tău de workouts.</p>
-            <button nz-button nzType="primary" (click)="reset()" routerLink="/dashboard">Mergi la Dashboard</button>
+            <h2>Workout complete!</h2>
+            <p>Great job! Your workout was saved to your history.</p>
+            <button nz-button nzType="primary" (click)="reset()" routerLink="/dashboard">Go to dashboard</button>
           </nz-card>
         </ng-container>
 
@@ -159,4 +159,3 @@
     </nz-content>
   </nz-layout>
 </nz-layout>
-
