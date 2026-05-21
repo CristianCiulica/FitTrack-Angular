@@ -6,10 +6,19 @@
 
 .weather-card {
   margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
 }
 
+.weather-card .ant-card-body {
+  position: relative;
+}
+
+
 .weather-content {
+  position: relative;
   color: #1d1d1f;
+  z-index: 1;
 }
 
 .weather-main {
@@ -41,18 +50,18 @@
   min-width: 120px;
   padding: 12px 16px;
   border-radius: 16px;
-  background: #eef4ff;
+  background: rgba(238, 244, 255, 0.7);
   text-align: center;
   border: 1px solid rgba(0, 113, 227, 0.15);
 }
 
 .score-pill.great {
-  background: #e8f8f0;
+  background: rgba(232, 248, 240, 0.7);
   border-color: rgba(52, 199, 89, 0.2);
 }
 
 .score-pill.poor {
-  background: #fff1f0;
+  background: rgba(255, 241, 240, 0.7);
   border-color: rgba(255, 59, 48, 0.2);
 }
 
@@ -80,6 +89,13 @@
 
 .indoor-link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .weather-main {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 .run-controls {
@@ -153,10 +169,5 @@
   .control-buttons,
   .mode-toggle {
     justify-content: center;
-  }
-
-  .weather-main {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }

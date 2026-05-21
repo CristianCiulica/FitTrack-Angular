@@ -54,26 +54,13 @@
     </nz-header>
 
     <nz-content class="app-content">
-      <nz-card class="run-card" nzTitle="Running / Walking">
-        <div class="run-controls">
-          <div class="mode-toggle">
-            <button nz-button [nzType]="mode === 'running' ? 'primary' : 'default'" (click)="setMode('running')" [disabled]="isTracking">
-              Running
-            </button>
-            <button nz-button [nzType]="mode === 'walking' ? 'primary' : 'default'" (click)="setMode('walking')" [disabled]="isTracking">
-              Walking
-            </button>
-          </div>
-          <div class="control-buttons">
-            <button nz-button nzType="primary" (click)="startTracking()" [disabled]="isTracking">Start</button>
-            <button nz-button (click)="stopTracking()" [disabled]="!isTracking">Stop</button>
-            <button nz-button nzType="text" (click)="resetTracking()">Reset</button>
-          </div>
-          <div class="status-text">{{ statusText }}</div>
+      <nz-card class="weather-card" nzTitle="Weather & score" [ngClass]="weatherTheme">
+        <div class="weather-sky">
+          <div class="weather-cloud cloud-1"></div>
+          <div class="weather-cloud cloud-2"></div>
+          <div class="weather-cloud cloud-3"></div>
+          <div class="weather-rain"></div>
         </div>
-      </nz-card>
-
-      <nz-card class="weather-card" nzTitle="Weather & score">
         <div class="weather-content" *ngIf="weatherLoading">Loading weather...</div>
         <div class="weather-content" *ngIf="!weatherLoading && weatherError">
           {{ weatherError }}
@@ -100,6 +87,25 @@
           <div class="indoor-cta" *ngIf="shouldShowIndoorCta">
             <a routerLink="/workouts" class="indoor-link">Try an indoor workout?</a>
           </div>
+        </div>
+      </nz-card>
+
+      <nz-card class="run-card" nzTitle="Running / Walking">
+        <div class="run-controls">
+          <div class="mode-toggle">
+            <button nz-button [nzType]="mode === 'running' ? 'primary' : 'default'" (click)="setMode('running')" [disabled]="isTracking">
+              Running
+            </button>
+            <button nz-button [nzType]="mode === 'walking' ? 'primary' : 'default'" (click)="setMode('walking')" [disabled]="isTracking">
+              Walking
+            </button>
+          </div>
+          <div class="control-buttons">
+            <button nz-button nzType="primary" (click)="startTracking()" [disabled]="isTracking">Start</button>
+            <button nz-button (click)="stopTracking()" [disabled]="!isTracking">Stop</button>
+            <button nz-button nzType="text" (click)="resetTracking()">Reset</button>
+          </div>
+          <div class="status-text">{{ statusText }}</div>
         </div>
       </nz-card>
 

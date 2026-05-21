@@ -1,6 +1,9 @@
 .app-layout { min-height: 100vh; }
 
 .sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
   background: #ffffff !important;
   border-right: 1px solid rgba(0,0,0,0.06);
 

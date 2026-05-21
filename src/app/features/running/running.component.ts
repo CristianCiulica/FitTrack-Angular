@@ -56,6 +56,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private startTime: number | null = null;
   private lastLatLng: L.LatLng | null = null;
 
+  private resizeHandler = () => this.map?.invalidateSize();
+
   constructor(
     public authService: AuthService,
     private message: NzMessageService,
@@ -69,10 +71,13 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   ngAfterViewInit(): void {
     this.configureLeafletIcons();
     this.initMap();
+    window.addEventListener('resize', this.resizeHandler);
+    setTimeout(() => this.map?.invalidateSize(), 0);
   }
 
   ngOnDestroy(): void {
     this.stopTracking();
+    window.removeEventListener('resize', this.resizeHandler);
     this.map?.remove();
   }
 
@@ -150,6 +155,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     }).addTo(this.map);
 
     this.polyline = L.polyline([], { color: '#1e6bff', weight: 4 }).addTo(this.map);
+    setTimeout(() => this.map?.invalidateSize(), 0);
   }
 
   private handlePosition(pos: GeolocationPosition) {
@@ -252,5 +258,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   get shouldShowIndoorCta(): boolean {
     return !!this.weather?.willRain;
+  }
+
+  get weatherTheme(): 'rain' | 'sun' | 'neutral' {
+    if (!this.weather) return 'neutral';
+    if (this.weather.willRain) return 'rain';
+    if ([0, 1, 2].includes(this.weather.weatherCode)) return 'sun';
+    return 'neutral';
   }
 }
