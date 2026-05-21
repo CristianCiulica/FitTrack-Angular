@@ -1,0 +1,11 @@
+.route-shell {
+  position: relative;
+  min-height: 100dvh;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-shell {
+    animation: none !important;
+  }
+}
+

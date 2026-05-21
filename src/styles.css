@@ -49,11 +49,17 @@ a:hover {
   border-radius: 16px !important;
   border: 1px solid var(--border);
   background: var(--surface);
+  overflow: hidden;
 }
 
 .ant-card-head {
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  border-radius: 16px 16px 0 0;
+}
+
+.ant-card-body {
+  border-radius: 0 0 16px 16px;
 }
 
 .ant-btn {
@@ -93,4 +99,15 @@ a:hover {
 
 .ant-table-thead > tr > th {
   background: var(--surface-muted) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
