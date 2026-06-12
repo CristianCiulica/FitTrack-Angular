@@ -5,6 +5,6 @@ export const runningRoutes: Routes = [
   {
     path: '',
     component: RunningComponent,
+    canDeactivate: [(component: RunningComponent) => component.canLeaveRunning()],
   },
 ];
-

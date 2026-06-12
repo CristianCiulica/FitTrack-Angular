@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { WorkoutService } from '../../core/services/workout.service';
+import { RunningSessionService } from '../../core/services/running-session.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ExportService } from '../../core/services/export.service';
 import { Workout, MUSCLE_GROUPS, MuscleGroup } from '../../core/models/workout.model';
+import { RunningSession } from '../../core/models/running-session.model';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -47,6 +49,7 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
 })
 export class WorkoutsComponent implements OnInit {
   workouts = signal<Workout[]>([]);
+  runningSessions = signal<RunningSession[]>([]);
   searchText = signal('');
   filterMuscle = signal<MuscleGroup | ''>('');
   sortColumn = signal<string>('date');
@@ -118,6 +121,7 @@ export class WorkoutsComponent implements OnInit {
 
   constructor(
     private workoutService: WorkoutService,
+    private runningSessionService: RunningSessionService,
     private authService: AuthService,
     private exportService: ExportService,
     private message: NzMessageService
@@ -125,6 +129,23 @@ export class WorkoutsComponent implements OnInit {
 
   ngOnInit() {
     this.refreshWorkouts();
+    this.runningSessions.set(
+      this.runningSessionService.getSessions(this.authService.currentUserId),
+    );
+  }
+
+  formatDuration(totalSeconds: number): string {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    }
+    return `${seconds}s`;
   }
 
   private refreshWorkouts() {

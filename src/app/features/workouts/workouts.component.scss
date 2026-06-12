@@ -1,11 +1,13 @@
-.app-layout { min-height: 100vh; }
+.app-layout {
+  min-height: 100vh;
+}
 
 .sidebar {
   position: sticky;
   top: 0;
   height: 100vh;
   background: #ffffff !important;
-  border-right: 1px solid rgba(0,0,0,0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
 
   .sidebar-logo {
     height: 64px;
@@ -13,8 +15,12 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    .logo-emoji { font-size: 24px; }
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    .logo-emoji {
+      font-size: 24px;
+    }
+
     .logo-text {
       font-size: 20px;
       font-weight: 700;
@@ -27,12 +33,15 @@
     background: transparent !important;
     border: none !important;
     margin-top: 8px;
+
     ::ng-deep .ant-menu-item {
       color: #1d1d1f !important;
       border-radius: 10px !important;
       margin: 4px 12px !important;
       width: calc(100% - 24px) !important;
-      &:hover, &.ant-menu-item-selected {
+
+      &:hover,
+      &.ant-menu-item-selected {
         background: #eaf2ff !important;
         color: #1d1d1f !important;
       }
@@ -44,14 +53,16 @@
     bottom: 0;
     width: 100%;
     padding: 16px;
-    border-top: 1px solid rgba(0,0,0,0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     .user-info {
       display: flex;
       align-items: center;
       gap: 10px;
+
       .user-name {
         color: #1d1d1f;
         font-size: 13px;
@@ -64,21 +75,43 @@
   }
 }
 
-.main-layout { background: transparent; }
+.main-layout {
+  background: transparent;
+}
 
 .app-header {
-  background: rgba(255,255,255,0.8) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 0 32px;
   height: 64px;
   position: sticky;
   top: 0;
   z-index: 100;
-  h2 { font-size: 20px; font-weight: 600; color: #1d1d1f; margin: 0; }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  button[nz-button] {
+    margin-right: 0 !important;
+  }
 }
 
 .app-content {
@@ -86,6 +119,135 @@
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+}
+
+.cardio-history {
+  margin-bottom: 22px;
+  padding: 20px;
+  background: linear-gradient(145deg, #f7fbff, #ffffff);
+  border: 1px solid rgba(0, 113, 227, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(31, 75, 122, 0.06);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 15px;
+
+  span {
+    color: #7a8493;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin: 2px 0 0;
+    color: #1d1d1f;
+    font-size: 19px;
+  }
+
+  > strong {
+    min-width: 38px;
+    padding: 7px 10px;
+    color: #0066cc;
+    text-align: center;
+    background: #eaf3ff;
+    border-radius: 999px;
+  }
+}
+
+.cardio-session-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 12px;
+}
+
+.cardio-session-card {
+  min-width: 0;
+  padding: 15px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 15px;
+}
+
+.cardio-session-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+
+  h4 {
+    margin: 0;
+    color: #1d1d1f;
+    font-size: 15px;
+  }
+
+  span {
+    color: #8e8e93;
+    font-size: 11px;
+  }
+
+  > strong {
+    color: #0066cc;
+    font-size: 16px;
+  }
+}
+
+.activity-icon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  color: #ffffff;
+  font-size: 17px;
+  background: #28a745;
+  border-radius: 12px;
+  place-items: center;
+
+  &.walking {
+    background: #0071e3;
+  }
+}
+
+.cardio-session-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+
+  div {
+    display: grid;
+    gap: 2px;
+  }
+
+  span {
+    color: #8e8e93;
+    font-size: 9px;
+  }
+
+  strong {
+    overflow: hidden;
+    color: #374151;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.empty-cardio-history {
+  padding: 18px;
+  color: #7a8493;
+  font-size: 13px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px dashed rgba(0, 113, 227, 0.2);
+  border-radius: 13px;
 }
 
 .filters-bar {
@@ -103,8 +265,8 @@
 .table-card {
   background: #ffffff;
   border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 
   .exercise-name {
@@ -116,5 +278,345 @@
     font-size: 12px;
     color: #aeaeb2;
     margin-top: 2px;
+  }
+}
+
+.mobile-workout-list {
+  display: none;
+}
+
+@media (max-width: 992px) {
+  .app-layout {
+    min-height: auto;
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: relative;
+    top: auto;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    & {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 100% !important;
+      flex: 0 0 100% !important;
+    }
+
+    .sidebar-menu {
+      margin-top: 0;
+      padding: 8px 0;
+      max-height: 240px;
+      overflow: auto;
+    }
+
+    .sidebar-footer {
+      position: static;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  .main-layout {
+    min-width: 0;
+  }
+
+  .app-header {
+    padding: 12px 16px;
+    height: auto;
+    min-height: 64px;
+    align-items: flex-start;
+    flex-direction: column;
+
+    h2 {
+      white-space: normal;
+      line-height: 1.2;
+    }
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .app-content {
+    padding: 20px 16px;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+    align-items: stretch;
+
+    .search-input {
+      max-width: none;
+      width: 100%;
+    }
+
+    nz-select {
+      width: 100% !important;
+    }
+  }
+
+  .table-card {
+    overflow-x: auto;
+  }
+
+  ::ng-deep .table-card .ant-table-wrapper {
+    min-width: 700px;
+  }
+}
+
+@media (max-width: 820px) {
+  .cardio-history {
+    margin-bottom: 14px;
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .section-heading h3 {
+    font-size: 17px;
+  }
+
+  .cardio-session-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardio-session-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .workouts-header {
+    flex-wrap: wrap;
+
+    .header-actions {
+      display: grid !important;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      order: 2;
+      width: 100% !important;
+      margin-left: 0;
+
+      button[nz-button] {
+        width: 100% !important;
+        min-width: 0;
+        padding-inline: 6px;
+      }
+    }
+  }
+
+  .desktop-workout-table {
+    display: none;
+  }
+
+  .mobile-workout-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .mobile-workout-card {
+    min-width: 0;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+  }
+
+  .mobile-workout-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    > div {
+      min-width: 0;
+    }
+
+    h3 {
+      margin: 0 0 4px;
+      color: #1d1d1f;
+      font-size: 17px;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
+    }
+
+    span {
+      color: #8e8e93;
+      font-size: 12px;
+    }
+
+    nz-tag {
+      flex: 0 0 auto;
+      margin-right: 0;
+    }
+  }
+
+  .mobile-workout-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin-top: 12px;
+    color: #6e6e73;
+    font-size: 13px;
+
+    span:last-child {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .mobile-workout-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 44px;
+    gap: 8px;
+    margin-top: 14px;
+
+    button[nz-button] {
+      width: 100%;
+      min-width: 0;
+      min-height: 40px;
+      padding-inline: 8px;
+    }
+  }
+
+  .mobile-exercise-list {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #ececf0;
+  }
+
+  .mobile-exercise-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px;
+    background: #f7f8fb;
+    border-radius: 12px;
+
+    > div:first-child {
+      display: grid;
+      min-width: 0;
+      gap: 2px;
+
+      strong {
+        color: #1d1d1f;
+        font-size: 13px;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+
+      span {
+        color: #8e8e93;
+        font-size: 11px;
+      }
+    }
+  }
+
+  .mobile-exercise-stats {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+    max-width: 48%;
+
+    span {
+      padding: 3px 6px;
+      color: #4b5563;
+      font-size: 10px;
+      font-weight: 600;
+      background: #ffffff;
+      border-radius: 7px;
+    }
+  }
+
+  .mobile-empty-state {
+    display: grid;
+    justify-items: center;
+    gap: 10px;
+    padding: 40px 20px;
+    color: #6e6e73;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 18px;
+
+    > span {
+      color: #c7c7cc;
+      font-size: 38px;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .sidebar .sidebar-logo {
+    height: 56px;
+
+    .logo-text {
+      font-size: 18px;
+    }
+  }
+
+  .sidebar .sidebar-menu {
+    max-height: 180px;
+  }
+
+  .app-header h2 {
+    font-size: 18px;
+  }
+
+  .header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+
+    button[nz-button] {
+      width: 100%;
+      white-space: nowrap;
+    }
+  }
+
+  .app-content {
+    padding: 16px 12px;
+  }
+
+  .filters-bar {
+    margin-bottom: 16px;
+  }
+
+  .workouts-header .header-actions {
+    button[nz-button] {
+      font-size: 12px;
+    }
+  }
+
+  .mobile-workout-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .mobile-exercise-row {
+    flex-direction: column;
+  }
+
+  .mobile-exercise-stats {
+    justify-content: flex-start;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 360px) {
+  .workouts-header .header-actions .button-label {
+    display: none;
+  }
+
+  .mobile-workout-actions {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42px;
   }
 }

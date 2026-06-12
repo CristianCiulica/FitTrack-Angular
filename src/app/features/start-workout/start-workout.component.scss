@@ -16,6 +16,11 @@
   margin-top: 48px;
 }
 
+.dual-actions {
+  display: flex;
+  gap: 16px;
+}
+
 .routines-list {
   display: flex;
   flex-direction: column;
@@ -135,5 +140,138 @@
   p {
     color: #666;
     margin-bottom: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 12px 0;
+  }
+
+  .active-card {
+    .exercise-header {
+      margin-bottom: 20px;
+
+      h2 {
+        font-size: 26px;
+        line-height: 1.2;
+      }
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      text-align: center;
+
+      .stat .value {
+        font-size: 28px;
+      }
+    }
+  }
+
+  .rest-card .timer-display {
+    font-size: 64px;
+    margin: 24px 0;
+  }
+
+  .action-bar {
+    width: 100%;
+  }
+
+  .dual-actions {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .container {
+    padding: 0;
+  }
+
+  .routine-card {
+    padding: 14px;
+  }
+
+  .active-card {
+    .stats-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+
+      .stat {
+        min-width: 0;
+        padding: 10px 6px;
+        border-radius: 10px;
+        background: #f7f8fb;
+
+        label {
+          min-height: 28px;
+          margin-bottom: 4px;
+          font-size: 11px;
+          line-height: 1.25;
+        }
+
+        .value {
+          font-size: 22px;
+          line-height: 1.15;
+        }
+      }
+    }
+  }
+
+  .dual-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: 8px;
+
+    button[nz-button] {
+      width: 100%;
+      min-width: 0;
+      min-height: 46px;
+      padding-inline: 8px;
+    }
+  }
+
+  .rest-card {
+    .timer-display {
+      font-size: 52px;
+      margin: 20px 0;
+    }
+
+    .timer-adjust {
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+  }
+
+  .finish-card {
+    padding: 28px 12px;
+  }
+
+  .active-action {
+    margin-top: 28px;
+  }
+
+  .action-bar > button[nz-button] {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .routine-preview {
+    gap: 6px !important;
+  }
+}
+
+@media (max-width: 350px) {
+  .active-card .stats-row {
+    grid-template-columns: 1fr;
+
+    .stat label {
+      min-height: 0;
+    }
+  }
+
+  .dual-actions {
+    grid-template-columns: 1fr;
   }
 }

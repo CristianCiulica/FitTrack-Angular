@@ -11,25 +11,35 @@
         <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
       </div>
       <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
-        <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="dashboard"></span>
-          <span>Dashboard</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/dashboard" aria-label="Dashboard">
+            <span nz-icon nzType="dashboard"></span>
+            <span>Home</span>
+          </a>
         </li>
-        <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="thunderbolt"></span>
-          <span>Workouts</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/workouts" aria-label="Workouts">
+            <span nz-icon nzType="thunderbolt"></span>
+            <span>History</span>
+          </a>
         </li>
-        <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="play-circle"></span>
-          <span>Start Workout</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/start-workout" aria-label="Start workout">
+            <span nz-icon nzType="play-circle"></span>
+            <span>Workout</span>
+          </a>
         </li>
-        <li nz-menu-item routerLink="/running" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="rise"></span>
-          <span>Running</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/running" aria-label="Running">
+            <span nz-icon nzType="rise"></span>
+            <span>Run</span>
+          </a>
         </li>
-        <li nz-menu-item routerLink="/bmi" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="heart"></span>
-          <span>BMI Calculator</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/bmi" aria-label="BMI calculator">
+            <span nz-icon nzType="heart"></span>
+            <span>BMI</span>
+          </a>
         </li>
       </ul>
     <div class="sidebar-footer" *ngIf="!isCollapsed">
@@ -45,16 +55,16 @@
 
   <!-- Content -->
   <nz-layout class="main-layout">
-    <nz-header class="app-header">
+    <nz-header class="app-header dashboard-header">
       <h2>Dashboard</h2>
       <div class="header-actions">
         <button nz-button nzType="text" routerLink="/workouts">
           <span nz-icon nzType="plus"></span>
-          New workout
+          <span class="button-label">New workout</span>
         </button>
         <button nz-button nzDanger (click)="logout()" style="margin-left: 8px">
           <span nz-icon nzType="logout"></span>
-          Logout
+          <span class="button-label">Logout</span>
         </button>
       </div>
     </nz-header>

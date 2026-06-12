@@ -12,25 +12,35 @@
         <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
       </div>
       <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
-        <li nz-menu-item routerLink="/dashboard" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="dashboard"></span>
-          <span>Dashboard</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/dashboard" aria-label="Dashboard">
+            <span nz-icon nzType="dashboard"></span>
+            <span>Home</span>
+          </a>
         </li>
-        <li nz-menu-item routerLink="/workouts" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="thunderbolt"></span>
-          <span>Workouts</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/workouts" aria-label="Workouts">
+            <span nz-icon nzType="thunderbolt"></span>
+            <span>History</span>
+          </a>
         </li>
-        <li nz-menu-item routerLink="/start-workout" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="play-circle"></span>
-          <span>Start Workout</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/start-workout" aria-label="Start workout">
+            <span nz-icon nzType="play-circle"></span>
+            <span>Workout</span>
+          </a>
         </li>
-        <li nz-menu-item routerLink="/running" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="rise"></span>
-          <span>Running</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/running" aria-label="Running">
+            <span nz-icon nzType="rise"></span>
+            <span>Run</span>
+          </a>
         </li>
-        <li nz-menu-item routerLink="/bmi" routerLinkActive="ant-menu-item-selected">
-          <span nz-icon nzType="heart"></span>
-          <span>BMI Calculator</span>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+          <a routerLink="/bmi" aria-label="BMI calculator">
+            <span nz-icon nzType="heart"></span>
+            <span>BMI</span>
+          </a>
         </li>
       </ul>
     <div class="sidebar-footer" *ngIf="!isCollapsed">
@@ -45,25 +55,79 @@
   </nz-sider>
 
   <nz-layout class="main-layout">
-    <nz-header class="app-header">
+    <nz-header class="app-header workouts-header">
       <h2>Workouts</h2>
       <div class="header-actions">
         <button nz-button (click)="exportExcel()" style="margin-right: 8px">
-          <span nz-icon nzType="file-excel"></span> Excel
+          <span nz-icon nzType="file-excel"></span>
+          <span class="button-label">Excel</span>
         </button>
         <button nz-button (click)="exportPDF()" style="margin-right: 8px">
-          <span nz-icon nzType="file-pdf"></span> PDF
+          <span nz-icon nzType="file-pdf"></span>
+          <span class="button-label">PDF</span>
         </button>
         <button nz-button nzType="primary" (click)="openAdd()" style="margin-right: 8px">
-          <span nz-icon nzType="plus"></span> Add workout
+          <span nz-icon nzType="plus"></span>
+          <span class="button-label">Add</span>
         </button>
         <button nz-button nzDanger (click)="logout()">
-          <span nz-icon nzType="logout"></span> Logout
+          <span nz-icon nzType="logout"></span>
+          <span class="button-label">Logout</span>
         </button>
       </div>
     </nz-header>
 
     <nz-content class="app-content">
+      <section class="cardio-history">
+        <div class="section-heading">
+          <div>
+            <span>Outdoor activity</span>
+            <h3>Running & walking history</h3>
+          </div>
+          <strong>{{ runningSessions().length }}</strong>
+        </div>
+
+        <div class="cardio-session-grid" *ngIf="runningSessions().length > 0; else noCardioSessions">
+          <article class="cardio-session-card" *ngFor="let session of runningSessions()">
+            <div class="cardio-session-header">
+              <div class="activity-icon" [class.walking]="session.mode === 'walking'">
+                <span nz-icon [nzType]="session.mode === 'running' ? 'rise' : 'forward'"></span>
+              </div>
+              <div>
+                <h4>{{ session.mode === 'running' ? 'Running' : 'Walking' }}</h4>
+                <span>{{ session.startedAt | date: 'd MMM y, HH:mm' }}</span>
+              </div>
+              <strong>{{ session.distanceMeters / 1000 | number: '1.2-2' }} km</strong>
+            </div>
+
+            <div class="cardio-session-stats">
+              <div>
+                <span>Duration</span>
+                <strong>{{ formatDuration(session.durationSeconds) }}</strong>
+              </div>
+              <div>
+                <span>Avg speed</span>
+                <strong>{{ session.averageSpeedKmh | number: '1.1-1' }} km/h</strong>
+              </div>
+              <div>
+                <span>Steps</span>
+                <strong>{{ session.steps }}</strong>
+              </div>
+              <div>
+                <span>Calories</span>
+                <strong>{{ session.calories }} kcal</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #noCardioSessions>
+          <div class="empty-cardio-history">
+            Completed running and walking workouts will appear here.
+          </div>
+        </ng-template>
+      </section>
+
       <!-- Filters -->
       <div class="filters-bar">
         <nz-input-group [nzPrefix]="prefixIcon" class="search-input">
@@ -89,7 +153,7 @@
       </div>
 
       <!-- Table -->
-      <div class="table-card">
+      <div class="table-card desktop-workout-table">
         <nz-table
           #workoutTable
           [nzData]="filteredWorkouts()"
@@ -202,6 +266,69 @@
             </tr>
           </tbody>
         </nz-table>
+      </div>
+
+      <div class="mobile-workout-list">
+        <article class="mobile-workout-card" *ngFor="let w of filteredWorkouts()">
+          <div class="mobile-workout-header">
+            <div>
+              <h3>{{ w.name }}</h3>
+              <span>{{ w.date }}</span>
+            </div>
+            <nz-tag [nzColor]="'default'">
+              {{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}
+            </nz-tag>
+          </div>
+
+          <div class="mobile-workout-summary">
+            <span>{{ w.exercises.length || 0 }} exercises</span>
+            <span *ngIf="w.notes">{{ w.notes }}</span>
+          </div>
+
+          <div class="mobile-workout-actions">
+            <button
+              nz-button
+              nzType="default"
+              (click)="onExpandChange(w.id!, !expandSet.has(w.id!))"
+            >
+              <span nz-icon [nzType]="expandSet.has(w.id!) ? 'close' : 'inbox'"></span>
+              {{ expandSet.has(w.id!) ? 'Hide' : 'Details' }}
+            </button>
+            <button nz-button nzType="default" (click)="openEdit(w)">
+              <span nz-icon nzType="edit"></span>
+              Edit
+            </button>
+            <button
+              nz-button
+              nzDanger
+              nz-popconfirm
+              nzPopconfirmTitle="Are you sure you want to delete?"
+              (nzOnConfirm)="deleteWorkout(w.id!)"
+            >
+              <span nz-icon nzType="delete"></span>
+            </button>
+          </div>
+
+          <div class="mobile-exercise-list" *ngIf="expandSet.has(w.id!)">
+            <div class="mobile-exercise-row" *ngFor="let ex of w.exercises">
+              <div>
+                <strong>{{ ex.exerciseName }}</strong>
+                <span>{{ ex.muscleGroup }}</span>
+              </div>
+              <div class="mobile-exercise-stats">
+                <span>{{ ex.sets }} sets</span>
+                <span>{{ ex.reps }} reps</span>
+                <span>{{ ex.weight }} kg</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <div class="mobile-empty-state" *ngIf="filteredWorkouts().length === 0">
+          <span nz-icon nzType="inbox"></span>
+          <p>No workouts found.</p>
+          <button nz-button nzType="primary" (click)="openAdd()">Add workout</button>
+        </div>
       </div>
     </nz-content>
   </nz-layout>
