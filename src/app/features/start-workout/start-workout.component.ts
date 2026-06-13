@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
@@ -8,13 +7,12 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { AuthService } from '../../core/services/auth.service';
 import { WorkoutService } from '../../core/services/workout.service';
-import { MuscleGroup } from '../../core/models/workout.model';
+import { MuscleGroup, Workout } from '../../core/models/workout.model';
+import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 
 interface PlannedExercise {
   name: string;
@@ -25,6 +23,7 @@ interface PlannedExercise {
 }
 
 interface Routine {
+  id?: string;
   name: string;
   exercises: PlannedExercise[];
 }
@@ -61,7 +60,6 @@ const PREDEFINED_ROUTINES: Routine[] = [
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     RouterLink,
     RouterLinkActive,
     NzLayoutModule,
@@ -70,20 +68,20 @@ const PREDEFINED_ROUTINES: Routine[] = [
     NzIconModule,
     NzAvatarModule,
     NzCardModule,
-    NzInputNumberModule,
-    NzSelectModule,
     NzProgressModule,
-    NzTagModule
+    NzTagModule,
+    WorkoutModalComponent,
   ],
   templateUrl: './start-workout.component.html',
   styleUrls: ['./start-workout.component.scss']
 })
 export class StartWorkoutComponent implements OnInit, OnDestroy {
-  isCollapsed = false;
   state = signal<'setup' | 'active' | 'rest' | 'finished'>('setup');
 
   routines = PREDEFINED_ROUTINES;
-  selectedRoutineIndex = signal<number | null>(null);
+  personalRoutines = signal<Routine[]>([]);
+  selectedRoutineKey = signal('predefined-0');
+  modalVisible = signal(false);
 
   currentRoutine = signal<Routine>({ name: 'Custom Workout', exercises: [] });
 
@@ -127,8 +125,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.selectedRoutineIndex.set(0);
-    this.onRoutineSelect(0);
+    this.selectRoutine(this.routines[0], 'predefined-0');
+    this.loadPersonalRoutines();
   }
 
   ngOnDestroy() {
@@ -139,10 +137,51 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.authService.logout().subscribe();
   }
 
-  onRoutineSelect(index: number) {
-    if (index >= 0 && index < this.routines.length) {
-      this.currentRoutine.set(JSON.parse(JSON.stringify(this.routines[index])));
-    }
+  selectRoutine(routine: Routine, key: string) {
+    this.selectedRoutineKey.set(key);
+    this.currentRoutine.set(JSON.parse(JSON.stringify(routine)));
+  }
+
+  openAddWorkout() {
+    this.modalVisible.set(true);
+  }
+
+  onModalSave(workout: Partial<Workout>) {
+    this.workoutService.addWorkout({
+      userId: this.authService.currentUserId,
+      name: workout.name || 'My workout',
+      date: workout.date || new Date().toISOString().split('T')[0],
+      notes: workout.notes ?? '',
+      exercises: workout.exercises || [],
+      isPredefined: false,
+    }).subscribe(() => {
+      this.modalVisible.set(false);
+      this.loadPersonalRoutines();
+    });
+  }
+
+  onModalCancel() {
+    this.modalVisible.set(false);
+  }
+
+  private loadPersonalRoutines() {
+    this.workoutService.getWorkouts().subscribe((workouts) => {
+      this.personalRoutines.set(
+        workouts
+          .filter((workout) => !workout.isPredefined)
+          .map((workout) => ({
+            id: workout.id,
+            name: workout.name,
+            exercises: workout.exercises.map((exercise) => ({
+              name: exercise.exerciseName,
+              muscleGroup: exercise.muscleGroup,
+              sets: exercise.sets,
+              reps: exercise.reps,
+              weight: exercise.weight,
+            })),
+          })),
+      );
+    });
   }
 
   startWorkout() {
@@ -201,6 +240,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   private finishWorkout() {
     this.stopTimer();
+    this.saveWorkout();
     this.state.set('finished');
   }
 
@@ -219,6 +259,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       name: workout.name,
       date: dateStr,
       notes: 'Auto-finished workout',
+      isPredefined: false,
       exercises: workout.exercises.map(ex => ({
         exerciseName: ex.name,
         muscleGroup: ex.muscleGroup,

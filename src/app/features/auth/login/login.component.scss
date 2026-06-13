@@ -194,15 +194,6 @@
   }
 }
 
-.remember-row {
-  margin-bottom: 24px;
-
-  .remember-check {
-    font-size: 14px;
-    color: #6e6e73;
-  }
-}
-
 .submit-btn {
   height: 48px !important;
   border-radius: 12px !important;
@@ -296,7 +287,7 @@
   margin-top: 4px !important;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 600px) {
   .auth-left {
     display: none;
   }
@@ -331,7 +322,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .auth-right {
     justify-content: flex-start;
     padding:

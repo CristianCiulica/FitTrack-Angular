@@ -1,17 +1,14 @@
 <nz-layout class="app-layout">
   <!-- Sidebar -->
   <nz-sider
-    nzCollapsible
-    [(nzCollapsed)]="isCollapsed"
-    [nzWidth]="240"
-    [nzCollapsedWidth]="72"
+    [nzWidth]="208"
     class="sidebar"
   >
       <div class="sidebar-logo">
         <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
-        <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
+        <span class="logo-text">FitTrack</span>
       </div>
-      <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
+      <ul nz-menu nzMode="inline" class="sidebar-menu">
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
           <a routerLink="/dashboard" aria-label="Dashboard">
             <span nz-icon nzType="dashboard"></span>
@@ -43,14 +40,12 @@
           </a>
         </li>
       </ul>
-    <div class="sidebar-footer" *ngIf="!isCollapsed">
+    <div class="sidebar-footer">
       <div class="user-info">
         <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
         <span class="user-name">{{ userName() }}</span>
       </div>
-      <button nz-button nzType="text" nzDanger (click)="logout()">
-        <span nz-icon nzType="logout"></span>
-      </button>
+      <button nz-button nzType="text" nzDanger class="logout-button" (click)="logout()">Logout</button>
     </div>
   </nz-sider>
 
@@ -70,10 +65,7 @@
           <span nz-icon nzType="plus"></span>
           <span class="button-label">Add</span>
         </button>
-        <button nz-button nzDanger (click)="logout()">
-          <span nz-icon nzType="logout"></span>
-          <span class="button-label">Logout</span>
-        </button>
+        <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
     </nz-header>
 
@@ -90,9 +82,6 @@
         <div class="cardio-session-grid" *ngIf="runningSessions().length > 0; else noCardioSessions">
           <article class="cardio-session-card" *ngFor="let session of runningSessions()">
             <div class="cardio-session-header">
-              <div class="activity-icon" [class.walking]="session.mode === 'walking'">
-                <span nz-icon [nzType]="session.mode === 'running' ? 'rise' : 'forward'"></span>
-              </div>
               <div>
                 <h4>{{ session.mode === 'running' ? 'Running' : 'Walking' }}</h4>
                 <span>{{ session.startedAt | date: 'd MMM y, HH:mm' }}</span>
@@ -128,40 +117,21 @@
         </ng-template>
       </section>
 
-      <!-- Filters -->
-      <div class="filters-bar">
-        <nz-input-group [nzPrefix]="prefixIcon" class="search-input">
-          <input
-            nz-input
-            placeholder="Search exercise..."
-            [(ngModel)]="searchText"
-            (ngModelChange)="searchText.set($event)"
-          />
-        </nz-input-group>
-        <ng-template #prefixIcon><span nz-icon nzType="search"></span></ng-template>
-
-        <nz-select
-          [(ngModel)]="filterMuscle"
-          (ngModelChange)="filterMuscle.set($event)"
-          nzPlaceHolder="Filter by muscle"
-          nzAllowClear
-          style="width: 220px"
-        >
-          <nz-option nzValue="" nzLabel="All categories"></nz-option>
-          <nz-option *ngFor="let m of muscleGroups" [nzValue]="m" [nzLabel]="m"></nz-option>
-        </nz-select>
+      <div class="history-table-heading">
+        <div>
+          <span>Training log</span>
+          <h3>Workout history</h3>
+        </div>
+        <strong>{{ filteredWorkouts().length }} sessions</strong>
       </div>
 
-      <!-- Table -->
       <div class="table-card desktop-workout-table">
         <nz-table
           #workoutTable
           [nzData]="filteredWorkouts()"
           [nzNoResult]="hideTableNoResult"
           [nzPageSize]="10"
-          nzShowSizeChanger
-          [nzPageSizeOptions]="[5, 10, 20]"
-          nzShowQuickJumper
+          nzSize="middle"
         >
           <thead>
             <tr>
@@ -195,20 +165,20 @@
           </thead>
           <tbody>
             <ng-container *ngFor="let w of workoutTable.data">
-              <tr>
+              <tr class="workout-row">
                 <td [nzExpand]="expandSet.has(w.id!)" (nzExpandChange)="onExpandChange(w.id!, $event)"></td>
-                <td>
+                <td class="workout-name-cell">
                   <strong>{{ w.name }}</strong>
                 </td>
-                <td>
+                <td class="workout-count-cell">
                   {{ w.exercises.length || 0 }}
                 </td>
                 <td>
                   <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}</nz-tag>
                 </td>
-                <td>{{ w.date }}</td>
-                <td>{{ w.notes }}</td>
-                <td>
+                <td class="workout-date-cell">{{ w.date | date: 'd MMM y' }}</td>
+                <td class="workout-notes-cell">{{ w.notes || '—' }}</td>
+                <td class="workout-actions-cell">
                   <button
                     nz-button
                     nzType="text"

@@ -1,17 +1,14 @@
 <nz-layout class="app-layout">
   <!-- Sidebar -->
   <nz-sider
-    nzCollapsible
-    [(nzCollapsed)]="isCollapsed"
-    [nzWidth]="240"
-    [nzCollapsedWidth]="72"
+    [nzWidth]="208"
     class="sidebar"
   >
       <div class="sidebar-logo">
         <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
-        <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
+        <span class="logo-text">FitTrack</span>
       </div>
-      <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
+      <ul nz-menu nzMode="inline" class="sidebar-menu">
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
           <a routerLink="/dashboard" aria-label="Dashboard">
             <span nz-icon nzType="dashboard"></span>
@@ -43,14 +40,12 @@
           </a>
         </li>
       </ul>
-    <div class="sidebar-footer" *ngIf="!isCollapsed">
+    <div class="sidebar-footer">
       <div class="user-info">
         <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
         <span class="user-name">{{ userName() }}</span>
       </div>
-      <button nz-button nzType="text" nzDanger (click)="logout()">
-        <span nz-icon nzType="logout"></span>
-      </button>
+      <button nz-button nzType="text" nzDanger class="logout-button" (click)="logout()">Logout</button>
     </div>
   </nz-sider>
 
@@ -58,10 +53,11 @@
     <nz-header class="app-header">
       <h2>Start Workout</h2>
       <div class="header-actions">
-        <button nz-button nzDanger (click)="logout()">
-          <span nz-icon nzType="logout"></span>
-          <span class="button-label">Logout</span>
+        <button nz-button nzType="primary" (click)="openAddWorkout()">
+          <span nz-icon nzType="plus"></span>
+          Add workout
         </button>
+        <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
     </nz-header>
 
@@ -70,13 +66,17 @@
 
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
-          <nz-card nzTitle="Choose a predefined workout">
+          <nz-card class="routine-library">
+            <div class="routine-section-heading">
+              <span>Ready to start</span>
+              <h3>Predefined workouts</h3>
+            </div>
             <div class="routines-list">
               <div
                 class="routine-card"
                 *ngFor="let r of routines; let i = index"
-                [class.selected]="selectedRoutineIndex() === i"
-                (click)="selectedRoutineIndex.set(i); onRoutineSelect(i)">
+                [class.selected]="selectedRoutineKey() === 'predefined-' + i"
+                (click)="selectRoutine(r, 'predefined-' + i)">
                 <h3>{{ r.name }}</h3>
                 <p>{{ r.exercises.length }} exercises</p>
                 <div class="routine-preview">
@@ -84,6 +84,30 @@
                 </div>
               </div>
             </div>
+
+            <div class="routine-section-heading personal-heading">
+              <span>Your library</span>
+              <h3>My workouts</h3>
+            </div>
+            <div class="routines-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
+              <div
+                class="routine-card personal-routine"
+                *ngFor="let routine of personalRoutines()"
+                [class.selected]="selectedRoutineKey() === 'personal-' + routine.id"
+                (click)="selectRoutine(routine, 'personal-' + routine.id)"
+              >
+                <h3>{{ routine.name }}</h3>
+                <p>{{ routine.exercises.length }} exercises</p>
+                <div class="routine-preview">
+                  <nz-tag *ngFor="let exercise of routine.exercises">{{ exercise.name }}</nz-tag>
+                </div>
+              </div>
+            </div>
+            <ng-template #noPersonalRoutines>
+              <button type="button" class="empty-personal-routines" (click)="openAddWorkout()">
+                You have no personal workouts yet. Add your first workout.
+              </button>
+            </ng-template>
 
             <div class="action-bar">
               <button nz-button nzType="primary" nzSize="large" (click)="startWorkout()">
@@ -174,3 +198,11 @@
     </nz-content>
   </nz-layout>
 </nz-layout>
+
+<app-workout-modal
+  [visible]="modalVisible()"
+  [workout]="null"
+  (save)="onModalSave($event)"
+  (cancel)="onModalCancel()"
+>
+</app-workout-modal>

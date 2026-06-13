@@ -14,6 +14,7 @@ export interface Workout {
   exercises: ExerciseLog[];
   notes?: string;
   createdAt?: Date;
+  isPredefined?: boolean;
 }
 
 

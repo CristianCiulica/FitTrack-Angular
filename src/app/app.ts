@@ -64,7 +64,7 @@ export class App implements OnInit {
   }
 
   prepareRoute(outlet: RouterOutlet) {
-    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches) {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 600px)').matches) {
       return 'mobile';
     }
     if (!outlet?.isActivated) return 'root';

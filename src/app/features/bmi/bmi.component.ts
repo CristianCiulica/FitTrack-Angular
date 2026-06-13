@@ -33,7 +33,6 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrls: ['./bmi.component.scss']
 })
 export class BmiComponent {
-  isCollapsed = false;
 
   height = signal<number>(170); // cm
   weight = signal<number>(70);  // kg

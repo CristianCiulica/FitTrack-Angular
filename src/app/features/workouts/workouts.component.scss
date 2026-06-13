@@ -177,7 +177,7 @@
 
 .cardio-session-header {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
 
@@ -195,21 +195,6 @@
   > strong {
     color: #0066cc;
     font-size: 16px;
-  }
-}
-
-.activity-icon {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  color: #ffffff;
-  font-size: 17px;
-  background: #28a745;
-  border-radius: 12px;
-  place-items: center;
-
-  &.walking {
-    background: #0071e3;
   }
 }
 
@@ -250,34 +235,106 @@
   border-radius: 13px;
 }
 
-.filters-bar {
+.history-table-heading {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 26px 0 12px;
 
-  .search-input {
-    max-width: 320px;
-    border-radius: 10px;
+  span {
+    color: #8e8e93;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin: 2px 0 0;
+    color: #1d1d1f;
+    font-size: 19px;
+  }
+
+  > strong {
+    color: #6e6e73;
+    font-size: 12px;
+    font-weight: 600;
   }
 }
 
 .table-card {
   background: #ffffff;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 18px;
+  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.055);
   overflow: hidden;
+}
 
-  .exercise-name {
-    font-weight: 500;
-    color: #1d1d1f;
+::ng-deep .table-card {
+  .ant-table {
+    background: transparent;
   }
 
-  .exercise-notes {
-    font-size: 12px;
-    color: #aeaeb2;
-    margin-top: 2px;
+  .ant-table-thead > tr > th {
+    padding-block: 13px;
+    color: #6b7280;
+    font-size: 10px;
+    font-weight: 750;
+    letter-spacing: 0.55px;
+    text-transform: uppercase;
+    background: #f8fafc !important;
+    border-bottom-color: #eceff3;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding-block: 15px;
+    color: #4b5563;
+    border-bottom-color: #eff1f4;
+  }
+
+  .ant-table-tbody > .workout-row:hover > td {
+    background: #fafcff !important;
+  }
+
+  .ant-table-expanded-row > td {
+    padding: 12px 18px 18px !important;
+    background: #f8fafc !important;
+  }
+
+  .ant-pagination {
+    margin: 16px 18px;
+  }
+}
+
+.workout-name-cell strong {
+  color: #1d1d1f;
+  font-size: 14px;
+}
+
+.workout-count-cell,
+.workout-date-cell {
+  color: #667085;
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-notes-cell {
+  max-width: 260px;
+  overflow: hidden;
+  color: #7a8493;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workout-actions-cell {
+  white-space: nowrap;
+
+  button[nz-button] {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: #f7f8fa;
+    border-radius: 9px !important;
   }
 }
 
@@ -285,7 +342,7 @@
   display: none;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 600px) {
   .app-layout {
     min-height: auto;
     flex-direction: column;
@@ -344,20 +401,6 @@
     padding: 20px 16px;
   }
 
-  .filters-bar {
-    flex-direction: column;
-    align-items: stretch;
-
-    .search-input {
-      max-width: none;
-      width: 100%;
-    }
-
-    nz-select {
-      width: 100% !important;
-    }
-  }
-
   .table-card {
     overflow-x: auto;
   }
@@ -367,7 +410,7 @@
   }
 }
 
-@media (max-width: 820px) {
+@media (max-width: 600px) {
   .cardio-history {
     margin-bottom: 14px;
     padding: 14px;
@@ -584,10 +627,6 @@
 
   .app-content {
     padding: 16px 12px;
-  }
-
-  .filters-bar {
-    margin-bottom: 16px;
   }
 
   .workouts-header .header-actions {

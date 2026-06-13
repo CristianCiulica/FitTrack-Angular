@@ -1,24 +1,20 @@
-import { Component, OnInit, signal, computed, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { WorkoutService } from '../../core/services/workout.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ExportService } from '../../core/services/export.service';
-import { Workout, MUSCLE_GROUPS, MuscleGroup } from '../../core/models/workout.model';
+import { Workout } from '../../core/models/workout.model';
 import { RunningSession } from '../../core/models/running-session.model';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { RouterLinkActive } from '@angular/router';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
@@ -28,19 +24,15 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     RouterLink,
     RouterLinkActive,
     NzTableModule,
     NzButtonModule,
     NzIconModule,
-    NzInputModule,
-    NzSelectModule,
     NzTagModule,
     NzPopconfirmModule,
     NzLayoutModule,
     NzMenuModule,
-    NzDropDownModule,
     NzAvatarModule,
     WorkoutModalComponent,
   ],
@@ -50,30 +42,15 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
 export class WorkoutsComponent implements OnInit {
   workouts = signal<Workout[]>([]);
   runningSessions = signal<RunningSession[]>([]);
-  searchText = signal('');
-  filterMuscle = signal<MuscleGroup | ''>('');
   sortColumn = signal<string>('date');
   sortDirection = signal<'ascend' | 'descend' | null>('descend');
-  isCollapsed = false;
   modalVisible = signal(false);
   editingWorkout = signal<Workout | null>(null);
-  muscleGroups = MUSCLE_GROUPS;
   readonly hideTableNoResult: any = null;
   expandSet = new Set<string>();
 
   filteredWorkouts = computed(() => {
     let data = [...this.workouts()];
-    const search = this.searchText().toLowerCase();
-    if (search) {
-      data = data.filter(w =>
-        w.name.toLowerCase().includes(search) ||
-        w.exercises?.some(ex => ex.exerciseName.toLowerCase().includes(search))
-      );
-    }
-    if (this.filterMuscle()) {
-      data = data.filter(w => w.exercises?.some(ex => ex.muscleGroup === this.filterMuscle()));
-    }
-    // Apply sorting
     const sc = this.sortColumn();
     const sd = this.sortDirection();
     if (sc && sd) {

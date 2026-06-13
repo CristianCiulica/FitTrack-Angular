@@ -36,7 +36,6 @@ import { Workout } from '../../core/models/workout.model';
 })
 export class DashboardComponent implements OnInit {
   workouts = signal<Workout[]>([]);
-  isCollapsed = false;
 
   totalWorkouts = computed(() => this.workouts().length);
   totalVolume = computed(() =>

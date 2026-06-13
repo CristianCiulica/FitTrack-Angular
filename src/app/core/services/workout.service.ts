@@ -68,7 +68,16 @@ export class WorkoutService {
     }
 
     try {
-      return (JSON.parse(raw) as Workout[]).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      return (JSON.parse(raw) as Workout[])
+        .map((workout) => ({
+          ...workout,
+          isPredefined:
+            workout.isPredefined ??
+            ['Chest & Triceps Day', 'Leg Day', 'Back & Biceps', 'Shoulders - Volume'].includes(
+              workout.name,
+            ),
+        }))
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     } catch {
       return [];
     }
@@ -100,6 +109,7 @@ export class WorkoutService {
       {
         id: this.createWorkoutId() + '1',
         userId,
+        isPredefined: true,
         name: 'Chest & Triceps Day',
         date: formatDate(1),
         notes: 'Heavy pressing focus',
@@ -112,6 +122,7 @@ export class WorkoutService {
       {
         id: this.createWorkoutId() + '2',
         userId,
+        isPredefined: true,
         name: 'Leg Day',
         date: formatDate(2),
         notes: '2 min rest between sets',
@@ -123,6 +134,7 @@ export class WorkoutService {
       {
         id: this.createWorkoutId() + '3',
         userId,
+        isPredefined: true,
         name: 'Back & Biceps',
         date: formatDate(3),
         notes: 'Focus on contraction',
@@ -135,6 +147,7 @@ export class WorkoutService {
       {
         id: this.createWorkoutId() + '4',
         userId,
+        isPredefined: true,
         name: 'Shoulders - Volume',
         date: formatDate(4),
         notes: 'Keep rest short',

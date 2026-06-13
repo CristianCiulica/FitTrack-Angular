@@ -7,7 +7,6 @@ import { CommonModule } from '@angular/common';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
@@ -21,7 +20,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
     NzFormModule,
     NzInputModule,
     NzButtonModule,
-    NzCheckboxModule,
     NzIconModule,
   ],
   templateUrl: './login.component.html',
@@ -42,8 +40,7 @@ export class LoginComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, strongPasswordValidator]],
-      remember: [false]
+      password: ['', [Validators.required, strongPasswordValidator]]
     });
   }
 
@@ -64,8 +61,8 @@ export class LoginComponent implements OnInit {
       return;
     }
     this.loading = true;
-    const { email, password, remember } = this.form.value;
-    this.auth.login(email, password, remember).subscribe({
+    const { email, password } = this.form.value;
+    this.auth.login(email, password, false).subscribe({
       next: () => {
         this.loadingService.showAfterNextNavigation(1000);
         this.router.navigate(['/dashboard']);
@@ -78,9 +75,8 @@ export class LoginComponent implements OnInit {
   }
 
   signInWithGoogle() {
-    const remember = this.form.get('remember')?.value ?? false;
     this.googleLoading = true;
-    this.auth.signInWithGoogle(remember).subscribe({
+    this.auth.signInWithGoogle(false).subscribe({
       next: ({ redirecting }) => {
         if (redirecting) return;
         this.loadingService.showAfterNextNavigation(1000);

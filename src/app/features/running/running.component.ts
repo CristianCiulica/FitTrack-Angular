@@ -45,7 +45,6 @@ interface AcceptedPosition {
   styleUrls: ['./running.component.scss'],
 })
 export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
-  isCollapsed = false;
   isTracking = false;
   isCalibrating = false;
   mode: 'running' | 'walking' = 'running';

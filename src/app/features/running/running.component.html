@@ -1,16 +1,13 @@
 <nz-layout class="app-layout">
   <nz-sider
-    nzCollapsible
-    [(nzCollapsed)]="isCollapsed"
-    [nzWidth]="240"
-    [nzCollapsedWidth]="72"
+    [nzWidth]="208"
     class="sidebar"
   >
     <div class="sidebar-logo">
       <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
-      <span class="logo-text" *ngIf="!isCollapsed">FitTrack</span>
+      <span class="logo-text">FitTrack</span>
     </div>
-    <ul nz-menu nzMode="inline" [nzInlineCollapsed]="isCollapsed" class="sidebar-menu">
+    <ul nz-menu nzMode="inline" class="sidebar-menu">
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
         <a [routerLink]="isTracking ? null : '/dashboard'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Dashboard">
           <span nz-icon nzType="dashboard"></span>
@@ -42,14 +39,12 @@
         </a>
       </li>
     </ul>
-    <div class="sidebar-footer" *ngIf="!isCollapsed">
+    <div class="sidebar-footer">
       <div class="user-info">
         <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
         <span class="user-name">{{ authService.currentUser()?.displayName || authService.currentUser()?.email || 'Athlete' }}</span>
       </div>
-      <button nz-button nzType="text" nzDanger (click)="logout()">
-        <span nz-icon nzType="logout"></span>
-      </button>
+      <button nz-button nzType="text" nzDanger class="logout-button" (click)="logout()">Logout</button>
     </div>
   </nz-sider>
 
@@ -57,10 +52,7 @@
     <nz-header class="app-header">
       <h2>Running</h2>
       <div class="header-actions">
-        <button nz-button nzDanger (click)="logout()">
-          <span nz-icon nzType="logout"></span>
-          <span class="button-label">Logout</span>
-        </button>
+        <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
     </nz-header>
 
