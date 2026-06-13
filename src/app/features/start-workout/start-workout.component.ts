@@ -5,7 +5,6 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -66,7 +65,6 @@ const PREDEFINED_ROUTINES: Routine[] = [
     NzMenuModule,
     NzButtonModule,
     NzIconModule,
-    NzAvatarModule,
     NzCardModule,
     NzProgressModule,
     NzTagModule,
@@ -93,11 +91,6 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   restTimeTarget = signal(60);
   restTimeRemaining = signal(60);
   private timerInterval: any;
-
-  userName = computed(() => {
-    const u = this.authService.currentUser();
-    return u?.displayName ?? u?.email ?? 'Athlete';
-  });
 
   currentExercise = computed(() => {
     const ex = this.currentRoutine().exercises;

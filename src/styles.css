@@ -163,33 +163,6 @@ a:hover {
   background: #eaf2ff !important;
 }
 
-.sidebar .sidebar-footer {
-  position: absolute;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.sidebar .user-info {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  gap: 10px;
-}
-
-.sidebar .user-name {
-  max-width: 62px;
-  overflow: hidden;
-  color: #1d1d1f;
-  font-size: 13px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .sidebar .logout-button {
   flex: 0 0 auto;
   padding-inline: 7px !important;
@@ -297,7 +270,6 @@ a:hover {
   }
 
   .app-layout > .sidebar .sidebar-logo,
-  .app-layout > .sidebar .sidebar-footer,
   .app-layout > .sidebar .ant-layout-sider-trigger {
     display: none !important;
   }
@@ -403,8 +375,9 @@ a:hover {
     margin: 0 !important;
     overflow: hidden !important;
     color: inherit;
-    font-size: 10px !important;
+    font-size: 9.5px !important;
     font-weight: 650;
+    letter-spacing: -0.15px;
     line-height: 1.15 !important;
     text-align: center;
     text-overflow: ellipsis;
@@ -412,18 +385,19 @@ a:hover {
     opacity: 1 !important;
   }
 
-  .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected {
+  html body .app-layout > .sidebar .sidebar-menu.ant-menu .ant-menu-item.ant-menu-item-selected {
     background: transparent !important;
+    background-color: transparent !important;
     color: #0066cc !important;
   }
 
-  .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a {
-    color: #0066cc;
+  body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a {
+    color: #0066cc !important;
   }
 
-  .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a::before {
-    background: linear-gradient(180deg, #eaf4ff 0%, #e3efff 100%);
-    box-shadow: inset 0 0 0 1px rgba(0, 113, 227, 0.08);
+  body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a::before {
+    background: transparent !important;
+    box-shadow: none !important;
   }
 
   .app-layout > .main-layout {

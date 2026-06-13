@@ -15,27 +15,9 @@
       <nz-form-item>
         <nz-form-label nzRequired>Workout name</nz-form-label>
         <nz-form-control nzErrorTip="Please enter a valid name">
-          <input nz-input formControlName="name" placeholder="e.g. Chest Day" />
+          <input nz-input formControlName="name" />
         </nz-form-control>
       </nz-form-item>
-
-      <div class="row-fields">
-        <!-- Date -->
-        <nz-form-item class="flex-1">
-          <nz-form-label nzRequired>Date</nz-form-label>
-          <nz-form-control>
-            <input type="date" nz-input formControlName="date" />
-          </nz-form-control>
-        </nz-form-item>
-
-        <!-- Notes -->
-        <nz-form-item class="flex-2">
-          <nz-form-label>Notes (optional)</nz-form-label>
-          <nz-form-control>
-            <input nz-input formControlName="notes" placeholder="e.g. Felt tired" />
-          </nz-form-control>
-        </nz-form-item>
-      </div>
 
       <div class="exercises-header">
         <h3>Exercises</h3>

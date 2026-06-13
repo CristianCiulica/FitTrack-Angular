@@ -9,7 +9,6 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { Workout } from '../../core/models/workout.model';
@@ -27,7 +26,6 @@ import { Workout } from '../../core/models/workout.model';
     NzStatisticModule,
     NzIconModule,
     NzButtonModule,
-    NzAvatarModule,
     NzDropDownModule,
     NzTagModule,
   ],
@@ -61,11 +59,6 @@ export class DashboardComponent implements OnInit {
     return muscle;
   });
   recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
-
-  userName = computed(() => {
-    const u = this.authService.currentUser();
-    return u?.displayName ?? u?.email ?? 'Athlete';
-  });
 
   constructor(
     private workoutService: WorkoutService,

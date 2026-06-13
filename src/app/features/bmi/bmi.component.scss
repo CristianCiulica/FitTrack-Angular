@@ -6,66 +6,40 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  background: #ffffff !important;
+  background: #fff !important;
   border-right: 1px solid rgba(0, 0, 0, 0.06);
 
   .sidebar-logo {
-    height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 64px;
     gap: 10px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
     .logo-text {
+      color: #1d1d1f;
       font-size: 20px;
       font-weight: 700;
-      color: #1d1d1f;
       letter-spacing: -0.5px;
     }
   }
 
   .sidebar-menu {
-    background: transparent !important;
-    border: none !important;
     margin-top: 8px;
+    background: transparent !important;
+    border: 0 !important;
 
     ::ng-deep .ant-menu-item {
+      width: calc(100% - 24px) !important;
+      margin: 4px 12px !important;
       color: #1d1d1f !important;
       border-radius: 10px !important;
-      margin: 4px 12px !important;
-      width: calc(100% - 24px) !important;
 
       &:hover,
       &.ant-menu-item-selected {
-        background: #eaf2ff !important;
         color: #1d1d1f !important;
-      }
-    }
-  }
-
-  .sidebar-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      .user-name {
-        color: #1d1d1f;
-        font-size: 13px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 130px;
+        background: #eaf2ff !important;
       }
     }
   }
@@ -73,92 +47,295 @@
 
 .main-layout {
   background: transparent;
+}
 
-  .app-header {
-    background: rgba(255, 255, 255, 0.8) !important;
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+.app-header {
+  position: sticky;
+  z-index: 100;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 32px;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.84) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(20px);
+
+  h2 {
+    margin: 0;
+    color: #1d1d1f;
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.app-content {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.bmi-card {
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 22px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+
+  ::ng-deep .ant-card-body {
+    padding: 0;
+  }
+}
+
+.calculator-heading {
+  padding: 30px 32px 24px;
+  background:
+    radial-gradient(circle at top right, rgba(24, 144, 255, 0.16), transparent 36%),
+    #fff;
+  border-bottom: 1px solid #edf0f5;
+
+  > span {
+    color: #1677ff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 7px 0 5px;
+    color: #172033;
+    font-size: clamp(27px, 3vw, 36px);
+    font-weight: 750;
+    letter-spacing: -0.04em;
+  }
+
+  p {
+    max-width: 650px;
+    margin: 0;
+    color: #667085;
+    line-height: 1.55;
+  }
+}
+
+.calculator-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 28px;
+  padding: 30px 32px 32px;
+}
+
+.calculator-form {
+  min-width: 0;
+  padding: 2px;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.calc-row {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+
+  > span {
+    color: #344054;
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  nz-input-number,
+  select {
+    width: 100%;
+    height: 44px;
+    border: 1px solid #e1e6ed;
+    border-radius: 12px;
+    background: #f8fafc;
+    box-shadow: none;
+    transition: border-color 160ms ease, background 160ms ease;
+
+    &:hover,
+    &:focus-within {
+      background: #fff;
+      border-color: #91caff;
+    }
+  }
+
+  select {
+    padding: 0 12px;
+    color: #172033;
+    outline: none;
+  }
+
+  ::ng-deep .ant-input-number-input {
+    height: 42px;
+    padding-inline: 13px;
+  }
+}
+
+.goal-selector {
+  margin-top: 24px;
+
+  > span {
+    display: block;
+    margin-bottom: 8px;
+    color: #344054;
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  > div {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  button {
+    min-height: 44px;
+    padding: 10px 14px;
+    color: #475467;
+    font-weight: 650;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: 160ms ease;
+
+    &:hover {
+      border-color: #91caff;
+    }
+
+    &.selected {
+      color: #0958d9;
+      background: #eaf3ff;
+      border-color: #69b1ff;
+      box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.08);
+    }
+  }
+}
+
+.goal-rate {
+  display: block;
+  margin-top: 24px;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #edf0f5;
+  border-radius: 14px;
+
+  > div:first-child,
+  .range-labels {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 0 32px;
-    height: 64px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-
-    h2 {
-      font-size: 20px;
-      font-weight: 600;
-      color: #1d1d1f;
-      margin: 0;
-      white-space: nowrap;
-    }
+    gap: 16px;
   }
 
-  .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-
-    button[nz-button] {
-      margin-left: 0 !important;
-    }
+  > div:first-child span {
+    color: #344054;
+    font-size: 13px;
+    font-weight: 650;
   }
 
-  .app-content {
-    padding: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
+  strong {
+    color: #172033;
+    font-size: 13px;
+  }
+
+  input {
     width: 100%;
+    margin: 17px 0 8px;
+    accent-color: #1677ff;
+  }
 
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
+  .range-labels {
+    color: #98a2b3;
+    font-size: 11px;
+  }
+}
 
-      .bmi-card {
-        border-radius: 16px;
-        border: 1px solid rgba(0, 0, 0, 0.06);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.results-panel {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  padding: 26px;
+  color: #172033;
+  background:
+    radial-gradient(circle at top right, rgba(24, 144, 255, 0.14), transparent 42%),
+    linear-gradient(145deg, #f8fbff, #f2f6fb);
+  border: 1px solid #dde7f2;
+  border-radius: 18px;
+  box-shadow: 0 14px 30px rgba(31, 75, 122, 0.09);
+}
 
-        .calc-row {
-          margin-bottom: 24px;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
+.calorie-target {
+  padding-bottom: 22px;
+  border-bottom: 1px solid #dce4ed;
 
-          label {
-            font-weight: 500;
-            color: #1d1d1f;
-          }
-        }
+  span,
+  small {
+    display: block;
+    color: #667085;
+  }
 
-        .result-box {
-          margin-top: 32px;
-          padding: 24px;
-          text-align: center;
-          background: #f7f8fb;
-          border-radius: 12px;
-          border: 1px solid #e5e5ea;
+  strong {
+    display: block;
+    margin: 7px 0 0;
+    color: #0958d9;
+    font-size: clamp(44px, 6vw, 62px);
+    line-height: 1;
+    letter-spacing: -0.06em;
+  }
 
-          h3 {
-            margin-bottom: 8px;
-            color: #6e6e73;
-          }
+  small {
+    margin-top: 5px;
+  }
+}
 
-          .bmi-value {
-            font-size: 48px;
-            font-weight: bold;
-            color: #0071e3;
-            line-height: 1;
-            margin-bottom: 16px;
-          }
-        }
-      }
-    }
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+
+  > div {
+    min-width: 0;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #e0e7ef;
+    border-radius: 12px;
+  }
+
+  span,
+  small {
+    display: block;
+    color: #7b8493;
+    font-size: 11px;
+  }
+
+  strong {
+    display: block;
+    margin: 5px 0 2px;
+    color: #172033;
+    font-size: 22px;
+  }
+
+  ::ng-deep .ant-tag {
+    max-width: 100%;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -170,103 +347,66 @@
 
   .sidebar {
     position: relative;
-    top: auto;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     width: 100% !important;
-    max-width: 100% !important;
     min-width: 100% !important;
+    max-width: 100% !important;
+    height: auto;
     flex: 0 0 100% !important;
+    border-right: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
 
-    .sidebar-menu {
-      margin-top: 0;
-      padding: 8px 0;
-      max-height: 240px;
-      overflow: auto;
+  .app-header {
+    min-height: 64px;
+    height: auto;
+    padding: 12px 16px;
+    align-items: flex-start;
+    flex-direction: column;
+
+    h2 {
+      font-size: 18px;
     }
 
-    .sidebar-footer {
-      position: static;
+    .header-actions,
+    button {
+      width: 100%;
     }
   }
 
-  .main-layout {
-    .app-header {
-      padding: 12px 16px;
-      height: auto;
-      min-height: 64px;
-      align-items: flex-start;
-      flex-direction: column;
+  .app-content {
+    padding: 16px 12px;
+  }
 
-      h2 {
-        white-space: normal;
-        line-height: 1.2;
-      }
-    }
+  .bmi-card {
+    border-radius: 16px;
+  }
 
-    .header-actions {
-      width: 100%;
-      justify-content: flex-start;
-    }
+  .calculator-heading {
+    padding: 24px 20px 20px;
+  }
 
-    .app-content {
-      padding: 20px 16px;
-    }
+  .calculator-layout {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    padding: 22px 20px 20px;
+  }
+
+  .input-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .results-panel {
+    padding: 22px 18px;
+  }
+
+  .calorie-target strong {
+    font-size: 48px;
   }
 }
 
-@media (max-width: 576px) {
-  .sidebar .sidebar-logo {
-    height: 56px;
-
-    .logo-text {
-      font-size: 18px;
-    }
-  }
-
-  .sidebar .sidebar-menu {
-    max-height: 180px;
-  }
-
-  .main-layout {
-    .app-header h2 {
-      font-size: 18px;
-    }
-
-    .header-actions {
-      width: 100%;
-
-      button[nz-button] {
-        width: 100%;
-      }
-    }
-
-    .app-content {
-      padding: 16px 12px;
-
-      .container {
-        width: 100%;
-
-        .bmi-card {
-          ::ng-deep .ant-card-body {
-            padding: 16px !important;
-          }
-
-          .calc-row {
-            margin-bottom: 18px;
-          }
-
-          .result-box {
-            margin-top: 22px;
-            padding: 20px 16px;
-
-            .bmi-value {
-              font-size: 42px;
-            }
-          }
-        }
-      }
-    }
+@media (max-width: 380px) {
+  .goal-selector > div,
+  .result-grid {
+    grid-template-columns: 1fr;
   }
 }

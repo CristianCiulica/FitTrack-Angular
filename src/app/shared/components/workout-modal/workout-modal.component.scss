@@ -19,19 +19,6 @@
   padding: 24px !important;
 }
 
-.row-fields {
-  display: flex;
-  gap: 12px;
-
-  .flex-1 {
-    flex: 1;
-  }
-
-  .flex-2 {
-    flex: 2;
-  }
-}
-
 .exercises-header {
   display: flex;
   justify-content: space-between;
@@ -124,11 +111,6 @@
   ::ng-deep .ant-modal-footer button {
     min-width: 92px;
     min-height: 42px;
-  }
-
-  .row-fields {
-    flex-direction: column;
-    gap: 0;
   }
 
   .exercises-header {

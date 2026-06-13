@@ -33,19 +33,12 @@
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/bmi" aria-label="BMI calculator">
+          <a routerLink="/bmi" aria-label="Nutrition calculator">
             <span nz-icon nzType="heart"></span>
-            <span>BMI</span>
+            <span>Nutrition</span>
           </a>
         </li>
       </ul>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <nz-avatar nzIcon="user" style="background:#1d1d1f"></nz-avatar>
-        <span class="user-name">{{ userName() }}</span>
-      </div>
-      <button nz-button nzType="text" nzDanger class="logout-button" (click)="logout()">Logout</button>
-    </div>
   </nz-sider>
 
   <!-- Content -->
@@ -53,10 +46,6 @@
     <nz-header class="app-header dashboard-header">
       <h2>Dashboard</h2>
       <div class="header-actions">
-        <button nz-button nzType="text" routerLink="/workouts">
-          <span nz-icon nzType="plus"></span>
-          <span class="button-label">New workout</span>
-        </button>
         <button nz-button nzDanger class="logout-button" (click)="logout()" style="margin-left: 8px">Logout</button>
       </div>
     </nz-header>
@@ -100,7 +89,7 @@
             <span nz-icon nzType="trophy" style="font-size:24px"></span>
           </div>
           <div class="stat-label">Favorite muscle</div>
-          <div class="stat-value-text">{{ mostUsedMuscle() }}</div>
+          <div class="stat-value-text muscle-pill">{{ mostUsedMuscle() }}</div>
         </nz-card>
       </div>
 

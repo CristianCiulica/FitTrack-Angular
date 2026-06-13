@@ -33,19 +33,12 @@
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
-        <a [routerLink]="isTracking ? null : '/bmi'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="BMI calculator">
+        <a [routerLink]="isTracking ? null : '/bmi'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Nutrition calculator">
           <span nz-icon nzType="heart"></span>
-          <span>BMI</span>
+          <span>Nutrition</span>
         </a>
       </li>
     </ul>
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <nz-avatar nzIcon="user" style="background: #1d1d1f"></nz-avatar>
-        <span class="user-name">{{ authService.currentUser()?.displayName || authService.currentUser()?.email || 'Athlete' }}</span>
-      </div>
-      <button nz-button nzType="text" nzDanger class="logout-button" (click)="logout()">Logout</button>
-    </div>
   </nz-sider>
 
   <nz-layout class="main-layout">

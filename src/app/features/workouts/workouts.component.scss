@@ -48,31 +48,6 @@
     }
   }
 
-  .sidebar-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      .user-name {
-        color: #1d1d1f;
-        font-size: 13px;
-        max-width: 130px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-    }
-  }
 }
 
 .main-layout {
@@ -265,9 +240,9 @@
 
 .table-card {
   background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.07);
-  border-radius: 18px;
-  box-shadow: 0 8px 28px rgba(15, 23, 42, 0.055);
+  border: 1px solid #e9edf3;
+  border-radius: 16px;
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.045);
   overflow: hidden;
 }
 
@@ -277,29 +252,46 @@
   }
 
   .ant-table-thead > tr > th {
-    padding-block: 13px;
-    color: #6b7280;
+    padding: 13px 18px;
+    color: #7b8493;
     font-size: 10px;
     font-weight: 750;
     letter-spacing: 0.55px;
     text-transform: uppercase;
-    background: #f8fafc !important;
-    border-bottom-color: #eceff3;
+    background: #fbfcfe !important;
+    border-bottom-color: #e9edf3;
   }
 
   .ant-table-tbody > tr > td {
-    padding-block: 15px;
+    padding: 15px 18px;
     color: #4b5563;
-    border-bottom-color: #eff1f4;
+    border-bottom-color: #f0f2f5;
   }
 
   .ant-table-tbody > .workout-row:hover > td {
-    background: #fafcff !important;
+    background: #fbfcff !important;
   }
 
-  .ant-table-expanded-row > td {
-    padding: 12px 18px 18px !important;
-    background: #f8fafc !important;
+  .workout-details-row > td {
+    padding: 0 18px 18px !important;
+    background: #fff !important;
+  }
+
+  .workout-details-row .ant-table {
+    overflow: hidden;
+    background: #f8fafc;
+    border: 1px solid #e9edf3;
+    border-radius: 12px;
+  }
+
+  .workout-details-row .ant-table-thead > tr > th {
+    padding: 10px 14px;
+    background: #f4f6f9 !important;
+  }
+
+  .workout-details-row .ant-table-tbody > tr > td {
+    padding: 11px 14px;
+    background: transparent;
   }
 
   .ant-pagination {
@@ -312,18 +304,25 @@
   font-size: 14px;
 }
 
-.workout-count-cell,
-.workout-date-cell {
+.workout-count-cell {
   color: #667085;
   font-variant-numeric: tabular-nums;
 }
 
-.workout-notes-cell {
-  max-width: 260px;
-  overflow: hidden;
-  color: #7a8493;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.muscle-group-cell,
+.exercise-group-cell {
+  min-width: 120px;
+
+  nz-tag,
+  .ant-tag {
+    display: inline-block;
+    max-width: none;
+    margin-right: 0;
+    padding: 3px 10px;
+    line-height: 20px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
 }
 
 .workout-actions-cell {
@@ -333,8 +332,25 @@
     width: 32px;
     height: 32px;
     padding: 0;
-    background: #f7f8fa;
-    border-radius: 9px !important;
+    color: #667085;
+    background: transparent;
+    border-radius: 8px !important;
+
+    &:hover {
+      background: #f4f6f9;
+    }
+  }
+
+  button.details-button {
+    width: auto;
+    padding: 0 9px;
+    gap: 5px;
+    color: #475467;
+    font-size: 12px;
+
+    span[nz-icon] {
+      font-size: 10px;
+    }
   }
 }
 
@@ -369,10 +385,6 @@
       overflow: auto;
     }
 
-    .sidebar-footer {
-      position: static;
-      border-top: 1px solid rgba(0, 0, 0, 0.06);
-    }
   }
 
   .main-layout {
@@ -406,7 +418,7 @@
   }
 
   ::ng-deep .table-card .ant-table-wrapper {
-    min-width: 700px;
+    min-width: 560px;
   }
 }
 
@@ -434,7 +446,7 @@
 
     .header-actions {
       display: grid !important;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       order: 2;
       width: 100% !important;
       margin-left: 0;
@@ -491,6 +503,8 @@
     nz-tag {
       flex: 0 0 auto;
       margin-right: 0;
+      padding: 3px 10px;
+      border-radius: 999px;
     }
   }
 
@@ -505,6 +519,11 @@
     span:last-child {
       overflow-wrap: anywhere;
     }
+  }
+
+  .mobile-workout-header nz-tag {
+    max-width: none;
+    white-space: nowrap;
   }
 
   .mobile-workout-actions {
@@ -551,8 +570,13 @@
       }
 
       span {
-        color: #8e8e93;
+        width: fit-content;
+        margin-top: 3px;
+        padding: 2px 7px;
+        color: #667085;
         font-size: 11px;
+        background: #eef2f7;
+        border-radius: 999px;
       }
     }
   }

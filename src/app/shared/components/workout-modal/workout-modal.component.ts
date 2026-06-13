@@ -8,7 +8,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { Workout, MUSCLE_GROUPS } from '../../../core/models/workout.model';
 
 @Component({
@@ -24,7 +23,6 @@ import { Workout, MUSCLE_GROUPS } from '../../../core/models/workout.model';
     NzIconModule,
     NzSelectModule,
     NzInputNumberModule,
-    NzDatePickerModule,
   ],
   templateUrl: './workout-modal.component.html',
   styleUrls: ['./workout-modal.component.scss']
@@ -51,9 +49,7 @@ export class WorkoutModalComponent implements OnChanges {
       this.form = this.buildForm();
       if (this.workout) {
         this.form.patchValue({
-          name: this.workout.name,
-          date: this.workout.date,
-          notes: this.workout.notes
+          name: this.workout.name
         });
         this.exercises.clear();
         if (this.workout.exercises && this.workout.exercises.length) {
@@ -67,9 +63,7 @@ export class WorkoutModalComponent implements OnChanges {
 
   buildForm(): FormGroup {
     return this.fb.group({
-      name: ['Workout name...', [Validators.required, Validators.minLength(2)]],
-      date: [new Date().toISOString().split('T')[0], Validators.required],
-      notes: [''],
+      name: ['', [Validators.required, Validators.minLength(2)]],
       exercises: this.fb.array([this.createExerciseGroup()])
     });
   }

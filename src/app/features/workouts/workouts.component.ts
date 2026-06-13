@@ -16,7 +16,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { RouterLinkActive } from '@angular/router';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 
 @Component({
@@ -33,7 +32,6 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
     NzPopconfirmModule,
     NzLayoutModule,
     NzMenuModule,
-    NzAvatarModule,
     WorkoutModalComponent,
   ],
   templateUrl: './workouts.component.html',
@@ -85,11 +83,6 @@ export class WorkoutsComponent implements OnInit {
     }
   }
 
-  userName = computed(() => {
-    const u = this.authService.currentUser();
-    return u?.displayName ?? u?.email ?? 'Athlete';
-  });
-
   muscleColors: Record<string, string> = {
     'Chest': 'red', 'Back': 'blue', 'Shoulders': 'orange',
     'Arms': 'purple', 'Legs': 'green', 'Core': 'cyan',
@@ -133,11 +126,6 @@ export class WorkoutsComponent implements OnInit {
     });
   }
 
-  openAdd() {
-    this.editingWorkout.set(null);
-    this.modalVisible.set(true);
-  }
-
   openEdit(workout: Workout) {
     this.editingWorkout.set(workout);
     this.modalVisible.set(true);
@@ -145,30 +133,14 @@ export class WorkoutsComponent implements OnInit {
 
   onModalSave(workout: Partial<Workout>) {
     const editing = this.editingWorkout();
-    if (editing?.id) {
-      this.workoutService.updateWorkout(editing.id, workout).subscribe({
-        next: () => {
-          this.message.success('Workout updated!');
-          this.refreshWorkouts();
-        },
-        error: () => this.message.error('Update failed.')
-      });
-    } else {
-      const full: Omit<Workout, 'id'> = {
-        userId: this.authService.currentUserId,
-        name: workout.name || 'New session',
-        date: workout.date!,
-        notes: workout.notes ?? '',
-        exercises: workout.exercises || [],
-      };
-      this.workoutService.addWorkout(full).subscribe({
-        next: () => {
-          this.message.success('Workout added!');
-          this.refreshWorkouts();
-        },
-        error: () => this.message.error('Add failed.')
-      });
-    }
+    if (!editing?.id) return;
+    this.workoutService.updateWorkout(editing.id, workout).subscribe({
+      next: () => {
+        this.message.success('Workout updated!');
+        this.refreshWorkouts();
+      },
+      error: () => this.message.error('Update failed.')
+    });
     this.modalVisible.set(false);
   }
 

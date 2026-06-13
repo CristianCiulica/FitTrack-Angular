@@ -48,31 +48,6 @@
     }
   }
 
-  .sidebar-footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      .user-name {
-        color: #1d1d1f;
-        font-size: 13px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 130px;
-      }
-    }
-  }
 }
 
 .main-layout {
@@ -184,6 +159,19 @@
     font-weight: 600;
     color: #1d1d1f;
   }
+
+  .muscle-pill {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    padding: 5px 11px;
+    color: #475467;
+    font-size: 16px;
+    line-height: 1.2;
+    background: #f1f4f8;
+    border: 1px solid #e2e7ee;
+    border-radius: 999px;
+  }
 }
 
 .recent-card {
@@ -220,6 +208,13 @@
       flex-direction: column;
       align-items: flex-end;
       gap: 4px;
+
+      ::ng-deep .ant-tag {
+        margin-right: 0;
+        padding: 3px 10px;
+        line-height: 20px;
+        border-radius: 999px;
+      }
     }
 
     .recent-date {
@@ -267,9 +262,6 @@
       overflow: auto;
     }
 
-    .sidebar-footer {
-      position: static;
-    }
   }
 
   .app-header {

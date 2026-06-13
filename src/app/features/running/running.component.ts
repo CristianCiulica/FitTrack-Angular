@@ -6,7 +6,6 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../core/services/auth.service';
@@ -38,7 +37,6 @@ interface AcceptedPosition {
     NzMenuModule,
     NzButtonModule,
     NzIconModule,
-    NzAvatarModule,
     NzCardModule,
   ],
   templateUrl: './running.component.html',
