@@ -10,13 +10,23 @@
       </div>
       <ul nz-menu nzMode="inline" class="sidebar-menu">
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/dashboard" aria-label="Dashboard">
+          <a
+            [routerLink]="workoutInProgress() ? null : '/dashboard'"
+            [attr.aria-disabled]="workoutInProgress()"
+            [class.navigation-locked]="workoutInProgress()"
+            (click)="blockNavigation($event)"
+            aria-label="Dashboard">
             <span nz-icon nzType="dashboard"></span>
             <span>Home</span>
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/workouts" aria-label="Workouts">
+          <a
+            [routerLink]="workoutInProgress() ? null : '/workouts'"
+            [attr.aria-disabled]="workoutInProgress()"
+            [class.navigation-locked]="workoutInProgress()"
+            (click)="blockNavigation($event)"
+            aria-label="Workouts">
             <span nz-icon nzType="thunderbolt"></span>
             <span>History</span>
           </a>
@@ -28,13 +38,23 @@
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/running" aria-label="Running">
+          <a
+            [routerLink]="workoutInProgress() ? null : '/running'"
+            [attr.aria-disabled]="workoutInProgress()"
+            [class.navigation-locked]="workoutInProgress()"
+            (click)="blockNavigation($event)"
+            aria-label="Running">
             <span nz-icon nzType="rise"></span>
             <span>Run</span>
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/bmi" aria-label="Nutrition calculator">
+          <a
+            [routerLink]="workoutInProgress() ? null : '/bmi'"
+            [attr.aria-disabled]="workoutInProgress()"
+            [class.navigation-locked]="workoutInProgress()"
+            (click)="blockNavigation($event)"
+            aria-label="Nutrition calculator">
             <span nz-icon nzType="heart"></span>
             <span>Nutrition</span>
           </a>
@@ -60,20 +80,46 @@
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
           <nz-card class="routine-library">
-            <div class="routine-section-heading">
-              <span>Ready to start</span>
-              <h3>Predefined workouts</h3>
+            <div class="routine-heading-row">
+              <div class="routine-section-heading">
+                <span>Ready to start</span>
+                <h3>Predefined workouts</h3>
+              </div>
+              <div class="carousel-controls">
+                <span>
+                  {{ predefinedStartIndex() + 1 }}–{{ predefinedStartIndex() + visiblePredefinedRoutines().length }}
+                  of {{ routines.length }}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Previous predefined workouts"
+                  (click)="showPreviousPredefined()"
+                  [disabled]="!canShowPreviousPredefined()"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next predefined workouts"
+                  (click)="showNextPredefined()"
+                  [disabled]="!canShowNextPredefined()"
+                >
+                  ›
+                </button>
+              </div>
             </div>
-            <div class="routines-list">
-              <div
-                class="routine-card"
-                *ngFor="let r of routines; let i = index"
-                [class.selected]="selectedRoutineKey() === 'predefined-' + i"
-                (click)="selectRoutine(r, 'predefined-' + i)">
-                <h3>{{ r.name }}</h3>
-                <p>{{ r.exercises.length }} exercises</p>
-                <div class="routine-preview">
-                  <nz-tag *ngFor="let ex of r.exercises">{{ ex.name }}</nz-tag>
+            <div class="predefined-carousel">
+              <div class="routines-list predefined-routines-list">
+                <div
+                  class="routine-card"
+                  *ngFor="let item of visiblePredefinedRoutines()"
+                  [class.selected]="selectedRoutineKey() === 'predefined-' + item.index"
+                  (click)="selectRoutine(item.routine, 'predefined-' + item.index)">
+                  <h3>{{ item.routine.name }}</h3>
+                  <p>{{ item.routine.exercises.length }} exercises</p>
+                  <div class="routine-preview">
+                    <nz-tag *ngFor="let ex of item.routine.exercises">{{ ex.name }}</nz-tag>
+                  </div>
                 </div>
               </div>
             </div>
@@ -82,7 +128,7 @@
               <span>Your library</span>
               <h3>My workouts</h3>
             </div>
-            <div class="routines-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
+            <div class="routines-list personal-routines-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
               <div
                 class="routine-card personal-routine"
                 *ngFor="let routine of personalRoutines()"

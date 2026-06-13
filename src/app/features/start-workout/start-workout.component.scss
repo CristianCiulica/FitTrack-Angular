@@ -1,7 +1,7 @@
 @use '../workouts/workouts.component.scss';
 
 .container {
-  max-width: 800px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 24px;
 }
@@ -27,6 +27,14 @@
   gap: 12px;
 }
 
+.predefined-carousel {
+  overflow: hidden;
+}
+
+.predefined-routines-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .routine-library {
   border-radius: 20px !important;
 }
@@ -49,6 +57,59 @@
   }
 }
 
+.routine-heading-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 13px;
+
+  .routine-section-heading {
+    margin-bottom: 0;
+  }
+}
+
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  > span {
+    margin-right: 2px;
+    color: #8e8e93;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  button {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0 0 3px;
+    color: #344054;
+    font-size: 25px;
+    line-height: 1;
+    background: #fff;
+    border: 1px solid #dfe4eb;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 160ms ease;
+
+    &:hover:not(:disabled) {
+      color: #0066cc;
+      border-color: #91caff;
+      background: #f5f9ff;
+    }
+
+    &:disabled {
+      color: #c7cbd1;
+      background: #f7f8fa;
+      cursor: default;
+    }
+  }
+}
+
 .personal-heading {
   margin-top: 26px;
   padding-top: 22px;
@@ -57,6 +118,7 @@
 
 .routine-card {
   min-width: 0;
+  min-height: 190px;
   padding: 16px;
   background: #ffffff;
   border: 1px solid #e2e5ea;
@@ -67,7 +129,6 @@
   &:hover {
     border-color: #8bbcf0;
     box-shadow: 0 7px 18px rgba(15, 23, 42, 0.07);
-    transform: translateY(-1px);
   }
 
   &.selected {
@@ -91,6 +152,11 @@
     flex-wrap: wrap;
     gap: 8px;
   }
+}
+
+.navigation-locked {
+  cursor: not-allowed !important;
+  opacity: 0.45;
 }
 
 ::ng-deep .routine-preview .ant-tag {
@@ -244,6 +310,16 @@
   .routines-list {
     grid-template-columns: 1fr;
   }
+
+  .predefined-routines-list {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 100%;
+  }
+
+  .routine-heading-row {
+    align-items: center;
+  }
 }
 
 @media (max-width: 576px) {
@@ -253,6 +329,15 @@
 
   .routine-card {
     padding: 14px;
+    min-height: 0;
+  }
+
+  .routine-heading-row {
+    gap: 10px;
+  }
+
+  .carousel-controls > span {
+    display: none;
   }
 
   .active-card {
