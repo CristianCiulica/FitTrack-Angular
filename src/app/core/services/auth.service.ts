@@ -10,7 +10,9 @@ import {
   updateProfile,
   user,
   GoogleAuthProvider,
+  getRedirectResult,
   signInWithPopup,
+  signInWithRedirect,
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { from, Observable } from 'rxjs';
@@ -23,11 +25,6 @@ export class AuthService {
   private router = inject(Router);
 
   currentUser = signal<any>(null);
-
-  constructor() {
-    // Force sign-out on refresh to show the Login page first.
-    signOut(this.auth);
-  }
 
   isLoggedIn$: Observable<boolean> = user(this.auth).pipe(
     map((u) => {
@@ -61,12 +58,36 @@ export class AuthService {
     const persistence = remember ? browserLocalPersistence : browserSessionPersistence;
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
+
     return from(
-      setPersistence(this.auth, persistence).then(() => signInWithPopup(this.auth, provider)),
+      setPersistence(this.auth, persistence).then(async () => {
+        if (this.shouldUseGoogleRedirect()) {
+          await signInWithRedirect(this.auth, provider);
+          return { redirecting: true };
+        }
+
+        await signInWithPopup(this.auth, provider);
+        return { redirecting: false };
+      }),
     );
+  }
+
+  completeGoogleRedirect() {
+    return from(getRedirectResult(this.auth));
   }
 
   get currentUserId(): string {
     return this.auth.currentUser?.uid ?? '';
+  }
+
+  private shouldUseGoogleRedirect(): boolean {
+    if (typeof navigator === 'undefined') return false;
+
+    const userAgent = navigator.userAgent;
+    const isIosDevice = /iPad|iPhone|iPod/.test(userAgent);
+    const isModernIpad =
+      navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+
+    return isIosDevice || isModernIpad;
   }
 }

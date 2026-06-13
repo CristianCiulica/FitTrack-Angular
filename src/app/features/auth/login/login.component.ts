@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -27,7 +27,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   form: FormGroup;
   loading = false;
   googleLoading = false;
@@ -44,6 +44,17 @@ export class LoginComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, strongPasswordValidator]],
       remember: [false]
+    });
+  }
+
+  ngOnInit(): void {
+    this.auth.completeGoogleRedirect().subscribe({
+      next: (credential) => {
+        if (!credential) return;
+        this.loadingService.showAfterNextNavigation(1000);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => this.showGoogleError(error),
     });
   }
 
@@ -70,15 +81,32 @@ export class LoginComponent {
     const remember = this.form.get('remember')?.value ?? false;
     this.googleLoading = true;
     this.auth.signInWithGoogle(remember).subscribe({
-      next: () => {
+      next: ({ redirecting }) => {
+        if (redirecting) return;
         this.loadingService.showAfterNextNavigation(1000);
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
-        this.message.error('Google sign-in failed. Please try again.');
+      error: (error) => {
+        this.showGoogleError(error);
         this.googleLoading = false;
       },
     });
+  }
+
+  private showGoogleError(error: { code?: string }) {
+    if (error?.code === 'auth/popup-closed-by-user') {
+      this.message.warning('Google sign-in was cancelled.');
+      return;
+    }
+    if (error?.code === 'auth/popup-blocked') {
+      this.message.error('The Google window was blocked. Allow popups and try again.');
+      return;
+    }
+    if (error?.code === 'auth/unauthorized-domain') {
+      this.message.error('This website domain must be authorized in Firebase Authentication.');
+      return;
+    }
+    this.message.error('Google sign-in failed. Please try again.');
   }
 }
 

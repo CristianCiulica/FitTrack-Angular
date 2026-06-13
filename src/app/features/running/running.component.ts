@@ -127,17 +127,34 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.resetTracking(false);
     this.isTracking = true;
     this.isCalibrating = true;
-    this.sessionStartedAt = Date.now();
     this.runningSessionService.setTrackingActive(true);
-    this.calibrationStartedAt = Date.now();
     this.calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
-    this.statusText = 'Calibrating GPS. Keep the phone still.';
-    this.startCalibrationTimer();
+    this.statusText = 'Allow location access to start tracking.';
 
-    this.watchId = navigator.geolocation.watchPosition(
-      (pos) => this.handlePosition(pos),
+    const locationOptions: PositionOptions = {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 15000,
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (!this.isTracking) return;
+
+        this.sessionStartedAt = Date.now();
+        this.calibrationStartedAt = Date.now();
+        this.statusText = 'Calibrating GPS. Keep the phone still.';
+        this.startCalibrationTimer();
+        this.handlePosition(position);
+
+        this.watchId = navigator.geolocation.watchPosition(
+          (pos) => this.handlePosition(pos),
+          (err) => this.handleError(err),
+          locationOptions,
+        );
+      },
       (err) => this.handleError(err),
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 },
+      locationOptions,
     );
   }
 
