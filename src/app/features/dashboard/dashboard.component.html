@@ -53,52 +53,56 @@
     </nz-header>
 
     <nz-content class="app-content">
-      <!-- Stats cards -->
-      <div class="stats-grid">
-        <nz-card class="stat-card">
-          <div class="stat-icon purple">
-            <span nz-icon nzType="fire" style="font-size:24px"></span>
-          </div>
-          <nz-statistic
-            [nzValue]="totalWorkouts()"
-            nzTitle="Total Workouts">
-          </nz-statistic>
-        </nz-card>
-
-        <nz-card class="stat-card">
-          <div class="stat-icon blue">
-            <span nz-icon nzType="calendar" style="font-size:24px"></span>
-          </div>
-          <nz-statistic
-            [nzValue]="thisWeekWorkouts()"
-            nzTitle="This week">
-          </nz-statistic>
-        </nz-card>
-
-        <nz-card class="stat-card">
-          <div class="stat-icon green">
-            <span nz-icon nzType="rise" style="font-size:24px"></span>
-          </div>
-          <nz-statistic
-            [nzValue]="totalVolume()"
-            nzTitle="Total volume (kg)"
-            [nzValueStyle]="{ color: '#1d1d1f' }">
-          </nz-statistic>
-        </nz-card>
-
-        <a routerLink="/start-workout" class="stat-card workout-card" aria-label="Go to Workout">
-          <div class="stat-icon orange">
-            <span nz-icon nzType="play-circle" style="font-size:24px"></span>
-          </div>
-          <div class="stat-label">Workout</div>
-          <div class="stat-action">
-            Start workout
-            <span nz-icon nzType="arrow-right"></span>
-          </div>
-        </a>
+      <!-- Hero Banner -->
+      <div class="dashboard-hero">
+        <div class="hero-content">
+          <h1>Welcome back!️</h1>
+          <p>You've done <strong>{{ totalWorkouts() }}</strong> workouts so far. Ready for the next one?</p>
+          <a routerLink="/start-workout" class="hero-cta">
+            <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+            Start a new workout
+          </a>
+        </div>
+        <div class="hero-decoration"></div>
       </div>
 
-      <!-- Recent workouts -->
+      <!-- Quick Stats -->
+      <div class="stats-row">
+        <div class="modern-stat-card">
+          <div class="icon-wrapper purple">
+            <span nz-icon nzType="fire"></span>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ totalWorkouts() }}</span>
+            <span class="stat-label">Total Workouts</span>
+          </div>
+        </div>
+
+        <div class="modern-stat-card">
+          <div class="icon-wrapper blue">
+            <span nz-icon nzType="calendar"></span>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ thisWeekWorkouts() }}</span>
+            <span class="stat-label">This Week</span>
+          </div>
+        </div>
+
+        <div class="modern-stat-card">
+          <div class="icon-wrapper green">
+            <span nz-icon nzType="rise"></span>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">{{ totalVolume() }} <small>kg</small></span>
+            <span class="stat-label">Total Volume</span>
+          </div>
+        </div>
+      </div>
+
+      <button nz-button nzBlock nzSize="large" class="ai-coach-trigger" (click)="toggleChat()">
+        <span nz-icon nzType="fire"></span>
+        AI Nutrition Coach
+      </button>
       <nz-card class="recent-card" nzTitle="Recent workouts">
         <div class="recent-list">
           <div *ngFor="let w of recentWorkouts()" class="recent-item">
@@ -117,6 +121,66 @@
           </div>
         </div>
       </nz-card>
+
+      <nz-modal
+        [nzVisible]="isChatOpen()"
+        nzTitle=""
+        (nzOnCancel)="toggleChat()"
+        [nzFooter]="null"
+        [nzWidth]="700"
+        nzCentered
+        [nzStyle]="{ padding: '0' }"
+        [nzBodyStyle]="{ padding: '0' }"
+        nzWrapClassName="blurred-modal-wrap no-padding-modal"
+        [nzCloseIcon]="customCloseIcon"
+      >
+        <ng-template #customCloseIcon>
+          <span nz-icon nzType="close-circle" nzTheme="fill" class="modern-close-icon"></span>
+        </ng-template>
+
+        <ng-container *nzModalContent>
+          <div class="chat-container modern-chat">
+            <div class="chat-header-modern">
+               <div class="chat-avatar">
+                 <span nz-icon nzType="robot"></span>
+               </div>
+               <div class="chat-title-info">
+                 <h3>Nutrition AI Coach</h3>
+                 <span class="status-dot"></span> <small>Online</small>
+               </div>
+            </div>
+
+            <div class="chat-body" #chatBody>
+              <div *ngFor="let msg of chatMessages()" class="chat-message" [class.user]="msg.role === 'user'">
+                <div class="bubble-wrapper">
+                  <div class="avatar-mini" *ngIf="msg.role === 'ai'">
+                    <span nz-icon nzType="robot"></span>
+                  </div>
+                  <div class="bubble">{{ msg.text }}</div>
+                </div>
+              </div>
+              <div *ngIf="isTyping()" class="chat-message ai">
+                <div class="bubble-wrapper">
+                  <div class="avatar-mini">
+                    <span nz-icon nzType="robot"></span>
+                  </div>
+                  <div class="bubble typing">
+                    <div class="dot-typing"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-footer">
+              <div class="input-wrapper">
+                <input type="text" [(ngModel)]="chatInput" placeholder="Ex: Am ouă, spanac și pui..." (keydown.enter)="sendMessage()" />
+                <button nz-button class="send-btn" nzType="primary" nzShape="circle" (click)="sendMessage()">
+                  <span nz-icon nzType="send"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </nz-modal>
     </nz-content>
   </nz-layout>
 </nz-layout>
