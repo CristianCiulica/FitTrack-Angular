@@ -268,20 +268,49 @@ a:hover {
     flex: none !important;
     padding: 0;
     pointer-events: none;
-    background: rgba(255, 255, 255, 0.96) !important;
-    border: 1px solid rgba(15, 23, 42, 0.09) !important;
-    border-radius: 22px !important;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.58), rgba(244, 248, 255, 0.34)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.72) !important;
+    border-radius: 24px !important;
     box-shadow:
-      0 12px 32px rgba(15, 23, 42, 0.16),
-      0 2px 8px rgba(15, 23, 42, 0.06);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+      0 16px 38px rgba(15, 23, 42, 0.16),
+      0 3px 10px rgba(15, 23, 42, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.78),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.28);
+    backdrop-filter: blur(30px) saturate(185%) contrast(104%);
+    -webkit-backdrop-filter: blur(30px) saturate(185%) contrast(104%);
     isolation: isolate;
     contain: layout paint;
     transform: translateZ(0);
   }
 
+  body .app-layout > .sidebar::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    content: '';
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.72), transparent 34%),
+      linear-gradient(115deg, rgba(255, 255, 255, 0.34), transparent 42%, rgba(140, 190, 255, 0.12));
+    border-radius: inherit;
+  }
+
+  body .app-layout > .sidebar::after {
+    position: absolute;
+    top: 1px;
+    left: 12%;
+    z-index: 0;
+    width: 76%;
+    height: 1px;
+    content: '';
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.92), transparent);
+  }
+
   .app-layout > .sidebar .ant-layout-sider-children {
+    position: relative;
+    z-index: 1;
     height: 68px !important;
     overflow: visible;
     pointer-events: auto;
@@ -453,10 +482,32 @@ a:hover {
       14px
       10px !important;
     gap: 8px !important;
-    background: rgba(248, 250, 255, 0.9) !important;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    overflow: hidden;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(239, 246, 255, 0.36)) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.7) !important;
+    box-shadow:
+      0 8px 24px rgba(15, 23, 42, 0.08),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(30px) saturate(180%) contrast(103%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%) contrast(103%);
+    isolation: isolate;
+  }
+
+  .app-layout .app-header::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    content: '';
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.75), transparent 38%),
+      linear-gradient(110deg, rgba(255, 255, 255, 0.26), transparent 50%, rgba(130, 180, 255, 0.1));
+  }
+
+  .app-layout .app-header > * {
+    position: relative;
+    z-index: 1;
   }
 
   .app-layout .app-header h2 {

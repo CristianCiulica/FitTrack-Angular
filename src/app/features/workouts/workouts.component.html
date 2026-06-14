@@ -183,28 +183,19 @@
               </tr>
               <tr class="workout-details-row" *ngIf="expandSet.has(w.id!)">
                 <td colspan="4">
-                  <nz-table #innerTable [nzData]="w.exercises" nzSize="middle" [nzShowPagination]="false">
-                    <thead>
-                      <tr>
-                        <th>Exercise</th>
-                        <th>Group</th>
-                        <th>Sets</th>
-                        <th>Reps</th>
-                        <th>Weight (kg)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr *ngFor="let ex of innerTable.data">
-                        <td>{{ ex.exerciseName }}</td>
-                        <td class="exercise-group-cell">
-                          <nz-tag [nzColor]="muscleColors[ex.muscleGroup] || 'default'">{{ ex.muscleGroup }}</nz-tag>
-                        </td>
-                        <td>{{ ex.sets }}</td>
-                        <td>{{ ex.reps }}</td>
-                        <td>{{ ex.weight }}</td>
-                      </tr>
-                    </tbody>
-                  </nz-table>
+                  <div class="desktop-exercise-list">
+                    <div class="desktop-exercise-row" *ngFor="let ex of w.exercises">
+                      <div class="desktop-exercise-info">
+                        <strong>{{ ex.exerciseName }}</strong>
+                        <span>{{ ex.muscleGroup }}</span>
+                      </div>
+                      <div class="desktop-exercise-stats">
+                        <span>{{ ex.sets }} sets</span>
+                        <span>{{ ex.reps }} reps</span>
+                        <span>{{ ex.weight }} kg</span>
+                      </div>
+                    </div>
+                  </div>
                 </td>
               </tr>
             </ng-container>

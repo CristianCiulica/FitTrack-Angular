@@ -119,14 +119,16 @@
           </div>
         </button>
         <div class="run-controls" *ngIf="activityExpanded">
-          <div class="mode-toggle">
-            <button nz-button [nzType]="mode === 'running' ? 'primary' : 'default'" (click)="setMode('running')" [disabled]="isTracking">
-              Running
-            </button>
-            <button nz-button [nzType]="mode === 'walking' ? 'primary' : 'default'" (click)="setMode('walking')" [disabled]="isTracking">
-              Walking
-            </button>
-          </div>
+          <label class="mode-picker">
+            <span>Activity type</span>
+            <div class="mode-select-shell">
+              <select [value]="mode" (change)="onModeChange($event)" [disabled]="isTracking">
+                <option value="running">Running</option>
+                <option value="walking">Walking</option>
+              </select>
+              <span class="mode-select-chevron" aria-hidden="true"></span>
+            </div>
+          </label>
           <div class="control-buttons">
             <button nz-button class="start-button" (click)="startTracking()" [disabled]="isTracking">Start</button>
             <button nz-button class="stop-button" (click)="stopTracking()" [disabled]="!isTracking">Stop</button>

@@ -82,12 +82,6 @@ export class WorkoutsComponent implements OnInit {
     }
   }
 
-  muscleColors: Record<string, string> = {
-    'Chest': 'red', 'Back': 'blue', 'Shoulders': 'orange',
-    'Arms': 'purple', 'Legs': 'green', 'Core': 'cyan',
-    'Cardio': 'magenta', 'Full Body': 'gold'
-  };
-
   constructor(
     private workoutService: WorkoutService,
     private runningSessionService: RunningSessionService,
