@@ -43,22 +43,17 @@
 .auth-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  width: fit-content;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(0, 20, 70, 0.18);
+}
 
-  .brand-icon {
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .brand-name {
-    font-size: 22px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: -0.5px;
-  }
+.brand-logo {
+  display: block;
+  width: 190px;
+  height: auto;
 }
 
 .auth-hero {
@@ -287,102 +282,263 @@
   margin-top: 4px !important;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 1024px) {
+  .auth-wrapper {
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
   .auth-left {
     display: none;
   }
 
   .auth-right {
+    position: relative;
+    isolation: isolate;
+    display: flex;
     width: 100%;
     min-height: 100dvh;
     flex-direction: column;
     justify-content: center;
-    gap: 28px;
-    background:
-      radial-gradient(circle at top right, rgba(0, 113, 227, 0.12), transparent 38%),
-      #f5f5f7;
+    gap: 22px;
+    padding:
+      calc(20px + env(safe-area-inset-top))
+      max(18px, env(safe-area-inset-right))
+      calc(24px + env(safe-area-inset-bottom))
+      max(18px, env(safe-area-inset-left));
+    height: 100dvh;
+    overflow: hidden;
+    background: linear-gradient(145deg, #0f57da 0%, #2a78ff 100%);
+
+    &::before,
+    &::after {
+      position: absolute;
+      z-index: -1;
+      content: '';
+      pointer-events: none;
+      border-radius: 48%;
+    }
+
+    &::before {
+      right: -150px;
+      top: -105px;
+      width: 390px;
+      height: 430px;
+      background: rgba(76, 166, 255, 0.16);
+      transform: rotate(-12deg);
+    }
+
+    &::after {
+      right: -100px;
+      bottom: -90px;
+      width: 310px;
+      height: 250px;
+      background: rgba(62, 199, 175, 0.3);
+      transform: rotate(18deg);
+    }
   }
 
   .mobile-brand {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
     width: 100%;
-    max-width: 380px;
-    color: #1d1d1f;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.4px;
+    max-width: 420px;
+    margin: 0 auto;
+    gap: 10px;
+    color: #fff;
+    text-align: center;
 
-    .brand-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .brand-logo {
+      width: min(250px, 76vw);
+      padding: 9px 13px;
+      background: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 20px;
+      box-shadow: 0 18px 36px rgba(0, 28, 94, 0.2);
     }
-  }
-}
 
-@media (max-width: 600px) {
-  .auth-right {
-    justify-content: flex-start;
-    padding:
-      calc(24px + env(safe-area-inset-top))
-      max(18px, env(safe-area-inset-right))
-      calc(28px + env(safe-area-inset-bottom))
-      max(18px, env(safe-area-inset-left));
+    > small {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
   }
 
   .auth-card {
-    max-width: 100%;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 24px 22px 20px;
+    background: #f3f5fb;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 30px;
+    box-shadow: 0 22px 50px rgba(0, 23, 80, 0.2);
 
     .card-header {
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       text-align: center;
 
       h2 {
-        font-size: 28px;
-        line-height: 1.15;
+        margin-bottom: 5px;
+        color: #2a4cc8;
+        font-size: 31px;
+        font-weight: 800;
+        line-height: 1.08;
+        letter-spacing: -0.8px;
+      }
+
+      p {
+        color: #111;
+        font-size: 15px;
+        font-weight: 650;
       }
     }
   }
-}
 
-@media (max-width: 480px) {
-  .auth-right {
-    gap: 22px;
-    padding:
-      calc(18px + env(safe-area-inset-top))
-      max(14px, env(safe-area-inset-right))
-      calc(22px + env(safe-area-inset-bottom))
-      max(14px, env(safe-area-inset-left));
-  }
+  .form-group {
+    margin-bottom: 1px;
 
-  .mobile-brand {
-    font-size: 18px;
-  }
-
-  .auth-card .card-header {
-    margin-bottom: 20px;
-
-    h2 {
-      font-size: 26px;
+    label {
+      margin: 0 0 7px 3px;
+      color: #3c4250;
+      font-size: 12px;
+      font-weight: 700;
     }
   }
 
-  .submit-btn,
-  .google-btn,
   .apple-input {
-    min-height: 46px !important;
+    height: 56px !important;
+    padding-inline: 16px !important;
+    color: #111 !important;
+    font-size: 17px !important;
+    font-weight: 550;
+    background: #fff !important;
+    border: 1.5px solid #e1e5ef !important;
+    border-radius: 14px !important;
+
+    &:focus {
+      border-color: #2a4cc8 !important;
+      box-shadow: 0 0 0 3px rgba(42, 76, 200, 0.12) !important;
+    }
+  }
+
+  .input-wrapper .eye-btn {
+    right: 15px;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+    color: #666b78;
+    font-size: 18px;
+    border-radius: 50%;
+
+    &:active {
+      background: rgba(42, 76, 200, 0.09);
+    }
+  }
+
+  .submit-btn {
+    height: 60px !important;
+    margin: 4px 0 18px;
+    color: #fff !important;
+    font-size: 19px !important;
+    font-weight: 750 !important;
+    background: #2a4cc8 !important;
+    border-radius: 15px !important;
+    box-shadow: 0 10px 20px rgba(42, 76, 200, 0.2);
+  }
+
+  .divider {
+    margin: 0 0 13px;
+    color: #777d89;
+    font-size: 11px;
+    font-weight: 650;
+
+    &::before,
+    &::after {
+      background: rgba(102, 107, 120, 0.24);
+    }
+  }
+
+  .google-btn {
+    height: 56px !important;
+    color: #3c4043 !important;
+    font-size: 16px !important;
+    background: #fff !important;
+    border: 1px solid #dadce0 !important;
+    border-radius: 14px !important;
+    box-shadow: none;
+  }
+
+  .google-icon svg {
+    width: 22px;
+    height: 22px;
   }
 
   .auth-footer {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    margin-top: 17px;
     gap: 4px;
+    color: #666b78;
+    font-size: 13px;
 
     a {
       margin-left: 0;
+      color: #2a4cc8;
+      font-weight: 750;
     }
+  }
+
+  ::ng-deep .ant-form-item {
+    margin-bottom: 13px !important;
+  }
+}
+
+@media (max-width: 380px), (max-width: 1024px) and (max-height: 720px) {
+  .auth-right {
+    justify-content: center;
+    gap: 14px;
+    padding-top: calc(10px + env(safe-area-inset-top));
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  }
+
+  .mobile-brand {
+    justify-content: center;
+    gap: 5px;
+
+    .brand-logo {
+      width: min(205px, 65vw);
+      padding: 6px 10px;
+      border-radius: 15px;
+    }
+
+    > small {
+      font-size: 11px;
+    }
+  }
+
+  .auth-card {
+    padding: 20px 18px 17px;
+    border-radius: 25px;
+
+    .card-header {
+      margin-bottom: 15px;
+
+      h2 {
+        font-size: 27px;
+      }
+    }
+  }
+
+  .apple-input,
+  .google-btn {
+    height: 51px !important;
+  }
+
+  .submit-btn {
+    height: 54px !important;
   }
 }

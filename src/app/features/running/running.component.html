@@ -4,8 +4,7 @@
     class="sidebar"
   >
     <div class="sidebar-logo">
-      <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
-      <span class="logo-text">FitTrack</span>
+      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
     </div>
     <ul nz-menu nzMode="inline" class="sidebar-menu">
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
@@ -43,7 +42,10 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
-      <h2>Running</h2>
+      <h2>
+        <span class="desktop-page-title">Running</span>
+        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+      </h2>
       <div class="header-actions">
         <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
@@ -92,7 +94,6 @@
             </div>
             <p class="weather-alert" *ngIf="weather.willRain">
               Rain likely{{ weather.rainWindow ? ' around ' + weather.rainWindow : '' }}.
-              <a [routerLink]="isTracking ? null : '/workouts'" (click)="blockNavigation($event)">Choose an indoor workout</a>
             </p>
           </div>
         </div>
@@ -129,7 +130,6 @@
           <div class="control-buttons">
             <button nz-button class="start-button" (click)="startTracking()" [disabled]="isTracking">Start</button>
             <button nz-button class="stop-button" (click)="stopTracking()" [disabled]="!isTracking">Stop</button>
-            <button nz-button class="reset-button" (click)="resetTracking()" [disabled]="isTracking">Reset</button>
           </div>
           <div class="status-text">{{ statusText }}</div>
         </div>

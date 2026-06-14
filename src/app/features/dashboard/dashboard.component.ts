@@ -47,17 +47,6 @@ export class DashboardComponent implements OnInit {
     const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     return this.workouts().filter(w => new Date(w.date) >= weekAgo).length;
   });
-  mostUsedMuscle = computed(() => {
-    const map = new Map<string, number>();
-    this.workouts().forEach(w => {
-      w.exercises?.forEach(ex => {
-        map.set(ex.muscleGroup, (map.get(ex.muscleGroup) ?? 0) + 1);
-      });
-    });
-    let max = 0, muscle = '-';
-    map.forEach((v, k) => { if (v > max) { max = v; muscle = k; } });
-    return muscle;
-  });
   recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
 
   constructor(

@@ -74,6 +74,10 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  togglePasswordVisibility() {
+    this.passwordVisible = !this.passwordVisible;
+  }
+
   signInWithGoogle() {
     this.googleLoading = true;
     this.auth.signInWithGoogle(false).subscribe({

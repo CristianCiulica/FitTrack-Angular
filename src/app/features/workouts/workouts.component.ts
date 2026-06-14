@@ -4,7 +4,6 @@ import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { AuthService } from '../../core/services/auth.service';
-import { ExportService } from '../../core/services/export.service';
 import { Workout } from '../../core/models/workout.model';
 import { RunningSession } from '../../core/models/running-session.model';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -93,7 +92,6 @@ export class WorkoutsComponent implements OnInit {
     private workoutService: WorkoutService,
     private runningSessionService: RunningSessionService,
     private authService: AuthService,
-    private exportService: ExportService,
     private message: NzMessageService
   ) { }
 
@@ -156,14 +154,6 @@ export class WorkoutsComponent implements OnInit {
       },
       error: () => this.message.error('Delete failed.')
     });
-  }
-
-  exportPDF() {
-    this.exportService.exportToPDF(this.filteredWorkouts());
-  }
-
-  exportExcel() {
-    this.exportService.exportToExcel(this.filteredWorkouts());
   }
 
   logout() {

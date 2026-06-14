@@ -4,8 +4,7 @@
     [nzWidth]="208"
     class="sidebar">
       <div class="sidebar-logo">
-        <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
-        <span class="logo-text">FitTrack</span>
+        <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
       </div>
       <ul nz-menu nzMode="inline" class="sidebar-menu">
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
@@ -44,7 +43,10 @@
   <!-- Content -->
   <nz-layout class="main-layout">
     <nz-header class="app-header dashboard-header">
-      <h2>Dashboard</h2>
+      <h2>
+        <span class="desktop-page-title">Dashboard</span>
+        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+      </h2>
       <div class="header-actions">
         <button nz-button nzDanger class="logout-button" (click)="logout()" style="margin-left: 8px">Logout</button>
       </div>
@@ -84,13 +86,16 @@
           </nz-statistic>
         </nz-card>
 
-        <nz-card class="stat-card">
+        <a routerLink="/start-workout" class="stat-card workout-card" aria-label="Go to Workout">
           <div class="stat-icon orange">
-            <span nz-icon nzType="trophy" style="font-size:24px"></span>
+            <span nz-icon nzType="play-circle" style="font-size:24px"></span>
           </div>
-          <div class="stat-label">Favorite muscle</div>
-          <div class="stat-value-text muscle-pill">{{ mostUsedMuscle() }}</div>
-        </nz-card>
+          <div class="stat-label">Workout</div>
+          <div class="stat-action">
+            Start workout
+            <span nz-icon nzType="arrow-right"></span>
+          </div>
+        </a>
       </div>
 
       <!-- Recent workouts -->

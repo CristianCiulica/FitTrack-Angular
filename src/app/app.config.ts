@@ -27,6 +27,8 @@ import {
   ForwardOutline,
   HeartOutline,
   CloseOutline,
+  EyeInvisibleOutline,
+  EyeOutline,
 } from '@ant-design/icons-angular/icons';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
@@ -66,6 +68,8 @@ export const appConfig: ApplicationConfig = {
       ForwardOutline,
       HeartOutline,
       CloseOutline,
+      EyeOutline,
+      EyeInvisibleOutline,
     ]),
     { provide: NZ_I18N, useValue: en_US },
   ],

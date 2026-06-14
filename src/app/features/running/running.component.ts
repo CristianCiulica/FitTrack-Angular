@@ -19,6 +19,7 @@ const GPS_CALIBRATION_MS = 5000;
 const GPS_CALIBRATION_TIMEOUT_MS = 8000;
 const GPS_REQUIRED_FIXES = 3;
 const GPS_MAX_ACCURACY_METERS = 30;
+const GPS_MARKER_MAX_ACCURACY_METERS = 60;
 
 interface AcceptedPosition {
   point: L.LatLng;
@@ -69,6 +70,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private startTime: number | null = null;
   private sessionStartedAt: number | null = null;
   private lastAcceptedPosition: AcceptedPosition | null = null;
+  private lastDisplayedPosition: AcceptedPosition | null = null;
   private calibrationStartedAt: number | null = null;
   private calibrationFixes = 0;
   private bestCalibrationPosition: AcceptedPosition | null = null;
@@ -187,6 +189,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.startTime = null;
     this.sessionStartedAt = null;
     this.lastAcceptedPosition = null;
+    this.lastDisplayedPosition = null;
     this.calibrationStartedAt = null;
     this.calibrationFixes = 0;
     this.bestCalibrationPosition = null;
@@ -242,6 +245,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       return;
     }
 
+    this.updateLivePosition(point, timestamp, accuracy);
+
     if (accuracy > GPS_MAX_ACCURACY_METERS) {
       this.statusText = `Weak GPS signal (~${Math.round(accuracy)}m). Waiting for a better fix.`;
       return;
@@ -275,10 +280,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         ? pos.coords.speed * 3.6
         : null;
 
-    if (
-      segmentSpeedKmh > maxPlausibleSpeedKmh ||
-      (reportedSpeedKmh !== null && reportedSpeedKmh > maxPlausibleSpeedKmh)
-    ) {
+    const reportedSpeedLooksWrong =
+      reportedSpeedKmh !== null &&
+      reportedSpeedKmh > maxPlausibleSpeedKmh * 1.5 &&
+      segmentSpeedKmh > maxPlausibleSpeedKmh * 0.75;
+
+    if (segmentSpeedKmh > maxPlausibleSpeedKmh || reportedSpeedLooksWrong) {
       this.statusText = 'GPS jump ignored. Rechecking your position...';
       return;
     }
@@ -291,12 +298,15 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         return;
       }
 
-      const pendingDistance = this.haversineMeters(previous.point, pending.point);
       const confirmationDistance = Math.max(2, noiseThreshold * 0.4);
-      const continuedMovement = segmentMeters >= pendingDistance + confirmationDistance;
+      const continuationMeters = this.haversineMeters(pending.point, point);
+      const continuationSeconds = Math.max((timestamp - pending.timestamp) / 1000, 0.5);
+      const continuationSpeedKmh = (continuationMeters / continuationSeconds) * 3.6;
+      const continuedMovement =
+        continuationMeters >= confirmationDistance &&
+        continuationSpeedKmh <= maxPlausibleSpeedKmh;
 
       if (!continuedMovement) {
-        this.pendingMovementPosition = { point, timestamp, accuracy };
         this.statusText = 'Movement detected. Waiting for one more stable fix...';
         return;
       }
@@ -404,6 +414,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.stopCalibrationTimer();
     this.startTime = Date.now();
     this.lastAcceptedPosition = position;
+    this.lastDisplayedPosition = position;
     this.movementConfirmed = false;
     this.pendingMovementPosition = null;
     this.updateMarker(position.point, true);
@@ -421,12 +432,33 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     extendPath: boolean,
   ) {
     this.lastAcceptedPosition = { point, timestamp, accuracy };
+    this.lastDisplayedPosition = { point, timestamp, accuracy };
     this.updateMarker(point, true);
     if (extendPath) {
       this.polyline?.addLatLng(point);
     } else {
       this.polyline?.setLatLngs([point]);
     }
+  }
+
+  private updateLivePosition(point: L.LatLng, timestamp: number, accuracy: number) {
+    if (accuracy > GPS_MARKER_MAX_ACCURACY_METERS) return;
+
+    const previous = this.lastDisplayedPosition;
+    if (previous) {
+      const elapsedSeconds = Math.max((timestamp - previous.timestamp) / 1000, 0.5);
+      const distanceMeters = this.haversineMeters(previous.point, point);
+      const displaySpeedKmh = (distanceMeters / elapsedSeconds) * 3.6;
+      const maxDisplaySpeedKmh = this.mode === 'running' ? 45 : 25;
+      const significantJump = distanceMeters > Math.max(25, accuracy + previous.accuracy);
+
+      if (significantJump && displaySpeedKmh > maxDisplaySpeedKmh) {
+        return;
+      }
+    }
+
+    this.lastDisplayedPosition = { point, timestamp, accuracy };
+    this.updateMarker(point, true);
   }
 
   private updateMarker(point: L.LatLng, followPosition: boolean) {

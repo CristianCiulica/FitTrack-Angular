@@ -139,9 +139,22 @@ a:hover {
 
 .sidebar .logo-text {
   color: #1d1d1f;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.sidebar .logo-dot {
+  color: #536dfe;
+}
+
+.mobile-header-brand {
+  display: none;
+}
+
+.brand-dot {
+  color: #536dfe;
 }
 
 .sidebar .sidebar-menu {
@@ -237,13 +250,16 @@ a:hover {
 
   body .app-layout > .sidebar {
     position: fixed !important;
-    inset:
-      auto
-      max(10px, env(safe-area-inset-right))
-      max(10px, env(safe-area-inset-bottom))
-      max(10px, env(safe-area-inset-left)) !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    left: max(10px, env(safe-area-inset-left)) !important;
     z-index: 5000 !important;
-    width: auto !important;
+    width: calc(
+      100dvw -
+      max(10px, env(safe-area-inset-left)) -
+      max(10px, env(safe-area-inset-right))
+    ) !important;
     min-width: 0 !important;
     max-width: none !important;
     height: 68px !important;
@@ -261,6 +277,8 @@ a:hover {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     isolation: isolate;
+    contain: layout paint;
+    transform: translateZ(0);
   }
 
   .app-layout > .sidebar .ant-layout-sider-children {
@@ -310,6 +328,11 @@ a:hover {
     border-radius: 16px !important;
     overflow: visible !important;
     pointer-events: auto;
+  }
+
+  html body .app-layout > .sidebar .ant-layout-sider-children .sidebar-menu.ant-menu.ant-menu-inline .ant-menu-item {
+    width: 100% !important;
+    margin: 0 !important;
   }
 
   .app-layout > .sidebar .sidebar-menu .ant-menu-title-content {
@@ -362,6 +385,10 @@ a:hover {
   }
 
   .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a .anticon {
+    display: grid !important;
+    place-items: center;
+    width: 21px !important;
+    height: 21px !important;
     min-width: 0 !important;
     margin: 0 !important;
     font-size: 21px !important;
@@ -393,6 +420,10 @@ a:hover {
 
   body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a {
     color: #0066cc !important;
+  }
+
+  body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a > span:last-child {
+    font-weight: 650 !important;
   }
 
   body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a::before {
@@ -480,10 +511,15 @@ a:hover {
     padding-inline: 12px;
   }
 
-  .app-layout .dashboard-header .header-actions button:first-child {
-    color: #0066cc;
-    background: #eaf4ff;
-    border-color: #d5e8ff;
+  .desktop-page-title {
+    display: none;
+  }
+
+  .mobile-header-brand {
+    display: inline;
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -1px;
   }
 
   .app-layout .app-content {
@@ -541,4 +577,14 @@ a:hover {
     width: 40px !important;
     padding-inline: 0;
   }
+}
+
+html body .app-layout .app-header .header-actions .logout-button {
+  width: 76px !important;
+  min-width: 76px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  line-height: 38px !important;
 }

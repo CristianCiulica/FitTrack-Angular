@@ -5,8 +5,7 @@
     class="sidebar"
   >
       <div class="sidebar-logo">
-        <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
-        <span class="logo-text">FitTrack</span>
+        <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
       </div>
       <ul nz-menu nzMode="inline" class="sidebar-menu">
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
@@ -44,16 +43,11 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header workouts-header">
-      <h2>Workouts</h2>
+      <h2>
+        <span class="desktop-page-title">Workouts</span>
+        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+      </h2>
       <div class="header-actions">
-        <button nz-button (click)="exportExcel()" style="margin-right: 8px">
-          <span nz-icon nzType="file-excel"></span>
-          <span class="button-label">Excel</span>
-        </button>
-        <button nz-button (click)="exportPDF()" style="margin-right: 8px">
-          <span nz-icon nzType="file-pdf"></span>
-          <span class="button-label">PDF</span>
-        </button>
         <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
     </nz-header>

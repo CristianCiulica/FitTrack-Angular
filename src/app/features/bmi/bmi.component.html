@@ -5,8 +5,7 @@
     class="sidebar"
   >
     <div class="sidebar-logo">
-      <span nz-icon nzType="fire" style="font-size: 24px; color: #1890ff; margin-right: 8px;"></span>
-      <span class="logo-text">FitTrack</span>
+      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
     </div>
     <ul nz-menu nzMode="inline" class="sidebar-menu">
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
@@ -45,7 +44,10 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
-      <h2>Nutrition</h2>
+      <h2>
+        <span class="desktop-page-title">Nutrition</span>
+        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+      </h2>
       <div class="header-actions">
         <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
@@ -152,7 +154,7 @@
               </div>
 
               <div class="result-grid">
-                <div>
+                <div class="primary-result">
                   <span>BMI</span>
                   <strong>{{ bmi() }}</strong>
                   <nz-tag [nzColor]="bmiCategory().color">{{ bmiCategory().text }}</nz-tag>
@@ -166,11 +168,6 @@
                   <span>Basal metabolism</span>
                   <strong>{{ basalCalories() }}</strong>
                   <small>kcal/day</small>
-                </div>
-                <div>
-                  <span>Activity factor</span>
-                  <strong>{{ activityFactor() | number: '1.3-3' }}</strong>
-                  <small>strength adjusted</small>
                 </div>
               </div>
             </div>
