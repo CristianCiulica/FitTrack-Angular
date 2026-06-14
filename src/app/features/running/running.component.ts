@@ -18,8 +18,9 @@ const LEAFLET_SHADOW_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-s
 const GPS_CALIBRATION_MS = 5000;
 const GPS_CALIBRATION_TIMEOUT_MS = 8000;
 const GPS_REQUIRED_FIXES = 3;
-const GPS_MAX_ACCURACY_METERS = 30;
-const GPS_MARKER_MAX_ACCURACY_METERS = 60;
+const GPS_MAX_ACCURACY_METERS = 50;
+const GPS_CALIBRATION_MAX_ACCURACY_METERS = 35;
+const GPS_MARKER_MAX_ACCURACY_METERS = 120;
 
 interface AcceptedPosition {
   point: L.LatLng;
@@ -76,7 +77,6 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private bestCalibrationPosition: AcceptedPosition | null = null;
   private calibrationTimer: ReturnType<typeof setInterval> | null = null;
   private movementConfirmed = false;
-  private pendingMovementPosition: AcceptedPosition | null = null;
 
   private resizeHandler = () => this.map?.invalidateSize();
 
@@ -201,7 +201,6 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.calibrationFixes = 0;
     this.bestCalibrationPosition = null;
     this.movementConfirmed = false;
-    this.pendingMovementPosition = null;
     this.calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
     this.gpsAccuracy = undefined;
     this.isCalibrating = false;
@@ -270,18 +269,17 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
     const segmentMeters = this.haversineMeters(previous.point, point);
     const noiseThreshold = Math.max(
-      this.mode === 'running' ? 5 : 4,
-      Math.min(12, (accuracy + previous.accuracy) * 0.3),
+      this.mode === 'running' ? 3 : 2,
+      Math.min(8, (accuracy + previous.accuracy) * 0.2),
     );
 
     if (segmentMeters < noiseThreshold) {
-      this.pendingMovementPosition = null;
       this.statusText = `GPS stable. Accuracy ~${Math.round(accuracy)}m.`;
       return;
     }
 
     const segmentSpeedKmh = (segmentMeters / elapsedSeconds) * 3.6;
-    const maxPlausibleSpeedKmh = this.mode === 'running' ? 25 : 10;
+    const maxPlausibleSpeedKmh = this.mode === 'running' ? 25 : 12;
     const reportedSpeedKmh =
       pos.coords.speed !== null && Number.isFinite(pos.coords.speed)
         ? pos.coords.speed * 3.6
@@ -297,30 +295,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       return;
     }
 
-    if (!this.movementConfirmed) {
-      const pending = this.pendingMovementPosition;
-      if (!pending) {
-        this.pendingMovementPosition = { point, timestamp, accuracy };
-        this.statusText = 'Movement detected. Confirming GPS direction...';
-        return;
-      }
-
-      const confirmationDistance = Math.max(2, noiseThreshold * 0.4);
-      const continuationMeters = this.haversineMeters(pending.point, point);
-      const continuationSeconds = Math.max((timestamp - pending.timestamp) / 1000, 0.5);
-      const continuationSpeedKmh = (continuationMeters / continuationSeconds) * 3.6;
-      const continuedMovement =
-        continuationMeters >= confirmationDistance &&
-        continuationSpeedKmh <= maxPlausibleSpeedKmh;
-
-      if (!continuedMovement) {
-        this.statusText = 'Movement detected. Waiting for one more stable fix...';
-        return;
-      }
-
-      this.movementConfirmed = true;
-      this.pendingMovementPosition = null;
-    }
+    this.movementConfirmed = true;
 
     this.distanceMeters += segmentMeters;
     this.acceptPosition(point, timestamp, accuracy, true);
@@ -398,7 +373,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       this.updateMarker(point, false);
     }
 
-    if (accuracy > GPS_MAX_ACCURACY_METERS) {
+    if (accuracy > GPS_CALIBRATION_MAX_ACCURACY_METERS) {
       this.statusText = `Calibrating GPS. Accuracy is ~${Math.round(accuracy)}m.`;
       return;
     }
@@ -423,11 +398,10 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.lastAcceptedPosition = position;
     this.lastDisplayedPosition = position;
     this.movementConfirmed = false;
-    this.pendingMovementPosition = null;
     this.updateMarker(position.point, true);
     this.polyline?.setLatLngs([position.point]);
     this.statusText =
-      position.accuracy <= GPS_MAX_ACCURACY_METERS
+      position.accuracy <= GPS_CALIBRATION_MAX_ACCURACY_METERS
         ? `GPS ready. Accuracy ~${Math.round(position.accuracy)}m.`
         : `Tracking started with a weak signal (~${Math.round(position.accuracy)}m).`;
   }
@@ -481,8 +455,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     this.marker?.setLatLng(point);
-    if (followPosition) {
-      this.map?.panTo(point, { animate: true });
+    if (followPosition && this.map && !this.map.getBounds().pad(-0.2).contains(point)) {
+      this.map.panTo(point, { animate: true });
     }
   }
 

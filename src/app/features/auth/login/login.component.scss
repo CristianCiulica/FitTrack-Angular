@@ -52,7 +52,7 @@
 
 .brand-logo {
   display: block;
-  width: 190px;
+  width: 160px;
   height: auto;
 }
 
@@ -308,34 +308,7 @@
       max(18px, env(safe-area-inset-left));
     height: 100dvh;
     overflow: hidden;
-    background: linear-gradient(145deg, #0f57da 0%, #2a78ff 100%);
-
-    &::before,
-    &::after {
-      position: absolute;
-      z-index: -1;
-      content: '';
-      pointer-events: none;
-      border-radius: 48%;
-    }
-
-    &::before {
-      right: -150px;
-      top: -105px;
-      width: 390px;
-      height: 430px;
-      background: rgba(76, 166, 255, 0.16);
-      transform: rotate(-12deg);
-    }
-
-    &::after {
-      right: -100px;
-      bottom: -90px;
-      width: 310px;
-      height: 250px;
-      background: rgba(62, 199, 175, 0.3);
-      transform: rotate(18deg);
-    }
+    background: linear-gradient(145deg, #2e3656 0%, #2c4670 30%, #2a5a90 60%, #4986cb 85%, #82bdec 100%);
   }
 
   .mobile-brand {
@@ -350,8 +323,8 @@
     text-align: center;
 
     .brand-logo {
-      width: min(250px, 76vw);
-      padding: 9px 13px;
+      width: min(205px, 64vw);
+      padding: 7px 11px;
       background: #fff;
       border: 1px solid rgba(255, 255, 255, 0.8);
       border-radius: 20px;
@@ -510,8 +483,8 @@
     gap: 5px;
 
     .brand-logo {
-      width: min(205px, 65vw);
-      padding: 6px 10px;
+      width: min(175px, 56vw);
+      padding: 5px 8px;
       border-radius: 15px;
     }
 
