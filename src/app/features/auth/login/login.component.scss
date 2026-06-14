@@ -51,9 +51,18 @@
 }
 
 .brand-logo {
-  display: block;
-  width: 160px;
-  height: auto;
+  display: inline-flex;
+  align-items: baseline;
+  color: #050505;
+  font-size: 36px;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -2.4px;
+  white-space: nowrap;
+}
+
+.brand-dot {
+  color: #6768f5;
 }
 
 .auth-hero {
@@ -323,8 +332,7 @@
     text-align: center;
 
     .brand-logo {
-      width: min(205px, 64vw);
-      padding: 7px 11px;
+      padding: 9px 14px 10px;
       background: #fff;
       border: 1px solid rgba(255, 255, 255, 0.8);
       border-radius: 20px;
@@ -483,9 +491,9 @@
     gap: 5px;
 
     .brand-logo {
-      width: min(175px, 56vw);
-      padding: 5px 8px;
+      padding: 7px 11px 8px;
       border-radius: 15px;
+      font-size: 31px;
     }
 
     > small {

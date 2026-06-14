@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -25,7 +25,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent {
   form: FormGroup;
   loading = false;
   googleLoading = false;
@@ -41,17 +41,6 @@ export class LoginComponent implements OnInit {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, strongPasswordValidator]]
-    });
-  }
-
-  ngOnInit(): void {
-    this.auth.completeGoogleRedirect().subscribe({
-      next: (credential) => {
-        if (!credential) return;
-        this.loadingService.showAfterNextNavigation(1000);
-        this.router.navigate(['/dashboard']);
-      },
-      error: (error) => this.showGoogleError(error),
     });
   }
 
@@ -80,9 +69,8 @@ export class LoginComponent implements OnInit {
 
   signInWithGoogle() {
     this.googleLoading = true;
-    this.auth.signInWithGoogle(false).subscribe({
-      next: ({ redirecting }) => {
-        if (redirecting) return;
+    this.auth.signInWithGoogle().subscribe({
+      next: () => {
         this.loadingService.showAfterNextNavigation(1000);
         this.router.navigate(['/dashboard']);
       },
@@ -104,6 +92,14 @@ export class LoginComponent implements OnInit {
     }
     if (error?.code === 'auth/unauthorized-domain') {
       this.message.error('This website domain must be authorized in Firebase Authentication.');
+      return;
+    }
+    if (error?.code === 'auth/operation-not-allowed') {
+      this.message.error('Google sign-in is not enabled in Firebase Authentication.');
+      return;
+    }
+    if (error?.code === 'auth/network-request-failed') {
+      this.message.error('Network error. Check your connection and try again.');
       return;
     }
     this.message.error('Google sign-in failed. Please try again.');
