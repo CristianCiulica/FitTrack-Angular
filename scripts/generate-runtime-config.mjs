@@ -28,7 +28,14 @@ const fileEnvironment = {
   ...loadEnvironmentFile('.env.local'),
 };
 
-const readValue = (name) => process.env[name] || fileEnvironment[name] || '';
+const readValue = (name) => {
+  const value = (process.env[name] || fileEnvironment[name] || '').trim();
+  const assignmentPrefix = `${name}=`;
+
+  return value.startsWith(assignmentPrefix)
+    ? value.slice(assignmentPrefix.length).trim()
+    : value;
+};
 
 const firebase = {
   apiKey: readValue('FIREBASE_API_KEY'),
