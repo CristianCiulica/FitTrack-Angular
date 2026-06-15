@@ -60,7 +60,30 @@ Create these GitHub repository secrets under **Settings → Secrets and variable
 
 In GitHub **Settings → Pages**, select **GitHub Actions** as the source.
 
-For Google login, add `cristianciulica.github.io` to Firebase Authentication's authorized domains. Restrict the Firebase browser key to Firebase APIs and the deployed referrer in Google Cloud Console. Firebase Web API keys identify the project and are visible in any browser application; access to Firestore and Storage must be protected with Firebase Security Rules and App Check.
+For Google login, add `cristianciulica.github.io` to Firebase Authentication's authorized domains. If the Firebase browser key uses website restrictions, allow the deployed GitHub Pages URL together with `fittrack-angular-7ca07.firebaseapp.com` and `fittrack-angular-7ca07.web.app`, which host the Firebase authentication handler. Firebase Web API keys identify the project and are visible in any browser application; access to Firestore and Storage must be protected with Firebase Security Rules and App Check.
+
+## Install as a phone app
+
+The production build is a Progressive Web App with a FitTrack home-screen icon and offline app-shell caching.
+
+On iPhone:
+
+1. Open the deployed FitTrack URL in Safari.
+2. Tap **Share**.
+3. Select **Add to Home Screen**.
+4. Confirm with **Add**.
+
+On Android:
+
+1. Open the deployed FitTrack URL in Chrome.
+2. Open the browser menu.
+3. Select **Install app** or **Add to Home screen**.
+
+The PWA service worker is enabled only in production builds. Regenerate the icon set after changing the source logo with:
+
+```bash
+npm run icons:pwa
+```
 
 ## Running unit tests
 
