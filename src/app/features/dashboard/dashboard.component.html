@@ -101,7 +101,7 @@
 
       <button nz-button nzBlock nzSize="large" class="ai-coach-trigger" (click)="toggleChat()">
         <span nz-icon nzType="fire"></span>
-        AI Nutrition Coach
+        Nutrition Assistant
       </button>
       <nz-card class="recent-card" nzTitle="Recent workouts">
         <div class="recent-list">
@@ -146,65 +146,132 @@
               </div>
               <div class="chat-title-info">
                 <span class="chat-brand">FitTrack<span>.</span></span>
-                <h3>Nutrition Coach</h3>
-                <p><span class="status-dot"></span>Ready to help with meals and fitness</p>
+                <h3>Nutrition Assistant</h3>
+                <p>Guided meal planner · works without an AI service</p>
               </div>
             </div>
 
-            <div class="chat-body" #chatBody>
-              <div class="chat-date-label">Today</div>
-              <div *ngFor="let msg of chatMessages()" class="chat-message" [class.user]="msg.role === 'user'">
-                <div class="bubble-wrapper">
-                  <div class="avatar-mini" *ngIf="msg.role === 'ai'">
-                    <span nz-icon nzType="fire"></span>
-                  </div>
-                  <div class="bubble">{{ msg.text }}</div>
+            <div class="assistant-body" #chatBody>
+              <div class="assistant-progress">
+                <div class="progress-copy">
+                  <span>{{ assistantQuestion().eyebrow }}</span>
+                  <strong>{{ assistantProgress() }}%</strong>
+                </div>
+                <div class="progress-track" aria-hidden="true">
+                  <span [style.width.%]="assistantProgress()"></span>
                 </div>
               </div>
-              <div *ngIf="isTyping()" class="chat-message ai">
-                <div class="bubble-wrapper">
-                  <div class="avatar-mini">
-                    <span nz-icon nzType="fire"></span>
+
+              <div class="answer-summary" *ngIf="selectedAnswerLabels().length">
+                <span *ngFor="let item of selectedAnswerLabels()">{{ item.label }}</span>
+              </div>
+
+              <ng-container *ngIf="assistantStep() !== 'result'; else assistantResultTemplate">
+                <section class="assistant-question">
+                  <h4>{{ assistantQuestion().title }}</h4>
+                  <p>{{ assistantQuestion().description }}</p>
+                </section>
+
+                <div class="assistant-options">
+                  <button
+                    *ngFor="let option of assistantOptions()"
+                    type="button"
+                    [class.selected]="isAssistantOptionSelected(option.value)"
+                    (click)="chooseAssistantOption(option.value)"
+                  >
+                    <span class="option-icon" aria-hidden="true">{{ option.icon }}</span>
+                    <span class="option-copy">
+                      <strong>{{ option.label }}</strong>
+                      <small>{{ option.description }}</small>
+                    </span>
+                    <span class="option-arrow" aria-hidden="true">›</span>
+                  </button>
+                </div>
+              </ng-container>
+
+              <ng-template #assistantResultTemplate>
+                <div class="assistant-result" *ngIf="assistantResult() as result">
+                  <div class="result-hero">
+                    <span class="result-kicker">Recommended for you</span>
+                    <h4>{{ result.title }}</h4>
+                    <p>{{ result.subtitle }}</p>
+                    <div class="result-meta">
+                      <span>⏱ {{ result.prepMinutes }} min</span>
+                      <span>💳 {{ result.cost }} cost</span>
+                    </div>
                   </div>
-                  <div class="bubble typing">
-                    <div class="dot-typing"></div>
+
+                  <div class="macro-grid">
+                    <div class="macro-card calories">
+                      <span>Calories</span>
+                      <strong>{{ result.calories }}</strong>
+                      <small>kcal</small>
+                    </div>
+                    <div class="macro-card">
+                      <span>Protein</span>
+                      <strong>{{ result.protein }}</strong>
+                      <small>grams</small>
+                    </div>
+                    <div class="macro-card">
+                      <span>Carbs</span>
+                      <strong>{{ result.carbs }}</strong>
+                      <small>grams</small>
+                    </div>
+                    <div class="macro-card">
+                      <span>Fats</span>
+                      <strong>{{ result.fats }}</strong>
+                      <small>grams</small>
+                    </div>
+                  </div>
+
+                  <section class="result-section">
+                    <h5>Ingredients</h5>
+                    <ul>
+                      <li *ngFor="let ingredient of result.ingredients">{{ ingredient }}</li>
+                    </ul>
+                  </section>
+
+                  <section class="result-section">
+                    <h5>How to make it</h5>
+                    <ol>
+                      <li *ngFor="let instruction of result.steps">{{ instruction }}</li>
+                    </ol>
+                  </section>
+
+                  <section class="result-section compact">
+                    <h5>Smart swaps</h5>
+                    <p *ngFor="let swap of result.swaps">{{ swap }}</p>
+                  </section>
+
+                  <div class="coach-tip">
+                    <span aria-hidden="true">💡</span>
+                    <div>
+                      <strong>Coach tip</strong>
+                      <p>{{ result.coachTip }}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </ng-template>
             </div>
-            <div class="chat-footer">
-              <div class="quick-prompts" aria-label="Suggested questions">
-                <button type="button" (click)="useChatSuggestion('Suggest a high-protein breakfast')">
-                  High-protein breakfast
-                </button>
-                <button type="button" (click)="useChatSuggestion('What can I eat after my workout?')">
-                  Post-workout meal
-                </button>
-                <button type="button" (click)="useChatSuggestion('Create a simple healthy dinner')">
-                  Healthy dinner
-                </button>
-              </div>
-              <div class="input-wrapper">
-                <input
-                  type="text"
-                  [(ngModel)]="chatInput"
-                  placeholder="Ask about meals, calories or fitness..."
-                  aria-label="Message Nutrition Coach"
-                  (keydown.enter)="sendMessage()"
-                />
-                <button
-                  nz-button
-                  class="send-btn"
-                  nzType="primary"
-                  nzShape="circle"
-                  aria-label="Send message"
-                  [disabled]="!chatInput().trim() || isTyping()"
-                  (click)="sendMessage()"
-                >
-                  <span class="send-symbol" aria-hidden="true">➤</span>
-                </button>
-              </div>
-              <p class="chat-disclaimer">FitTrack AI can make mistakes. Check important nutrition advice.</p>
+
+            <div class="assistant-footer">
+              <button
+                type="button"
+                class="assistant-back"
+                *ngIf="assistantStep() !== 'goal'"
+                (click)="goBackAssistant()"
+              >
+                ‹ Back
+              </button>
+              <p>Meal ideas are educational and do not replace medical advice.</p>
+              <button
+                type="button"
+                class="assistant-reset"
+                *ngIf="assistantStep() === 'result'"
+                (click)="resetAssistant()"
+              >
+                Start again
+              </button>
             </div>
           </div>
         </ng-container>

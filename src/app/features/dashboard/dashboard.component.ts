@@ -1,6 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -14,13 +13,20 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { Workout } from '../../core/models/workout.model';
+import {
+  ASSISTANT_OPTIONS,
+  AssistantAnswers,
+  AssistantOption,
+  AssistantStep,
+  MealRecommendation,
+  createMealRecommendation,
+} from './nutrition-assistant.data';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     RouterLink,
     RouterLinkActive,
     NzLayoutModule,
@@ -41,13 +47,50 @@ export class DashboardComponent implements OnInit {
 
   workouts = signal<Workout[]>([]);
 
-  // --- CHATBOT STATE ---
+  readonly assistantStepOrder: Exclude<AssistantStep, 'result'>[] = [
+    'goal',
+    'meal',
+    'diet',
+    'time',
+    'budget',
+  ];
   isChatOpen = signal(false);
-  isTyping = signal(false);
-  chatInput = signal('');
-  chatMessages = signal<{role: 'user'|'ai', text: string}[]>([
-    { role: 'ai', text: 'Hi! Tell me what ingredients you have or what your fitness goal is, and I’ll help you plan a simple meal.' }
-  ]);
+  assistantStep = signal<AssistantStep>('goal');
+  assistantAnswers = signal<Partial<AssistantAnswers>>({});
+  assistantResult = signal<MealRecommendation | null>(null);
+
+  assistantProgress = computed(() => {
+    const step = this.assistantStep();
+    if (step === 'result') return 100;
+    const index = this.assistantStepOrder.indexOf(step);
+    return Math.round(((index + 1) / this.assistantStepOrder.length) * 100);
+  });
+
+  assistantQuestion = computed(() => {
+    switch (this.assistantStep()) {
+      case 'goal': return { eyebrow: 'Step 1 of 5', title: 'What is your main goal?', description: 'This changes the suggested portions and macro balance.' };
+      case 'meal': return { eyebrow: 'Step 2 of 5', title: 'What do you want to plan?', description: 'Choose the moment when you want to eat this meal.' };
+      case 'diet': return { eyebrow: 'Step 3 of 5', title: 'Any dietary preference?', description: 'The assistant will only use compatible meal ideas.' };
+      case 'time': return { eyebrow: 'Step 4 of 5', title: 'How much time do you have?', description: 'We will match the preparation style to your schedule.' };
+      case 'budget': return { eyebrow: 'Step 5 of 5', title: 'Choose your budget', description: 'One last choice before building your recommendation.' };
+      case 'result': return { eyebrow: 'Your plan', title: 'Meal recommendation', description: 'Built locally from your selected preferences.' };
+    }
+  });
+
+  assistantOptions = computed<AssistantOption[]>(() => {
+    const step = this.assistantStep();
+    return step === 'result' ? [] : ASSISTANT_OPTIONS[step];
+  });
+
+  selectedAnswerLabels = computed(() =>
+    this.assistantStepOrder
+      .map((step) => {
+        const value = this.assistantAnswers()[step];
+        const option = ASSISTANT_OPTIONS[step].find((item) => item.value === value);
+        return option ? { step, label: option.label } : null;
+      })
+      .filter((item): item is { step: Exclude<AssistantStep, 'result'>; label: string } => !!item),
+  );
 
   totalWorkouts = computed(() => this.workouts().length);
   totalVolume = computed(() =>
@@ -63,53 +106,61 @@ export class DashboardComponent implements OnInit {
   });
   recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
 
-  // --- CHATBOT LOGIC ---
   toggleChat() {
     this.isChatOpen.update(v => !v);
     if (this.isChatOpen()) {
-      this.scrollToLatestMessage();
+      this.scrollAssistantToTop();
     }
   }
 
-  useChatSuggestion(suggestion: string) {
-    this.chatInput.set(suggestion);
+  chooseAssistantOption(value: string) {
+    const step = this.assistantStep();
+    if (step === 'result') return;
+
+    this.assistantAnswers.update((answers) => ({ ...answers, [step]: value }));
+    const currentIndex = this.assistantStepOrder.indexOf(step);
+
+    if (currentIndex === this.assistantStepOrder.length - 1) {
+      const completeAnswers = this.assistantAnswers() as AssistantAnswers;
+      this.assistantResult.set(createMealRecommendation(completeAnswers));
+      this.assistantStep.set('result');
+    } else {
+      this.assistantStep.set(this.assistantStepOrder[currentIndex + 1]);
+    }
+    this.scrollAssistantToTop();
   }
 
-  sendMessage() {
-    const text = this.chatInput().trim();
-    if (!text) return;
-
-    this.chatMessages.update(m => [...m, { role: 'user', text }]);
-    this.chatInput.set('');
-    this.isTyping.set(true);
-    this.scrollToLatestMessage();
-
-    // --- HTTP CALL PLACEHOLDER ---
-    // TODO: Aici pui request-ul real către API-ul tău (ex: Groq, Gemini, OpenAI)
-    // PROMPT DE SISTEM PENTRU API:
-    /*
-      "Ești un asistent STRICT pentru fitness și nutriție al aplicației FitTrack.
-      Regula 1: Răspunzi DOAR la solicitări legate de rețete, calorii, macronutrienți, exerciții și sănătate sportivă.
-      Regula 2: Dacă utilizatorul te întreabă ORICE altceva (codificare, politică, poezii, glume nespecifice, matematică din afara calculului de calorii), REFUZI clar și scurt, spunând că poți discuta doar despre nutriție și fitness.
-      Regula 3: Fii concis, prietenos și oferă direct liste de alimente/idei de mese bazate DOAR pe ce are utilizatorul."
-    */
-    setTimeout(() => {
-       this.chatMessages.update(m => [...m, {
-         role: 'ai',
-         text: 'Your Nutrition Coach is being connected. Soon, you’ll receive personalized meal and fitness suggestions here.'
-       }]);
-       this.isTyping.set(false);
-       this.scrollToLatestMessage();
-
-       // Seteaza setTimeout sa scroleze jos in cazul in care adaugi mult text
-    }, 1500);
+  isAssistantOptionSelected(value: string): boolean {
+    const step = this.assistantStep();
+    return step !== 'result' && this.assistantAnswers()[step] === value;
   }
 
-  private scrollToLatestMessage() {
+  goBackAssistant() {
+    const step = this.assistantStep();
+    if (step === 'goal') return;
+
+    if (step === 'result') {
+      this.assistantStep.set('budget');
+      this.assistantResult.set(null);
+    } else {
+      const currentIndex = this.assistantStepOrder.indexOf(step);
+      this.assistantStep.set(this.assistantStepOrder[currentIndex - 1]);
+    }
+    this.scrollAssistantToTop();
+  }
+
+  resetAssistant() {
+    this.assistantAnswers.set({});
+    this.assistantResult.set(null);
+    this.assistantStep.set('goal');
+    this.scrollAssistantToTop();
+  }
+
+  private scrollAssistantToTop() {
     setTimeout(() => {
       const chatBody = this.chatBody?.nativeElement;
       if (!chatBody) return;
-      chatBody.scrollTop = chatBody.scrollHeight;
+      chatBody.scrollTop = 0;
     });
   }
 
