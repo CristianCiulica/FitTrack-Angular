@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { LoadingService } from '../../../core/services/loading.service';
 import { CommonModule } from '@angular/common';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -28,13 +29,16 @@ import { strongPasswordValidator } from '../login/login.component';
 export class RegisterComponent {
   form: FormGroup;
   loading = false;
+  googleLoading = false;
   passwordVisible = false;
+  confirmPasswordVisible = false;
 
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,
     private router: Router,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private loadingService: LoadingService,
   ) {
     this.form = this.fb.group({
       firstName: ['', Validators.required],
@@ -62,6 +66,48 @@ export class RegisterComponent {
         this.loading = false;
       }
     });
+  }
+
+  toggleConfirmPasswordVisibility() {
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;
+  }
+
+  signInWithGoogle() {
+    this.googleLoading = true;
+    this.auth.signInWithGoogle().subscribe({
+      next: () => {
+        this.loadingService.showAfterNextNavigation(1000);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => {
+        this.showGoogleError(error);
+        this.googleLoading = false;
+      },
+    });
+  }
+
+  private showGoogleError(error: { code?: string }) {
+    if (error?.code === 'auth/popup-closed-by-user') {
+      this.message.warning('Google sign-in was cancelled.');
+      return;
+    }
+    if (error?.code === 'auth/popup-blocked') {
+      this.message.error('The Google window was blocked. Allow popups and try again.');
+      return;
+    }
+    if (error?.code === 'auth/unauthorized-domain') {
+      this.message.error('This website domain must be authorized in Firebase Authentication.');
+      return;
+    }
+    if (error?.code === 'auth/operation-not-allowed') {
+      this.message.error('Google sign-in is not enabled in Firebase Authentication.');
+      return;
+    }
+    if (error?.code === 'auth/network-request-failed') {
+      this.message.error('Network error. Check your connection and try again.');
+      return;
+    }
+    this.message.error('Google sign-in failed. Please try again.');
   }
 }
 

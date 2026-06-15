@@ -100,10 +100,10 @@
 .cardio-history {
   margin-bottom: 22px;
   padding: 20px;
-  background: linear-gradient(145deg, #f7fbff, #ffffff);
-  border: 1px solid rgba(0, 113, 227, 0.12);
+  background: #ffffff;
+  border: 1px solid #e9edf3;
   border-radius: 18px;
-  box-shadow: 0 8px 30px rgba(31, 75, 122, 0.06);
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.045);
 }
 
 .section-heading {
@@ -127,13 +127,44 @@
     font-size: 19px;
   }
 
-  > strong {
-    min-width: 38px;
-    padding: 7px 10px;
-    color: #0066cc;
+}
+
+.collapse-toggle {
+  min-height: 38px;
+  padding: 5px 8px 5px 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #536174;
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid #e0e6ee;
+  border-radius: 12px;
+  background: #f8fafc;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+
+  strong {
+    min-width: 24px;
+    color: #46617f;
+    font-size: 12px;
+    font-weight: 700;
     text-align: center;
-    background: #eaf3ff;
-    border-radius: 999px;
+  }
+
+  span[nz-icon] {
+    width: 25px;
+    height: 25px;
+    display: grid;
+    place-items: center;
+    color: #64748b;
+    border-radius: 8px;
+    background: #ffffff;
+  }
+
+  &:hover {
+    color: #1769dc;
+    border-color: #b8d2f4;
+    background: #f3f7fc;
   }
 }
 
@@ -216,7 +247,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin: 26px 0 12px;
+  margin: 0 0 12px;
 
   span {
     color: #8e8e93;
@@ -232,11 +263,18 @@
     font-size: 19px;
   }
 
-  > strong {
-    color: #6e6e73;
-    font-size: 12px;
-    font-weight: 600;
-  }
+}
+
+.workout-history-section {
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid #e9edf3;
+  border-radius: 18px;
+  box-shadow: 0 6px 22px rgba(15, 23, 42, 0.045);
+}
+
+.workout-collapse-toggle strong {
+  white-space: nowrap;
 }
 
 .table-card {
@@ -509,6 +547,11 @@
   .mobile-workout-list {
     display: grid;
     gap: 12px;
+  }
+
+  .workout-history-section {
+    padding: 14px;
+    border-radius: 16px;
   }
 
   .mobile-workout-card {

@@ -48,24 +48,7 @@
 .predefined-section,
 .personal-section {
   padding: 24px;
-}
-
-.predefined-section {
-  background: linear-gradient(
-    180deg,
-    #d8e9ff 0%,
-    #eef5ff 42%,
-    #ffffff 100%
-  );
-}
-
-.personal-section {
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #eef5ff 58%,
-    #d8e9ff 100%
-  );
+  background: #ffffff;
 }
 
 .routine-section-heading {

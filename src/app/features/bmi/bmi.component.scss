@@ -99,12 +99,7 @@
 
 .calculator-heading {
   padding: 30px 32px 24px;
-  background: linear-gradient(
-    180deg,
-    #d8e9ff 0%,
-    #eef5ff 42%,
-    #ffffff 100%
-  );
+  background: #ffffff;
   border-bottom: 1px solid #edf0f5;
 
   > span {
@@ -279,18 +274,20 @@
   color: #172033;
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #eef5ff 58%,
-    #d8e9ff 100%
+    #edf5ff 0%,
+    #f7faff 42%,
+    #ffffff 100%
   );
-  border: 1px solid #dde7f2;
+  border: 1px solid #e3eaf3;
   border-radius: 18px;
-  box-shadow: 0 14px 30px rgba(31, 75, 122, 0.09);
+  box-shadow: 0 10px 24px rgba(31, 75, 122, 0.06);
 }
 
 .calorie-target {
   padding-bottom: 22px;
-  border-bottom: 1px solid #dce4ed;
+  text-align: center;
+  background: transparent;
+  border-bottom: 1px solid rgba(84, 116, 155, 0.18);
 
   span,
   small {
@@ -316,7 +313,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 16px;
 
   > div {
     min-width: 0;

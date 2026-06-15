@@ -43,6 +43,8 @@ export class WorkoutsComponent implements OnInit {
   sortDirection = signal<'ascend' | 'descend' | null>('descend');
   modalVisible = signal(false);
   editingWorkout = signal<Workout | null>(null);
+  cardioHistoryOpen = signal(true);
+  workoutHistoryOpen = signal(true);
   readonly hideTableNoResult: any = null;
   expandSet = new Set<string>();
 
@@ -72,6 +74,14 @@ export class WorkoutsComponent implements OnInit {
   onSortOrderChange(column: string, direction: string | null) {
     this.sortColumn.set(column);
     this.sortDirection.set(direction as 'ascend' | 'descend' | null);
+  }
+
+  toggleCardioHistory() {
+    this.cardioHistoryOpen.update((isOpen) => !isOpen);
+  }
+
+  toggleWorkoutHistory() {
+    this.workoutHistoryOpen.update((isOpen) => !isOpen);
   }
 
   onExpandChange(id: string, checked: boolean): void {
