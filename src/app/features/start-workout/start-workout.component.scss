@@ -36,7 +36,36 @@
 }
 
 .routine-library {
+  overflow: hidden;
   border-radius: 20px !important;
+
+  ::ng-deep .ant-card-body {
+    padding: 0;
+    background: #ffffff;
+  }
+}
+
+.predefined-section,
+.personal-section {
+  padding: 24px;
+}
+
+.predefined-section {
+  background: linear-gradient(
+    180deg,
+    #d8e9ff 0%,
+    #eef5ff 42%,
+    #ffffff 100%
+  );
+}
+
+.personal-section {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #eef5ff 58%,
+    #d8e9ff 100%
+  );
 }
 
 .routine-section-heading {
@@ -111,9 +140,9 @@
 }
 
 .personal-heading {
-  margin-top: 26px;
-  padding-top: 22px;
-  border-top: 1px solid #ececf0;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .routine-card {
@@ -169,7 +198,7 @@
 }
 
 .personal-routine {
-  background: #fbfcff;
+  background: #ffffff;
 }
 
 .empty-personal-routines {
@@ -178,7 +207,7 @@
   color: #64748b;
   font-size: 13px;
   text-align: center;
-  background: #fafbfc;
+  background: #ffffff;
   border: 1px dashed #cbd5e1;
   border-radius: 14px;
   cursor: pointer;

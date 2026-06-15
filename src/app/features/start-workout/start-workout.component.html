@@ -82,79 +82,83 @@
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
           <nz-card class="routine-library">
-            <div class="routine-heading-row">
-              <div class="routine-section-heading">
-                <span>Ready to start</span>
-                <h3>Predefined workouts</h3>
+            <section class="predefined-section">
+              <div class="routine-heading-row">
+                <div class="routine-section-heading">
+                  <span>Ready to start</span>
+                  <h3>Predefined workouts</h3>
+                </div>
+                <div class="carousel-controls">
+                  <span>
+                    {{ predefinedStartIndex() + 1 }}–{{ predefinedStartIndex() + visiblePredefinedRoutines().length }}
+                    of {{ routines.length }}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Previous predefined workouts"
+                    (click)="showPreviousPredefined()"
+                    [disabled]="!canShowPreviousPredefined()"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next predefined workouts"
+                    (click)="showNextPredefined()"
+                    [disabled]="!canShowNextPredefined()"
+                  >
+                    ›
+                  </button>
+                </div>
               </div>
-              <div class="carousel-controls">
-                <span>
-                  {{ predefinedStartIndex() + 1 }}–{{ predefinedStartIndex() + visiblePredefinedRoutines().length }}
-                  of {{ routines.length }}
-                </span>
-                <button
-                  type="button"
-                  aria-label="Previous predefined workouts"
-                  (click)="showPreviousPredefined()"
-                  [disabled]="!canShowPreviousPredefined()"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  aria-label="Next predefined workouts"
-                  (click)="showNextPredefined()"
-                  [disabled]="!canShowNextPredefined()"
-                >
-                  ›
-                </button>
-              </div>
-            </div>
-            <div class="predefined-carousel">
-              <div class="routines-list predefined-routines-list">
-                <div
-                  class="routine-card"
-                  *ngFor="let item of visiblePredefinedRoutines()"
-                  [class.selected]="selectedRoutineKey() === 'predefined-' + item.index"
-                  (click)="selectRoutine(item.routine, 'predefined-' + item.index)">
-                  <h3>{{ item.routine.name }}</h3>
-                  <p>{{ item.routine.exercises.length }} exercises</p>
-                  <div class="routine-preview">
-                    <nz-tag *ngFor="let ex of item.routine.exercises">{{ ex.name }}</nz-tag>
+              <div class="predefined-carousel">
+                <div class="routines-list predefined-routines-list">
+                  <div
+                    class="routine-card"
+                    *ngFor="let item of visiblePredefinedRoutines()"
+                    [class.selected]="selectedRoutineKey() === 'predefined-' + item.index"
+                    (click)="selectRoutine(item.routine, 'predefined-' + item.index)">
+                    <h3>{{ item.routine.name }}</h3>
+                    <p>{{ item.routine.exercises.length }} exercises</p>
+                    <div class="routine-preview">
+                      <nz-tag *ngFor="let ex of item.routine.exercises">{{ ex.name }}</nz-tag>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </section>
 
-            <div class="routine-section-heading personal-heading">
-              <span>Your library</span>
-              <h3>My workouts</h3>
-            </div>
-            <div class="routines-list personal-routines-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
-              <div
-                class="routine-card personal-routine"
-                *ngFor="let routine of personalRoutines()"
-                [class.selected]="selectedRoutineKey() === 'personal-' + routine.id"
-                (click)="selectRoutine(routine, 'personal-' + routine.id)"
-              >
-                <h3>{{ routine.name }}</h3>
-                <p>{{ routine.exercises.length }} exercises</p>
-                <div class="routine-preview">
-                  <nz-tag *ngFor="let exercise of routine.exercises">{{ exercise.name }}</nz-tag>
+            <section class="personal-section">
+              <div class="routine-section-heading personal-heading">
+                <span>Your library</span>
+                <h3>My workouts</h3>
+              </div>
+              <div class="routines-list personal-routines-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
+                <div
+                  class="routine-card personal-routine"
+                  *ngFor="let routine of personalRoutines()"
+                  [class.selected]="selectedRoutineKey() === 'personal-' + routine.id"
+                  (click)="selectRoutine(routine, 'personal-' + routine.id)"
+                >
+                  <h3>{{ routine.name }}</h3>
+                  <p>{{ routine.exercises.length }} exercises</p>
+                  <div class="routine-preview">
+                    <nz-tag *ngFor="let exercise of routine.exercises">{{ exercise.name }}</nz-tag>
+                  </div>
                 </div>
               </div>
-            </div>
-            <ng-template #noPersonalRoutines>
-              <button type="button" class="empty-personal-routines" (click)="openAddWorkout()">
-                You have no personal workouts yet. Add your first workout.
-              </button>
-            </ng-template>
+              <ng-template #noPersonalRoutines>
+                <button type="button" class="empty-personal-routines" (click)="openAddWorkout()">
+                  You have no personal workouts yet. Add your first workout.
+                </button>
+              </ng-template>
 
-            <div class="action-bar">
-              <button nz-button nzType="primary" nzSize="large" (click)="startWorkout()">
-                <span nz-icon nzType="play-circle"></span> Start workout
-              </button>
-            </div>
+              <div class="action-bar">
+                <button nz-button nzType="primary" nzSize="large" (click)="startWorkout()">
+                  <span nz-icon nzType="play-circle"></span> Start workout
+                </button>
+              </div>
+            </section>
           </nz-card>
         </ng-container>
 

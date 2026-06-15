@@ -101,11 +101,9 @@
 .dashboard-hero {
   background: linear-gradient(
     180deg,
-    #dae8fe 0%,
-    #f4f8ff 24%,
-    #ffffff 50%,
-    #f4f8ff 76%,
-    #dae8fe 100%
+    #d8e9ff 0%,
+    #eef5ff 42%,
+    #ffffff 100%
   );
   border-radius: 20px;
   padding: 40px;
@@ -182,14 +180,7 @@
 .modern-stat-card {
   display: flex;
   align-items: center;
-  background: linear-gradient(
-    180deg,
-    #e3edff 0%,
-    #f7faff 28%,
-    #ffffff 50%,
-    #f7faff 72%,
-    #e3edff 100%
-  );
+  background: #ffffff;
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.03);
@@ -258,11 +249,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
   background: linear-gradient(
     180deg,
-    #dae8fe 0%,
-    #f4f8ff 24%,
-    #ffffff 50%,
-    #f4f8ff 76%,
-    #dae8fe 100%
+    #ffffff 0%,
+    #eef5ff 58%,
+    #d8e9ff 100%
   ) !important;
 
   ::ng-deep .ant-card-head,
