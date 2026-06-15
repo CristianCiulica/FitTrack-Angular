@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -37,6 +37,8 @@ import { Workout } from '../../core/models/workout.model';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild('chatBody') private chatBody?: ElementRef<HTMLElement>;
+
   workouts = signal<Workout[]>([]);
 
   // --- CHATBOT STATE ---
@@ -44,7 +46,7 @@ export class DashboardComponent implements OnInit {
   isTyping = signal(false);
   chatInput = signal('');
   chatMessages = signal<{role: 'user'|'ai', text: string}[]>([
-    { role: 'ai', text: 'Salut! Cu ce te pot ajuta astăzi? Spune-mi ce ingrediente ai prin casă, și îți fac o sugestie sănătoasă de meniu!' }
+    { role: 'ai', text: 'Hi! Tell me what ingredients you have or what your fitness goal is, and I’ll help you plan a simple meal.' }
   ]);
 
   totalWorkouts = computed(() => this.workouts().length);
@@ -64,6 +66,13 @@ export class DashboardComponent implements OnInit {
   // --- CHATBOT LOGIC ---
   toggleChat() {
     this.isChatOpen.update(v => !v);
+    if (this.isChatOpen()) {
+      this.scrollToLatestMessage();
+    }
+  }
+
+  useChatSuggestion(suggestion: string) {
+    this.chatInput.set(suggestion);
   }
 
   sendMessage() {
@@ -73,6 +82,7 @@ export class DashboardComponent implements OnInit {
     this.chatMessages.update(m => [...m, { role: 'user', text }]);
     this.chatInput.set('');
     this.isTyping.set(true);
+    this.scrollToLatestMessage();
 
     // --- HTTP CALL PLACEHOLDER ---
     // TODO: Aici pui request-ul real către API-ul tău (ex: Groq, Gemini, OpenAI)
@@ -86,12 +96,21 @@ export class DashboardComponent implements OnInit {
     setTimeout(() => {
        this.chatMessages.update(m => [...m, {
          role: 'ai',
-         text: 'Acesta este un răspuns de test! Acum trebuie să îmi pui logica de API aici folosind prompt-ul restrictiv din cod.'
+         text: 'Your Nutrition Coach is being connected. Soon, you’ll receive personalized meal and fitness suggestions here.'
        }]);
        this.isTyping.set(false);
+       this.scrollToLatestMessage();
 
        // Seteaza setTimeout sa scroleze jos in cazul in care adaugi mult text
     }, 1500);
+  }
+
+  private scrollToLatestMessage() {
+    setTimeout(() => {
+      const chatBody = this.chatBody?.nativeElement;
+      if (!chatBody) return;
+      chatBody.scrollTop = chatBody.scrollHeight;
+    });
   }
 
   constructor(

@@ -124,6 +124,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     }
   }
 
+  quickStartRun() {
+    if (this.isTracking) return;
+    this.mode = 'running';
+    this.startTracking();
+  }
+
   startTracking() {
     if (!navigator.geolocation) {
       this.message.error('Geolocation is not supported on this device.');

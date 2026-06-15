@@ -127,7 +127,7 @@
         nzTitle=""
         (nzOnCancel)="toggleChat()"
         [nzFooter]="null"
-        [nzWidth]="700"
+        [nzWidth]="680"
         nzCentered
         [nzStyle]="{ padding: '0' }"
         [nzBodyStyle]="{ padding: '0' }"
@@ -135,26 +135,28 @@
         [nzCloseIcon]="customCloseIcon"
       >
         <ng-template #customCloseIcon>
-          <span nz-icon nzType="close-circle" nzTheme="fill" class="modern-close-icon"></span>
+          <span class="modern-close-icon" aria-hidden="true">×</span>
         </ng-template>
 
         <ng-container *nzModalContent>
           <div class="chat-container modern-chat">
             <div class="chat-header-modern">
-               <div class="chat-avatar">
-                 <span nz-icon nzType="robot"></span>
-               </div>
-               <div class="chat-title-info">
-                 <h3>Nutrition AI Coach</h3>
-                 <span class="status-dot"></span> <small>Online</small>
-               </div>
+              <div class="chat-avatar">
+                <span nz-icon nzType="fire"></span>
+              </div>
+              <div class="chat-title-info">
+                <span class="chat-brand">FitTrack<span>.</span></span>
+                <h3>Nutrition Coach</h3>
+                <p><span class="status-dot"></span>Ready to help with meals and fitness</p>
+              </div>
             </div>
 
             <div class="chat-body" #chatBody>
+              <div class="chat-date-label">Today</div>
               <div *ngFor="let msg of chatMessages()" class="chat-message" [class.user]="msg.role === 'user'">
                 <div class="bubble-wrapper">
                   <div class="avatar-mini" *ngIf="msg.role === 'ai'">
-                    <span nz-icon nzType="robot"></span>
+                    <span nz-icon nzType="fire"></span>
                   </div>
                   <div class="bubble">{{ msg.text }}</div>
                 </div>
@@ -162,7 +164,7 @@
               <div *ngIf="isTyping()" class="chat-message ai">
                 <div class="bubble-wrapper">
                   <div class="avatar-mini">
-                    <span nz-icon nzType="robot"></span>
+                    <span nz-icon nzType="fire"></span>
                   </div>
                   <div class="bubble typing">
                     <div class="dot-typing"></div>
@@ -171,12 +173,38 @@
               </div>
             </div>
             <div class="chat-footer">
-              <div class="input-wrapper">
-                <input type="text" [(ngModel)]="chatInput" placeholder="Ex: Am ouă, spanac și pui..." (keydown.enter)="sendMessage()" />
-                <button nz-button class="send-btn" nzType="primary" nzShape="circle" (click)="sendMessage()">
-                  <span nz-icon nzType="send"></span>
+              <div class="quick-prompts" aria-label="Suggested questions">
+                <button type="button" (click)="useChatSuggestion('Suggest a high-protein breakfast')">
+                  High-protein breakfast
+                </button>
+                <button type="button" (click)="useChatSuggestion('What can I eat after my workout?')">
+                  Post-workout meal
+                </button>
+                <button type="button" (click)="useChatSuggestion('Create a simple healthy dinner')">
+                  Healthy dinner
                 </button>
               </div>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  [(ngModel)]="chatInput"
+                  placeholder="Ask about meals, calories or fitness..."
+                  aria-label="Message Nutrition Coach"
+                  (keydown.enter)="sendMessage()"
+                />
+                <button
+                  nz-button
+                  class="send-btn"
+                  nzType="primary"
+                  nzShape="circle"
+                  aria-label="Send message"
+                  [disabled]="!chatInput().trim() || isTyping()"
+                  (click)="sendMessage()"
+                >
+                  <span class="send-symbol" aria-hidden="true">➤</span>
+                </button>
+              </div>
+              <p class="chat-disclaimer">FitTrack AI can make mistakes. Check important nutrition advice.</p>
             </div>
           </div>
         </ng-container>

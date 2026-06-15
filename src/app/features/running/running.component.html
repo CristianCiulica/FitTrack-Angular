@@ -100,24 +100,36 @@
       </nz-card>
 
       <nz-card class="run-card">
-        <button
-          type="button"
-          class="run-card-summary"
-          [class.expanded]="activityExpanded"
-          [attr.aria-expanded]="activityExpanded"
-          (click)="toggleActivityDetails()"
-        >
-          <div>
-            <span class="run-card-eyebrow">Activity</span>
-            <strong>{{ mode === 'running' ? 'Running' : 'Walking' }}</strong>
-          </div>
-          <div class="run-card-state">
-            <span class="gps-badge" [class.calibrating]="isCalibrating">
-              {{ isCalibrating ? 'Calibrating' : isTracking ? 'GPS active' : 'Ready' }}
-            </span>
-            <span class="run-chevron" aria-hidden="true"></span>
-          </div>
-        </button>
+        <div class="run-card-top">
+          <button
+            type="button"
+            class="run-card-summary"
+            [class.expanded]="activityExpanded"
+            [attr.aria-expanded]="activityExpanded"
+            (click)="toggleActivityDetails()"
+          >
+            <div>
+              <span class="run-card-eyebrow">Activity</span>
+              <strong>{{ mode === 'running' ? 'Running' : 'Walking' }}</strong>
+            </div>
+            <div class="run-card-state">
+              <span class="gps-badge" *ngIf="isTracking" [class.calibrating]="isCalibrating">
+                {{ isCalibrating ? 'Calibrating' : 'GPS active' }}
+              </span>
+              <span class="run-chevron" aria-hidden="true"></span>
+            </div>
+          </button>
+          <button
+            nz-button
+            type="button"
+            class="quick-run-button"
+            [class.stop]="isTracking"
+            (click)="isTracking ? stopTracking() : quickStartRun()"
+          >
+            <span nz-icon [nzType]="isTracking ? 'close' : 'play-circle'"></span>
+            {{ isTracking ? 'Stop' : 'Quick Run' }}
+          </button>
+        </div>
         <div class="run-controls" *ngIf="activityExpanded">
           <label class="mode-picker">
             <span>Activity type</span>

@@ -269,16 +269,16 @@ a:hover {
     padding: 0;
     pointer-events: none;
     background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.58), rgba(244, 248, 255, 0.34)) !important;
-    border: 1px solid rgba(255, 255, 255, 0.72) !important;
+      linear-gradient(135deg, rgba(255, 255, 255, 0.38), rgba(224, 238, 255, 0.16)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.82) !important;
     border-radius: 24px !important;
     box-shadow:
-      0 16px 38px rgba(15, 23, 42, 0.16),
-      0 3px 10px rgba(15, 23, 42, 0.07),
-      inset 0 1px 0 rgba(255, 255, 255, 0.78),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.28);
-    backdrop-filter: blur(30px) saturate(185%) contrast(104%);
-    -webkit-backdrop-filter: blur(30px) saturate(185%) contrast(104%);
+      0 18px 44px rgba(15, 23, 42, 0.2),
+      0 4px 12px rgba(15, 23, 42, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.96),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(42px) saturate(235%) contrast(108%) brightness(108%);
+    -webkit-backdrop-filter: blur(42px) saturate(235%) contrast(108%) brightness(108%);
     isolation: isolate;
     contain: layout paint;
     transform: translateZ(0);
@@ -291,8 +291,13 @@ a:hover {
     content: '';
     pointer-events: none;
     background:
-      radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.72), transparent 34%),
-      linear-gradient(115deg, rgba(255, 255, 255, 0.34), transparent 42%, rgba(140, 190, 255, 0.12));
+      radial-gradient(circle at 16% 0%, rgba(255, 255, 255, 0.88), transparent 32%),
+      linear-gradient(
+        115deg,
+        rgba(255, 255, 255, 0.42),
+        rgba(255, 255, 255, 0.04) 42%,
+        rgba(116, 174, 255, 0.18)
+      );
     border-radius: inherit;
   }
 
@@ -305,7 +310,7 @@ a:hover {
     height: 1px;
     content: '';
     pointer-events: none;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.92), transparent);
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
   }
 
   .app-layout > .sidebar .ant-layout-sider-children {
@@ -468,7 +473,7 @@ a:hover {
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
   }
 
-  .app-layout .app-header {
+  html body .app-layout .app-header {
     position: sticky !important;
     top: 0 !important;
     z-index: 500 !important;
@@ -483,26 +488,23 @@ a:hover {
       10px !important;
     gap: 8px !important;
     overflow: hidden;
-    background:
-      linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(239, 246, 255, 0.36)) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.7) !important;
-    box-shadow:
-      0 8px 24px rgba(15, 23, 42, 0.08),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(30px) saturate(180%) contrast(103%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%) contrast(103%);
-    isolation: isolate;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    border-bottom: 1px solid #e7eaf0 !important;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    opacity: 1 !important;
+    isolation: auto;
   }
 
-  .app-layout .app-header::before {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    content: '';
-    pointer-events: none;
-    background:
-      radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.75), transparent 38%),
-      linear-gradient(110deg, rgba(255, 255, 255, 0.26), transparent 50%, rgba(130, 180, 255, 0.1));
+  html body .app-layout .app-header::before,
+  html body .app-layout .app-header::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    opacity: 0 !important;
   }
 
   .app-layout .app-header > * {

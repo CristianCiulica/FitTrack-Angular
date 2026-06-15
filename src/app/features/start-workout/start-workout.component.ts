@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -193,6 +193,10 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   logout() {
+    if (this.workoutInProgress()) {
+      this.message.warning('Stop the current workout before logging out.');
+      return;
+    }
     this.authService.logout().subscribe();
   }
 
@@ -206,6 +210,19 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     event.preventDefault();
     event.stopPropagation();
     this.message.warning('Stop the current workout before changing sections.');
+  }
+
+  canLeaveWorkout(): boolean {
+    if (!this.workoutInProgress()) return true;
+    this.message.warning('Stop the current workout before leaving this page.');
+    return false;
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  preventBrowserExit(event: BeforeUnloadEvent): void {
+    if (!this.workoutInProgress()) return;
+    event.preventDefault();
+    event.returnValue = '';
   }
 
   private updatePredefinedVisibleCount(isMobile: boolean) {

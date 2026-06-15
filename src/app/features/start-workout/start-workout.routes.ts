@@ -1,9 +1,12 @@
 import { Routes } from '@angular/router';
+import { StartWorkoutComponent } from './start-workout.component';
 
 export const startWorkoutRoutes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./start-workout.component').then((m) => m.StartWorkoutComponent),
+    component: StartWorkoutComponent,
+    canDeactivate: [
+      (component: StartWorkoutComponent) => component.canLeaveWorkout(),
+    ],
   },
 ];
-
