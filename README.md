@@ -4,10 +4,16 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
-To start a local development server, run:
+Copy the Firebase runtime configuration template:
 
 ```bash
-ng serve
+cp .env.example .env.local
+```
+
+Fill in the Firebase Web App values, then start the local server:
+
+```bash
+npm start
 ```
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
@@ -31,10 +37,30 @@ ng generate --help
 To build the project run:
 
 ```bash
-ng build
+npm run build
 ```
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+
+The build generates `public/firebase-config.js` from `.env.local` or environment variables. Both files containing real values are ignored by Git.
+
+## GitHub Pages deploy
+
+The workflow in `.github/workflows/deploy-pages.yml` deploys pushes to `main`.
+
+Create these GitHub repository secrets under **Settings → Secrets and variables → Actions**:
+
+- `FIREBASE_API_KEY`
+- `FIREBASE_AUTH_DOMAIN`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_STORAGE_BUCKET`
+- `FIREBASE_MESSAGING_SENDER_ID`
+- `FIREBASE_APP_ID`
+- `FIREBASE_MEASUREMENT_ID`
+
+In GitHub **Settings → Pages**, select **GitHub Actions** as the source.
+
+For Google login, add `cristianciulica.github.io` to Firebase Authentication's authorized domains. Restrict the Firebase browser key to Firebase APIs and the deployed referrer in Google Cloud Console. Firebase Web API keys identify the project and are visible in any browser application; access to Firestore and Storage must be protected with Firebase Security Rules and App Check.
 
 ## Running unit tests
 

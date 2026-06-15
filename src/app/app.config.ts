@@ -30,7 +30,7 @@ import {
   EyeInvisibleOutline,
   EyeOutline,
 } from '@ant-design/icons-angular/icons';
-import { environment } from '../environments/environment';
+import { getFirebaseConfig } from './core/config/runtime-config';
 import { routes } from './app.routes';
 import { NZ_I18N, en_US } from 'ng-zorro-antd/i18n';
 import { registerLocaleData } from '@angular/common';
@@ -44,7 +44,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideAnimationsAsync(),
     provideHttpClient(),
-    provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
+    provideFirebaseApp(() => initializeApp(getFirebaseConfig())),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideNzIcons([

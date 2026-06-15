@@ -45,3 +45,9 @@ Thumbs.db
 
 
 /Enunt.txt
+
+# Local runtime configuration
+.env
+.env.*
+!.env.example
+/public/firebase-config.js
