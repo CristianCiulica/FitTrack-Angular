@@ -147,7 +147,7 @@
               <div class="chat-title-info">
                 <span class="chat-brand">FitTrack<span>.</span></span>
                 <h3>Nutrition Assistant</h3>
-                <p>Guided meal planner </p>
+                <p>Guided meal planner</p>
               </div>
             </div>
 
@@ -254,7 +254,7 @@
               </ng-template>
             </div>
 
-            <div class="assistant-footer">
+            <div class="assistant-footer" [class.result-visible]="assistantStep() === 'result'">
               <button
                 type="button"
                 class="assistant-back"
@@ -264,14 +264,14 @@
                 ‹ Back
               </button>
               <p>Meal ideas are educational and do not replace medical advice.</p>
-              <button
-                type="button"
-                class="assistant-reset"
-                *ngIf="assistantStep() === 'result'"
-                (click)="resetAssistant()"
-              >
-                Start again
-              </button>
+              <div class="assistant-result-actions" *ngIf="assistantStep() === 'result'">
+                <button type="button" class="assistant-another" (click)="showAnotherRecipe()">
+                  Another recipe
+                </button>
+                <button type="button" class="assistant-reset" (click)="resetAssistant()">
+                  Start again
+                </button>
+              </div>
             </div>
           </div>
         </ng-container>

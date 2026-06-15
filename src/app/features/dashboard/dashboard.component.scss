@@ -790,12 +790,25 @@
     grid-row: 1;
   }
 
-  .assistant-reset {
+  .assistant-result-actions {
     grid-column: 3;
     grid-row: 1;
+    display: flex;
+    gap: 7px;
+  }
+
+  .assistant-another {
+    color: #1769dc;
+    border-color: #bdd5f5;
+    background: #f3f8ff;
+    white-space: nowrap;
+  }
+
+  .assistant-reset {
     color: #fff;
     border-color: transparent;
     background: #1769dc;
+    white-space: nowrap;
 
     &:hover {
       color: #fff;
@@ -891,6 +904,18 @@
     button {
       padding-inline: 10px;
     }
+
+    .assistant-result-actions {
+      gap: 5px;
+    }
+
+    &.result-visible {
+      grid-template-columns: auto 1fr auto;
+
+      p {
+        display: none;
+      }
+    }
   }
 }
 
@@ -913,6 +938,15 @@
 
   .assistant-footer p {
     display: none;
+  }
+
+  .assistant-footer {
+    grid-template-columns: auto 1fr;
+
+    .assistant-result-actions {
+      grid-column: 2;
+      justify-self: end;
+    }
   }
 }
 

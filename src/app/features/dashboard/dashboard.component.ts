@@ -156,6 +156,12 @@ export class DashboardComponent implements OnInit {
     this.scrollAssistantToTop();
   }
 
+  showAnotherRecipe() {
+    const answers = this.assistantAnswers() as AssistantAnswers;
+    this.assistantResult.set(createMealRecommendation(answers));
+    this.scrollAssistantToTop();
+  }
+
   private scrollAssistantToTop() {
     setTimeout(() => {
       const chatBody = this.chatBody?.nativeElement;
