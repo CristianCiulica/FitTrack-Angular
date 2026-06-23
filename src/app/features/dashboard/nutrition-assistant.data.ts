@@ -807,7 +807,7 @@ const MEALS: MealTemplate[] = [
     fats: 25,
     prepMinutes: 10,
     cost: 'Medium',
-    ingredients: ['150 g firm tofu', '100 g black beans', '1/2 avocado', 'Cherry tomatoes', 'Red onion', 'Lemon juice and cilantro'],
+    ingredients: ['150 g firm tofu', '100 g black beans', '½ avocado', 'Cherry tomatoes', 'Red onion', 'Lemon juice and cilantro'],
     steps: ['Cube tofu and dice avocado, tomatoes, and onion.', 'Rinse and drain black beans.', 'Toss all ingredients together with lemon juice, salt, and pepper.'],
     swaps: ['Use chickpeas instead of black beans.', 'Add corn for a bit of sweetness.'],
     coachTip: 'Let the salad sit for 10 minutes before eating to let the flavors blend.',
