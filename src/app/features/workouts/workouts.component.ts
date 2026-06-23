@@ -83,8 +83,8 @@ export class WorkoutsComponent implements OnInit {
   });
 
   onSearch(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.searchQuery.set(input.value);
+    const value = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.searchQuery.set(value);
   }
 
   onSortOrderChange(column: string, direction: string | null) {
