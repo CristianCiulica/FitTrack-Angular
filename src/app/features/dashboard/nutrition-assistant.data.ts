@@ -44,32 +44,32 @@ interface MealTemplate extends MealRecommendation {
 
 export const ASSISTANT_OPTIONS: Record<Exclude<AssistantStep, 'result'>, AssistantOption[]> = {
   goal: [
-    { value: 'lose', label: 'Fat loss', description: 'High volume, filling meals and controlled calories.', icon: '↘' },
-    { value: 'maintain', label: 'Maintain', description: 'Balanced portions for energy and recovery.', icon: '◎' },
-    { value: 'gain', label: 'Build muscle', description: 'More calories, protein and training fuel.', icon: '↗' },
+    { value: 'lose', label: 'Fat loss', description: 'High volume, filling meals and controlled calories.', icon: '📉' },
+    { value: 'maintain', label: 'Maintain', description: 'Balanced portions for energy and recovery.', icon: '⚖️' },
+    { value: 'gain', label: 'Build muscle', description: 'More calories, protein and training fuel.', icon: '💪' },
   ],
   meal: [
-    { value: 'breakfast', label: 'Breakfast', description: 'Start the day with steady energy.', icon: '☀' },
-    { value: 'lunch', label: 'Lunch', description: 'A complete meal for the middle of the day.', icon: '◐' },
-    { value: 'dinner', label: 'Dinner', description: 'Recovery-focused and easy to digest.', icon: '☾' },
-    { value: 'snack', label: 'Snack', description: 'Small, practical and protein-aware.', icon: '◇' },
-    { value: 'post-workout', label: 'Post-workout', description: 'Protein and carbohydrates for recovery.', icon: '⚡' },
+    { value: 'breakfast', label: 'Breakfast', description: 'Start the day with steady energy.', icon: '🍳' },
+    { value: 'lunch', label: 'Lunch', description: 'A complete meal for the middle of the day.', icon: '🥗' },
+    { value: 'dinner', label: 'Dinner', description: 'Recovery-focused and easy to digest.', icon: '🍽️' },
+    { value: 'snack', label: 'Snack', description: 'Small, practical and protein-aware.', icon: '🍎' },
+    { value: 'post-workout', label: 'Post-workout', description: 'Protein and carbohydrates for recovery.', icon: '🥤' },
   ],
   diet: [
-    { value: 'balanced', label: 'No restrictions', description: 'Uses a wide range of foods.', icon: '✓' },
-    { value: 'vegetarian', label: 'Vegetarian', description: 'No meat or fish.', icon: '◉' },
-    { value: 'vegan', label: 'Vegan', description: 'Only plant-based ingredients.', icon: '⌁' },
-    { value: 'lactose-free', label: 'Lactose-free', description: 'No regular dairy products.', icon: '○' },
+    { value: 'balanced', label: 'No restrictions', description: 'Uses a wide range of foods.', icon: '🥑' },
+    { value: 'vegetarian', label: 'Vegetarian', description: 'No meat or fish.', icon: '🥦' },
+    { value: 'vegan', label: 'Vegan', description: 'Only plant-based ingredients.', icon: '🌱' },
+    { value: 'lactose-free', label: 'Lactose-free', description: 'No regular dairy products.', icon: '🥥' },
   ],
   time: [
-    { value: 'quick', label: 'Under 10 min', description: 'Minimal cooking and cleanup.', icon: '10' },
-    { value: 'standard', label: '10–30 min', description: 'A normal freshly cooked meal.', icon: '25' },
-    { value: 'meal-prep', label: 'Meal prep', description: 'Cook several portions at once.', icon: '×4' },
+    { value: 'quick', label: 'Under 10 min', description: 'Minimal cooking and cleanup.', icon: '⚡' },
+    { value: 'standard', label: '10–30 min', description: 'A normal freshly cooked meal.', icon: '⏱️' },
+    { value: 'meal-prep', label: 'Meal prep', description: 'Cook several portions at once.', icon: '🍱' },
   ],
   budget: [
-    { value: 'low', label: 'Budget friendly', description: 'Simple and affordable staples.', icon: '$' },
-    { value: 'medium', label: 'Balanced budget', description: 'Good variety without overspending.', icon: '$$' },
-    { value: 'flexible', label: 'Flexible', description: 'Prioritizes taste and nutrition.', icon: '$$$' },
+    { value: 'low', label: 'Budget friendly', description: 'Simple and affordable staples.', icon: '🪙' },
+    { value: 'medium', label: 'Balanced budget', description: 'Good variety without overspending.', icon: '💵' },
+    { value: 'flexible', label: 'Flexible', description: 'Prioritizes taste and nutrition.', icon: '💰' },
   ],
 };
 
