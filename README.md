@@ -2,6 +2,10 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.11.
 
+## Documentation
+
+The detailed project documentation lives in [docs/README.md](docs/README.md). It covers the app structure, setup, auth flow, feature pages, and common troubleshooting steps.
+
 ## Development server
 
 Copy the Firebase runtime configuration template:
