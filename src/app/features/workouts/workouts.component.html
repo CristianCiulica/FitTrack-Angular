@@ -117,16 +117,22 @@
             <span>Training log</span>
             <h3>Workout history</h3>
           </div>
-          <button
-            type="button"
-            class="collapse-toggle workout-collapse-toggle"
-            [attr.aria-expanded]="workoutHistoryOpen()"
-            aria-label="Toggle workout history"
-            (click)="toggleWorkoutHistory()"
-          >
-            <strong>{{ filteredWorkouts().length }} sessions</strong>
-            <span nz-icon [nzType]="workoutHistoryOpen() ? 'up' : 'down'"></span>
-          </button>
+          <div class="history-table-controls">
+            <div class="search-input-wrapper">
+              <span nz-icon nzType="search"></span>
+              <input type="text" placeholder="Search workouts..." class="workout-search-input" (input)="onSearch($event)">
+            </div>
+            <button
+              type="button"
+              class="collapse-toggle workout-collapse-toggle"
+              [attr.aria-expanded]="workoutHistoryOpen()"
+              aria-label="Toggle workout history"
+              (click)="toggleWorkoutHistory()"
+            >
+              <strong>{{ filteredWorkouts().length }} sessions</strong>
+              <span nz-icon [nzType]="workoutHistoryOpen() ? 'up' : 'down'"></span>
+            </button>
+          </div>
         </div>
 
         <ng-container *ngIf="workoutHistoryOpen()">

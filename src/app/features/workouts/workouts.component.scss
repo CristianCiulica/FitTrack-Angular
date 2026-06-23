@@ -246,6 +246,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   margin: 0 0 12px;
 
@@ -271,6 +272,50 @@
   border: 1px solid #e9edf3;
   border-radius: 18px;
   box-shadow: 0 6px 22px rgba(15, 23, 42, 0.045);
+}
+
+.history-table-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  span[nz-icon] {
+    position: absolute;
+    left: 10px;
+    color: #8e8e93;
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .workout-search-input {
+    width: 200px;
+    height: 38px;
+    padding: 0 12px 0 32px;
+    border: 1px solid #e0e6ee;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #1d1d1f;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s ease;
+
+    &:focus {
+      border-color: #1769dc;
+      box-shadow: 0 0 0 2px rgba(23, 105, 220, 0.1);
+      background: #ffffff;
+    }
+
+    &::placeholder {
+      color: #929fb1;
+    }
+  }
 }
 
 .workout-collapse-toggle strong {
