@@ -52,12 +52,12 @@ export class WorkoutsComponent implements OnInit {
   filteredWorkouts = computed(() => {
     let data = [...this.workouts()];
     const query = this.searchQuery().trim().toLowerCase();
-    
+
     if (query) {
-      data = data.filter(w => 
-        (w.name && w.name.toLowerCase().includes(query)) || 
+      data = data.filter(w =>
+        (w.name && w.name.toLowerCase().includes(query)) ||
         (w.exercises && w.exercises.some(e => e.muscleGroup && e.muscleGroup.toLowerCase().includes(query))) ||
-        (w.exercises && w.exercises.some(e => e.name && e.name.toLowerCase().includes(query)))
+        (w.exercises && w.exercises.some(e => e.exerciseName && e.exerciseName.toLowerCase().includes(query)))
       );
     }
 

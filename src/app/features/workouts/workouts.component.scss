@@ -199,7 +199,7 @@
     font-size: 11px;
   }
 
-  > strong {
+  >strong {
     color: #0066cc;
     font-size: 16px;
   }
@@ -335,7 +335,7 @@
     background: transparent;
   }
 
-  .ant-table-thead > tr > th {
+  .ant-table-thead>tr>th {
     padding: 13px 18px;
     color: #7b8493;
     font-size: 10px;
@@ -346,17 +346,17 @@
     border-bottom-color: #e9edf3;
   }
 
-  .ant-table-tbody > tr > td {
+  .ant-table-tbody>tr>td {
     padding: 15px 18px;
     color: #4b5563;
     border-bottom-color: #f0f2f5;
   }
 
-  .ant-table-tbody > .workout-row:hover > td {
+  .ant-table-tbody>.workout-row:hover>td {
     background: #fbfcff !important;
   }
 
-  .workout-details-row > td {
+  .workout-details-row>td {
     padding: 0 18px 18px !important;
     background: #fff !important;
   }
@@ -614,7 +614,7 @@
     justify-content: space-between;
     gap: 12px;
 
-    > div {
+    >div {
       min-width: 0;
     }
 
@@ -688,7 +688,7 @@
     background: #f7f8fb;
     border-radius: 12px;
 
-    > div:first-child {
+    >div:first-child {
       display: grid;
       min-width: 0;
       gap: 2px;
@@ -741,7 +741,7 @@
     border: 1px solid rgba(0, 0, 0, 0.07);
     border-radius: 18px;
 
-    > span {
+    >span {
       color: #c7c7cc;
       font-size: 38px;
     }
