@@ -41,6 +41,7 @@ export class WorkoutsComponent implements OnInit {
   runningSessions = signal<RunningSession[]>([]);
   sortColumn = signal<string>('date');
   sortDirection = signal<'ascend' | 'descend' | null>('descend');
+  searchQuery = signal<string>('');
   modalVisible = signal(false);
   editingWorkout = signal<Workout | null>(null);
   cardioHistoryOpen = signal(true);
@@ -50,6 +51,16 @@ export class WorkoutsComponent implements OnInit {
 
   filteredWorkouts = computed(() => {
     let data = [...this.workouts()];
+    const query = this.searchQuery().trim().toLowerCase();
+
+    if (query) {
+      data = data.filter(w =>
+        (w.name && w.name.toLowerCase().includes(query)) ||
+        (w.exercises && w.exercises.some(e => e.muscleGroup && e.muscleGroup.toLowerCase().includes(query))) ||
+        (w.exercises && w.exercises.some(e => e.exerciseName && e.exerciseName.toLowerCase().includes(query)))
+      );
+    }
+
     const sc = this.sortColumn();
     const sd = this.sortDirection();
     if (sc && sd) {
@@ -70,6 +81,11 @@ export class WorkoutsComponent implements OnInit {
 
     return data;
   });
+
+  onSearch(event: Event) {
+    const value = (event.target as HTMLInputElement | null)?.value ?? '';
+    this.searchQuery.set(value);
+  }
 
   onSortOrderChange(column: string, direction: string | null) {
     this.sortColumn.set(column);

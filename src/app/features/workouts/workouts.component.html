@@ -1,44 +1,41 @@
 <nz-layout class="app-layout">
   <!-- Sidebar -->
-  <nz-sider
-    [nzWidth]="208"
-    class="sidebar"
-  >
-      <div class="sidebar-logo">
-        <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
-      </div>
-      <ul nz-menu nzMode="inline" class="sidebar-menu">
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/dashboard" aria-label="Dashboard">
-            <span nz-icon nzType="dashboard"></span>
-            <span>Home</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/workouts" aria-label="Workouts">
-            <span nz-icon nzType="thunderbolt"></span>
-            <span>History</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/start-workout" aria-label="Start workout">
-            <span nz-icon nzType="play-circle"></span>
-            <span>Workout</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/running" aria-label="Running">
-            <span nz-icon nzType="rise"></span>
-            <span>Run</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/bmi" aria-label="Nutrition calculator">
-            <span nz-icon nzType="heart"></span>
-            <span>Nutrition</span>
-          </a>
-        </li>
-      </ul>
+  <nz-sider [nzWidth]="208" class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
+    </div>
+    <ul nz-menu nzMode="inline" class="sidebar-menu">
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/dashboard" aria-label="Dashboard">
+          <span nz-icon nzType="dashboard"></span>
+          <span>Home</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/workouts" aria-label="Workouts">
+          <span nz-icon nzType="thunderbolt"></span>
+          <span>History</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/start-workout" aria-label="Start workout">
+          <span nz-icon nzType="play-circle"></span>
+          <span>Workout</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/running" aria-label="Running">
+          <span nz-icon nzType="rise"></span>
+          <span>Run</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/bmi" aria-label="Nutrition calculator">
+          <span nz-icon nzType="heart"></span>
+          <span>Nutrition</span>
+        </a>
+      </li>
+    </ul>
   </nz-sider>
 
   <nz-layout class="main-layout">
@@ -72,7 +69,10 @@
         </div>
 
         <div class="collapse-content" *ngIf="cardioHistoryOpen()">
-          <div class="cardio-session-grid" *ngIf="runningSessions().length > 0; else noCardioSessions">
+          <div
+            class="cardio-session-grid"
+            *ngIf="runningSessions().length > 0; else noCardioSessions"
+          >
             <article class="cardio-session-card" *ngFor="let session of runningSessions()">
               <div class="cardio-session-header">
                 <div>
@@ -117,183 +117,193 @@
             <span>Training log</span>
             <h3>Workout history</h3>
           </div>
-          <button
-            type="button"
-            class="collapse-toggle workout-collapse-toggle"
-            [attr.aria-expanded]="workoutHistoryOpen()"
-            aria-label="Toggle workout history"
-            (click)="toggleWorkoutHistory()"
-          >
-            <strong>{{ filteredWorkouts().length }} sessions</strong>
-            <span nz-icon [nzType]="workoutHistoryOpen() ? 'up' : 'down'"></span>
-          </button>
+          <div class="history-table-controls">
+            <div class="search-input-wrapper">
+              <span nz-icon nzType="search" aria-hidden="true"></span>
+              <input
+                type="search"
+                aria-label="Search workouts"
+                placeholder="Search workouts..."
+                class="workout-search-input"
+                (input)="onSearch($event)"
+              />
+            </div>
+            <button
+              type="button"
+              class="collapse-toggle workout-collapse-toggle"
+              [attr.aria-expanded]="workoutHistoryOpen()"
+              aria-label="Toggle workout history"
+              (click)="toggleWorkoutHistory()"
+            >
+              <strong>{{ filteredWorkouts().length }} sessions</strong>
+              <span nz-icon [nzType]="workoutHistoryOpen() ? 'up' : 'down'"></span>
+            </button>
+          </div>
         </div>
 
         <ng-container *ngIf="workoutHistoryOpen()">
-        <div class="table-card desktop-workout-table">
-          <nz-table
-            #workoutTable
-            [nzData]="filteredWorkouts()"
-            [nzNoResult]="hideTableNoResult"
-            [nzPageSize]="10"
-            nzSize="middle"
-          >
-            <thead>
-              <tr>
-                <th
-                  nzColumnKey="name"
-                  nzShowSort
-                  [nzSortFn]="true"
-                  [nzSortOrder]="sortColumn() === 'name' ? sortDirection() : null"
-                  (nzSortOrderChange)="onSortOrderChange('name', $event)"
-                >
-                  Workout
-                </th>
-                <th>
-                  Exercises
-                </th>
-                <th>
-                  Primary muscle
-                </th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <ng-container *ngFor="let w of workoutTable.data">
-                <tr class="workout-row">
-                  <td class="workout-name-cell">
-                    <strong>{{ w.name }}</strong>
-                  </td>
-                  <td class="workout-count-cell">
-                    {{ w.exercises.length || 0 }}
-                  </td>
-                  <td class="muscle-group-cell">
-                    <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}</nz-tag>
-                  </td>
-                  <td class="workout-actions-cell">
-                    <button
-                      nz-button
-                      nzType="text"
-                      nzSize="small"
-                      class="details-button"
-                      (click)="onExpandChange(w.id!, !expandSet.has(w.id!))"
-                    >
-                      <span>{{ expandSet.has(w.id!) ? 'Hide' : 'Details' }}</span>
-                      <span nz-icon [nzType]="expandSet.has(w.id!) ? 'up' : 'down'"></span>
-                    </button>
-                    <button
-                      nz-button
-                      nzType="text"
-                      nzSize="small"
-                      (click)="openEdit(w)"
-                      style="margin-right: 4px"
-                    >
-                      <span nz-icon nzType="edit"></span>
-                    </button>
-                    <button
-                      nz-button
-                      nzType="text"
-                      nzSize="small"
-                      nzDanger
-                      nz-popconfirm
-                      nzPopconfirmTitle="Are you sure you want to delete?"
-                      (nzOnConfirm)="deleteWorkout(w.id!)"
-                    >
-                      <span nz-icon nzType="delete"></span>
-                    </button>
-                  </td>
+          <div class="table-card desktop-workout-table">
+            <nz-table
+              #workoutTable
+              [nzData]="filteredWorkouts()"
+              [nzNoResult]="hideTableNoResult"
+              [nzPageSize]="10"
+              nzSize="middle"
+            >
+              <thead>
+                <tr>
+                  <th
+                    nzColumnKey="name"
+                    nzShowSort
+                    [nzSortFn]="true"
+                    [nzSortOrder]="sortColumn() === 'name' ? sortDirection() : null"
+                    (nzSortOrderChange)="onSortOrderChange('name', $event)"
+                  >
+                    Workout
+                  </th>
+                  <th>Exercises</th>
+                  <th>Primary muscle</th>
+                  <th>Actions</th>
                 </tr>
-                <tr class="workout-details-row" *ngIf="expandSet.has(w.id!)">
-                  <td colspan="4">
-                    <div class="desktop-exercise-list">
-                      <div class="desktop-exercise-row" *ngFor="let ex of w.exercises">
-                        <div class="desktop-exercise-info">
-                          <strong>{{ ex.exerciseName }}</strong>
-                          <span>{{ ex.muscleGroup }}</span>
-                        </div>
-                        <div class="desktop-exercise-stats">
-                          <span>{{ ex.sets }} sets</span>
-                          <span>{{ ex.reps }} reps</span>
-                          <span>{{ ex.weight }} kg</span>
+              </thead>
+              <tbody>
+                <ng-container *ngFor="let w of workoutTable.data">
+                  <tr class="workout-row">
+                    <td class="workout-name-cell">
+                      <strong>{{ w.name }}</strong>
+                    </td>
+                    <td class="workout-count-cell">
+                      {{ w.exercises.length || 0 }}
+                    </td>
+                    <td class="muscle-group-cell">
+                      <nz-tag [nzColor]="'default'">{{
+                        w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed'
+                      }}</nz-tag>
+                    </td>
+                    <td class="workout-actions-cell">
+                      <button
+                        nz-button
+                        nzType="text"
+                        nzSize="small"
+                        class="details-button"
+                        (click)="onExpandChange(w.id!, !expandSet.has(w.id!))"
+                      >
+                        <span>{{ expandSet.has(w.id!) ? 'Hide' : 'Details' }}</span>
+                        <span nz-icon [nzType]="expandSet.has(w.id!) ? 'up' : 'down'"></span>
+                      </button>
+                      <button
+                        nz-button
+                        nzType="text"
+                        nzSize="small"
+                        (click)="openEdit(w)"
+                        style="margin-right: 4px"
+                      >
+                        <span nz-icon nzType="edit"></span>
+                      </button>
+                      <button
+                        nz-button
+                        nzType="text"
+                        nzSize="small"
+                        nzDanger
+                        nz-popconfirm
+                        nzPopconfirmTitle="Are you sure you want to delete?"
+                        (nzOnConfirm)="deleteWorkout(w.id!)"
+                      >
+                        <span nz-icon nzType="delete"></span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr class="workout-details-row" *ngIf="expandSet.has(w.id!)">
+                    <td colspan="4">
+                      <div class="desktop-exercise-list">
+                        <div class="desktop-exercise-row" *ngFor="let ex of w.exercises">
+                          <div class="desktop-exercise-info">
+                            <strong>{{ ex.exerciseName }}</strong>
+                            <span>{{ ex.muscleGroup }}</span>
+                          </div>
+                          <div class="desktop-exercise-stats">
+                            <span>{{ ex.sets }} sets</span>
+                            <span>{{ ex.reps }} reps</span>
+                            <span>{{ ex.weight }} kg</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    </td>
+                  </tr>
+                </ng-container>
+                <tr *ngIf="filteredWorkouts().length === 0">
+                  <td colspan="4" style="text-align: center; padding: 48px; color: #6e6e73">
+                    <span
+                      nz-icon
+                      nzType="inbox"
+                      style="font-size: 48px; display: block; margin-bottom: 16px; color: #d1d1d6"
+                    ></span>
+                    No workouts have been saved yet.
                   </td>
                 </tr>
-              </ng-container>
-              <tr *ngIf="filteredWorkouts().length === 0">
-                <td colspan="4" style="text-align: center; padding: 48px; color: #6e6e73">
-                  <span
-                    nz-icon
-                    nzType="inbox"
-                    style="font-size: 48px; display: block; margin-bottom: 16px; color: #d1d1d6"
-                  ></span>
-                  No workouts have been saved yet.
-                </td>
-              </tr>
-            </tbody>
-          </nz-table>
-        </div>
-
-        <div class="mobile-workout-list">
-          <article class="mobile-workout-card" *ngFor="let w of filteredWorkouts()">
-            <div class="mobile-workout-header">
-              <div>
-                <h3>{{ w.name }}</h3>
-              </div>
-              <nz-tag [nzColor]="'default'">
-                {{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}
-              </nz-tag>
-            </div>
-
-            <div class="mobile-workout-summary">
-              <span>{{ w.exercises.length || 0 }} exercises</span>
-            </div>
-
-            <div class="mobile-workout-actions">
-              <button
-                nz-button
-                nzType="default"
-                (click)="onExpandChange(w.id!, !expandSet.has(w.id!))"
-              >
-                <span nz-icon [nzType]="expandSet.has(w.id!) ? 'up' : 'down'"></span>
-                {{ expandSet.has(w.id!) ? 'Hide' : 'Details' }}
-              </button>
-              <button nz-button nzType="default" (click)="openEdit(w)">
-                <span nz-icon nzType="edit"></span>
-                Edit
-              </button>
-              <button
-                nz-button
-                nzDanger
-                nz-popconfirm
-                nzPopconfirmTitle="Are you sure you want to delete?"
-                (nzOnConfirm)="deleteWorkout(w.id!)"
-              >
-                <span nz-icon nzType="delete"></span>
-              </button>
-            </div>
-
-            <div class="mobile-exercise-list" *ngIf="expandSet.has(w.id!)">
-              <div class="mobile-exercise-row" *ngFor="let ex of w.exercises">
-                <div>
-                  <strong>{{ ex.exerciseName }}</strong>
-                  <span>{{ ex.muscleGroup }}</span>
-                </div>
-                <div class="mobile-exercise-stats">
-                  <span>{{ ex.sets }} sets</span>
-                  <span>{{ ex.reps }} reps</span>
-                  <span>{{ ex.weight }} kg</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <div class="mobile-empty-state" *ngIf="filteredWorkouts().length === 0">
-            <span nz-icon nzType="inbox"></span>
-            <p>No workouts have been saved yet.</p>
+              </tbody>
+            </nz-table>
           </div>
-        </div>
+
+          <div class="mobile-workout-list">
+            <article class="mobile-workout-card" *ngFor="let w of filteredWorkouts()">
+              <div class="mobile-workout-header">
+                <div>
+                  <h3>{{ w.name }}</h3>
+                </div>
+                <nz-tag [nzColor]="'default'">
+                  {{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}
+                </nz-tag>
+              </div>
+
+              <div class="mobile-workout-summary">
+                <span>{{ w.exercises.length || 0 }} exercises</span>
+              </div>
+
+              <div class="mobile-workout-actions">
+                <button
+                  nz-button
+                  nzType="default"
+                  (click)="onExpandChange(w.id!, !expandSet.has(w.id!))"
+                >
+                  <span nz-icon [nzType]="expandSet.has(w.id!) ? 'up' : 'down'"></span>
+                  {{ expandSet.has(w.id!) ? 'Hide' : 'Details' }}
+                </button>
+                <button nz-button nzType="default" (click)="openEdit(w)">
+                  <span nz-icon nzType="edit"></span>
+                  Edit
+                </button>
+                <button
+                  nz-button
+                  nzDanger
+                  nz-popconfirm
+                  nzPopconfirmTitle="Are you sure you want to delete?"
+                  (nzOnConfirm)="deleteWorkout(w.id!)"
+                >
+                  <span nz-icon nzType="delete"></span>
+                </button>
+              </div>
+
+              <div class="mobile-exercise-list" *ngIf="expandSet.has(w.id!)">
+                <div class="mobile-exercise-row" *ngFor="let ex of w.exercises">
+                  <div>
+                    <strong>{{ ex.exerciseName }}</strong>
+                    <span>{{ ex.muscleGroup }}</span>
+                  </div>
+                  <div class="mobile-exercise-stats">
+                    <span>{{ ex.sets }} sets</span>
+                    <span>{{ ex.reps }} reps</span>
+                    <span>{{ ex.weight }} kg</span>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <div class="mobile-empty-state" *ngIf="filteredWorkouts().length === 0">
+              <span nz-icon nzType="inbox"></span>
+              <p>No workouts have been saved yet.</p>
+            </div>
+          </div>
         </ng-container>
       </section>
     </nz-content>
