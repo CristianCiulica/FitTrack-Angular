@@ -17,6 +17,9 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { RouterLinkActive } from '@angular/router';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 
+type WorkoutSortColumn = 'name' | 'date' | 'exerciseCount' | 'primaryMuscle' | 'volume';
+type SortDirection = 'ascend' | 'descend' | null;
+
 @Component({
   selector: 'app-workouts',
   standalone: true,
@@ -39,8 +42,8 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
 export class WorkoutsComponent implements OnInit {
   workouts = signal<Workout[]>([]);
   runningSessions = signal<RunningSession[]>([]);
-  sortColumn = signal<string>('date');
-  sortDirection = signal<'ascend' | 'descend' | null>('descend');
+  sortColumn = signal<WorkoutSortColumn>('date');
+  sortDirection = signal<SortDirection>('descend');
   searchQuery = signal<string>('');
   modalVisible = signal(false);
   editingWorkout = signal<Workout | null>(null);
@@ -56,6 +59,8 @@ export class WorkoutsComponent implements OnInit {
     if (query) {
       data = data.filter(w =>
         (w.name && w.name.toLowerCase().includes(query)) ||
+        (w.date && w.date.toLowerCase().includes(query)) ||
+        String(this.getWorkoutVolume(w)).includes(query) ||
         (w.exercises && w.exercises.some(e => e.muscleGroup && e.muscleGroup.toLowerCase().includes(query))) ||
         (w.exercises && w.exercises.some(e => e.exerciseName && e.exerciseName.toLowerCase().includes(query)))
       );
@@ -66,16 +71,12 @@ export class WorkoutsComponent implements OnInit {
     if (sc && sd) {
       const multiplier = sd === 'ascend' ? 1 : -1;
       data.sort((a, b) => {
-        let av: any = (a as any)[sc];
-        let bv: any = (b as any)[sc];
-        if (sc === 'date') {
-          av = new Date(av).getTime();
-          bv = new Date(bv).getTime();
-        }
+        const av = this.getSortValue(a, sc);
+        const bv = this.getSortValue(b, sc);
         if (typeof av === 'string' && typeof bv === 'string') {
           return av.localeCompare(bv) * multiplier;
         }
-        return ((av ?? 0) - (bv ?? 0)) * multiplier;
+        return (Number(av) - Number(bv)) * multiplier;
       });
     }
 
@@ -87,9 +88,43 @@ export class WorkoutsComponent implements OnInit {
     this.searchQuery.set(value);
   }
 
-  onSortOrderChange(column: string, direction: string | null) {
+  onSortOrderChange(column: WorkoutSortColumn, direction: string | null) {
     this.sortColumn.set(column);
-    this.sortDirection.set(direction as 'ascend' | 'descend' | null);
+    this.sortDirection.set(
+      direction === 'ascend' || direction === 'descend' ? direction : null,
+    );
+  }
+
+  getExerciseCount(workout: Workout): number {
+    return workout.exercises?.length ?? 0;
+  }
+
+  getPrimaryMuscle(workout: Workout): string {
+    return workout.exercises?.[0]?.muscleGroup ?? 'Mixed';
+  }
+
+  getWorkoutVolume(workout: Workout): number {
+    return workout.exercises?.reduce(
+      (total, exercise) => total + exercise.sets * exercise.reps * exercise.weight,
+      0,
+    ) ?? 0;
+  }
+
+  private getSortValue(workout: Workout, column: WorkoutSortColumn): string | number {
+    switch (column) {
+      case 'name':
+        return workout.name.toLowerCase();
+      case 'date': {
+        const time = new Date(workout.date).getTime();
+        return Number.isFinite(time) ? time : 0;
+      }
+      case 'exerciseCount':
+        return this.getExerciseCount(workout);
+      case 'primaryMuscle':
+        return this.getPrimaryMuscle(workout).toLowerCase();
+      case 'volume':
+        return this.getWorkoutVolume(workout);
+    }
   }
 
   toggleCardioHistory() {

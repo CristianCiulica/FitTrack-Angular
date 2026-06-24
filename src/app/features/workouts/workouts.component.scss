@@ -327,11 +327,13 @@
   border: 1px solid #e9edf3;
   border-radius: 16px;
   box-shadow: 0 6px 22px rgba(15, 23, 42, 0.045);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 ::ng-deep .table-card {
   .ant-table {
+    min-width: 780px;
     background: transparent;
   }
 
@@ -430,9 +432,17 @@
   font-size: 14px;
 }
 
-.workout-count-cell {
+.workout-date-cell,
+.workout-count-cell,
+.workout-volume-cell {
   color: #667085;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.workout-volume-cell {
+  color: #1d4ed8;
+  font-weight: 700;
 }
 
 .muscle-group-cell,
@@ -599,6 +609,25 @@
     border-radius: 16px;
   }
 
+  .history-table-heading {
+    align-items: flex-start;
+  }
+
+  .history-table-controls {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .search-input-wrapper {
+    flex: 1 1 190px;
+    min-width: 0;
+
+    .workout-search-input {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
   .mobile-workout-card {
     min-width: 0;
     padding: 16px;
@@ -640,15 +669,39 @@
   }
 
   .mobile-workout-summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 12px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
     margin-top: 12px;
-    color: #6e6e73;
-    font-size: 13px;
 
-    span:last-child {
-      overflow-wrap: anywhere;
+    span {
+      min-width: 0;
+      padding: 9px 10px;
+      background: #f7f8fb;
+      border: 1px solid #eef1f5;
+      border-radius: 12px;
+    }
+
+    small {
+      display: block;
+      margin-bottom: 3px;
+      color: #8e8e93;
+      font-size: 9px;
+      font-weight: 750;
+      letter-spacing: 0.45px;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    strong {
+      display: block;
+      overflow: hidden;
+      color: #374151;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -814,6 +867,10 @@
 @media (max-width: 360px) {
   .workouts-header .header-actions .button-label {
     display: none;
+  }
+
+  .mobile-workout-summary {
+    grid-template-columns: 1fr;
   }
 
   .mobile-workout-actions {

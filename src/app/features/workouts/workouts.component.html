@@ -161,8 +161,42 @@
                   >
                     Workout
                   </th>
-                  <th>Exercises</th>
-                  <th>Primary muscle</th>
+                  <th
+                    nzColumnKey="date"
+                    nzShowSort
+                    [nzSortFn]="true"
+                    [nzSortOrder]="sortColumn() === 'date' ? sortDirection() : null"
+                    (nzSortOrderChange)="onSortOrderChange('date', $event)"
+                  >
+                    Date
+                  </th>
+                  <th
+                    nzColumnKey="exerciseCount"
+                    nzShowSort
+                    [nzSortFn]="true"
+                    [nzSortOrder]="sortColumn() === 'exerciseCount' ? sortDirection() : null"
+                    (nzSortOrderChange)="onSortOrderChange('exerciseCount', $event)"
+                  >
+                    Exercises
+                  </th>
+                  <th
+                    nzColumnKey="primaryMuscle"
+                    nzShowSort
+                    [nzSortFn]="true"
+                    [nzSortOrder]="sortColumn() === 'primaryMuscle' ? sortDirection() : null"
+                    (nzSortOrderChange)="onSortOrderChange('primaryMuscle', $event)"
+                  >
+                    Primary muscle
+                  </th>
+                  <th
+                    nzColumnKey="volume"
+                    nzShowSort
+                    [nzSortFn]="true"
+                    [nzSortOrder]="sortColumn() === 'volume' ? sortDirection() : null"
+                    (nzSortOrderChange)="onSortOrderChange('volume', $event)"
+                  >
+                    Volume
+                  </th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -172,13 +206,17 @@
                     <td class="workout-name-cell">
                       <strong>{{ w.name }}</strong>
                     </td>
+                    <td class="workout-date-cell">
+                      {{ w.date | date: 'd MMM y' }}
+                    </td>
                     <td class="workout-count-cell">
-                      {{ w.exercises.length || 0 }}
+                      {{ getExerciseCount(w) }}
                     </td>
                     <td class="muscle-group-cell">
-                      <nz-tag [nzColor]="'default'">{{
-                        w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed'
-                      }}</nz-tag>
+                      <nz-tag [nzColor]="'default'">{{ getPrimaryMuscle(w) }}</nz-tag>
+                    </td>
+                    <td class="workout-volume-cell">
+                      {{ getWorkoutVolume(w) | number: '1.0-0' }} kg
                     </td>
                     <td class="workout-actions-cell">
                       <button
@@ -214,7 +252,7 @@
                     </td>
                   </tr>
                   <tr class="workout-details-row" *ngIf="expandSet.has(w.id!)">
-                    <td colspan="4">
+                    <td colspan="6">
                       <div class="desktop-exercise-list">
                         <div class="desktop-exercise-row" *ngFor="let ex of w.exercises">
                           <div class="desktop-exercise-info">
@@ -232,7 +270,7 @@
                   </tr>
                 </ng-container>
                 <tr *ngIf="filteredWorkouts().length === 0">
-                  <td colspan="4" style="text-align: center; padding: 48px; color: #6e6e73">
+                  <td colspan="6" style="text-align: center; padding: 48px; color: #6e6e73">
                     <span
                       nz-icon
                       nzType="inbox"
@@ -252,12 +290,23 @@
                   <h3>{{ w.name }}</h3>
                 </div>
                 <nz-tag [nzColor]="'default'">
-                  {{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}
+                  {{ getPrimaryMuscle(w) }}
                 </nz-tag>
               </div>
 
               <div class="mobile-workout-summary">
-                <span>{{ w.exercises.length || 0 }} exercises</span>
+                <span>
+                  <small>Date</small>
+                  <strong>{{ w.date | date: 'd MMM y' }}</strong>
+                </span>
+                <span>
+                  <small>Exercises</small>
+                  <strong>{{ getExerciseCount(w) }}</strong>
+                </span>
+                <span>
+                  <small>Volume</small>
+                  <strong>{{ getWorkoutVolume(w) | number: '1.0-0' }} kg</strong>
+                </span>
               </div>
 
               <div class="mobile-workout-actions">
