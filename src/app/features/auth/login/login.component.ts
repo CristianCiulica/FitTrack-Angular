@@ -8,6 +8,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
@@ -21,6 +22,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
     NzInputModule,
     NzButtonModule,
     NzIconModule,
+    NzCheckboxModule,
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
@@ -40,7 +42,8 @@ export class LoginComponent {
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, strongPasswordValidator]]
+      password: ['', [Validators.required, strongPasswordValidator]],
+      remember: [false],
     });
   }
 
@@ -50,8 +53,8 @@ export class LoginComponent {
       return;
     }
     this.loading = true;
-    const { email, password } = this.form.value;
-    this.auth.login(email, password, false).subscribe({
+    const { email, password, remember } = this.form.value;
+    this.auth.login(email, password, !!remember).subscribe({
       next: () => {
         this.loadingService.showAfterNextNavigation(1000);
         this.router.navigate(['/dashboard']);

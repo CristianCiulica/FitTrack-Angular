@@ -198,6 +198,15 @@
   }
 }
 
+.remember-row {
+  display: inline-flex;
+  align-items: center;
+  margin: 4px 0 18px;
+  color: #3c4250;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .submit-btn {
   height: 48px !important;
   border-radius: 12px !important;

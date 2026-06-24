@@ -56,7 +56,11 @@ export class AuthService {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
 
-    return from(signInWithPopup(this.auth, provider));
+    return from(
+      setPersistence(this.auth, browserLocalPersistence).then(() =>
+        signInWithPopup(this.auth, provider),
+      ),
+    );
   }
 
   get currentUserId(): string {
