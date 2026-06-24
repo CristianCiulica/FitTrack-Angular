@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, effect, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -27,37 +27,40 @@ import { Workout, MUSCLE_GROUPS } from '../../../core/models/workout.model';
   templateUrl: './workout-modal.component.html',
   styleUrls: ['./workout-modal.component.scss']
 })
-export class WorkoutModalComponent implements OnChanges {
-  @Input() visible = false;
-  @Input() workout: Workout | null = null;
-  @Output() save = new EventEmitter<Partial<Workout>>();
-  @Output() cancel = new EventEmitter<void>();
+export class WorkoutModalComponent {
+  visible = input(false);
+  workout = input<Workout | null>(null);
+  save = output<Partial<Workout>>();
+  cancel = output<void>();
 
   form: FormGroup;
   muscleGroups = MUSCLE_GROUPS;
 
-  get isEdit() { return !!this.workout; }
+  get isEdit() { return !!this.workout(); }
   get title() { return this.isEdit ? 'Edit workout' : 'Add new workout'; }
   get exercises() { return this.form.get('exercises') as FormArray; }
 
   constructor(private fb: FormBuilder) {
     this.form = this.buildForm();
+    effect(() => {
+      if (this.visible()) {
+        this.resetForm(this.workout());
+      }
+    });
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['visible'] && this.visible) {
-      this.form = this.buildForm();
-      if (this.workout) {
-        this.form.patchValue({
-          name: this.workout.name
-        });
-        this.exercises.clear();
-        if (this.workout.exercises && this.workout.exercises.length) {
-          this.workout.exercises.forEach(ex => this.addExercise(ex));
-        } else {
-          this.addExercise();
-        }
-      }
+  private resetForm(workout: Workout | null) {
+    this.form = this.buildForm();
+    if (!workout) return;
+
+    this.form.patchValue({
+      name: workout.name
+    });
+    this.exercises.clear();
+    if (workout.exercises && workout.exercises.length) {
+      workout.exercises.forEach(ex => this.addExercise(ex));
+    } else {
+      this.addExercise();
     }
   }
 
