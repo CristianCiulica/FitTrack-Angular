@@ -30,7 +30,7 @@ Implemented parts:
 Implemented parts:
 
 - Signal-based state exists in several pages
-- The workout modal uses `@Input()` and `@Output()` for parent-child communication
+- The workout modal uses `input()` and `output()` for parent-child communication
 - Multiple services exist, including auth, workout, loading, reminder, running-session, and weather services
 
 ## 4. Table or list implementation
