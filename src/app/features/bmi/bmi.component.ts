@@ -39,8 +39,9 @@ export class BmiComponent {
   goal = signal<'lose' | 'gain'>('lose');
   goalRate = signal<number>(0.5);
 
+// folosim computed pentru valori calc automat
   bmi = computed(() => {
-    const h = this.height() / 100; // in meters
+    const h = this.height() / 100;
     const w = this.weight();
     if (h === 0) return '0.0';
     return (w / (h * h)).toFixed(1);

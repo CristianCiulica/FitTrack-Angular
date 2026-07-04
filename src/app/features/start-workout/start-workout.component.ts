@@ -122,11 +122,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   currentRoutine = signal<Routine>({ name: 'Custom Workout', exercises: [] });
 
-  // Active state vars
   currentExerciseIndex = signal(0);
   currentSetIndex = signal(1);
 
-  // Rest state vars
   restTimeTarget = signal(60);
   restTimeRemaining = signal(60);
   private timerInterval: any;
@@ -162,7 +160,6 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     const totalSets = this.currentRoutine().exercises.reduce((acc, ex) => acc + ex.sets, 0);
     if (totalSets === 0) return 0;
 
-    // completed sets
     let completed = 0;
     const exList = this.currentRoutine().exercises;
     for (let i = 0; i < this.currentExerciseIndex(); i++) completed += exList[i].sets;
@@ -291,7 +288,6 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   finishSet() {
-    // If not the last set or last exercise, go to rest
     this.state.set('rest');
     this.restTimeRemaining.set(this.restTimeTarget());
 
@@ -311,11 +307,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (!currEx) return;
 
     if (this.currentSetIndex() < currEx.sets) {
-      // next set
       this.currentSetIndex.set(this.currentSetIndex() + 1);
       this.state.set('active');
     } else {
-      // next exercise
       if (this.currentExerciseIndex() + 1 < this.currentRoutine().exercises.length) {
         this.currentExerciseIndex.set(this.currentExerciseIndex() + 1);
         this.currentSetIndex.set(1);
@@ -366,7 +360,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         reps: ex.reps,
         weight: ex.weight
       }))
-    }).subscribe(); // Ignoring sub errors for brevity here
+    }).subscribe();
   }
 
   reset() {

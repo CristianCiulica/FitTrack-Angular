@@ -47,6 +47,8 @@ const firebase = {
   measurementId: readValue('FIREBASE_MEASUREMENT_ID'),
 };
 
+const apiBaseUrl = readValue('API_BASE_URL') || 'http://localhost:4000/api';
+
 const requiredFields = [
   ['FIREBASE_API_KEY', firebase.apiKey],
   ['FIREBASE_AUTH_DOMAIN', firebase.authDomain],
@@ -71,7 +73,7 @@ mkdirSync(outputDirectory, { recursive: true });
 
 writeFileSync(
   outputPath,
-  `window.__FITTRACK_CONFIG__ = Object.freeze(${JSON.stringify({ firebase }, null, 2)});\n`,
+  `window.__FITTRACK_CONFIG__ = Object.freeze(${JSON.stringify({ firebase, apiBaseUrl }, null, 2)});\n`,
   'utf8',
 );
 

@@ -57,6 +57,7 @@ export interface WeatherSummary {
 export class WeatherService {
   constructor(private http: HttpClient) {}
 
+  // integrare Open Meteo
   getCityWeather(city: string) {
     const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
     return this.http.get<GeoResponse>(geoUrl).pipe(
@@ -141,6 +142,7 @@ export class WeatherService {
     return { willRain, maxProbability, window };
   }
 
+  // folosim codurile default de vreme de la openAPI
   private calculateScore(params: {
     temp: number;
     wind: number;
@@ -212,4 +214,3 @@ export class WeatherService {
     return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   }
 }
-

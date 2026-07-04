@@ -83,11 +83,13 @@ export class WorkoutsComponent implements OnInit {
     return data;
   });
 
+  //cautare in lista
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement | null)?.value ?? '';
     this.searchQuery.set(value);
   }
 
+  //sortare pe fiecare coloana
   onSortOrderChange(column: WorkoutSortColumn, direction: string | null) {
     this.sortColumn.set(column);
     this.sortDirection.set(
@@ -152,9 +154,9 @@ export class WorkoutsComponent implements OnInit {
 
   ngOnInit() {
     this.refreshWorkouts();
-    this.runningSessions.set(
-      this.runningSessionService.getSessions(this.authService.currentUserId),
-    );
+    this.runningSessionService.getSessions().subscribe((sessions) => {
+      this.runningSessions.set(sessions);
+    });
   }
 
   formatDuration(totalSeconds: number): string {
@@ -172,11 +174,7 @@ export class WorkoutsComponent implements OnInit {
   }
 
   private refreshWorkouts() {
-    this.workoutService.getWorkouts().subscribe(data => {
-      this.workouts.set(data);
-      this.workoutService.workouts.set(data);
-      this.workoutService.totalWorkouts.set(data.length);
-    });
+    this.workoutService.getWorkouts().subscribe((data) => this.workouts.set(data));
   }
 
   openEdit(workout: Workout) {

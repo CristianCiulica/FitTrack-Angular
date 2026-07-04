@@ -130,6 +130,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.startTracking();
   }
 
+  // logica de gps tracking
   startTracking() {
     if (!navigator.geolocation) {
       this.message.error('Geolocation is not supported on this device.');
@@ -358,19 +359,24 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     const endedAt = Date.now();
-    this.runningSessionService.saveSession({
-      userId,
-      mode: this.mode,
-      startedAt: new Date(this.sessionStartedAt).toISOString(),
-      endedAt: new Date(endedAt).toISOString(),
-      durationSeconds: Math.max(1, Math.round((endedAt - this.sessionStartedAt) / 1000)),
-      distanceMeters: Math.round(this.distanceMeters),
-      steps: this.steps,
-      averageSpeedKmh: Number(this.avgSpeedKmh.toFixed(1)),
-      calories: Math.round(this.calories),
-    });
+    const startedAt = this.sessionStartedAt;
+    this.runningSessionService
+      .saveSession({
+        userId,
+        mode: this.mode,
+        startedAt: new Date(startedAt).toISOString(),
+        endedAt: new Date(endedAt).toISOString(),
+        durationSeconds: Math.max(1, Math.round((endedAt - startedAt) / 1000)),
+        distanceMeters: Math.round(this.distanceMeters),
+        steps: this.steps,
+        averageSpeedKmh: Number(this.avgSpeedKmh.toFixed(1)),
+        calories: Math.round(this.calories),
+      })
+      .subscribe({
+        next: () => this.message.success('Workout saved in History.'),
+        error: () => this.message.error('Could not save your session. Please try again.'),
+      });
     this.sessionStartedAt = null;
-    this.message.success('Workout saved in History.');
   }
 
   private handleCalibrationFix(point: L.LatLng, timestamp: number, accuracy: number) {

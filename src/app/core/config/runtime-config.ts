@@ -2,6 +2,7 @@ import type { FirebaseOptions } from 'firebase/app';
 
 interface FitTrackRuntimeConfig {
   firebase?: FirebaseOptions;
+  apiBaseUrl?: string;
 }
 
 declare global {
@@ -20,4 +21,12 @@ export function getFirebaseConfig(): FirebaseOptions {
   }
 
   return config;
+}
+
+export function getApiBaseUrl(): string {
+  const url = window.__FITTRACK_CONFIG__?.apiBaseUrl;
+  if (!url) {
+    return 'http://localhost:4000/api';
+  }
+  return url.replace(/\/$/, '');
 }

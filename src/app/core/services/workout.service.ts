@@ -1,16 +1,15 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { Auth, user } from '@angular/fire/auth';
 import { Workout } from '../models/workout.model';
-import { Observable, of, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+import { ApiService } from './api.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorkoutService {
+  // folosim signals pentru statistici/lista
   totalWorkouts = signal<number>(0);
   workouts = signal<Workout[]>([]);
-  private readonly auth = inject(Auth);
-  private readonly authState$ = user(this.auth);
-  private readonly storagePrefix = 'fittrack_workouts';
+  private readonly api = inject(ApiService);
 
   totalVolume = computed(() =>
     this.workouts().reduce((acc, w) => {
@@ -20,142 +19,28 @@ export class WorkoutService {
   );
 
   getWorkouts(): Observable<Workout[]> {
-    return this.authState$.pipe(
-      map((u) => this.loadWorkouts(u?.uid ?? '')),
+    return this.api.get<{ workouts: Workout[] }>('/workouts').pipe(
+      map((res) => res.workouts),
+      tap((workouts) => {
+        this.workouts.set(workouts);
+        this.totalWorkouts.set(workouts.length);
+      }),
     );
   }
 
-  addWorkout(workout: Omit<Workout, 'id'>) {
-    const uid = workout.userId;
-    const current = this.loadWorkouts(uid);
-    const nextWorkout: Workout = {
-      ...workout,
-      id: this.createWorkoutId(),
-    };
-    this.saveWorkouts(uid, [nextWorkout, ...current]);
-    return of(nextWorkout);
+  addWorkout(workout: Omit<Workout, 'id'>): Observable<Workout> {
+    return this.api
+      .post<{ workout: Workout }>('/workouts', workout)
+      .pipe(map((res) => res.workout));
   }
 
-  updateWorkout(id: string, workout: Partial<Workout>) {
-    const uid = workout.userId ?? this.auth.currentUser?.uid ?? '';
-    const current = this.loadWorkouts(uid);
-    const updated = current.map((item) => (item.id === id ? { ...item, ...workout } : item));
-    this.saveWorkouts(uid, updated);
-    return of(updated.find((item) => item.id === id));
+  updateWorkout(id: string, workout: Partial<Workout>): Observable<Workout> {
+    return this.api
+      .put<{ workout: Workout }>(`/workouts/${id}`, workout)
+      .pipe(map((res) => res.workout));
   }
 
-  deleteWorkout(id: string) {
-    const uid = this.auth.currentUser?.uid ?? '';
-    const current = this.loadWorkouts(uid);
-    this.saveWorkouts(uid, current.filter((item) => item.id !== id));
-    return of(void 0);
-  }
-
-  private getStorageKey(userId: string): string {
-    return `${this.storagePrefix}:${userId}`;
-  }
-
-  private loadWorkouts(userId: string): Workout[] {
-    if (!userId || typeof window === 'undefined') {
-      return [];
-    }
-
-    const raw = localStorage.getItem(this.getStorageKey(userId));
-    if (!raw) {
-      const predefinedWorkouts = this.getPredefinedWorkouts(userId);
-      this.saveWorkouts(userId, predefinedWorkouts);
-      return predefinedWorkouts;
-    }
-
-    try {
-      return (JSON.parse(raw) as Workout[])
-        .map((workout) => ({
-          ...workout,
-          isPredefined:
-            workout.isPredefined ??
-            ['Chest & Triceps Day', 'Leg Day', 'Back & Biceps', 'Shoulders - Volume'].includes(
-              workout.name,
-            ),
-        }))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    } catch {
-      return [];
-    }
-  }
-
-  private saveWorkouts(userId: string, workouts: Workout[]): void {
-    if (!userId || typeof window === 'undefined') {
-      return;
-    }
-
-    localStorage.setItem(this.getStorageKey(userId), JSON.stringify(workouts));
-    this.workouts.set(workouts);
-    this.totalWorkouts.set(workouts.length);
-  }
-
-  private createWorkoutId(): string {
-    return `w_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-  }
-
-  private getPredefinedWorkouts(userId: string): Workout[] {
-    const today = new Date();
-    const formatDate = (daysAgo: number) => {
-      const d = new Date(today);
-      d.setDate(d.getDate() - daysAgo);
-      return d.toISOString().split('T')[0];
-    };
-
-    return [
-      {
-        id: this.createWorkoutId() + '1',
-        userId,
-        isPredefined: true,
-        name: 'Chest & Triceps Day',
-        date: formatDate(1),
-        notes: 'Heavy pressing focus',
-        exercises: [
-          { exerciseName: 'Bench Press', muscleGroup: 'Chest', sets: 4, reps: 10, weight: 80 },
-          { exerciseName: 'Incline Dumbbell Press', muscleGroup: 'Chest', sets: 3, reps: 12, weight: 30 },
-          { exerciseName: 'Tricep Pushdowns', muscleGroup: 'Arms', sets: 3, reps: 15, weight: 25 }
-        ]
-      },
-      {
-        id: this.createWorkoutId() + '2',
-        userId,
-        isPredefined: true,
-        name: 'Leg Day',
-        date: formatDate(2),
-        notes: '2 min rest between sets',
-        exercises: [
-          { exerciseName: 'Squats', muscleGroup: 'Legs', sets: 4, reps: 8, weight: 100 },
-          { exerciseName: 'Leg Press', muscleGroup: 'Legs', sets: 3, reps: 15, weight: 150 }
-        ]
-      },
-      {
-        id: this.createWorkoutId() + '3',
-        userId,
-        isPredefined: true,
-        name: 'Back & Biceps',
-        date: formatDate(3),
-        notes: 'Focus on contraction',
-        exercises: [
-          { exerciseName: 'Pull-ups', muscleGroup: 'Back', sets: 4, reps: 10, weight: 0 },
-          { exerciseName: 'Barbell Rows', muscleGroup: 'Back', sets: 4, reps: 8, weight: 70 },
-          { exerciseName: 'Bicep Curls', muscleGroup: 'Arms', sets: 3, reps: 12, weight: 15 }
-        ]
-      },
-      {
-        id: this.createWorkoutId() + '4',
-        userId,
-        isPredefined: true,
-        name: 'Shoulders - Volume',
-        date: formatDate(4),
-        notes: 'Keep rest short',
-        exercises: [
-          { exerciseName: 'Overhead Press', muscleGroup: 'Shoulders', sets: 3, reps: 10, weight: 50 },
-          { exerciseName: 'Lateral Raises', muscleGroup: 'Shoulders', sets: 4, reps: 15, weight: 12.5 }
-        ]
-      }
-    ];
+  deleteWorkout(id: string): Observable<void> {
+    return this.api.delete<{ deleted: boolean }>(`/workouts/${id}`).pipe(map(() => void 0));
   }
 }

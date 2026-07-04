@@ -70,6 +70,7 @@ export class LoginComponent {
     this.passwordVisible = !this.passwordVisible;
   }
 
+  // logare cu google
   signInWithGoogle() {
     this.googleLoading = true;
     this.auth.signInWithGoogle().subscribe({
