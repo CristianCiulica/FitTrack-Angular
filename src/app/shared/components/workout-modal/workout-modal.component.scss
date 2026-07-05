@@ -1,56 +1,70 @@
-::ng-deep .ant-modal-content {
-  border-radius: 18px !important;
-  overflow: hidden;
-}
-
-::ng-deep .ant-modal-header {
-  border-radius: 18px 18px 0 0 !important;
-  border-bottom: 1px solid #f5f5f7 !important;
-  padding: 20px 24px !important;
-}
-
-::ng-deep .ant-modal-title {
-  font-size: 17px !important;
-  font-weight: 600 !important;
-  color: #1d1d1f !important;
-}
-
-::ng-deep .ant-modal-body {
-  padding: 24px !important;
-}
+/* ============================================================
+   Workout modal — Liquid Glass sheet
+   Frosted modal chrome comes from the global ant-modal overrides.
+   ============================================================ */
 
 .exercises-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-top: 16px;
+  margin-top: 18px;
 
   h3 {
     margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.018em;
+    color: #1d1d1f;
   }
 }
 
 .exercises-divider {
-  margin: 8px 0 16px;
+  margin: 10px 0 16px;
   border: none;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.exercises-list {
+  display: flex;
+  flex-direction: column;
 }
 
 .exercise-row {
   display: flex;
   gap: 8px;
   align-items: flex-end;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: background 0.18s ease, border-color 0.18s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
 }
 
 .ex-index {
-  padding-bottom: 12px;
+  padding-bottom: 10px;
+  font-size: 13px;
   font-weight: 700;
+  color: #86868b;
+  font-variant-numeric: tabular-nums;
 }
 
 .compact-item {
   margin-bottom: 0;
+}
+
+.flex-2 {
+  flex: 2;
+}
+
+.flex-1 {
+  flex: 1;
 }
 
 .field-compact {
@@ -58,20 +72,24 @@
 }
 
 .field-small {
-  width: 70px;
+  width: 74px;
 }
 
 .field-medium {
-  width: 80px;
+  width: 86px;
 }
 
 .remove-btn {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .mobile-field-label {
   display: none;
 }
+
+/* ------------------------------------------------------------
+   Mobile sheet behavior
+   ------------------------------------------------------------ */
 
 @media (max-width: 600px) {
   ::ng-deep .ant-modal {
@@ -85,7 +103,6 @@
     display: flex;
     flex-direction: column;
     max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-    border-radius: 20px !important;
   }
 
   ::ng-deep .ant-modal-header {
@@ -104,8 +121,9 @@
   ::ng-deep .ant-modal-footer {
     flex: 0 0 auto;
     padding: 12px 18px max(12px, env(safe-area-inset-bottom)) !important;
-    background: rgba(255, 255, 255, 0.96);
-    border-top: 1px solid #ececf0;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
 
   ::ng-deep .ant-modal-footer button {
@@ -119,11 +137,9 @@
 
   .exercise-row {
     flex-wrap: wrap;
-    padding: 10px;
-    border: 1px solid #f0f0f2;
-    border-radius: 10px;
-    margin-bottom: 10px;
     gap: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
   }
 
   .ex-index {
@@ -145,40 +161,16 @@
   .mobile-field-label {
     display: block;
     margin-bottom: 5px;
-    color: #6e6e73;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #86868b;
   }
 
   .remove-btn {
     margin-bottom: 0;
     margin-left: auto;
-  }
-}
-
-@media (max-width: 520px) {
-  ::ng-deep .ant-modal-body {
-    padding: 14px !important;
-  }
-
-  .exercises-header {
-    align-items: center;
-
-    button[nz-button] {
-      min-height: 40px;
-    }
-  }
-
-  .field-small,
-  .field-medium {
-    width: calc(33.333% - 7px);
-  }
-
-  .exercise-row {
-    padding: 12px;
-  }
-
-  .remove-btn {
     width: 42px;
     min-height: 40px;
   }

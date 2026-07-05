@@ -7,6 +7,7 @@
     "icons:pwa": "swift scripts/generate-pwa-icons.swift",
     "prestart": "npm run config",
     "start": "ng serve",
+    "server": "npm --prefix server run dev",
     "prebuild": "npm run config",
     "build": "ng build",
     "build:pages": "npm run config && ng build --base-href /FitTrack-Angular/ --output-path dist/fittrack-pages",

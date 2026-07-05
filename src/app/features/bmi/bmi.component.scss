@@ -1,443 +1,402 @@
-.app-layout {
-  min-height: 100vh;
-}
-
-.sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  background: #fff !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.06);
-
-  .sidebar-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 64px;
-    gap: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-    .logo-text {
-      color: #1d1d1f;
-      font-size: 23px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -1px;
-    }
-  }
-
-  .sidebar-menu {
-    margin-top: 8px;
-    background: transparent !important;
-    border: 0 !important;
-
-    ::ng-deep .ant-menu-item {
-      width: calc(100% - 24px) !important;
-      margin: 4px 12px !important;
-      color: #1d1d1f !important;
-      border-radius: 10px !important;
-
-      &:hover,
-      &.ant-menu-item-selected {
-        color: #1d1d1f !important;
-        background: #eaf2ff !important;
-      }
-    }
-  }
-}
-
-.main-layout {
-  background: transparent;
-}
-
-.app-header {
-  position: sticky;
-  z-index: 100;
-  top: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 64px;
-  padding: 0 32px;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.84) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(20px);
-
-  h2 {
-    margin: 0;
-    color: #1d1d1f;
-    font-size: 20px;
-    font-weight: 600;
-  }
-}
-
-.app-content {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 32px;
-}
+/* ============================================================
+   Nutrition calculator — Liquid Glass
+   Shell (sidebar/header/content) is styled globally in styles.css.
+   ============================================================ */
 
 .container {
-  width: 100%;
-  max-width: 1040px;
+  max-width: 1080px;
   margin: 0 auto;
 }
 
 .bmi-card {
-  background: #ffffff;
-  overflow: hidden;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 22px;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  border-radius: 28px !important;
 
   ::ng-deep .ant-card-body {
-    padding: 0;
+    padding: 34px 36px;
   }
 }
 
 .calculator-heading {
-  padding: 30px 32px 24px;
-  background: #ffffff;
-  border-bottom: 1px solid #edf0f5;
+  margin-bottom: 30px;
 
-  > span {
-    color: #1677ff;
+  span {
+    display: block;
     font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.1em;
     text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #86868b;
   }
 
   h1 {
-    margin: 7px 0 5px;
-    color: #172033;
-    font-size: clamp(27px, 3vw, 36px);
-    font-weight: 750;
-    letter-spacing: -0.04em;
+    margin: 4px 0 8px;
+    font-size: clamp(28px, 3.2vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: #1d1d1f;
   }
 
   p {
-    max-width: 650px;
     margin: 0;
-    color: #667085;
-    line-height: 1.55;
+    max-width: 520px;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: #6e6e73;
   }
 }
 
 .calculator-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
-  gap: 28px;
-  padding: 30px 32px 32px;
-  background: #ffffff;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 34px;
+  align-items: start;
 }
 
-.calculator-form {
-  min-width: 0;
-  padding: 2px;
-}
+/* ------------------------------------------------------------
+   Form
+   ------------------------------------------------------------ */
 
 .input-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 16px;
 }
 
 .calc-row {
   display: flex;
-  min-width: 0;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
 
   > span {
-    color: #344054;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 650;
+    letter-spacing: -0.005em;
+    color: #515154;
   }
 
-  nz-input-number,
-  select {
+  ::ng-deep nz-input-number {
     width: 100%;
     height: 44px;
-    border: 1px solid #e1e6ed;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: none;
-    transition: border-color 160ms ease, background 160ms ease;
 
-    &:hover,
-    &:focus-within {
-      background: #fff;
-      border-color: #91caff;
+    .ant-input-number-input {
+      height: 42px;
+      font-size: 15px;
+      font-weight: 560;
+      font-variant-numeric: tabular-nums;
     }
   }
 
   select {
-    padding: 0 12px;
-    color: #172033;
-    outline: none;
-  }
+    appearance: none;
+    -webkit-appearance: none;
+    height: 44px;
+    padding: 0 16px;
+    font-size: 15px;
+    font-weight: 560;
+    font-family: inherit;
+    color: #1d1d1f;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.09);
+    border-radius: 12px;
+    background:
+      linear-gradient(45deg, transparent 50%, #aeaeb2 50%) calc(100% - 20px) 55% / 6px 6px no-repeat,
+      linear-gradient(135deg, #aeaeb2 50%, transparent 50%) calc(100% - 14px) 55% / 6px 6px no-repeat,
+      rgba(255, 255, 255, 0.75);
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
 
-  ::ng-deep .ant-input-number-input {
-    height: 42px;
-    padding-inline: 13px;
+    &:focus {
+      outline: none;
+      border-color: rgba(0, 113, 227, 0.6);
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.13);
+    }
   }
 }
 
+/* iOS-style segmented goal control */
 .goal-selector {
-  margin-top: 24px;
+  margin-top: 22px;
 
   > span {
     display: block;
     margin-bottom: 8px;
-    color: #344054;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 650;
+    color: #515154;
   }
 
   > div {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.055);
 
-  button {
-    min-height: 44px;
-    padding: 10px 14px;
-    color: #475467;
-    font-weight: 650;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 11px;
-    cursor: pointer;
-    transition: 160ms ease;
+    button {
+      height: 40px;
+      font-size: 14px;
+      font-weight: 590;
+      font-family: inherit;
+      letter-spacing: -0.01em;
+      color: #515154;
+      cursor: pointer;
+      border: none;
+      border-radius: 11px;
+      background: transparent;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.22s ease, transform 0.15s ease;
 
-    &:hover {
-      border-color: #91caff;
-    }
+      &:active {
+        transform: scale(0.98);
+      }
 
-    &.selected {
-      color: #0958d9;
-      background: #eaf3ff;
-      border-color: #69b1ff;
-      box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.08);
+      &.selected {
+        color: #1d1d1f;
+        font-weight: 650;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow:
+          0 3px 10px rgba(15, 23, 42, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 1);
+      }
     }
   }
 }
 
+/* Pace slider */
 .goal-rate {
   display: block;
-  margin-top: 24px;
-  padding: 18px;
-  background: #ffffff;
-  border: 1px solid #edf0f5;
-  border-radius: 14px;
+  margin-top: 22px;
 
-  > div:first-child,
+  > div:first-child {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+
+    span {
+      font-size: 12.5px;
+      font-weight: 650;
+      color: #515154;
+    }
+
+    strong {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #0066cc;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  input[type='range'] {
+    width: 100%;
+    height: 28px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    cursor: pointer;
+
+    &::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, rgba(10, 132, 255, 0.55), rgba(100, 210, 255, 0.55));
+    }
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 26px;
+      height: 26px;
+      margin-top: -10px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 0.5px solid rgba(0, 0, 0, 0.06);
+      box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.22),
+        0 1px 3px rgba(15, 23, 42, 0.14);
+      transition: transform 0.15s ease;
+    }
+
+    &::-webkit-slider-thumb:active {
+      transform: scale(1.08);
+    }
+
+    &::-moz-range-track {
+      height: 6px;
+      border-radius: 99px;
+      background: linear-gradient(90deg, rgba(10, 132, 255, 0.55), rgba(100, 210, 255, 0.55));
+    }
+
+    &::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 0.5px solid rgba(0, 0, 0, 0.06);
+      box-shadow:
+        0 4px 12px rgba(15, 23, 42, 0.22),
+        0 1px 3px rgba(15, 23, 42, 0.14);
+    }
+  }
+
   .range-labels {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    gap: 16px;
-  }
+    margin-top: 2px;
 
-  > div:first-child span {
-    color: #344054;
-    font-size: 13px;
-    font-weight: 650;
-  }
-
-  strong {
-    color: #172033;
-    font-size: 13px;
-  }
-
-  input {
-    width: 100%;
-    margin: 17px 0 8px;
-    accent-color: #1677ff;
-  }
-
-  .range-labels {
-    color: #98a2b3;
-    font-size: 11px;
+    span {
+      font-size: 11.5px;
+      font-weight: 590;
+      color: #aeaeb2;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
   }
 }
+
+/* ------------------------------------------------------------
+   Results
+   ------------------------------------------------------------ */
 
 .results-panel {
   display: flex;
-  min-width: 0;
   flex-direction: column;
-  padding: 26px;
-  color: #172033;
-  background: linear-gradient(
-    180deg,
-    #edf5ff 0%,
-    #f7faff 42%,
-    #ffffff 100%
-  );
-  border: 1px solid #e3eaf3;
-  border-radius: 18px;
-  box-shadow: 0 10px 24px rgba(31, 75, 122, 0.06);
+  gap: 14px;
 }
 
 .calorie-target {
-  padding-bottom: 22px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 24px 26px;
   text-align: center;
-  background: transparent;
-  border-bottom: 1px solid rgba(84, 116, 155, 0.18);
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 24px;
+  color: #fff;
+  background:
+    radial-gradient(90% 140% at 85% 0%, rgba(100, 210, 255, 0.35), transparent 60%),
+    linear-gradient(160deg, #0a84ff 0%, #0066cc 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 24px 56px rgba(0, 102, 204, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
 
-  span,
-  small {
-    display: block;
-    color: #667085;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 12%;
+    width: 76%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  }
+
+  span {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.75);
   }
 
   strong {
-    display: block;
-    margin: 7px 0 0;
-    color: #0958d9;
-    font-size: clamp(44px, 6vw, 62px);
+    margin: 6px 0 0;
+    font-size: clamp(52px, 6vw, 68px);
+    font-weight: 650;
     line-height: 1;
-    letter-spacing: -0.06em;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 12px rgba(0, 40, 90, 0.25);
   }
 
   small {
-    margin-top: 5px;
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 590;
+    color: rgba(255, 255, 255, 0.8);
   }
 }
 
 .result-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 
   > div {
-    min-width: 0;
-    padding: 14px;
-    background: rgba(255, 255, 255, 0.82);
-    border: 1px solid #e0e7ef;
-    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 18px 10px;
+    text-align: center;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.66);
+    border: 1px solid rgba(0, 0, 0, 0.055);
+
+    span {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #86868b;
+    }
+
+    strong {
+      font-size: 23px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    small {
+      font-size: 11px;
+      color: #aeaeb2;
+    }
   }
 
   .primary-result {
-    display: grid;
-    grid-column: 1 / -1;
-    justify-items: center;
-    padding: 20px;
-    text-align: center;
+    background: linear-gradient(150deg, rgba(0, 113, 227, 0.1), rgba(0, 113, 227, 0.04));
+    border-color: rgba(0, 113, 227, 0.16);
 
     strong {
-      font-size: 30px;
-      line-height: 1.1;
+      color: #0066cc;
     }
-
-    ::ng-deep .ant-tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 28px;
-      margin: 7px 0 0;
-      padding: 4px 13px;
-      font-size: 12px;
-      font-weight: 650;
-      line-height: 1.2;
-      border-radius: 999px;
-    }
-  }
-
-  span,
-  small {
-    display: block;
-    color: #7b8493;
-    font-size: 11px;
-  }
-
-  strong {
-    display: block;
-    margin: 5px 0 2px;
-    color: #172033;
-    font-size: 22px;
-  }
-
-  ::ng-deep .ant-tag {
-    max-width: 100%;
-    margin-top: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 
-@media (max-width: 600px) {
-  .app-layout {
-    min-height: auto;
-    flex-direction: column;
-  }
+/* ------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------ */
 
-  .sidebar {
-    position: relative;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    height: auto;
-    flex: 0 0 100% !important;
-    border-right: 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
-
-  .app-header {
-    min-height: 64px;
-    height: auto;
-    padding: 12px 16px;
-    align-items: flex-start;
-    flex-direction: column;
-
-    h2 {
-      font-size: 18px;
-    }
-
-    .header-actions,
-    button {
-      width: 100%;
-    }
-  }
-
-  .app-content {
-    padding: 16px 12px;
-  }
-
-  .bmi-card {
-    border-radius: 16px;
-  }
-
-  .calculator-heading {
-    padding: 24px 20px 20px;
-  }
-
+@media (max-width: 900px) {
   .calculator-layout {
     grid-template-columns: 1fr;
-    gap: 22px;
-    padding: 22px 20px 20px;
+    gap: 26px;
   }
 
+  .bmi-card ::ng-deep .ant-card-body {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
   .input-grid {
     grid-template-columns: 1fr;
   }
 
-  .results-panel {
-    padding: 22px 18px;
-  }
-
-  .calorie-target strong {
-    font-size: 48px;
-  }
-}
-
-@media (max-width: 380px) {
-  .goal-selector > div {
+  .result-grid {
     grid-template-columns: 1fr;
+
+    > div {
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 14px 18px;
+
+      strong {
+        font-size: 19px;
+      }
+    }
   }
 }
