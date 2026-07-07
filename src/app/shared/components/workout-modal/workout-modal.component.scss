@@ -3,88 +3,347 @@
    Frosted modal chrome comes from the global ant-modal overrides.
    ============================================================ */
 
-.exercises-header {
+/* ---- Header ---- */
+.wm-title {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-top: 18px;
+  gap: 13px;
+
+  .wm-title-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+
+    strong {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.022em;
+      color: #1d1d1f;
+    }
+
+    small {
+      font-size: 12.5px;
+      color: #86868b;
+    }
+  }
+}
+
+/* ---- Body ---- */
+.wm-form {
+  padding: 22px 24px 8px;
+}
+
+.wm-field {
+  display: block;
+  margin-bottom: 22px;
+
+  .wm-field-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 620;
+    letter-spacing: -0.005em;
+    color: #515154;
+  }
+}
+
+.wm-input {
+  width: 100%;
+  height: 46px;
+  padding: 0 15px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1d1d1f;
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.72);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+
+  &::placeholder {
+    color: #aeaeb2;
+  }
+
+  &:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.96);
+    border-color: rgba(0, 113, 227, 0.6);
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.13);
+  }
+
+  &.is-invalid {
+    border-color: rgba(255, 59, 48, 0.55);
+    box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.12);
+  }
+}
+
+.wm-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #d70015;
+}
+
+.wm-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
 
   h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 700;
-    letter-spacing: -0.018em;
+    letter-spacing: -0.02em;
     color: #1d1d1f;
   }
-}
 
-.exercises-divider {
-  margin: 10px 0 16px;
-  border: none;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.exercises-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.exercise-row {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  margin-bottom: 10px;
-  padding: 10px 12px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: background 0.18s ease, border-color 0.18s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.85);
-    border-color: rgba(0, 0, 0, 0.08);
+  .wm-count {
+    display: grid;
+    place-items: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0066cc;
+    border-radius: 980px;
+    background: rgba(0, 113, 227, 0.1);
+    font-variant-numeric: tabular-nums;
   }
 }
 
-.ex-index {
-  padding-bottom: 10px;
-  font-size: 13px;
+/* ---- Exercise cards ---- */
+.wm-exercises {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.wm-exercise {
+  padding: 16px 16px 18px;
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.5));
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.wm-exercise-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 14px;
+}
+
+.wm-exercise-num {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  font-size: 13.5px;
   font-weight: 700;
-  color: #86868b;
+  color: #fff;
+  border-radius: 50%;
+  background: #1d1d1f;
   font-variant-numeric: tabular-nums;
 }
 
-.compact-item {
-  margin-bottom: 0;
-}
-
-.flex-2 {
-  flex: 2;
-}
-
-.flex-1 {
+.wm-exercise-name {
   flex: 1;
-}
-
-.field-compact {
   min-width: 0;
+  height: 44px;
 }
 
-.field-small {
-  width: 74px;
+.wm-remove {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  font-size: 16px;
+  color: #d70015;
+  cursor: pointer;
+  border: 1px solid rgba(255, 59, 48, 0.22);
+  border-radius: 12px;
+  background: rgba(255, 59, 48, 0.06);
+  transition: background 0.16s ease, border-color 0.16s ease, opacity 0.16s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 59, 48, 0.12);
+    border-color: rgba(255, 59, 48, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
 }
 
-.field-medium {
-  width: 86px;
+.wm-subfield {
+  display: block;
+
+  .wm-subfield-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11.5px;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #86868b;
+  }
 }
 
-.remove-btn {
-  margin-bottom: 2px;
+.wm-exercise > .wm-subfield {
+  margin-bottom: 14px;
 }
 
-.mobile-field-label {
-  display: none;
+.wm-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* ng-zorro controls inside the card */
+::ng-deep .wm-select .ant-select-selector {
+  height: 44px !important;
+  border-radius: 13px !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  align-items: center;
+}
+
+::ng-deep .wm-select.is-invalid .ant-select-selector {
+  border-color: rgba(255, 59, 48, 0.55) !important;
+  box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.12) !important;
+}
+
+::ng-deep .wm-metrics nz-input-number {
+  width: 100%;
+  height: 44px;
+  border-radius: 13px !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+
+  .ant-input-number-input {
+    height: 42px;
+    font-size: 15px;
+    font-weight: 560;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ---- Add exercise ---- */
+.wm-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  height: 48px;
+  margin-top: 14px;
+  font-size: 15px;
+  font-weight: 620;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  color: #0066cc;
+  cursor: pointer;
+  border: 1px dashed rgba(0, 113, 227, 0.4);
+  border-radius: 14px;
+  background: rgba(0, 113, 227, 0.04);
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 113, 227, 0.08);
+    border-color: rgba(0, 113, 227, 0.6);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+/* ---- Footer with live summary ---- */
+.wm-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.wm-summary {
+  display: flex;
+  gap: 20px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.1;
+
+    strong {
+      font-size: 17px;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    span {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #86868b;
+    }
+  }
+}
+
+.wm-actions {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.wm-btn {
+  height: 44px;
+  padding: 0 22px;
+  font-size: 15px;
+  font-weight: 620;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  border-radius: 980px;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.18s ease, border-color 0.18s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.wm-btn-ghost {
+  color: #515154;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+
+  &:hover {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.2);
+  }
+}
+
+.wm-btn-primary {
+  color: #fff;
+  border: none;
+  background: linear-gradient(180deg, #1a86f0, #0071e3);
+  box-shadow:
+    0 10px 24px rgba(0, 113, 227, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+
+  &:hover {
+    background: linear-gradient(180deg, #2b90f2, #0077ed);
+    box-shadow:
+      0 12px 28px rgba(0, 113, 227, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
 }
 
 /* ------------------------------------------------------------
@@ -113,7 +372,6 @@
   ::ng-deep .ant-modal-body {
     flex: 1 1 auto;
     max-height: none !important;
-    padding: 16px 18px !important;
     overflow-y: auto !important;
     overscroll-behavior: contain;
   }
@@ -121,64 +379,38 @@
   ::ng-deep .ant-modal-footer {
     flex: 0 0 auto;
     padding: 12px 18px max(12px, env(safe-area-inset-bottom)) !important;
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.72);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
 
-  ::ng-deep .ant-modal-footer button {
-    min-width: 92px;
-    min-height: 42px;
+  .wm-form {
+    padding: 18px 18px 4px;
   }
 
-  .exercises-header {
-    margin-top: 12px;
+  .wm-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 
-  .exercise-row {
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 12px;
-    margin-bottom: 10px;
+  .wm-summary {
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.035);
   }
 
-  .ex-index {
-    width: 100%;
-    padding-bottom: 0;
-  }
-
-  .flex-2,
-  .flex-1 {
-    flex: 1 1 100%;
-    width: 100%;
-  }
-
-  .field-small,
-  .field-medium {
-    width: calc(33.333% - 7px);
-  }
-
-  .mobile-field-label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 11px;
-    font-weight: 650;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #86868b;
-  }
-
-  .remove-btn {
-    margin-bottom: 0;
-    margin-left: auto;
-    width: 42px;
-    min-height: 40px;
+  .wm-actions {
+    button {
+      flex: 1;
+    }
   }
 }
 
-@media (max-width: 360px) {
-  .field-small,
-  .field-medium {
-    width: 100%;
+@media (max-width: 340px) {
+  .wm-metrics {
+    grid-template-columns: 1fr;
   }
 }

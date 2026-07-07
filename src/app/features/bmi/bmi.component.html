@@ -9,32 +9,44 @@
     <ul nz-menu nzMode="inline" class="sidebar-menu">
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/dashboard" aria-label="Dashboard">
-          <span nz-icon nzType="dashboard"></span>
+          <span nz-icon nzType="ft:home"></span>
           <span>Home</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/workouts" aria-label="Workouts">
-          <span nz-icon nzType="thunderbolt"></span>
+          <span nz-icon nzType="ft:history"></span>
           <span>History</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/start-workout" aria-label="Start workout">
-          <span nz-icon nzType="play-circle"></span>
+          <span nz-icon nzType="ft:workout"></span>
           <span>Workout</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/running" aria-label="Running">
-          <span nz-icon nzType="rise"></span>
+          <span nz-icon nzType="ft:run"></span>
           <span>Run</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/bmi" aria-label="Nutrition calculator">
-          <span nz-icon nzType="heart"></span>
+          <span nz-icon nzType="ft:nutrition"></span>
           <span>Nutrition</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/account" aria-label="Account">
+          <span nz-icon nzType="user"></span>
+          <span>Account</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/settings" aria-label="Settings">
+          <span nz-icon nzType="setting"></span>
+          <span>Settings</span>
         </a>
       </li>
     </ul>
@@ -43,10 +55,13 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
-      <h2>
-        <span class="desktop-page-title">Nutrition</span>
-        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
-      </h2>
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Nutrition</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
       <div class="header-actions">
         <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
@@ -64,22 +79,44 @@
           <div class="calculator-layout">
             <div class="calculator-form">
               <div class="input-grid">
-                <label class="calc-row">
+                <label class="calc-row" *ngIf="!isImperial()">
                   <span>Height (cm)</span>
                   <nz-input-number
-                    [(ngModel)]="height"
+                    [ngModel]="height()"
+                    (ngModelChange)="onHeightCm($event)"
                     [nzMin]="120"
                     [nzMax]="230"
                     [nzStep]="1">
                   </nz-input-number>
                 </label>
 
+                <label class="calc-row" *ngIf="isImperial()">
+                  <span>Height (ft/in)</span>
+                  <div class="split-inputs">
+                    <nz-input-number
+                      [ngModel]="feet()"
+                      (ngModelChange)="onFeetInput($event)"
+                      [nzMin]="3"
+                      [nzMax]="8"
+                      [nzStep]="1">
+                    </nz-input-number>
+                    <nz-input-number
+                      [ngModel]="inches()"
+                      (ngModelChange)="onInchesInput($event)"
+                      [nzMin]="0"
+                      [nzMax]="11"
+                      [nzStep]="1">
+                    </nz-input-number>
+                  </div>
+                </label>
+
                 <label class="calc-row">
-                  <span>Weight (kg)</span>
+                  <span>Weight ({{ weightUnit() }})</span>
                   <nz-input-number
-                    [(ngModel)]="weight"
-                    [nzMin]="35"
-                    [nzMax]="300"
+                    [ngModel]="weightInput()"
+                    (ngModelChange)="onWeightInput($event)"
+                    [nzMin]="isImperial() ? 77 : 35"
+                    [nzMax]="isImperial() ? 660 : 300"
                     [nzStep]="1">
                   </nz-input-number>
                 </label>
@@ -87,7 +124,8 @@
                 <label class="calc-row">
                   <span>Age</span>
                   <nz-input-number
-                    [(ngModel)]="age"
+                    [ngModel]="age()"
+                    (ngModelChange)="onAge($event)"
                     [nzMin]="16"
                     [nzMax]="90"
                     [nzStep]="1">
@@ -96,7 +134,7 @@
 
                 <label class="calc-row">
                   <span>Sex</span>
-                  <select [(ngModel)]="sex">
+                  <select [ngModel]="sex()" (ngModelChange)="onSex($event)">
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                   </select>

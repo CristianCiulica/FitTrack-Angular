@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -10,6 +10,15 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { AuthService } from '../../core/services/auth.service';
+import { ProfileService } from '../../core/services/profile.service';
+import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
+import {
+  cmToFeetInches,
+  displayWeight,
+  feetInchesToCm,
+  toCanonicalWeight,
+  weightUnitLabel,
+} from '../../core/utils/units';
 
 @Component({
   selector: 'app-bmi',
@@ -25,19 +34,50 @@ import { AuthService } from '../../core/services/auth.service';
     NzIconModule,
     NzCardModule,
     NzInputNumberModule,
-    NzTagModule
+    NzTagModule,
+    AppMenuComponent,
   ],
   templateUrl: './bmi.component.html',
   styleUrls: ['./bmi.component.scss']
 })
 export class BmiComponent {
+  private readonly profileService = inject(ProfileService);
+  private readonly authService = inject(AuthService);
+
+  // canonic metric — seedat din profil, sincronizat inapoi la profil (sursa unica de adevar)
   height = signal<number>(170); // cm
   weight = signal<number>(70);  // kg
   age = signal<number>(30);
   sex = signal<'male' | 'female'>('male');
+
+  // stare doar de calculator, nu se persista in profil
   strengthTrainingDays = signal<number>(4);
   goal = signal<'lose' | 'gain'>('lose');
   goalRate = signal<number>(0.5);
+
+  readonly units = this.profileService.units;
+  readonly isImperial = computed(() => this.units() === 'imperial');
+  readonly weightUnit = computed(() => weightUnitLabel(this.units()));
+  readonly weightInput = computed(() => displayWeight(this.weight(), this.units()));
+  readonly feet = computed(() => cmToFeetInches(this.height()).feet);
+  readonly inches = computed(() => cmToFeetInches(this.height()).inches);
+
+  private hydrated = false;
+  private patchTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    this.profileService.load().subscribe();
+    // seedam din profil o singura data, cand devine disponibil
+    effect(() => {
+      const p = this.profileService.profile();
+      if (!p || this.hydrated) return;
+      if (p.heightCm) this.height.set(p.heightCm);
+      if (p.weightKg) this.weight.set(p.weightKg);
+      if (p.age) this.age.set(p.age);
+      if (p.sex === 'male' || p.sex === 'female') this.sex.set(p.sex);
+      this.hydrated = true;
+    });
+  }
 
 // folosim computed pentru valori calc automat
   bmi = computed(() => {
@@ -49,9 +89,9 @@ export class BmiComponent {
 
   bmiCategory = computed(() => {
     const value = parseFloat(this.bmi());
-    if (value < 18.5) return { text: 'Underweight', color: 'orange' };
+    if (value < 18.5) return { text: 'Underweight', color: 'blue' };
     if (value < 25) return { text: 'Healthy weight', color: 'green' };
-    if (value < 30) return { text: 'Overweight', color: 'orange' };
+    if (value < 30) return { text: 'Overweight', color: 'red' };
     return { text: 'Obesity', color: 'red' };
   });
 
@@ -95,7 +135,51 @@ export class BmiComponent {
     }
   }
 
-  constructor(private authService: AuthService) {}
+  // modificarile datelor fizice se propaga in tot restul aplicatiei prin profil
+  onHeightCm(value: number) {
+    this.height.set(value);
+    this.queueProfileSync();
+  }
+
+  onWeightInput(value: number) {
+    this.weight.set(toCanonicalWeight(value, this.units()));
+    this.queueProfileSync();
+  }
+
+  onFeetInput(value: number) {
+    this.height.set(feetInchesToCm(value, this.inches()));
+    this.queueProfileSync();
+  }
+
+  onInchesInput(value: number) {
+    this.height.set(feetInchesToCm(this.feet(), value));
+    this.queueProfileSync();
+  }
+
+  onAge(value: number) {
+    this.age.set(value);
+    this.queueProfileSync();
+  }
+
+  onSex(value: 'male' | 'female') {
+    this.sex.set(value);
+    this.queueProfileSync();
+  }
+
+  private queueProfileSync() {
+    if (!this.profileService.profile()) return;
+    if (this.patchTimer) clearTimeout(this.patchTimer);
+    this.patchTimer = setTimeout(() => {
+      this.profileService
+        .patch({
+          heightCm: Math.round(this.height()),
+          weightKg: Math.round(this.weight() * 10) / 10,
+          age: this.age(),
+          sex: this.sex(),
+        })
+        .subscribe({ error: () => {} });
+    }, 600);
+  }
 
   logout() {
     this.authService.logout().subscribe();

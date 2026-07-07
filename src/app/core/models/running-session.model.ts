@@ -9,4 +9,6 @@ export interface RunningSession {
   steps: number;
   averageSpeedKmh: number;
   calories: number;
+  /** traseul GPS: perechi [lat, lng] */
+  route?: [number, number][];
 }

@@ -1,76 +1,126 @@
 <nz-modal
   [nzVisible]="visible"
-  [nzTitle]="title"
+  [nzTitle]="titleTpl"
+  [nzFooter]="footerTpl"
   (nzOnCancel)="onCancel()"
-  (nzOnOk)="submit()"
-  nzOkText="Save"
-  nzCancelText="Cancel"
-  nzWidth="min(800px, calc(100vw - 24px))"
-  [nzBodyStyle]="{ 'max-height': '70vh', overflow: 'auto' }"
+  nzWidth="min(720px, calc(100vw - 24px))"
+  nzWrapClassName="workout-modal-wrap"
+  [nzBodyStyle]="{ 'max-height': '68vh', overflow: 'auto', padding: '0' }"
 >
-  <ng-container *nzModalContent>
-    <form nz-form [formGroup]="form" nzLayout="vertical">
-
-      <!-- Workout name -->
-      <nz-form-item>
-        <nz-form-label nzRequired>Workout name</nz-form-label>
-        <nz-form-control nzErrorTip="Please enter a valid name">
-          <input nz-input formControlName="name" />
-        </nz-form-control>
-      </nz-form-item>
-
-      <div class="exercises-header">
-        <h3>Exercises</h3>
-        <button nz-button nzType="dashed" type="button" (click)="addExercise()">
-          <span nz-icon nzType="plus"></span> Add
-        </button>
+  <ng-template #titleTpl>
+    <div class="wm-title">
+      <div class="wm-title-copy">
+        <strong>{{ title }}</strong>
+        <small>{{ subtitle }}</small>
       </div>
-      <hr class="exercises-divider" />
+    </div>
+  </ng-template>
 
-      <div formArrayName="exercises" class="exercises-list">
-        <div *ngFor="let ex of exercises.controls; let i = index" [formGroupName]="i" class="exercise-row">
-          <div class="ex-index">{{ i + 1 }}.</div>
+  <ng-container *nzModalContent>
+    <form [formGroup]="form" class="wm-form">
+      <!-- Workout name -->
+      <label class="wm-field">
+        <span class="wm-field-label">Workout name</span>
+        <input
+          class="wm-input"
+          formControlName="name"
+          placeholder="e.g. Upper body power"
+          [class.is-invalid]="showError(form.get('name'))"
+        />
+        <small class="wm-error" *ngIf="showError(form.get('name'))">
+          Give your workout a name (min. 2 characters).
+        </small>
+      </label>
 
-          <nz-form-item class="flex-2 compact-item">
-            <nz-form-control nzErrorTip="Required.">
-              <input nz-input formControlName="exerciseName" placeholder="Exercise" />
-            </nz-form-control>
-          </nz-form-item>
+      <!-- Exercises -->
+      <div class="wm-section-head">
+        <h3>Exercises</h3>
+        <span class="wm-count">{{ exercises.length }}</span>
+      </div>
 
-          <nz-form-item class="flex-1 compact-item">
-            <nz-form-control nzErrorTip="Required.">
-              <nz-select formControlName="muscleGroup" nzPlaceHolder="Group">
-                <nz-option *ngFor="let m of muscleGroups" [nzValue]="m" [nzLabel]="m"></nz-option>
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
+      <div formArrayName="exercises" class="wm-exercises">
+        <div
+          class="wm-exercise"
+          *ngFor="let ex of exercises.controls; let i = index"
+          [formGroupName]="i"
+        >
+          <div class="wm-exercise-head">
+            <span class="wm-exercise-num">{{ i + 1 }}</span>
+            <input
+              class="wm-input wm-exercise-name"
+              formControlName="exerciseName"
+              placeholder="Exercise name"
+              [class.is-invalid]="showError(ex.get('exerciseName'))"
+            />
+            <button
+              type="button"
+              class="wm-remove"
+              aria-label="Remove exercise"
+              [disabled]="exercises.length === 1"
+              (click)="removeExercise(i)"
+            >
+              <span nz-icon nzType="delete"></span>
+            </button>
+          </div>
 
-          <nz-form-item class="compact-item field-compact field-small">
-            <span class="mobile-field-label">Sets</span>
-            <nz-form-control>
-              <nz-input-number formControlName="sets" [nzMin]="1" [nzStep]="1" nzPlaceHolder="Set" style="width:100%"></nz-input-number>
-            </nz-form-control>
-          </nz-form-item>
+          <label class="wm-subfield">
+            <span class="wm-subfield-label">Muscle group</span>
+            <nz-select
+              formControlName="muscleGroup"
+              nzPlaceHolder="Select a group"
+              class="wm-select"
+              [class.is-invalid]="showError(ex.get('muscleGroup'))"
+            >
+              <nz-option *ngFor="let m of muscleGroups" [nzValue]="m" [nzLabel]="m"></nz-option>
+            </nz-select>
+          </label>
 
-          <nz-form-item class="compact-item field-compact field-small">
-            <span class="mobile-field-label">Reps</span>
-            <nz-form-control>
-              <nz-input-number formControlName="reps" [nzMin]="1" [nzStep]="1" nzPlaceHolder="Rep" style="width:100%"></nz-input-number>
-            </nz-form-control>
-          </nz-form-item>
-
-          <nz-form-item class="compact-item field-compact field-medium">
-            <span class="mobile-field-label">Weight</span>
-            <nz-form-control>
-              <nz-input-number formControlName="weight" [nzMin]="0" [nzStep]="2.5" nzPlaceHolder="kg" style="width:100%"></nz-input-number>
-            </nz-form-control>
-          </nz-form-item>
-
-          <button nz-button nzType="text" nzDanger type="button" (click)="removeExercise(i)" [disabled]="exercises.length === 1" class="remove-btn">
-            <span nz-icon nzType="delete"></span>
-          </button>
+          <div class="wm-metrics">
+            <label class="wm-subfield">
+              <span class="wm-subfield-label">Sets</span>
+              <nz-input-number formControlName="sets" [nzMin]="1" [nzStep]="1"></nz-input-number>
+            </label>
+            <label class="wm-subfield">
+              <span class="wm-subfield-label">Reps</span>
+              <nz-input-number formControlName="reps" [nzMin]="1" [nzStep]="1"></nz-input-number>
+            </label>
+            <label class="wm-subfield">
+              <span class="wm-subfield-label">Weight (kg)</span>
+              <nz-input-number formControlName="weight" [nzMin]="0" [nzStep]="2.5"></nz-input-number>
+            </label>
+          </div>
         </div>
       </div>
+
+      <button type="button" class="wm-add" (click)="addExercise()">
+        <span nz-icon nzType="plus"></span>
+        Add exercise
+      </button>
     </form>
   </ng-container>
+
+  <ng-template #footerTpl>
+    <div class="wm-footer">
+      <div class="wm-summary">
+        <div>
+          <strong>{{ filledExercises }}</strong>
+          <span>exercises</span>
+        </div>
+        <div>
+          <strong>~{{ estimatedCalories }}</strong>
+          <span>kcal</span>
+        </div>
+        <div>
+          <strong>{{ totalVolume | number: '1.0-0' }}</strong>
+          <span>kg volume</span>
+        </div>
+      </div>
+      <div class="wm-actions">
+        <button type="button" class="wm-btn wm-btn-ghost" (click)="onCancel()">Cancel</button>
+        <button type="button" class="wm-btn wm-btn-primary" (click)="submit()">
+          {{ isEdit ? 'Save changes' : 'Create workout' }}
+        </button>
+      </div>
+    </div>
+  </ng-template>
 </nz-modal>

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { forkJoin, map, switchMap, throwError } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 
 interface GeoResponse {
   results?: Array<{
@@ -26,6 +26,7 @@ interface ForecastResponse {
     precipitation: number[];
     weathercode: number[];
     wind_speed_10m: number[];
+    uv_index?: number[];
   };
 }
 
@@ -51,6 +52,14 @@ export interface WeatherSummary {
   scoreLabel: string;
   aqi?: number;
   pm25?: number;
+  uvIndex?: number;
+}
+
+interface ReverseGeoResponse {
+  city?: string;
+  locality?: string;
+  principalSubdivision?: string;
+  countryName?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -69,21 +78,40 @@ export class WeatherService {
         return hit;
       }),
       switchMap((hit) => {
-        const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${hit.latitude}&longitude=${hit.longitude}&current=temperature_2m,weathercode,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weathercode,wind_speed_10m&timezone=auto`;
-        const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${hit.latitude}&longitude=${hit.longitude}&hourly=pm2_5,pm10,us_aqi&timezone=auto`;
-
-        return forkJoin({
-          forecast: this.http.get<ForecastResponse>(forecastUrl),
-          air: this.http.get<AirQualityResponse>(airUrl),
-        }).pipe(
-          map(({ forecast, air }) => this.buildSummary(hit, forecast, air)),
-        );
+        const cityLabel = hit.admin1 ? `${hit.name}, ${hit.admin1}` : `${hit.name}, ${hit.country}`;
+        return this.fetchByCoordinates(hit.latitude, hit.longitude, cityLabel);
       }),
     );
   }
 
+  // foloseste GPS-ul telefonului: ia vremea pentru locatia curenta, oriunde ar fi
+  getWeatherByCoords(latitude: number, longitude: number) {
+    const reverseUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+
+    return this.http.get<ReverseGeoResponse>(reverseUrl).pipe(
+      map((geo) => {
+        const place = geo.city || geo.locality;
+        if (place && geo.principalSubdivision) return `${place}, ${geo.principalSubdivision}`;
+        if (place) return place;
+        return 'Your location';
+      }),
+      catchError(() => of('Your location')),
+      switchMap((cityLabel) => this.fetchByCoordinates(latitude, longitude, cityLabel)),
+    );
+  }
+
+  private fetchByCoordinates(latitude: number, longitude: number, cityLabel: string) {
+    const forecastUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weathercode,wind_speed_10m,uv_index&timezone=auto`;
+    const airUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&hourly=pm2_5,pm10,us_aqi&timezone=auto`;
+
+    return forkJoin({
+      forecast: this.http.get<ForecastResponse>(forecastUrl),
+      air: this.http.get<AirQualityResponse>(airUrl),
+    }).pipe(map(({ forecast, air }) => this.buildSummary(cityLabel, forecast, air)));
+  }
+
   private buildSummary(
-    hit: NonNullable<GeoResponse['results']>[number],
+    cityLabel: string,
     forecast: ForecastResponse,
     air: AirQualityResponse,
   ): WeatherSummary {
@@ -91,7 +119,6 @@ export class WeatherService {
       throw new Error('Forecast unavailable');
     }
 
-    const cityLabel = hit.admin1 ? `${hit.name}, ${hit.admin1}` : `${hit.name}, ${hit.country}`;
     const currentTime = forecast.current.time;
     const currentIndex = Math.max(0, forecast.hourly.time.indexOf(currentTime));
 
@@ -119,6 +146,7 @@ export class WeatherService {
       scoreLabel,
       aqi: this.pickLatestValue(air.hourly?.us_aqi),
       pm25: this.pickLatestValue(air.hourly?.pm2_5),
+      uvIndex: forecast.hourly.uv_index?.[currentIndex],
     };
   }
 

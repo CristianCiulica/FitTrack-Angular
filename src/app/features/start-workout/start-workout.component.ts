@@ -11,8 +11,11 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../core/services/auth.service';
 import { WorkoutService } from '../../core/services/workout.service';
+import { ProfileService } from '../../core/services/profile.service';
 import { MuscleGroup, Workout } from '../../core/models/workout.model';
+import { estimateSessionCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
+import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 
 interface PlannedExercise {
   name: string;
@@ -25,12 +28,14 @@ interface PlannedExercise {
 interface Routine {
   id?: string;
   name: string;
+  category?: string;
   exercises: PlannedExercise[];
 }
 
 const PREDEFINED_ROUTINES: Routine[] = [
   {
     name: 'Push Day (Chest, Shoulders, Triceps)',
+    category: 'Push',
     exercises: [
       { name: 'Bench Press', sets: 4, reps: 10, weight: 60, muscleGroup: 'Chest' },
       { name: 'Overhead Press', sets: 3, reps: 10, weight: 40, muscleGroup: 'Shoulders' },
@@ -39,6 +44,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
   },
   {
     name: 'Pull Day (Back, Biceps)',
+    category: 'Pull',
     exercises: [
       { name: 'Pull-ups', sets: 4, reps: 8, weight: 0, muscleGroup: 'Back' },
       { name: 'Barbell Rows', sets: 4, reps: 10, weight: 50, muscleGroup: 'Back' },
@@ -47,6 +53,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
   },
   {
     name: 'Leg Day',
+    category: 'Legs',
     exercises: [
       { name: 'Squats', sets: 4, reps: 8, weight: 80, muscleGroup: 'Legs' },
       { name: 'Leg Press', sets: 3, reps: 12, weight: 120, muscleGroup: 'Legs' },
@@ -55,6 +62,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
   },
   {
     name: 'Full Body Strength',
+    category: 'Full body',
     exercises: [
       { name: 'Back Squats', sets: 4, reps: 6, weight: 80, muscleGroup: 'Legs' },
       { name: 'Bench Press', sets: 4, reps: 8, weight: 60, muscleGroup: 'Chest' },
@@ -64,6 +72,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
   },
   {
     name: 'Upper Body Power',
+    category: 'Push',
     exercises: [
       { name: 'Incline Bench Press', sets: 4, reps: 8, weight: 50, muscleGroup: 'Chest' },
       { name: 'Pull-ups', sets: 4, reps: 8, weight: 0, muscleGroup: 'Back' },
@@ -73,6 +82,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
   },
   {
     name: 'Lower Body & Glutes',
+    category: 'Legs',
     exercises: [
       { name: 'Hip Thrusts', sets: 4, reps: 10, weight: 80, muscleGroup: 'Legs' },
       { name: 'Bulgarian Split Squats', sets: 3, reps: 10, weight: 20, muscleGroup: 'Legs' },
@@ -82,6 +92,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
   },
   {
     name: 'Core & Conditioning',
+    category: 'Core',
     exercises: [
       { name: 'Weighted Crunches', sets: 3, reps: 15, weight: 10, muscleGroup: 'Core' },
       { name: 'Hanging Leg Raises', sets: 3, reps: 12, weight: 0, muscleGroup: 'Core' },
@@ -106,6 +117,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
     NzProgressModule,
     NzTagModule,
     WorkoutModalComponent,
+    AppMenuComponent,
   ],
   templateUrl: './start-workout.component.html',
   styleUrls: ['./start-workout.component.scss']
@@ -114,8 +126,6 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   state = signal<'setup' | 'active' | 'rest' | 'finished'>('setup');
 
   routines = PREDEFINED_ROUTINES;
-  predefinedStartIndex = signal(0);
-  predefinedVisibleCount = signal(3);
   personalRoutines = signal<Routine[]>([]);
   selectedRoutineKey = signal('predefined-0');
   modalVisible = signal(false);
@@ -128,10 +138,6 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   restTimeTarget = signal(60);
   restTimeRemaining = signal(60);
   private timerInterval: any;
-  private predefinedMediaQuery?: MediaQueryList;
-  private readonly handlePredefinedMediaChange = (event: MediaQueryListEvent) => {
-    this.updatePredefinedVisibleCount(event.matches);
-  };
 
   workoutInProgress = computed(() =>
     this.state() === 'active' || this.state() === 'rest',
@@ -144,16 +150,45 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     return null;
   });
 
-  visiblePredefinedRoutines = computed(() => {
-    const start = this.predefinedStartIndex();
+  // filtre pe categorii, in stilul referintei (All / Push / Pull / ...)
+  routineFilter = signal<string>('All');
+  readonly routineFilters = ['All', ...Array.from(new Set(PREDEFINED_ROUTINES.map((r) => r.category!)))]
+
+  filteredPredefined = computed(() => {
+    const filter = this.routineFilter();
     return this.routines
-      .slice(start, start + this.predefinedVisibleCount())
-      .map((routine, offset) => ({ routine, index: start + offset }));
+      .map((routine, index) => ({ routine, index }))
+      .filter(({ routine }) => filter === 'All' || routine.category === filter);
   });
 
-  canShowPreviousPredefined = computed(() => this.predefinedStartIndex() > 0);
-  canShowNextPredefined = computed(
-    () => this.predefinedStartIndex() < this.routines.length - this.predefinedVisibleCount(),
+  routineKcal(routine: Routine): number {
+    return estimateSessionCalories(routine.exercises, this.profileService.weightKg());
+  }
+
+  routineMinutes(routine: Routine): number {
+    return estimateSessionMinutes(routine.exercises);
+  }
+
+  // grupele musculare lucrate, pentru textul de pe card (ex. "Legs / Chest / Back")
+  muscleSummary(routine: Routine): string {
+    const groups = Array.from(new Set(routine.exercises.map((e) => e.muscleGroup)));
+    return groups.slice(0, 3).join(' / ');
+  }
+
+  // tonuri alternante pentru cardurile din plan
+  cardTone(index: number): string {
+    return ['blue', 'purple', 'cyan', 'green'][index % 4];
+  }
+
+  /* ------- progresul saptamanal din hero ------- */
+
+  readonly weeklyGoal = 4;
+  readonly weeklyCount = computed(() => {
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return this.workoutService.workouts().filter((w) => new Date(w.date).getTime() >= weekAgo).length;
+  });
+  readonly weeklyPercent = computed(() =>
+    Math.min(100, Math.round((this.weeklyCount() / this.weeklyGoal) * 100)),
   );
 
   progressPercent = computed(() => {
@@ -171,22 +206,17 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private workoutService: WorkoutService,
+    private profileService: ProfileService,
     private message: NzMessageService,
   ) {}
 
   ngOnInit() {
-    if (typeof window !== 'undefined') {
-      this.predefinedMediaQuery = window.matchMedia('(max-width: 600px)');
-      this.updatePredefinedVisibleCount(this.predefinedMediaQuery.matches);
-      this.predefinedMediaQuery.addEventListener('change', this.handlePredefinedMediaChange);
-    }
     this.selectRoutine(this.routines[0], 'predefined-0');
     this.loadPersonalRoutines();
   }
 
   ngOnDestroy() {
     this.stopTimer();
-    this.predefinedMediaQuery?.removeEventListener('change', this.handlePredefinedMediaChange);
   }
 
   logout() {
@@ -220,22 +250,6 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (!this.workoutInProgress()) return;
     event.preventDefault();
     event.returnValue = '';
-  }
-
-  private updatePredefinedVisibleCount(isMobile: boolean) {
-    const visibleCount = isMobile ? 1 : 3;
-    this.predefinedVisibleCount.set(visibleCount);
-    const lastStart = Math.max(0, this.routines.length - visibleCount);
-    this.predefinedStartIndex.update((index) => Math.min(index, lastStart));
-  }
-
-  showPreviousPredefined() {
-    this.predefinedStartIndex.update((index) => Math.max(0, index - 1));
-  }
-
-  showNextPredefined() {
-    const lastStart = Math.max(0, this.routines.length - this.predefinedVisibleCount());
-    this.predefinedStartIndex.update((index) => Math.min(lastStart, index + 1));
   }
 
   openAddWorkout() {

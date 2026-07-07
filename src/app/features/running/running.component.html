@@ -9,32 +9,44 @@
     <ul nz-menu nzMode="inline" class="sidebar-menu">
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
         <a [routerLink]="isTracking ? null : '/dashboard'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Dashboard">
-          <span nz-icon nzType="dashboard"></span>
+          <span nz-icon nzType="ft:home"></span>
           <span>Home</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
         <a [routerLink]="isTracking ? null : '/workouts'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Workouts">
-          <span nz-icon nzType="thunderbolt"></span>
+          <span nz-icon nzType="ft:history"></span>
           <span>History</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
         <a [routerLink]="isTracking ? null : '/start-workout'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Start workout">
-          <span nz-icon nzType="play-circle"></span>
+          <span nz-icon nzType="ft:workout"></span>
           <span>Workout</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/running" aria-label="Running">
-          <span nz-icon nzType="rise"></span>
+          <span nz-icon nzType="ft:run"></span>
           <span>Run</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
         <a [routerLink]="isTracking ? null : '/bmi'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Nutrition calculator">
-          <span nz-icon nzType="heart"></span>
+          <span nz-icon nzType="ft:nutrition"></span>
           <span>Nutrition</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking" class="sidebar-secondary-item">
+        <a [routerLink]="isTracking ? null : '/account'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Account">
+          <span nz-icon nzType="user"></span>
+          <span>Account</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking" class="sidebar-secondary-item">
+        <a [routerLink]="isTracking ? null : '/settings'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Settings">
+          <span nz-icon nzType="setting"></span>
+          <span>Settings</span>
         </a>
       </li>
     </ul>
@@ -42,10 +54,13 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
-      <h2>
-        <span class="desktop-page-title">Running</span>
-        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
-      </h2>
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Running</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
       <div class="header-actions">
         <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
@@ -88,6 +103,10 @@
               <span>Rain</span>
               <strong>{{ weather.rainProbability | number: '1.0-0' }}%</strong>
             </div>
+            <div class="weather-detail" *ngIf="weather.uvIndex !== undefined">
+              <span>UV index</span>
+              <strong>{{ weather.uvIndex | number: '1.0-0' }} · {{ uvLabel(weather.uvIndex) }}</strong>
+            </div>
             <div class="weather-detail" *ngIf="weather.aqi !== undefined">
               <span>Air quality</span>
               <strong>{{ weather.aqi | number: '1.0-0' }} AQI</strong>
@@ -113,9 +132,7 @@
               <strong>{{ mode === 'running' ? 'Running' : 'Walking' }}</strong>
             </div>
             <div class="run-card-state">
-              <span class="gps-badge" *ngIf="isTracking" [class.calibrating]="isCalibrating">
-                {{ isCalibrating ? 'Calibrating' : 'GPS active' }}
-              </span>
+              <span class="gps-badge" *ngIf="isTracking && !isCalibrating">GPS active</span>
               <span class="run-chevron" aria-hidden="true"></span>
             </div>
           </button>
@@ -149,45 +166,79 @@
         </div>
       </nz-card>
 
-      <nz-card class="map-card">
-        <div class="map-card-heading">
-          <div>
-            <span>Live route</span>
-            <small *ngIf="gpsAccuracy !== undefined">Accuracy ~{{ gpsAccuracy | number: '1.0-0' }}m</small>
-          </div>
-          <strong>{{ distanceKm }} km</strong>
-        </div>
-        <div class="map-shell">
-          <div id="running-map" class="map"></div>
-          <div class="gps-calibration-overlay" *ngIf="isCalibrating">
-            <div class="calibration-pulse"></div>
-            <strong>Calibrating GPS</strong>
-            <span *ngIf="calibrationSecondsRemaining > 0">
-              Keep still for {{ calibrationSecondsRemaining }}s
-            </span>
-            <span *ngIf="calibrationSecondsRemaining === 0">
-              Waiting for a stable signal
-            </span>
+      <!-- Harta live: ascunsa pana la Start, apoi fullscreen (stil Strava) -->
+      <div class="live-map" [class.active]="isTracking">
+        <div id="running-map" class="map"></div>
+
+        <div class="live-top">
+          <div class="live-status">
+            <span class="gps-badge" *ngIf="!isCalibrating">GPS active</span>
+            <span class="live-status-text">{{ statusText }}</span>
           </div>
         </div>
-      </nz-card>
+
+        <div class="gps-calibration-overlay" *ngIf="isCalibrating">
+          <div class="calibration-pulse"></div>
+          <strong>Calibrating GPS</strong>
+          <span *ngIf="calibrationSecondsRemaining > 0">
+            Keep still for {{ calibrationSecondsRemaining }}s
+          </span>
+          <span *ngIf="calibrationSecondsRemaining === 0">
+            Waiting for a stable signal
+          </span>
+        </div>
+
+        <div class="live-panel">
+          <div class="live-stats">
+            <div>
+              <span>Time</span>
+              <strong>{{ elapsedDisplay }}</strong>
+            </div>
+            <div>
+              <span>Distance</span>
+              <strong>{{ distanceKm }} km</strong>
+            </div>
+            <div>
+              <span>Speed</span>
+              <strong>{{ avgSpeedDisplay }}</strong>
+            </div>
+            <div>
+              <span>Kcal</span>
+              <strong>{{ caloriesDisplay }}</strong>
+            </div>
+          </div>
+          <button type="button" class="live-stop" (click)="stopTracking()">
+            <span nz-icon nzType="close"></span>
+            Stop
+          </button>
+        </div>
+      </div>
 
       <div class="stats-grid">
-        <nz-card class="stat-card">
-          <div class="stat-label">Steps</div>
+        <nz-card class="stat-card" data-tone="blue">
+          <div class="stat-icon"><span nz-icon nzType="ft:history"></span></div>
+          <div class="stat-value">{{ elapsedDisplay }}</div>
+          <div class="stat-label">Time</div>
+        </nz-card>
+        <nz-card class="stat-card" data-tone="purple">
+          <div class="stat-icon"><span nz-icon nzType="ft:run"></span></div>
           <div class="stat-value">{{ steps }}</div>
+          <div class="stat-label">Steps</div>
         </nz-card>
-        <nz-card class="stat-card">
-          <div class="stat-label">Distance</div>
+        <nz-card class="stat-card" data-tone="cyan">
+          <div class="stat-icon"><span nz-icon nzType="rise"></span></div>
           <div class="stat-value">{{ distanceKm }} km</div>
+          <div class="stat-label">Distance</div>
         </nz-card>
-        <nz-card class="stat-card">
-          <div class="stat-label">Avg speed</div>
+        <nz-card class="stat-card" data-tone="green">
+          <div class="stat-icon"><span nz-icon nzType="dashboard"></span></div>
           <div class="stat-value">{{ avgSpeedDisplay }} km/h</div>
+          <div class="stat-label">Avg speed</div>
         </nz-card>
-        <nz-card class="stat-card">
-          <div class="stat-label">Calories</div>
+        <nz-card class="stat-card" data-tone="pink">
+          <div class="stat-icon"><span nz-icon nzType="fire"></span></div>
           <div class="stat-value">{{ caloriesDisplay }} kcal</div>
+          <div class="stat-label">Calories</div>
         </nz-card>
       </div>
     </nz-content>

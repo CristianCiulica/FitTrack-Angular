@@ -4,117 +4,205 @@
    ============================================================ */
 
 /* ------------------------------------------------------------
-   Hero
+   Activity head: title + month navigation
    ------------------------------------------------------------ */
 
-.dashboard-hero {
-  position: relative;
-  margin-bottom: 22px;
-  padding: 44px 40px;
-  border-radius: 28px;
-  overflow: hidden;
-  isolation: isolate;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.5));
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow:
-    0 30px 70px rgba(15, 23, 42, 0.09),
-    0 4px 14px rgba(15, 23, 42, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(30px) saturate(185%);
-  -webkit-backdrop-filter: blur(30px) saturate(185%);
+.activity-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
 
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 520px;
+.activity-title {
+  h1 {
+    margin: 0;
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: #1d1d1f;
+  }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: clamp(28px, 3vw, 38px);
-      font-weight: 700;
-      letter-spacing: -0.035em;
+  p {
+    margin: 2px 0 0;
+    font-size: 14px;
+    letter-spacing: -0.01em;
+    color: #86868b;
+  }
+}
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+
+  .month-label {
+    font-size: 14.5px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: #1d1d1f;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .month-arrows {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 980px;
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.55));
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+      0 8px 22px rgba(15, 23, 42, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+
+    button {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      padding: 0 0 2px;
+      font-size: 20px;
+      line-height: 1;
       color: #1d1d1f;
-    }
-
-    p {
-      margin: 0 0 26px;
-      font-size: 16.5px;
-      line-height: 1.5;
-      letter-spacing: -0.012em;
-      color: #515154;
-
-      strong {
-        color: #0066cc;
-        font-weight: 700;
-        font-variant-numeric: tabular-nums;
-      }
-    }
-
-    .hero-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 13px 26px;
-      font-size: 16px;
-      font-weight: 620;
-      letter-spacing: -0.01em;
-      color: #fff;
-      border-radius: 980px;
-      background: linear-gradient(180deg, #1a86f0, #0071e3);
-      box-shadow:
-        0 12px 26px rgba(0, 113, 227, 0.34),
-        inset 0 1px 0 rgba(255, 255, 255, 0.32);
-      transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
+      cursor: pointer;
+      border: none;
+      border-radius: 50%;
+      background: transparent;
+      transition: background 0.16s ease, transform 0.15s ease;
 
       &:hover {
-        color: #fff;
-        transform: translateY(-1px);
-        box-shadow:
-          0 15px 32px rgba(0, 113, 227, 0.42),
-          inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        background: rgba(0, 0, 0, 0.05);
       }
 
       &:active {
-        transform: scale(0.98);
+        transform: scale(0.92);
       }
     }
-  }
-
-  /* Refracted light inside the panel */
-  .hero-decoration {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background:
-      radial-gradient(42% 70% at 86% 18%, rgba(10, 132, 255, 0.16), transparent 70%),
-      radial-gradient(34% 55% at 70% 90%, rgba(100, 210, 255, 0.14), transparent 70%),
-      radial-gradient(26% 45% at 96% 60%, rgba(175, 82, 222, 0.09), transparent 70%);
   }
 }
 
 /* ------------------------------------------------------------
-   Stat cards
+   Week strip
    ------------------------------------------------------------ */
 
-.stats-row {
+.week-strip {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 22px;
-}
-
-.modern-stat-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 22px 24px;
-  border-radius: 22px;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-bottom: 18px;
+  padding: 12px 10px 10px;
+  border-radius: 24px;
   background: linear-gradient(150deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.5));
   border: 1px solid rgba(255, 255, 255, 0.88);
   box-shadow:
     0 18px 44px rgba(15, 23, 42, 0.07),
-    0 2px 8px rgba(15, 23, 42, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+}
+
+.day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 2px 6px;
+  cursor: pointer;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  font-family: inherit;
+  transition: background 0.18s ease, transform 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  .day-label {
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    color: #aeaeb2;
+  }
+
+  .day-num {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+    font-weight: 620;
+    color: #1d1d1f;
+    border-radius: 50%;
+    font-variant-numeric: tabular-nums;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.22s ease;
+  }
+
+  .day-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #0a84ff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
+
+  &.today .day-num {
+    box-shadow: inset 0 0 0 1.5px rgba(0, 113, 227, 0.45);
+  }
+
+  &.selected {
+    .day-label {
+      color: #0066cc;
+    }
+
+    .day-num {
+      color: #fff;
+      background: linear-gradient(180deg, #1a86f0, #0071e3);
+      box-shadow:
+        0 8px 18px rgba(0, 113, 227, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    .day-dot {
+      background: #0066cc;
+    }
+  }
+}
+
+/* ------------------------------------------------------------
+   Daily metric cards (Steps + My Goals)
+   ------------------------------------------------------------ */
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 18px 44px rgba(15, 23, 42, 0.07),
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(26px) saturate(180%);
   -webkit-backdrop-filter: blur(26px) saturate(180%);
@@ -124,65 +212,251 @@
     transform: translateY(-2px);
     box-shadow:
       0 24px 56px rgba(15, 23, 42, 0.1),
-      0 3px 10px rgba(15, 23, 42, 0.04),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  .icon-wrapper {
-    display: grid;
-    place-items: center;
-    flex: 0 0 auto;
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    font-size: 23px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  .metric-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
 
-    &.purple {
-      background: linear-gradient(150deg, rgba(175, 82, 222, 0.16), rgba(175, 82, 222, 0.09));
-      color: #af52de;
+  .metric-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1d1d1f;
+  }
+
+  .metric-icon {
+    font-size: 19px;
+    color: #0071e3;
+  }
+
+  .metric-value {
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .metric-caption {
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: #86868b;
+  }
+}
+
+.steps-card {
+  background:
+    radial-gradient(80% 120% at 90% 0%, rgba(10, 132, 255, 0.13), transparent 60%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.55));
+}
+
+.goals-card {
+  background:
+    radial-gradient(80% 120% at 90% 0%, rgba(175, 82, 222, 0.13), transparent 60%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.55));
+
+  .goals-copy {
+    margin-bottom: 10px;
+  }
+
+  .goal-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 980px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+
+    .goal-track {
+      position: relative;
+      flex: 1;
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(0, 0, 0, 0.07);
+      overflow: hidden;
     }
 
-    &.blue {
-      background: linear-gradient(150deg, rgba(10, 132, 255, 0.16), rgba(10, 132, 255, 0.09));
-      color: #0071e3;
+    .goal-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #af52de, #0a84ff);
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    &.green {
-      background: linear-gradient(150deg, rgba(52, 199, 89, 0.17), rgba(52, 199, 89, 0.09));
-      color: #248a3d;
+    strong {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
     }
   }
 
-  .stat-info {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
+  .goal-meta {
+    margin-top: 6px;
+    font-size: 11.5px;
+    color: #aeaeb2;
+    font-variant-numeric: tabular-nums;
+  }
+}
 
-    .stat-value {
-      font-size: 29px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      color: #1d1d1f;
-      font-variant-numeric: tabular-nums;
+/* ------------------------------------------------------------
+   Calories donut
+   ------------------------------------------------------------ */
 
-      small {
-        font-size: 15px;
-        font-weight: 590;
-        color: #86868b;
-        margin-left: 2px;
-      }
+.kcal-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 14px;
+  padding: 24px 26px;
+  border-radius: 26px;
+  background:
+    radial-gradient(70% 120% at 8% 0%, rgba(10, 132, 255, 0.08), transparent 60%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.52));
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 20px 50px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+}
+
+.kcal-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .legend-dot {
+    flex: 0 0 auto;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+
+    &.target {
+      background: #1d1d1f;
     }
 
-    .stat-label {
-      margin-top: 2px;
-      font-size: 13px;
-      font-weight: 590;
-      letter-spacing: -0.005em;
+    &.burned {
+      background: #0a84ff;
+    }
+
+    &.remaining {
+      background: #64d2ff;
+    }
+  }
+
+  strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+  }
+
+  small {
+    font-size: 12px;
+    color: #86868b;
+  }
+}
+
+.kcal-donut {
+  --burned: 0%;
+  position: relative;
+  flex: 0 0 auto;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: conic-gradient(#0a84ff 0 var(--burned), rgba(100, 210, 255, 0.35) var(--burned) 100%);
+  box-shadow: 0 14px 34px rgba(0, 113, 227, 0.16);
+
+  .donut-hole {
+    position: absolute;
+    inset: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    border-radius: 50%;
+    background: rgba(252, 253, 255, 0.96);
+    box-shadow: inset 0 1px 4px rgba(15, 23, 42, 0.06);
+
+    strong {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    small {
+      font-size: 11px;
+      font-weight: 620;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: #86868b;
     }
   }
+}
+
+/* ------------------------------------------------------------
+   Start workout CTA
+   ------------------------------------------------------------ */
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 26px;
+  font-size: 16px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+  color: #fff;
+  border-radius: 980px;
+  background: linear-gradient(180deg, #1a86f0, #0071e3);
+  box-shadow:
+    0 12px 26px rgba(0, 113, 227, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
+
+  &:hover {
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow:
+      0 15px 32px rgba(0, 113, 227, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.start-cta {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 14px;
 }
 
 /* ------------------------------------------------------------
@@ -199,23 +473,23 @@
   font-size: 16px !important;
   font-weight: 620 !important;
   letter-spacing: -0.012em;
-  color: #b25000 !important;
+  color: #0066cc !important;
   border-radius: 980px !important;
-  border: 1px solid rgba(255, 149, 0, 0.32) !important;
-  background: linear-gradient(150deg, rgba(255, 214, 143, 0.4), rgba(255, 179, 64, 0.18)) !important;
+  border: 1px solid rgba(0, 113, 227, 0.28) !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.7), rgba(0, 113, 227, 0.08)) !important;
   box-shadow:
-    0 12px 30px rgba(255, 149, 0, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    0 12px 30px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(18px) saturate(170%);
   -webkit-backdrop-filter: blur(18px) saturate(170%);
   transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.22s ease !important;
 
   &:hover {
     transform: translateY(-1px);
-    border-color: rgba(255, 149, 0, 0.5) !important;
+    border-color: rgba(0, 113, 227, 0.45) !important;
     box-shadow:
-      0 16px 36px rgba(255, 149, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.75) !important;
+      0 16px 36px rgba(15, 23, 42, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
   }
 
   &:active {
@@ -322,6 +596,12 @@
   border-radius: 30px !important;
 }
 
+/* X-ul putin mai jos, aliniat cu headerul asistentului */
+::ng-deep .no-padding-modal .ant-modal-close {
+  top: 22px;
+  right: 20px;
+}
+
 ::ng-deep .modern-close-icon {
   display: grid;
   place-items: center;
@@ -343,7 +623,8 @@
 ::ng-deep .modern-chat {
   display: flex;
   flex-direction: column;
-  max-height: 82vh;
+  /* inaltime fixa: toate pasii au aceeasi dimensiune si incap pe ecran */
+  height: min(780px, 88vh);
 
   /* Header */
   .chat-header-modern {
@@ -353,23 +634,8 @@
     padding: 24px 28px 18px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.055);
     background:
-      radial-gradient(70% 120% at 12% 0%, rgba(255, 179, 64, 0.14), transparent 60%),
+      radial-gradient(70% 120% at 12% 0%, rgba(10, 132, 255, 0.12), transparent 60%),
       transparent;
-
-    .chat-avatar {
-      display: grid;
-      place-items: center;
-      width: 52px;
-      height: 52px;
-      flex: 0 0 auto;
-      font-size: 24px;
-      color: #fff;
-      border-radius: 17px;
-      background: linear-gradient(150deg, #ffb340, #ff9500);
-      box-shadow:
-        0 10px 24px rgba(255, 149, 0, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    }
 
     .chat-title-info {
       min-width: 0;
@@ -581,6 +847,42 @@
         linear-gradient(150deg, rgba(10, 132, 255, 0.1), rgba(10, 132, 255, 0.04));
       border: 1px solid rgba(10, 132, 255, 0.16);
 
+      /* caloriile, primele si cele mai vizibile */
+      .result-kcal {
+        display: flex;
+        align-items: baseline;
+        gap: 9px;
+        margin-bottom: 14px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid rgba(10, 132, 255, 0.14);
+
+        > strong {
+          font-size: 44px;
+          font-weight: 750;
+          line-height: 1;
+          letter-spacing: -0.04em;
+          color: #0066cc;
+          font-variant-numeric: tabular-nums;
+        }
+
+        .result-kcal-copy {
+          display: flex;
+          flex-direction: column;
+
+          span {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #0066cc;
+          }
+
+          small {
+            font-size: 11px;
+            color: #86868b;
+          }
+        }
+      }
+
       .result-kicker {
         display: block;
         margin-bottom: 6px;
@@ -608,33 +910,53 @@
 
       .result-meta {
         display: flex;
-        gap: 14px;
+        gap: 8px;
 
         span {
-          font-size: 13px;
-          font-weight: 560;
-          color: #515154;
+          padding: 5px 13px;
+          font-size: 12.5px;
+          font-weight: 590;
+          color: #0066cc;
+          background: rgba(255, 255, 255, 0.75);
+          border: 1px solid rgba(10, 132, 255, 0.18);
+          border-radius: 980px;
         }
       }
     }
 
     .macro-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 10px;
 
       .macro-card {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1px;
-        padding: 14px 8px;
+        gap: 3px;
+        padding: 15px 8px;
         text-align: center;
         border-radius: 16px;
         background: rgba(255, 255, 255, 0.72);
         border: 1px solid rgba(0, 0, 0, 0.06);
 
-        span {
+        .macro-dot {
+          width: 8px;
+          height: 8px;
+          margin-bottom: 3px;
+          border-radius: 50%;
+        }
+
+        strong {
+          font-size: 22px;
+          font-weight: 700;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          color: #1d1d1f;
+          font-variant-numeric: tabular-nums;
+        }
+
+        > span:last-child {
           font-size: 11.5px;
           font-weight: 650;
           text-transform: uppercase;
@@ -642,27 +964,9 @@
           color: #86868b;
         }
 
-        strong {
-          font-size: 21px;
-          font-weight: 700;
-          letter-spacing: -0.02em;
-          color: #1d1d1f;
-          font-variant-numeric: tabular-nums;
-        }
-
-        small {
-          font-size: 11px;
-          color: #aeaeb2;
-        }
-
-        &.calories {
-          background: linear-gradient(150deg, rgba(255, 149, 0, 0.14), rgba(255, 149, 0, 0.06));
-          border-color: rgba(255, 149, 0, 0.22);
-
-          strong {
-            color: #b25000;
-          }
-        }
+        &.protein .macro-dot { background: #0a84ff; }
+        &.carbs .macro-dot { background: #64d2ff; }
+        &.fats .macro-dot { background: #af52de; }
       }
     }
 
@@ -829,53 +1133,64 @@
    Responsive
    ------------------------------------------------------------ */
 
-@media (max-width: 900px) {
-  .stats-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-}
-
 @media (max-width: 600px) {
-  .dashboard-hero {
-    padding: 28px 22px;
-    border-radius: 24px;
+  .activity-head {
+    flex-wrap: wrap;
+    align-items: center;
+  }
 
-    .hero-content {
-      h1 {
-        font-size: 26px;
-      }
+  .activity-title h1 {
+    font-size: 27px;
+  }
 
-      p {
-        font-size: 15px;
-        margin-bottom: 20px;
-      }
+  .week-strip {
+    gap: 3px;
+    padding: 10px 6px 8px;
+  }
 
-      .hero-cta {
-        width: 100%;
-        justify-content: center;
-        padding: 14px 22px;
+  .day-cell .day-num {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .metric-grid {
+    gap: 10px;
+  }
+
+  .metric-card {
+    padding: 16px 16px;
+    border-radius: 22px;
+
+    .metric-value {
+      font-size: 28px;
+    }
+  }
+
+  .kcal-card {
+    padding: 20px 18px;
+    gap: 14px;
+  }
+
+  .kcal-donut {
+    width: 128px;
+    height: 128px;
+
+    .donut-hole {
+      inset: 19px;
+
+      strong {
+        font-size: 21px;
       }
     }
   }
 
-  .modern-stat-card {
-    padding: 16px 18px;
-
-    .icon-wrapper {
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      font-size: 20px;
-    }
-
-    .stat-info .stat-value {
-      font-size: 25px;
-    }
+  .hero-cta {
+    padding: 14px 22px;
   }
 
   ::ng-deep .modern-chat {
-    max-height: none;
+    height: min(720px, 86vh);
 
     .chat-header-modern {
       padding: 18px 18px 14px;
@@ -886,7 +1201,7 @@
     }
 
     .assistant-result .macro-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
     }
 
     .assistant-footer {

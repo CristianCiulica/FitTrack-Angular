@@ -15,7 +15,7 @@
             [class.navigation-locked]="workoutInProgress()"
             (click)="blockNavigation($event)"
             aria-label="Dashboard">
-            <span nz-icon nzType="dashboard"></span>
+            <span nz-icon nzType="ft:home"></span>
             <span>Home</span>
           </a>
         </li>
@@ -26,13 +26,13 @@
             [class.navigation-locked]="workoutInProgress()"
             (click)="blockNavigation($event)"
             aria-label="Workouts">
-            <span nz-icon nzType="thunderbolt"></span>
+            <span nz-icon nzType="ft:history"></span>
             <span>History</span>
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
           <a routerLink="/start-workout" aria-label="Start workout">
-            <span nz-icon nzType="play-circle"></span>
+            <span nz-icon nzType="ft:workout"></span>
             <span>Workout</span>
           </a>
         </li>
@@ -43,7 +43,7 @@
             [class.navigation-locked]="workoutInProgress()"
             (click)="blockNavigation($event)"
             aria-label="Running">
-            <span nz-icon nzType="rise"></span>
+            <span nz-icon nzType="ft:run"></span>
             <span>Run</span>
           </a>
         </li>
@@ -54,8 +54,30 @@
             [class.navigation-locked]="workoutInProgress()"
             (click)="blockNavigation($event)"
             aria-label="Nutrition calculator">
-            <span nz-icon nzType="heart"></span>
+            <span nz-icon nzType="ft:nutrition"></span>
             <span>Nutrition</span>
+          </a>
+        </li>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+          <a
+            [routerLink]="workoutInProgress() ? null : '/account'"
+            [attr.aria-disabled]="workoutInProgress()"
+            [class.navigation-locked]="workoutInProgress()"
+            (click)="blockNavigation($event)"
+            aria-label="Account">
+            <span nz-icon nzType="user"></span>
+            <span>Account</span>
+          </a>
+        </li>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+          <a
+            [routerLink]="workoutInProgress() ? null : '/settings'"
+            [attr.aria-disabled]="workoutInProgress()"
+            [class.navigation-locked]="workoutInProgress()"
+            (click)="blockNavigation($event)"
+            aria-label="Settings">
+            <span nz-icon nzType="setting"></span>
+            <span>Settings</span>
           </a>
         </li>
       </ul>
@@ -63,14 +85,17 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
-      <h2>
-        <span class="desktop-page-title">Start Workout</span>
-        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
-      </h2>
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Start Workout</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
       <div class="header-actions">
         <button nz-button nzType="primary" (click)="openAddWorkout()">
           <span nz-icon nzType="plus"></span>
-          Add workout
+          <span class="button-label">Add workout</span>
         </button>
         <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
@@ -81,85 +106,100 @@
 
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
-          <nz-card class="routine-library">
-            <section class="predefined-section">
-              <div class="routine-heading-row">
-                <div class="routine-section-heading">
-                  <span>Ready to start</span>
-                  <h3>Predefined workouts</h3>
-                </div>
-                <div class="carousel-controls">
-                  <span>
-                    {{ predefinedStartIndex() + 1 }}–{{ predefinedStartIndex() + visiblePredefinedRoutines().length }}
-                    of {{ routines.length }}
-                  </span>
-                  <button
-                    type="button"
-                    aria-label="Previous predefined workouts"
-                    (click)="showPreviousPredefined()"
-                    [disabled]="!canShowPreviousPredefined()"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    aria-label="Next predefined workouts"
-                    (click)="showNextPredefined()"
-                    [disabled]="!canShowNextPredefined()"
-                  >
-                    ›
-                  </button>
-                </div>
-              </div>
-              <div class="predefined-carousel">
-                <div class="routines-list predefined-routines-list">
-                  <div
-                    class="routine-card"
-                    *ngFor="let item of visiblePredefinedRoutines()"
-                    [class.selected]="selectedRoutineKey() === 'predefined-' + item.index"
-                    (click)="selectRoutine(item.routine, 'predefined-' + item.index)">
-                    <h3>{{ item.routine.name }}</h3>
-                    <p>{{ item.routine.exercises.length }} exercises</p>
-                    <div class="routine-preview">
-                      <nz-tag *ngFor="let ex of item.routine.exercises">{{ ex.name }}</nz-tag>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
+          <!-- Hero: rutina selectata + progres saptamanal -->
+          <div class="progress-hero">
+            <div class="progress-hero-copy">
+              <span class="hero-eyebrow">Progress</span>
+              <h2>{{ currentRoutine().name }}</h2>
+              <p>{{ currentRoutine().category || 'Custom' }} · ~{{ routineMinutes(currentRoutine()) }} mins</p>
+              <button type="button" class="kcal-pill" (click)="startWorkout()">
+                <span class="kcal-num">~{{ routineKcal(currentRoutine()) }}</span>
+                <span class="kcal-label">calories</span>
+                <span class="kcal-arrow" aria-hidden="true">↗</span>
+              </button>
+            </div>
+            <div
+              class="weekly-ring"
+              role="img"
+              [attr.aria-label]="'Weekly goal ' + weeklyPercent() + '%'"
+              [style.--pct.%]="weeklyPercent()"
+            >
+              <span>{{ weeklyPercent() }}%</span>
+            </div>
+          </div>
 
-            <section class="personal-section">
-              <div class="routine-section-heading personal-heading">
-                <span>Your library</span>
-                <h3>My workouts</h3>
-              </div>
-              <div class="routines-list personal-routines-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
-                <div
-                  class="routine-card personal-routine"
-                  *ngFor="let routine of personalRoutines()"
-                  [class.selected]="selectedRoutineKey() === 'personal-' + routine.id"
-                  (click)="selectRoutine(routine, 'personal-' + routine.id)"
-                >
-                  <h3>{{ routine.name }}</h3>
-                  <p>{{ routine.exercises.length }} exercises</p>
-                  <div class="routine-preview">
-                    <nz-tag *ngFor="let exercise of routine.exercises">{{ exercise.name }}</nz-tag>
-                  </div>
-                </div>
-              </div>
-              <ng-template #noPersonalRoutines>
-                <button type="button" class="empty-personal-routines" (click)="openAddWorkout()">
-                  You have no personal workouts yet. Add your first workout.
-                </button>
-              </ng-template>
+          <!-- Planul -->
+          <div class="plan-heading">
+            <h3>Your plan</h3>
+          </div>
 
-              <div class="action-bar">
-                <button nz-button nzType="primary" nzSize="large" (click)="startWorkout()">
-                  <span nz-icon nzType="play-circle"></span> Start workout
-                </button>
+          <div class="filter-pills" role="tablist" aria-label="Workout categories">
+            <button
+              type="button"
+              *ngFor="let filter of routineFilters"
+              [class.selected]="routineFilter() === filter"
+              (click)="routineFilter.set(filter)"
+            >
+              {{ filter }}
+            </button>
+          </div>
+
+          <div class="plan-list">
+            <div
+              class="plan-card"
+              *ngFor="let item of filteredPredefined(); let i = index"
+              [attr.data-tone]="cardTone(i)"
+              [class.selected]="selectedRoutineKey() === 'predefined-' + item.index"
+              (click)="selectRoutine(item.routine, 'predefined-' + item.index)"
+            >
+              <div class="duration-badge">
+                <strong>{{ routineMinutes(item.routine) }}</strong>
+                <span>mins</span>
               </div>
-            </section>
-          </nz-card>
+              <h3>{{ item.routine.name }}</h3>
+              <div class="plan-chips">
+                <span class="plan-chip">{{ item.routine.category }}</span>
+                <span class="plan-count">{{ item.routine.exercises.length }} exercises · ~{{ routineKcal(item.routine) }} kcal</span>
+              </div>
+              <p class="plan-muscles">{{ muscleSummary(item.routine) }}</p>
+            </div>
+          </div>
+
+          <!-- Biblioteca personala -->
+          <div class="plan-heading personal-heading">
+            <h3>My workouts</h3>
+          </div>
+          <div class="plan-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
+            <div
+              class="plan-card"
+              *ngFor="let routine of personalRoutines(); let i = index"
+              [attr.data-tone]="cardTone(i + 1)"
+              [class.selected]="selectedRoutineKey() === 'personal-' + routine.id"
+              (click)="selectRoutine(routine, 'personal-' + routine.id)"
+            >
+              <div class="duration-badge">
+                <strong>{{ routineMinutes(routine) }}</strong>
+                <span>mins</span>
+              </div>
+              <h3>{{ routine.name }}</h3>
+              <div class="plan-chips">
+                <span class="plan-chip">Custom</span>
+                <span class="plan-count">{{ routine.exercises.length }} exercises · ~{{ routineKcal(routine) }} kcal</span>
+              </div>
+              <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
+            </div>
+          </div>
+          <ng-template #noPersonalRoutines>
+            <button type="button" class="empty-personal-routines" (click)="openAddWorkout()">
+              You have no personal workouts yet. Add your first workout.
+            </button>
+          </ng-template>
+
+          <div class="action-bar">
+            <button nz-button nzType="primary" nzSize="large" (click)="startWorkout()">
+              <span nz-icon nzType="play-circle"></span> Start workout
+            </button>
+          </div>
         </ng-container>
 
         <!-- ACTIVE STATE -->
@@ -234,7 +274,7 @@
           <nz-card class="finish-card">
             <span nz-icon nzType="check-circle" style="font-size: 64px; color: #52c41a;"></span>
             <h2>Workout complete!</h2>
-            <p>Great job! Your workout was saved to your history.</p>
+            <p>Great job! You burned ~{{ routineKcal(currentRoutine()) }} kcal. Your workout was saved to your history.</p>
             <button nz-button nzType="primary" (click)="reset()" routerLink="/dashboard">Go to dashboard</button>
           </nz-card>
         </ng-container>

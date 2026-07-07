@@ -9,13 +9,15 @@ import { RunningSession } from '../../core/models/running-session.model';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { RouterLinkActive } from '@angular/router';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
+import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
+import { ProfileService } from '../../core/services/profile.service';
+import { estimateSessionCalories } from '../../core/utils/workout-calories';
 
 type WorkoutSortColumn = 'name' | 'date' | 'exerciseCount' | 'primaryMuscle' | 'volume';
 type SortDirection = 'ascend' | 'descend' | null;
@@ -30,11 +32,11 @@ type SortDirection = 'ascend' | 'descend' | null;
     NzTableModule,
     NzButtonModule,
     NzIconModule,
-    NzTagModule,
     NzPopconfirmModule,
     NzLayoutModule,
     NzMenuModule,
     WorkoutModalComponent,
+    AppMenuComponent,
   ],
   templateUrl: './workouts.component.html',
   styleUrls: ['./workouts.component.scss']
@@ -105,11 +107,64 @@ export class WorkoutsComponent implements OnInit {
     return workout.exercises?.[0]?.muscleGroup ?? 'Mixed';
   }
 
+  // ton de culoare distinct pentru fiecare grupa musculara, in loc de tag-ul gri implicit
+  private readonly muscleTones: Record<string, string> = {
+    Chest: 'blue',
+    Back: 'green',
+    Shoulders: 'purple',
+    Arms: 'cyan',
+    Legs: 'indigo',
+    Core: 'pink',
+    Cardio: 'red',
+    'Full Body': 'graphite',
+  };
+
+  muscleTone(muscleGroup: string): string {
+    return this.muscleTones[muscleGroup] ?? 'graphite';
+  }
+
   getWorkoutVolume(workout: Workout): number {
     return workout.exercises?.reduce(
       (total, exercise) => total + exercise.sets * exercise.reps * exercise.weight,
       0,
     ) ?? 0;
+  }
+
+  // estimare de calorii arse, pe baza greutatii din profil
+  getWorkoutCalories(workout: Workout): number {
+    return estimateSessionCalories(workout.exercises, this.profileService.weightKg());
+  }
+
+  // deseneaza traseul GPS salvat ca path SVG normalizat in viewBox 100x56
+  routePath(session: RunningSession): string | null {
+    const route = session.route;
+    if (!route || route.length < 2) return null;
+
+    const lats = route.map((p) => p[0]);
+    const lngs = route.map((p) => p[1]);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    const spanLat = Math.max(maxLat - minLat, 1e-5);
+    const spanLng = Math.max(maxLng - minLng, 1e-5);
+
+    const W = 100;
+    const H = 56;
+    const pad = 6;
+
+    // pastram proportiile traseului, centrat in viewBox
+    const scale = Math.min((W - pad * 2) / spanLng, (H - pad * 2) / spanLat);
+    const offsetX = (W - spanLng * scale) / 2;
+    const offsetY = (H - spanLat * scale) / 2;
+
+    return route
+      .map((p, i) => {
+        const x = offsetX + (p[1] - minLng) * scale;
+        const y = H - (offsetY + (p[0] - minLat) * scale);
+        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
+      })
+      .join(' ');
   }
 
   private getSortValue(workout: Workout, column: WorkoutSortColumn): string | number {
@@ -149,6 +204,7 @@ export class WorkoutsComponent implements OnInit {
     private workoutService: WorkoutService,
     private runningSessionService: RunningSessionService,
     private authService: AuthService,
+    private profileService: ProfileService,
     private message: NzMessageService
   ) { }
 

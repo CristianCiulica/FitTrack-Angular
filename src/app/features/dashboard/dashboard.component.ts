@@ -1,8 +1,10 @@
-import { Component, ElementRef, OnInit, ViewChild, signal, computed } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ProfileService } from '../../core/services/profile.service';
+import { RunningSessionService } from '../../core/services/running-session.service';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -13,6 +15,8 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { Workout } from '../../core/models/workout.model';
+import { estimateSessionCalories } from '../../core/utils/workout-calories';
+import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import {
   ASSISTANT_OPTIONS,
   AssistantAnswers,
@@ -38,12 +42,19 @@ import {
     NzDropDownModule,
     NzTagModule,
     NzModalModule,
+    AppMenuComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
   @ViewChild('chatBody') private chatBody?: ElementRef<HTMLElement>;
+
+  private readonly profileService = inject(ProfileService);
+  readonly firstName = computed(() => {
+    const name = this.profileService.displayName().trim();
+    return name ? name.split(' ')[0] : '';
+  });
 
   workouts = signal<Workout[]>([]);
 
@@ -105,6 +116,110 @@ export class DashboardComponent implements OnInit {
     return this.workouts().filter(w => new Date(w.date) >= weekAgo).length;
   });
   recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
+
+  /* ---------------- Activity calendar + daily metrics ---------------- */
+
+  private readonly runningSessionService = inject(RunningSessionService);
+  private readonly runningSessions = this.runningSessionService.sessions;
+
+  readonly selectedDate = signal<Date>(new Date());
+
+  private toKey(date: Date): string {
+    const m = `${date.getMonth() + 1}`.padStart(2, '0');
+    const d = `${date.getDate()}`.padStart(2, '0');
+    return `${date.getFullYear()}-${m}-${d}`;
+  }
+
+  // saptamana afisata incepe luni, in jurul zilei selectate
+  readonly weekDays = computed(() => {
+    const selected = this.selectedDate();
+    const monday = new Date(selected);
+    monday.setDate(selected.getDate() - ((selected.getDay() + 6) % 7));
+
+    const workoutKeys = new Set(this.workouts().map((w) => (w.date ?? '').slice(0, 10)));
+    const runKeys = new Set(this.runningSessions().map((s) => this.toKey(new Date(s.startedAt))));
+    const todayKey = this.toKey(new Date());
+    const selectedKey = this.toKey(selected);
+
+    return Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      const key = this.toKey(date);
+      return {
+        date,
+        key,
+        label: ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
+        dayNum: date.getDate(),
+        selected: key === selectedKey,
+        isToday: key === todayKey,
+        hasActivity: workoutKeys.has(key) || runKeys.has(key),
+      };
+    });
+  });
+
+  selectDay(date: Date) {
+    this.selectedDate.set(new Date(date));
+  }
+
+  shiftWeek(direction: -1 | 1) {
+    const next = new Date(this.selectedDate());
+    next.setDate(next.getDate() + direction * 7);
+    this.selectedDate.set(next);
+  }
+
+  private readonly sessionsForDay = computed(() => {
+    const key = this.toKey(this.selectedDate());
+    return this.runningSessions().filter((s) => this.toKey(new Date(s.startedAt)) === key);
+  });
+
+  readonly stepsForDay = computed(() =>
+    this.sessionsForDay().reduce((acc, s) => acc + (s.steps ?? 0), 0),
+  );
+
+  private readonly workoutsForDay = computed(() => {
+    const key = this.toKey(this.selectedDate());
+    return this.workouts().filter((w) => (w.date ?? '').slice(0, 10) === key);
+  });
+
+  readonly workoutsOnDay = computed(() => this.workoutsForDay().length);
+
+  // caloriile estimate ale unui antrenament de forta, pe baza greutatii din profil
+  workoutKcal(workout: Workout): number {
+    return estimateSessionCalories(workout.exercises, this.profileService.weightKg());
+  }
+
+  // tinta zilnica de calorii din profil (Mifflin-St Jeor, activitate usoara)
+  readonly targetKcal = computed(() => {
+    const p = this.profileService.profile();
+    if (!p?.weightKg || !p?.heightCm || !p?.age) return 2200;
+    const base = 10 * p.weightKg + 6.25 * p.heightCm - 5 * p.age + (p.sex === 'female' ? -161 : 5);
+    return Math.round(base * 1.375);
+  });
+
+  // arse = alergari + antrenamentele de forta din ziua selectata
+  readonly burnedKcal = computed(() => {
+    const runs = this.sessionsForDay().reduce((acc, s) => acc + (s.calories ?? 0), 0);
+    const weight = this.profileService.weightKg();
+    const workouts = this.workoutsForDay().reduce(
+      (acc, w) => acc + estimateSessionCalories(w.exercises, weight),
+      0,
+    );
+    return Math.round(runs + workouts);
+  });
+
+  readonly remainingKcal = computed(() => Math.max(0, this.targetKcal() - this.burnedKcal()));
+
+  readonly burnedPercent = computed(() => {
+    const target = this.targetKcal();
+    if (target <= 0) return 0;
+    return Math.min(100, Math.round((this.burnedKcal() / target) * 100));
+  });
+
+  // progres saptamanal: 4 antrenamente pe saptamana ca tinta
+  readonly weeklyGoal = 4;
+  readonly goalPercent = computed(() =>
+    Math.min(100, Math.round((this.thisWeekWorkouts() / this.weeklyGoal) * 100)),
+  );
 
   toggleChat() {
     this.isChatOpen.update(v => !v);
@@ -181,6 +296,7 @@ export class DashboardComponent implements OnInit {
       this.workoutService.workouts.set(data);
       this.workoutService.totalWorkouts.set(data.length);
     });
+    this.runningSessionService.getSessions().subscribe({ error: () => {} });
   }
 
   logout() {

@@ -8,32 +8,44 @@
       <ul nz-menu nzMode="inline" class="sidebar-menu">
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
           <a routerLink="/dashboard" aria-label="Dashboard">
-            <span nz-icon nzType="dashboard"></span>
+            <span nz-icon nzType="ft:home"></span>
             <span>Home</span>
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
           <a routerLink="/workouts" aria-label="Workouts">
-            <span nz-icon nzType="thunderbolt"></span>
+            <span nz-icon nzType="ft:history"></span>
             <span>History</span>
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
           <a routerLink="/start-workout" aria-label="Start workout">
-            <span nz-icon nzType="play-circle"></span>
+            <span nz-icon nzType="ft:workout"></span>
             <span>Workout</span>
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
           <a routerLink="/running" aria-label="Running">
-            <span nz-icon nzType="rise"></span>
+            <span nz-icon nzType="ft:run"></span>
             <span>Run</span>
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected">
           <a routerLink="/bmi" aria-label="Nutrition calculator">
-            <span nz-icon nzType="heart"></span>
+            <span nz-icon nzType="ft:nutrition"></span>
             <span>Nutrition</span>
+          </a>
+        </li>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+          <a routerLink="/account" aria-label="Account">
+            <span nz-icon nzType="user"></span>
+            <span>Account</span>
+          </a>
+        </li>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+          <a routerLink="/settings" aria-label="Settings">
+            <span nz-icon nzType="setting"></span>
+            <span>Settings</span>
           </a>
         </li>
       </ul>
@@ -42,61 +54,122 @@
   <!-- Content -->
   <nz-layout class="main-layout">
     <nz-header class="app-header dashboard-header">
-      <h2>
-        <span class="desktop-page-title">Dashboard</span>
-        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
-      </h2>
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Dashboard</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
       <div class="header-actions">
         <button nz-button nzDanger class="logout-button" (click)="logout()" style="margin-left: 8px">Logout</button>
       </div>
     </nz-header>
 
     <nz-content class="app-content">
-      <!-- Hero Banner -->
-      <div class="dashboard-hero">
-        <div class="hero-content">
-          <h1>Welcome back!️</h1>
-          <p>You've done <strong>{{ totalWorkouts() }}</strong> workouts so far. Ready for the next one?</p>
-          <a routerLink="/start-workout" class="hero-cta">
-            <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-            Start a new workout
-          </a>
+      <!-- Activity head: title + month navigation -->
+      <div class="activity-head">
+        <div class="activity-title">
+          <h1>Your Activity</h1>
+          <p *ngIf="firstName()">Welcome back, {{ firstName() }}!</p>
         </div>
-        <div class="hero-decoration"></div>
-      </div>
-
-      <!-- Quick Stats -->
-      <div class="stats-row">
-        <div class="modern-stat-card">
-          <div class="icon-wrapper purple">
-            <span nz-icon nzType="fire"></span>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ totalWorkouts() }}</span>
-            <span class="stat-label">Total Workouts</span>
-          </div>
-        </div>
-
-        <div class="modern-stat-card">
-          <div class="icon-wrapper blue">
-            <span nz-icon nzType="calendar"></span>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ thisWeekWorkouts() }}</span>
-            <span class="stat-label">This Week</span>
-          </div>
-        </div>
-
-        <div class="modern-stat-card">
-          <div class="icon-wrapper green">
-            <span nz-icon nzType="rise"></span>
-          </div>
-          <div class="stat-info">
-            <span class="stat-value">{{ totalVolume() }} <small>kg</small></span>
-            <span class="stat-label">Total Volume</span>
+        <div class="month-nav">
+          <span class="month-label">{{ selectedDate() | date: 'MMMM y' }}</span>
+          <div class="month-arrows">
+            <button type="button" aria-label="Previous week" (click)="shiftWeek(-1)">‹</button>
+            <button type="button" aria-label="Next week" (click)="shiftWeek(1)">›</button>
           </div>
         </div>
       </div>
+
+      <!-- Week strip -->
+      <div class="week-strip">
+        <button
+          type="button"
+          class="day-cell"
+          *ngFor="let day of weekDays()"
+          [class.selected]="day.selected"
+          [class.today]="day.isToday"
+          (click)="selectDay(day.date)"
+        >
+          <span class="day-label">{{ day.label }}</span>
+          <span class="day-num">{{ day.dayNum }}</span>
+          <span class="day-dot" [class.visible]="day.hasActivity" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <!-- Daily metric cards -->
+      <div class="metric-grid">
+        <div class="metric-card steps-card">
+          <div class="metric-head">
+            <span class="metric-title">Steps</span>
+            <span class="metric-icon" nz-icon nzType="rise"></span>
+          </div>
+          <strong class="metric-value">{{ stepsForDay() | number }}</strong>
+          <span class="metric-caption">
+            {{ workoutsOnDay() > 0 ? workoutsOnDay() + (workoutsOnDay() === 1 ? ' workout logged' : ' workouts logged') : 'steps' }}
+          </span>
+        </div>
+
+        <div class="metric-card goals-card">
+          <div class="metric-head">
+            <span class="metric-title">My Goals</span>
+          </div>
+          <span class="metric-caption goals-copy">
+            Keep it up, you can achieve your goals.
+          </span>
+          <div class="goal-pill">
+            <span class="goal-track" aria-hidden="true">
+              <span class="goal-fill" [style.width.%]="goalPercent()"></span>
+            </span>
+            <strong>{{ goalPercent() }}%</strong>
+          </div>
+          <span class="goal-meta">{{ thisWeekWorkouts() }}/{{ weeklyGoal }} workouts this week</span>
+        </div>
+      </div>
+
+      <!-- Calories donut -->
+      <div class="kcal-card">
+        <div class="kcal-legend">
+          <div class="legend-row">
+            <span class="legend-dot target"></span>
+            <div>
+              <strong>{{ targetKcal() | number }} Kcal</strong>
+              <small>Target</small>
+            </div>
+          </div>
+          <div class="legend-row">
+            <span class="legend-dot burned"></span>
+            <div>
+              <strong>{{ burnedKcal() | number }} Kcal</strong>
+              <small>Burned</small>
+            </div>
+          </div>
+          <div class="legend-row">
+            <span class="legend-dot remaining"></span>
+            <div>
+              <strong>{{ remainingKcal() | number }} Kcal</strong>
+              <small>Remaining</small>
+            </div>
+          </div>
+        </div>
+        <div
+          class="kcal-donut"
+          role="img"
+          [attr.aria-label]="'Burned ' + burnedPercent() + '% of daily calorie target'"
+          [style.--burned.%]="burnedPercent()"
+        >
+          <div class="donut-hole">
+            <strong>{{ burnedPercent() }}%</strong>
+            <small>burned</small>
+          </div>
+        </div>
+      </div>
+
+      <a routerLink="/start-workout" class="hero-cta start-cta">
+        <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+        Start a new workout
+      </a>
 
       <button nz-button nzBlock nzSize="large" class="ai-coach-trigger" (click)="toggleChat()">
         <span nz-icon nzType="fire"></span>
@@ -107,7 +180,7 @@
           <div *ngFor="let w of recentWorkouts()" class="recent-item">
             <div class="recent-left">
               <div class="recent-name">{{ w.name || 'Untitled workout' }}</div>
-              <div class="recent-meta">{{ w.exercises.length || 0 }} exercises</div>
+              <div class="recent-meta">{{ w.exercises.length || 0 }} exercises · ~{{ workoutKcal(w) }} kcal</div>
             </div>
             <div class="recent-right">
               <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}</nz-tag>
@@ -140,9 +213,6 @@
         <ng-container *nzModalContent>
           <div class="chat-container modern-chat">
             <div class="chat-header-modern">
-              <div class="chat-avatar">
-                <span nz-icon nzType="fire"></span>
-              </div>
               <div class="chat-title-info">
                 <span class="chat-brand">FitTrack<span>.</span></span>
                 <h3>Nutrition Assistant</h3>
@@ -191,35 +261,37 @@
               <ng-template #assistantResultTemplate>
                 <div class="assistant-result" *ngIf="assistantResult() as result">
                   <div class="result-hero">
+                    <div class="result-kcal">
+                      <strong>{{ result.calories }}</strong>
+                      <div class="result-kcal-copy">
+                        <span>kcal</span>
+                        <small>per serving</small>
+                      </div>
+                    </div>
                     <span class="result-kicker">Recommended for you</span>
                     <h4>{{ result.title }}</h4>
                     <p>{{ result.subtitle }}</p>
                     <div class="result-meta">
-                      <span>⏱ {{ result.prepMinutes }} min</span>
-                      <span>💳 {{ result.cost }} cost</span>
+                      <span>{{ result.prepMinutes }} min prep</span>
+                      <span>{{ result.cost }} cost</span>
                     </div>
                   </div>
 
                   <div class="macro-grid">
-                    <div class="macro-card calories">
-                      <span>Calories</span>
-                      <strong>{{ result.calories }}</strong>
-                      <small>kcal</small>
-                    </div>
-                    <div class="macro-card">
+                    <div class="macro-card protein">
+                      <span class="macro-dot" aria-hidden="true"></span>
+                      <strong>{{ result.protein }}g</strong>
                       <span>Protein</span>
-                      <strong>{{ result.protein }}</strong>
-                      <small>grams</small>
                     </div>
-                    <div class="macro-card">
+                    <div class="macro-card carbs">
+                      <span class="macro-dot" aria-hidden="true"></span>
+                      <strong>{{ result.carbs }}g</strong>
                       <span>Carbs</span>
-                      <strong>{{ result.carbs }}</strong>
-                      <small>grams</small>
                     </div>
-                    <div class="macro-card">
+                    <div class="macro-card fats">
+                      <span class="macro-dot" aria-hidden="true"></span>
+                      <strong>{{ result.fats }}g</strong>
                       <span>Fats</span>
-                      <strong>{{ result.fats }}</strong>
-                      <small>grams</small>
                     </div>
                   </div>
 

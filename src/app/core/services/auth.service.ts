@@ -17,12 +17,14 @@ import { from, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { inject } from '@angular/core';
 import { MigrationService } from './migration.service';
+import { ProfileService } from './profile.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private auth = inject(Auth);
   private router = inject(Router);
   private migration = inject(MigrationService);
+  private profileService = inject(ProfileService);
   currentUser = signal<any>(null);
 
   isLoggedIn$: Observable<boolean> = user(this.auth).pipe(
@@ -32,14 +34,22 @@ export class AuthService {
     }),
   );
 
-  // migram automat datele vechi din localStorage la primul login dupa update
+  // la logout golim profilul incarcat, ca urmatorul user sa nu vada datele vechi
+  private readonly sessionSub = user(this.auth).subscribe((u) => {
+    if (!u) this.profileService.clear();
+  });
+
+  // migram datele vechi din localStorage si incarcam profilul la primul login
   private readonly migrationSub = user(this.auth)
     .pipe(
       filter((u): u is NonNullable<typeof u> => !!u),
       map((u) => u.uid),
       distinctUntilChanged(),
     )
-    .subscribe((uid) => this.migration.migrateIfNeeded(uid));
+    .subscribe((uid) => {
+      this.migration.migrateIfNeeded(uid);
+      this.profileService.load(true).subscribe({ error: () => {} });
+    });
 
   // setam persistenta pentru remember me
   login(email: string, password: string, remember: boolean) {

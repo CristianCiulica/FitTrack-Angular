@@ -86,7 +86,8 @@ export class LoginComponent {
   }
 
   private showGoogleError(error: { code?: string }) {
-    if (error?.code === 'auth/popup-closed-by-user') {
+    console.error('[google-auth]', error);
+    if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
       this.message.warning('Google sign-in was cancelled.');
       return;
     }
@@ -106,7 +107,11 @@ export class LoginComponent {
       this.message.error('Network error. Check your connection and try again.');
       return;
     }
-    this.message.error('Google sign-in failed. Please try again.');
+    if (error?.code === 'auth/account-exists-with-different-credential') {
+      this.message.error('This email is already registered with a password. Sign in with your email and password instead.');
+      return;
+    }
+    this.message.error(`Google sign-in failed${error?.code ? ' (' + error.code + ')' : ''}. Please try again.`);
   }
 }
 

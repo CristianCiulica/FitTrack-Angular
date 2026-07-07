@@ -11,6 +11,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../core/services/auth.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { WeatherService, WeatherSummary } from '../../core/services/weather.service';
+import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 
 const LEAFLET_ICON_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
 const LEAFLET_ICON_RETINA_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
@@ -21,6 +22,7 @@ const GPS_REQUIRED_FIXES = 3;
 const GPS_MAX_ACCURACY_METERS = 50;
 const GPS_CALIBRATION_MAX_ACCURACY_METERS = 35;
 const GPS_MARKER_MAX_ACCURACY_METERS = 120;
+const WEATHER_FALLBACK_CITY = 'Bucharest';
 
 interface AcceptedPosition {
   point: L.LatLng;
@@ -40,6 +42,7 @@ interface AcceptedPosition {
     NzButtonModule,
     NzIconModule,
     NzCardModule,
+    AppMenuComponent,
   ],
   templateUrl: './running.component.html',
   styleUrls: ['./running.component.scss'],
@@ -49,7 +52,6 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   isCalibrating = false;
   mode: 'running' | 'walking' = 'running';
   statusText = 'Tap Start to begin tracking.';
-  cityName = 'Brasov';
   calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
   gpsAccuracy?: number;
   weatherExpanded = false;
@@ -63,10 +65,14 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   steps = 0;
   avgSpeedKmh = 0;
   calories = 0;
+  elapsedSeconds = 0;
 
   private map?: L.Map;
   private polyline?: L.Polyline;
+  private polylineCasing?: L.Polyline;
+  private routePoints: [number, number][] = [];
   private marker?: L.CircleMarker;
+  private elapsedTimer: ReturnType<typeof setInterval> | null = null;
   private watchId: number | null = null;
   private startTime: number | null = null;
   private sessionStartedAt: number | null = null;
@@ -100,6 +106,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   ngOnDestroy(): void {
     this.stopTracking(false);
+    this.stopElapsedTimer();
     window.removeEventListener('resize', this.resizeHandler);
     this.map?.remove();
   }
@@ -140,6 +147,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.resetTracking(false);
     this.isTracking = true;
     this.isCalibrating = true;
+    // overlay-ul fullscreen tocmai a devenit vizibil; harta trebuie redimensionata
+    setTimeout(() => this.map?.invalidateSize(), 80);
     this.runningSessionService.setTrackingActive(true);
     this.calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
     this.statusText = 'Allow location access to start tracking.';
@@ -174,6 +183,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   stopTracking(saveSession = true) {
     const wasTracking = this.isTracking;
     this.stopCalibrationTimer();
+    this.stopElapsedTimer();
     if (this.watchId !== null) {
       navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
@@ -200,6 +210,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.steps = 0;
     this.avgSpeedKmh = 0;
     this.calories = 0;
+    this.elapsedSeconds = 0;
+    this.stopElapsedTimer();
     this.startTime = null;
     this.sessionStartedAt = null;
     this.lastAcceptedPosition = null;
@@ -214,6 +226,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.runningSessionService.setTrackingActive(false);
     this.stopCalibrationTimer();
     this.polyline?.setLatLngs([]);
+    this.polylineCasing?.setLatLngs([]);
+    this.routePoints = [];
     this.marker?.remove();
     this.marker = undefined;
     if (clearStatus) {
@@ -223,6 +237,33 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   get distanceKm(): string {
     return (this.distanceMeters / 1000).toFixed(2);
+  }
+
+  get elapsedDisplay(): string {
+    const total = this.elapsedSeconds;
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    if (h > 0) {
+      return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  private startElapsedTimer() {
+    this.stopElapsedTimer();
+    this.elapsedTimer = setInterval(() => {
+      if (this.startTime) {
+        this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+      }
+    }, 1000);
+  }
+
+  private stopElapsedTimer() {
+    if (this.elapsedTimer) {
+      clearInterval(this.elapsedTimer);
+      this.elapsedTimer = null;
+    }
   }
 
   get avgSpeedDisplay(): string {
@@ -237,13 +278,16 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const container = document.getElementById('running-map');
     if (!container) return;
 
-    this.map = L.map(container, { zoomControl: true }).setView([0, 0], 2);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
+    this.map = L.map(container, { zoomControl: false }).setView([0, 0], 2);
+    // voyager: strazi, POI-uri si culori mai bogate decat varianta light
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 20,
       attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     }).addTo(this.map);
 
-    this.polyline = L.polyline([], { color: '#1e6bff', weight: 4 }).addTo(this.map);
+    // traseul cu contur alb, stil Strava
+    this.polylineCasing = L.polyline([], { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(this.map);
+    this.polyline = L.polyline([], { color: '#0a84ff', weight: 5 }).addTo(this.map);
     setTimeout(() => this.map?.invalidateSize(), 0);
   }
 
@@ -312,6 +356,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private handleError(err: GeolocationPositionError) {
     this.stopCalibrationTimer();
+    this.stopElapsedTimer();
     if (this.watchId !== null) {
       navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
@@ -407,11 +452,15 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.isCalibrating = false;
     this.stopCalibrationTimer();
     this.startTime = Date.now();
+    this.elapsedSeconds = 0;
+    this.startElapsedTimer();
     this.lastAcceptedPosition = position;
     this.lastDisplayedPosition = position;
     this.movementConfirmed = false;
     this.updateMarker(position.point, true);
     this.polyline?.setLatLngs([position.point]);
+    this.polylineCasing?.setLatLngs([position.point]);
+    this.routePoints = [[position.point.lat, position.point.lng]];
     this.statusText =
       position.accuracy <= GPS_CALIBRATION_MAX_ACCURACY_METERS
         ? `GPS ready. Accuracy ~${Math.round(position.accuracy)}m.`
@@ -429,8 +478,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.updateMarker(point, true);
     if (extendPath) {
       this.polyline?.addLatLng(point);
+      this.polylineCasing?.addLatLng(point);
+      this.routePoints.push([point.lat, point.lng]);
     } else {
       this.polyline?.setLatLngs([point]);
+      this.polylineCasing?.setLatLngs([point]);
+      this.routePoints = [[point.lat, point.lng]];
     }
   }
 
@@ -457,9 +510,10 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private updateMarker(point: L.LatLng, followPosition: boolean) {
     if (!this.marker && this.map) {
       this.marker = L.circleMarker(point, {
-        radius: 6,
-        color: '#ff3b30',
-        fillColor: '#ff3b30',
+        radius: 8,
+        color: '#ffffff',
+        weight: 3,
+        fillColor: '#0a84ff',
         fillOpacity: 1,
       }).addTo(this.map);
       this.map.setView(point, 16);
@@ -533,10 +587,37 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     });
   }
 
+  // ia vremea pentru locatia curenta (GPS), oriunde s-ar afla telefonul
   private loadWeather() {
     this.weatherLoading = true;
     this.weatherError = '';
-    this.weatherService.getCityWeather(this.cityName).subscribe({
+
+    if (!navigator.geolocation) {
+      this.loadWeatherForFallbackCity();
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        this.weatherService.getWeatherByCoords(latitude, longitude).subscribe({
+          next: (summary) => {
+            this.weather = summary;
+            this.weatherLoading = false;
+          },
+          error: () => {
+            this.weatherError = 'Unable to load weather right now.';
+            this.weatherLoading = false;
+          },
+        });
+      },
+      () => this.loadWeatherForFallbackCity(),
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
+    );
+  }
+
+  private loadWeatherForFallbackCity() {
+    this.weatherService.getCityWeather(WEATHER_FALLBACK_CITY).subscribe({
       next: (summary) => {
         this.weather = summary;
         this.weatherLoading = false;
@@ -546,6 +627,14 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         this.weatherLoading = false;
       },
     });
+  }
+
+  uvLabel(uv: number): string {
+    if (uv < 3) return 'Low';
+    if (uv < 6) return 'Moderate';
+    if (uv < 8) return 'High';
+    if (uv < 11) return 'Very high';
+    return 'Extreme';
   }
 
   get scoreTone(): 'great' | 'ok' | 'poor' {

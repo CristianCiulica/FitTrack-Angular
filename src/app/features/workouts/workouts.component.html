@@ -7,32 +7,44 @@
     <ul nz-menu nzMode="inline" class="sidebar-menu">
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/dashboard" aria-label="Dashboard">
-          <span nz-icon nzType="dashboard"></span>
+          <span nz-icon nzType="ft:home"></span>
           <span>Home</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/workouts" aria-label="Workouts">
-          <span nz-icon nzType="thunderbolt"></span>
+          <span nz-icon nzType="ft:history"></span>
           <span>History</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/start-workout" aria-label="Start workout">
-          <span nz-icon nzType="play-circle"></span>
+          <span nz-icon nzType="ft:workout"></span>
           <span>Workout</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/running" aria-label="Running">
-          <span nz-icon nzType="rise"></span>
+          <span nz-icon nzType="ft:run"></span>
           <span>Run</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected">
         <a routerLink="/bmi" aria-label="Nutrition calculator">
-          <span nz-icon nzType="heart"></span>
+          <span nz-icon nzType="ft:nutrition"></span>
           <span>Nutrition</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/account" aria-label="Account">
+          <span nz-icon nzType="user"></span>
+          <span>Account</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/settings" aria-label="Settings">
+          <span nz-icon nzType="setting"></span>
+          <span>Settings</span>
         </a>
       </li>
     </ul>
@@ -40,10 +52,13 @@
 
   <nz-layout class="main-layout">
     <nz-header class="app-header workouts-header">
-      <h2>
-        <span class="desktop-page-title">Workouts</span>
-        <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
-      </h2>
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Workouts</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
       <div class="header-actions">
         <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
       </div>
@@ -82,21 +97,28 @@
                 <strong>{{ session.distanceMeters / 1000 | number: '1.2-2' }} km</strong>
               </div>
 
+              <div class="cardio-route" *ngIf="routePath(session) as path">
+                <svg viewBox="0 0 100 56" preserveAspectRatio="xMidYMid meet" aria-label="Route preview">
+                  <path [attr.d]="path" class="route-casing" />
+                  <path [attr.d]="path" class="route-line" />
+                </svg>
+              </div>
+
               <div class="cardio-session-stats">
                 <div>
-                  <span>Duration</span>
+                  <span><span nz-icon nzType="ft:history" class="stat-icon-inline"></span>Duration</span>
                   <strong>{{ formatDuration(session.durationSeconds) }}</strong>
                 </div>
                 <div>
-                  <span>Avg speed</span>
+                  <span><span nz-icon nzType="dashboard" class="stat-icon-inline"></span>Avg speed</span>
                   <strong>{{ session.averageSpeedKmh | number: '1.1-1' }} km/h</strong>
                 </div>
                 <div>
-                  <span>Steps</span>
+                  <span><span nz-icon nzType="ft:run" class="stat-icon-inline"></span>Steps</span>
                   <strong>{{ session.steps }}</strong>
                 </div>
                 <div>
-                  <span>Calories</span>
+                  <span><span nz-icon nzType="fire" class="stat-icon-inline"></span>Calories</span>
                   <strong>{{ session.calories }} kcal</strong>
                 </div>
               </div>
@@ -197,6 +219,7 @@
                   >
                     Volume
                   </th>
+                  <th>Calories</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -213,10 +236,15 @@
                       {{ getExerciseCount(w) }}
                     </td>
                     <td class="muscle-group-cell">
-                      <nz-tag [nzColor]="'default'">{{ getPrimaryMuscle(w) }}</nz-tag>
+                      <span class="muscle-chip" [attr.data-tone]="muscleTone(getPrimaryMuscle(w))">
+                        {{ getPrimaryMuscle(w) }}
+                      </span>
                     </td>
                     <td class="workout-volume-cell">
                       {{ getWorkoutVolume(w) | number: '1.0-0' }} kg
+                    </td>
+                    <td class="workout-kcal-cell">
+                      ~{{ getWorkoutCalories(w) }} kcal
                     </td>
                     <td class="workout-actions-cell">
                       <button
@@ -252,7 +280,7 @@
                     </td>
                   </tr>
                   <tr class="workout-details-row" *ngIf="expandSet.has(w.id!)">
-                    <td colspan="6">
+                    <td colspan="7">
                       <div class="desktop-exercise-list">
                         <div class="desktop-exercise-row" *ngFor="let ex of w.exercises">
                           <div class="desktop-exercise-info">
@@ -270,7 +298,7 @@
                   </tr>
                 </ng-container>
                 <tr *ngIf="filteredWorkouts().length === 0">
-                  <td colspan="6" style="text-align: center; padding: 48px; color: #6e6e73">
+                  <td colspan="7" style="text-align: center; padding: 48px; color: #6e6e73">
                     <span
                       nz-icon
                       nzType="inbox"
@@ -289,9 +317,9 @@
                 <div>
                   <h3>{{ w.name }}</h3>
                 </div>
-                <nz-tag [nzColor]="'default'">
+                <span class="muscle-chip" [attr.data-tone]="muscleTone(getPrimaryMuscle(w))">
                   {{ getPrimaryMuscle(w) }}
-                </nz-tag>
+                </span>
               </div>
 
               <div class="mobile-workout-summary">
@@ -306,6 +334,10 @@
                 <span>
                   <small>Volume</small>
                   <strong>{{ getWorkoutVolume(w) | number: '1.0-0' }} kg</strong>
+                </span>
+                <span>
+                  <small>Calories</small>
+                  <strong>~{{ getWorkoutCalories(w) }} kcal</strong>
                 </span>
               </div>
 
