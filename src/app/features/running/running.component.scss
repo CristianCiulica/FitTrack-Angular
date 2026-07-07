@@ -62,9 +62,9 @@
     0 24px 54px rgba(15, 23, 42, 0.2),
     0 4px 16px rgba(15, 23, 42, 0.08),
     inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)) !important;
-  backdrop-filter: blur(2px) saturate(110%);
-  -webkit-backdrop-filter: blur(2px) saturate(110%);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01)) !important;
+  backdrop-filter: blur(3px) saturate(115%);
+  -webkit-backdrop-filter: blur(3px) saturate(115%);
   pointer-events: auto;
 }
 
@@ -95,14 +95,14 @@
 
   &.sun {
     background:
-      radial-gradient(70% 130% at 88% 0%, rgba(10, 132, 255, 0.1), transparent 60%),
-      linear-gradient(150deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)) !important;
+      radial-gradient(70% 130% at 88% 0%, rgba(10, 132, 255, 0.15), transparent 60%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01)) !important;
   }
 
   &.rain {
     background:
-      radial-gradient(70% 130% at 88% 0%, rgba(10, 132, 255, 0.1), transparent 60%),
-      linear-gradient(150deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0)) !important;
+      radial-gradient(70% 130% at 88% 0%, rgba(10, 132, 255, 0.15), transparent 60%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01)) !important;
   }
 }
 
@@ -602,13 +602,13 @@
     margin: 0 auto;
     padding: 18px 18px 16px;
     border-radius: 28px;
-    background: linear-gradient(150deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow:
       0 24px 60px rgba(15, 23, 42, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(2px) saturate(110%);
-    -webkit-backdrop-filter: blur(2px) saturate(110%);
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(3px) saturate(115%);
+    -webkit-backdrop-filter: blur(3px) saturate(115%);
   }
 
   .live-stats {
