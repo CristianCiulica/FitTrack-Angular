@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import * as L from 'leaflet';
@@ -12,6 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { WeatherService, WeatherSummary } from '../../core/services/weather.service';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 
 const LEAFLET_ICON_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
 const LEAFLET_ICON_RETINA_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
@@ -42,12 +43,16 @@ interface AcceptedPosition {
     NzButtonModule,
     NzIconModule,
     NzCardModule,
+    NzCardModule,
     AppMenuComponent,
+    NzModalModule,
   ],
   templateUrl: './running.component.html',
   styleUrls: ['./running.component.scss'],
 })
 export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
+  @ViewChild('runningMap') mapContainer?: ElementRef<HTMLElement>;
+
   isTracking = false;
   isCalibrating = false;
   mode: 'running' | 'walking' = 'running';
@@ -91,9 +96,11 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     private message: NzMessageService,
     private runningSessionService: RunningSessionService,
     private weatherService: WeatherService,
+    private modal: NzModalService,
   ) {}
 
   ngOnInit(): void {
+    document.body.style.overflow = 'hidden';
     this.loadWeather();
   }
 
@@ -105,6 +112,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
+    document.body.style.overflow = '';
     this.stopTracking(false);
     this.stopElapsedTimer();
     window.removeEventListener('resize', this.resizeHandler);
@@ -137,7 +145,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.startTracking();
   }
 
-  // logica de gps tracking
+  // GPS tracking logic
   startTracking() {
     if (!navigator.geolocation) {
       this.message.error('Geolocation is not supported on this device.');
@@ -147,7 +155,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.resetTracking(false);
     this.isTracking = true;
     this.isCalibrating = true;
-    // overlay-ul fullscreen tocmai a devenit vizibil; harta trebuie redimensionata
+    // fullscreen overlay just became visible; map needs to be resized
     setTimeout(() => this.map?.invalidateSize(), 80);
     this.runningSessionService.setTrackingActive(true);
     this.calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
@@ -178,6 +186,19 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       (err) => this.handleError(err),
       locationOptions,
     );
+  }
+
+  confirmStopTracking() {
+    this.modal.confirm({
+      nzTitle: 'End workout?',
+      nzWidth: 300,
+      nzOkText: 'End',
+      nzOkDanger: true,
+      nzOnOk: () => this.stopTracking(true),
+      nzCancelText: 'Cancel',
+      nzCentered: true,
+      nzClassName: 'glass-modal'
+    });
   }
 
   stopTracking(saveSession = true) {
@@ -275,17 +296,16 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private initMap() {
-    const container = document.getElementById('running-map');
+    const container = this.mapContainer?.nativeElement;
     if (!container) return;
 
-    this.map = L.map(container, { zoomControl: false }).setView([0, 0], 2);
-    // voyager: strazi, POI-uri si culori mai bogate decat varianta light
+    this.map = L.map(container, { zoomControl: false, attributionControl: false }).setView([44.4268, 26.1025], 16);
+    // voyager: streets, POIs and richer colors than the light variant
     L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
       maxZoom: 20,
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
     }).addTo(this.map);
 
-    // traseul cu contur alb, stil Strava
+    // route with white casing, Strava style
     this.polylineCasing = L.polyline([], { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(this.map);
     this.polyline = L.polyline([], { color: '#0a84ff', weight: 5 }).addTo(this.map);
     setTimeout(() => this.map?.invalidateSize(), 0);
@@ -416,6 +436,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         steps: this.steps,
         averageSpeedKmh: Number(this.avgSpeedKmh.toFixed(1)),
         calories: Math.round(this.calories),
+        route: this.routePoints,
       })
       .subscribe({
         next: () => this.message.success('Workout saved in History.'),
@@ -587,7 +608,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     });
   }
 
-  // ia vremea pentru locatia curenta (GPS), oriunde s-ar afla telefonul
+  // gets weather for current location (GPS), wherever the phone is
   private loadWeather() {
     this.weatherLoading = true;
     this.weatherError = '';
@@ -600,6 +621,9 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        if (this.map && !this.isTracking) {
+          this.map.setView([latitude, longitude], 17);
+        }
         this.weatherService.getWeatherByCoords(latitude, longitude).subscribe({
           next: (summary) => {
             this.weather = summary;

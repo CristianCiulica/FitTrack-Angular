@@ -14,6 +14,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { Workout } from '../../core/models/workout.model';
 import { estimateSessionCalories } from '../../core/utils/workout-calories';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
@@ -215,10 +216,12 @@ export class DashboardComponent implements OnInit {
     return Math.min(100, Math.round((this.burnedKcal() / target) * 100));
   });
 
-  // progres saptamanal: 4 antrenamente pe saptamana ca tinta
-  readonly weeklyGoal = 4;
+  readonly weeklyGoal = computed(() => {
+    const days = this.profileService.profile()?.workoutReminderDays ?? 2;
+    return days > 0 ? Math.max(1, Math.round(7 / days)) : 4;
+  });
   readonly goalPercent = computed(() =>
-    Math.min(100, Math.round((this.thisWeekWorkouts() / this.weeklyGoal) * 100)),
+    Math.min(100, Math.round((this.thisWeekWorkouts() / this.weeklyGoal()) * 100)),
   );
 
   toggleChat() {
@@ -287,16 +290,22 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private workoutService: WorkoutService,
-    private authService: AuthService
+    private authService: AuthService,
+    private message: NzMessageService
   ) { }
 
   ngOnInit() {
-    this.workoutService.getWorkouts().subscribe(data => {
-      this.workouts.set(data);
-      this.workoutService.workouts.set(data);
-      this.workoutService.totalWorkouts.set(data.length);
+    this.workoutService.getWorkouts().subscribe({
+      next: (data) => {
+        this.workouts.set(data);
+        this.workoutService.workouts.set(data);
+        this.workoutService.totalWorkouts.set(data.length);
+      },
+      error: (err) => console.warn('[dashboard] Failed to load workouts', err)
     });
-    this.runningSessionService.getSessions().subscribe({ error: () => {} });
+    this.runningSessionService.getSessions().subscribe({
+      error: (err) => console.warn('[dashboard] Failed to load running sessions', err)
+    });
   }
 
   logout() {

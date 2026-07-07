@@ -1,0 +1,48 @@
+<button type="button" class="hamburger" aria-label="Open menu" (click)="toggle()">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<nz-drawer
+  [nzVisible]="open()"
+  nzPlacement="left"
+  [nzClosable]="false"
+  [nzWidth]="308"
+  nzWrapClassName="app-menu-drawer"
+  (nzOnClose)="close()"
+>
+  <ng-container *nzDrawerContent>
+    <div class="menu-panel">
+      <div class="menu-brand">
+        <span class="brand">FitTrack<span>.</span></span>
+        <button type="button" class="close-btn" aria-label="Close menu" (click)="close()">
+          <span nz-icon nzType="close"></span>
+        </button>
+      </div>
+
+      <div class="menu-profile">
+        <div class="avatar">{{ initials() }}</div>
+        <div class="profile-copy">
+          <strong>{{ displayName() || 'Your profile' }}</strong>
+          <small>{{ profile()?.email }}</small>
+        </div>
+      </div>
+
+      <nav class="menu-links">
+        <button type="button" *ngFor="let link of links" class="menu-link" (click)="go(link.path)">
+          <span class="link-icon" nz-icon [nzType]="link.icon"></span>
+          <span class="link-copy">
+            <strong>{{ link.label }}</strong>
+            <small>{{ link.description }}</small>
+          </span>
+          <span class="link-arrow" aria-hidden="true">›</span>
+        </button>
+      </nav>
+
+      <button type="button" class="logout-link" (click)="logout()">
+        Log out
+      </button>
+    </div>
+  </ng-container>
+</nz-drawer>

@@ -1,408 +1,265 @@
 /* ============================================================
-   Nutrition calculator — Liquid Glass
-   Shell (sidebar/header/content) is styled globally in styles.css.
+   Nutrition calculator — Apple Clean Style
    ============================================================ */
 
 .container {
-  max-width: 1080px;
+  max-width: 680px;
   margin: 0 auto;
-}
-
-.bmi-card {
-  border-radius: 28px !important;
-
-  ::ng-deep .ant-card-body {
-    padding: 34px 36px;
-  }
-}
-
-.calculator-heading {
-  margin-bottom: 30px;
-
-  span {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: #86868b;
-  }
-
-  h1 {
-    margin: 4px 0 8px;
-    font-size: clamp(28px, 3.2vw, 38px);
-    font-weight: 700;
-    letter-spacing: -0.035em;
-    color: #1d1d1f;
-  }
-
-  p {
-    margin: 0;
-    max-width: 520px;
-    font-size: 14.5px;
-    line-height: 1.5;
-    color: #6e6e73;
-  }
-}
-
-.calculator-layout {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 34px;
-  align-items: start;
+  padding: 10px 0 40px;
 }
 
 /* ------------------------------------------------------------
-   Form
+   Hero Results (Large Typography, no cards)
    ------------------------------------------------------------ */
 
-.input-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px 16px;
+.hero-results {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fade-in 0.4s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.calorie-target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+
+  span {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #86868b;
+  }
+
+  strong {
+    margin: 4px 0 0;
+    font-size: clamp(64px, 8vw, 82px);
+    font-weight: 750;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #0066cc; /* Apple Blue */
+    font-variant-numeric: tabular-nums;
+  }
+
+  small {
+    margin-top: 4px;
+    font-size: 15px;
+    font-weight: 590;
+    color: #515154;
+  }
+}
+
+.result-grid {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+
+  .metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    span {
+      font-size: 11px;
+      font-weight: 650;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #86868b;
+      margin-bottom: 4px;
+    }
+
+    strong {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    small, ::ng-deep nz-tag {
+      margin-top: 2px;
+      font-size: 12px;
+      color: #86868b;
+    }
+  }
+}
+
+/* ------------------------------------------------------------
+   Settings Groups (iOS Style)
+   ------------------------------------------------------------ */
+
+.settings-group {
+  margin-bottom: 32px;
+}
+
+.settings-header {
+  margin: 0 0 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #86868b;
+}
+
+.settings-footer {
+  margin: 8px 16px 0;
+  font-size: 13px;
+  color: #86868b;
+  line-height: 1.4;
+}
+
+.settings-card {
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  padding: 0 16px;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+}
+
+.divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.06);
+  margin-left: 0;
 }
 
 .calc-row {
   display: flex;
-  flex-direction: column;
-  gap: 7px;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 6px 0;
 
   > span {
-    font-size: 12.5px;
-    font-weight: 650;
-    letter-spacing: -0.005em;
-    color: #515154;
+    font-size: 16px;
+    color: #1d1d1f;
   }
 
-  .split-inputs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
+  /* Inputs overrides */
   ::ng-deep nz-input-number {
-    width: 100%;
-    height: 44px;
+    width: 100px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 
     .ant-input-number-input {
-      height: 42px;
-      font-size: 15px;
-      font-weight: 560;
-      font-variant-numeric: tabular-nums;
+      text-align: center;
+      font-size: 16px;
+      color: #86868b;
+      padding: 0;
+      height: 36px;
+    }
+
+    .ant-input-number-handler-wrap {
+      display: none; /* Hide up/down arrows for cleaner look */
     }
   }
 
   select {
     appearance: none;
     -webkit-appearance: none;
-    height: 44px;
-    padding: 0 16px;
-    font-size: 15px;
-    font-weight: 560;
-    font-family: inherit;
-    color: #1d1d1f;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    color: #86868b;
+    text-align: center;
+    text-align-last: center;
+    padding-right: 14px;
+    outline: none;
     cursor: pointer;
-    border: 1px solid rgba(0, 0, 0, 0.09);
-    border-radius: 12px;
-    background:
-      linear-gradient(45deg, transparent 50%, #aeaeb2 50%) calc(100% - 20px) 55% / 6px 6px no-repeat,
-      linear-gradient(135deg, #aeaeb2 50%, transparent 50%) calc(100% - 14px) 55% / 6px 6px no-repeat,
-      rgba(255, 255, 255, 0.75);
-    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2386868B%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: 10px auto;
+  }
+}
 
-    &:focus {
-      outline: none;
-      border-color: rgba(0, 113, 227, 0.6);
-      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.13);
+.split-inputs {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  
+  ::ng-deep nz-input-number {
+    width: 50px;
+  }
+}
+
+/* ------------------------------------------------------------
+   Custom controls
+   ------------------------------------------------------------ */
+
+.ios-segmented {
+  display: flex;
+  background: rgba(118, 118, 128, 0.12);
+  border-radius: 8px;
+  padding: 2px;
+  
+  button {
+    flex: 1;
+    min-width: 70px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1d1d1f;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &.selected {
+      background: #fff;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+      font-weight: 600;
     }
   }
 }
 
-/* iOS-style segmented goal control */
-.goal-selector {
-  margin-top: 22px;
+.pace-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 14px 0;
 
-  > span {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 12.5px;
-    font-weight: 650;
-    color: #515154;
-  }
-
-  > div {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3px;
-    padding: 3px;
-    border-radius: 14px;
-    background: rgba(0, 0, 0, 0.055);
-
-    button {
-      height: 40px;
-      font-size: 14px;
-      font-weight: 590;
-      font-family: inherit;
-      letter-spacing: -0.01em;
-      color: #515154;
-      cursor: pointer;
-      border: none;
-      border-radius: 11px;
-      background: transparent;
-      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.22s ease, transform 0.15s ease;
-
-      &:active {
-        transform: scale(0.98);
-      }
-
-      &.selected {
-        color: #1d1d1f;
-        font-weight: 650;
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow:
-          0 3px 10px rgba(15, 23, 42, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 1);
-      }
-    }
-  }
-}
-
-/* Pace slider */
-.goal-rate {
-  display: block;
-  margin-top: 22px;
-
-  > div:first-child {
+  .pace-header {
     display: flex;
-    align-items: baseline;
     justify-content: space-between;
-    margin-bottom: 10px;
-
-    span {
-      font-size: 12.5px;
-      font-weight: 650;
-      color: #515154;
-    }
+    margin-bottom: 12px;
 
     strong {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
       color: #0066cc;
-      font-variant-numeric: tabular-nums;
+      font-weight: 500;
     }
   }
 
   input[type='range'] {
     width: 100%;
-    height: 28px;
     appearance: none;
     -webkit-appearance: none;
     background: transparent;
-    cursor: pointer;
 
     &::-webkit-slider-runnable-track {
-      height: 6px;
-      border-radius: 99px;
-      background: linear-gradient(90deg, rgba(10, 132, 255, 0.55), rgba(100, 210, 255, 0.55));
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(120, 120, 128, 0.2);
     }
 
     &::-webkit-slider-thumb {
       appearance: none;
       -webkit-appearance: none;
-      width: 26px;
-      height: 26px;
-      margin-top: -10px;
+      width: 28px;
+      height: 28px;
+      margin-top: -12px;
       border-radius: 50%;
-      background: #ffffff;
-      border: 0.5px solid rgba(0, 0, 0, 0.06);
-      box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.22),
-        0 1px 3px rgba(15, 23, 42, 0.14);
-      transition: transform 0.15s ease;
-    }
-
-    &::-webkit-slider-thumb:active {
-      transform: scale(1.08);
-    }
-
-    &::-moz-range-track {
-      height: 6px;
-      border-radius: 99px;
-      background: linear-gradient(90deg, rgba(10, 132, 255, 0.55), rgba(100, 210, 255, 0.55));
-    }
-
-    &::-moz-range-thumb {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: #ffffff;
-      border: 0.5px solid rgba(0, 0, 0, 0.06);
-      box-shadow:
-        0 4px 12px rgba(15, 23, 42, 0.22),
-        0 1px 3px rgba(15, 23, 42, 0.14);
-    }
-  }
-
-  .range-labels {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 2px;
-
-    span {
-      font-size: 11.5px;
-      font-weight: 590;
-      color: #aeaeb2;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-  }
-}
-
-/* ------------------------------------------------------------
-   Results
-   ------------------------------------------------------------ */
-
-.results-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.calorie-target {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 30px 24px 26px;
-  text-align: center;
-  overflow: hidden;
-  isolation: isolate;
-  border-radius: 24px;
-  color: #fff;
-  background:
-    radial-gradient(90% 140% at 85% 0%, rgba(100, 210, 255, 0.35), transparent 60%),
-    linear-gradient(160deg, #0a84ff 0%, #0066cc 100%);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow:
-    0 24px 56px rgba(0, 102, 204, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45);
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 12%;
-    width: 76%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
-  }
-
-  span {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.75);
-  }
-
-  strong {
-    margin: 6px 0 0;
-    font-size: clamp(52px, 6vw, 68px);
-    font-weight: 650;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    font-variant-numeric: tabular-nums;
-    text-shadow: 0 2px 12px rgba(0, 40, 90, 0.25);
-  }
-
-  small {
-    margin-top: 6px;
-    font-size: 13px;
-    font-weight: 590;
-    color: rgba(255, 255, 255, 0.8);
-  }
-}
-
-.result-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-
-  > div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 18px 10px;
-    text-align: center;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.66);
-    border: 1px solid rgba(0, 0, 0, 0.055);
-
-    span {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #86868b;
-    }
-
-    strong {
-      font-size: 23px;
-      font-weight: 700;
-      letter-spacing: -0.025em;
-      color: #1d1d1f;
-      font-variant-numeric: tabular-nums;
-    }
-
-    small {
-      font-size: 11px;
-      color: #aeaeb2;
-    }
-  }
-
-  .primary-result {
-    background: linear-gradient(150deg, rgba(0, 113, 227, 0.1), rgba(0, 113, 227, 0.04));
-    border-color: rgba(0, 113, 227, 0.16);
-
-    strong {
-      color: #0066cc;
-    }
-  }
-}
-
-/* ------------------------------------------------------------
-   Responsive
-   ------------------------------------------------------------ */
-
-@media (max-width: 900px) {
-  .calculator-layout {
-    grid-template-columns: 1fr;
-    gap: 26px;
-  }
-
-  .bmi-card ::ng-deep .ant-card-body {
-    padding: 24px 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .input-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .result-grid {
-    grid-template-columns: 1fr;
-
-    > div {
-      flex-direction: row;
-      justify-content: space-between;
-      padding: 14px 18px;
-
-      strong {
-        font-size: 19px;
-      }
+      background: #fff;
+      border: 0.5px solid rgba(0, 0, 0, 0.04);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
     }
   }
 }

@@ -51,7 +51,7 @@ export class WorkoutsComponent implements OnInit {
   editingWorkout = signal<Workout | null>(null);
   cardioHistoryOpen = signal(true);
   workoutHistoryOpen = signal(true);
-  readonly hideTableNoResult: any = null;
+  readonly hideTableNoResult: string | undefined = undefined;
   expandSet = new Set<string>();
 
   filteredWorkouts = computed(() => {

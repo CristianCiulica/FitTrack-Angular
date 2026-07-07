@@ -32,8 +32,9 @@
         </div>
 
         <div class="form-group">
-          <div class="label-row">
+          <div class="label-row" style="display: flex; justify-content: space-between; align-items: center;">
             <label>Password</label>
+            <a (click)="forgotPassword()" class="forgot-link" style="font-size: 0.875rem; cursor: pointer; color: var(--bright-blue);">Forgot password?</a>
           </div>
           <nz-form-item>
             <nz-form-control [nzErrorTip]="passError">
@@ -50,7 +51,7 @@
                   <span nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"></span>
                 </button>
               </div>
-              <ng-template #passError>Min. 6 chars: upper, lower, number, special.</ng-template>
+              <ng-template #passError>Password is required.</ng-template>
             </nz-form-control>
           </nz-form-item>
         </div>

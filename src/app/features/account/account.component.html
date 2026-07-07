@@ -1,0 +1,157 @@
+<nz-layout class="app-layout">
+  <nz-sider [nzWidth]="208" class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
+    </div>
+    <ul nz-menu nzMode="inline" class="sidebar-menu">
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/dashboard" aria-label="Dashboard">
+          <span nz-icon nzType="ft:home"></span><span>Home</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/workouts" aria-label="Workouts">
+          <span nz-icon nzType="ft:history"></span><span>History</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/start-workout" aria-label="Start workout">
+          <span nz-icon nzType="ft:workout"></span><span>Workout</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/running" aria-label="Running">
+          <span nz-icon nzType="ft:run"></span><span>Run</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/bmi" aria-label="Nutrition calculator">
+          <span nz-icon nzType="ft:nutrition"></span><span>Nutrition</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/account" aria-label="Account">
+          <span nz-icon nzType="user"></span><span>Account</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/settings" aria-label="Settings">
+          <span nz-icon nzType="setting"></span><span>Settings</span>
+        </a>
+      </li>
+    </ul>
+  </nz-sider>
+
+  <nz-layout class="main-layout">
+    <nz-header class="app-header">
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Account</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
+
+    </nz-header>
+
+    <nz-content class="app-content">
+      <div class="account-wrap">
+        <nz-card class="account-card">
+          <div class="account-heading">
+            <span>Your profile</span>
+            <h1>Account</h1>
+            <p>These details power your BMI, calorie targets and nutrition suggestions across the app.</p>
+          </div>
+
+          <div class="account-grid">
+            <label class="field field-full">
+              <span>Name</span>
+              <input
+                class="text-input"
+                type="text"
+                placeholder="Your name"
+                [ngModel]="name()"
+                (ngModelChange)="name.set($event)"
+              />
+            </label>
+
+            <label class="field">
+              <span>Age</span>
+              <nz-input-number
+                [ngModel]="age()"
+                (ngModelChange)="age.set($event)"
+                [nzMin]="12"
+                [nzMax]="100"
+                [nzStep]="1"
+              ></nz-input-number>
+            </label>
+
+            <label class="field">
+              <span>Sex</span>
+              <div class="segmented">
+                <button type="button" [class.selected]="sex() === 'male'" (click)="sex.set('male')">Male</button>
+                <button type="button" [class.selected]="sex() === 'female'" (click)="sex.set('female')">Female</button>
+              </div>
+            </label>
+
+            <label class="field" *ngIf="!isImperial()">
+              <span>Height (cm)</span>
+              <nz-input-number
+                [ngModel]="heightCm()"
+                (ngModelChange)="heightCm.set($event)"
+                [nzMin]="120"
+                [nzMax]="230"
+                [nzStep]="1"
+              ></nz-input-number>
+            </label>
+
+            <div class="field field-split" *ngIf="isImperial()">
+              <span>Height (ft / in)</span>
+              <div class="split-inputs">
+                <nz-input-number
+                  [ngModel]="feet()"
+                  (ngModelChange)="onFeetInput($event)"
+                  [nzMin]="3"
+                  [nzMax]="8"
+                  [nzStep]="1"
+                ></nz-input-number>
+                <nz-input-number
+                  [ngModel]="inches()"
+                  (ngModelChange)="onInchesInput($event)"
+                  [nzMin]="0"
+                  [nzMax]="11"
+                  [nzStep]="1"
+                ></nz-input-number>
+              </div>
+            </div>
+
+            <label class="field">
+              <span>Weight ({{ weightUnit() }})</span>
+              <nz-input-number
+                [ngModel]="weightInput()"
+                (ngModelChange)="onWeightInput($event)"
+                [nzMin]="isImperial() ? 66 : 30"
+                [nzMax]="isImperial() ? 660 : 300"
+                [nzStep]="1"
+              ></nz-input-number>
+            </label>
+          </div>
+
+          <div class="bmi-strip" [attr.data-tone]="bmiCategory().tone">
+            <div>
+              <span>Current BMI</span>
+              <strong>{{ bmiLabel() }}</strong>
+            </div>
+            <span class="bmi-pill">{{ bmiCategory().text }}</span>
+          </div>
+
+          <div class="account-actions">
+            <button nz-button nzType="primary" nzSize="large" [nzLoading]="saving()" (click)="save()">
+              Save changes
+            </button>
+          </div>
+        </nz-card>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

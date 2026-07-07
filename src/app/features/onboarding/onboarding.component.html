@@ -1,0 +1,176 @@
+<div class="onboarding">
+  <div class="onboarding-card">
+    <header class="onboarding-head">
+      <span class="brand">FitTrack<span>.</span></span>
+      <div class="progress-track" aria-hidden="true">
+        <span [style.width.%]="progress()"></span>
+      </div>
+    </header>
+
+    <div class="onboarding-body">
+      <!-- NAME -->
+      <section class="step" *ngIf="step() === 'name'">
+        <span class="eyebrow">Welcome</span>
+        <h1>Let's set up your profile</h1>
+        <p class="lead">First, what should we call you?</p>
+        <input
+          class="glass-input"
+          type="text"
+          placeholder="Your name"
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+          autocomplete="name"
+        />
+      </section>
+
+      <!-- AGE -->
+      <section class="step" *ngIf="step() === 'age'">
+        <span class="eyebrow">About you</span>
+        <h1>How old are you, {{ firstName }}?</h1>
+        <p class="lead">We use this to estimate your energy needs.</p>
+        <div class="big-number-field">
+          <nz-input-number
+            [ngModel]="age()"
+            (ngModelChange)="age.set($event)"
+            [nzMin]="12"
+            [nzMax]="100"
+            [nzStep]="1"
+          ></nz-input-number>
+          <span class="field-suffix">years</span>
+        </div>
+      </section>
+
+      <!-- BODY -->
+      <section class="step" *ngIf="step() === 'body'">
+        <span class="eyebrow">Your body</span>
+        <h1>Your height & weight</h1>
+        <p class="lead">This powers your BMI and calorie targets.</p>
+
+        <div class="dual-field">
+          <label>
+            <span>Height (cm)</span>
+            <nz-input-number
+              [ngModel]="heightCm()"
+              (ngModelChange)="heightCm.set($event)"
+              [nzMin]="120"
+              [nzMax]="230"
+              [nzStep]="1"
+            ></nz-input-number>
+          </label>
+          <label>
+            <span>Weight (kg)</span>
+            <nz-input-number
+              [ngModel]="weightKg()"
+              (ngModelChange)="weightKg.set($event)"
+              [nzMin]="30"
+              [nzMax]="300"
+              [nzStep]="1"
+            ></nz-input-number>
+          </label>
+        </div>
+
+        <div class="segmented sex-picker">
+          <button type="button" [class.selected]="sex() === 'male'" (click)="sex.set('male')">Male</button>
+          <button type="button" [class.selected]="sex() === 'female'" (click)="sex.set('female')">Female</button>
+        </div>
+      </section>
+
+      <!-- GOAL -->
+      <section class="step" *ngIf="step() === 'goal'">
+        <span class="eyebrow">Your goal</span>
+        <h1>What are you aiming for?</h1>
+        <p class="lead">We'll tailor your projection to it.</p>
+
+        <div class="goal-options">
+          <button type="button" [class.selected]="goal() === 'lose'" (click)="setGoal('lose')">
+            <strong>Lose weight</strong>
+            <small>Trim down at a steady pace</small>
+          </button>
+          <button type="button" [class.selected]="goal() === 'maintain'" (click)="setGoal('maintain')">
+            <strong>Maintain</strong>
+            <small>Stay where you are, get stronger</small>
+          </button>
+          <button type="button" [class.selected]="goal() === 'gain'" (click)="setGoal('gain')">
+            <strong>Build muscle</strong>
+            <small>Add size with a lean surplus</small>
+          </button>
+        </div>
+
+        <div class="pace-field" *ngIf="goal() !== 'maintain'">
+          <div class="pace-head">
+            <span>Weekly pace</span>
+            <strong>{{ goalRate() | number: '1.1-1' }} kg/week</strong>
+          </div>
+          <input
+            type="range"
+            min="0.1"
+            [max]="goal() === 'lose' ? 1 : 0.5"
+            step="0.1"
+            [ngModel]="goalRate()"
+            (ngModelChange)="goalRate.set(+$event)"
+          />
+        </div>
+      </section>
+
+      <!-- RESULT -->
+      <section class="step result" *ngIf="step() === 'result'">
+        <span class="eyebrow">Your starting point</span>
+        <h1>Here's where you stand, {{ firstName }}</h1>
+
+        <div class="bmi-hero" [attr.data-tone]="bmiCategory().tone">
+          <span class="bmi-label">Your BMI</span>
+          <strong>{{ bmiLabel() }}</strong>
+          <span class="bmi-category">{{ bmiCategory().text }}</span>
+        </div>
+
+        <div class="projection">
+          <p class="projection-headline">{{ projectionHeadline() }}</p>
+          <div class="projection-grid">
+            <div>
+              <span>In {{ projectionWeeks }} weeks</span>
+              <strong>{{ projectedWeight() | number: '1.0-0' }} kg</strong>
+            </div>
+            <div>
+              <span>Projected BMI</span>
+              <strong>{{ projectedBmi() | number: '1.1-1' }}</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer class="onboarding-foot">
+      <button
+        *ngIf="stepIndex() > 0"
+        type="button"
+        class="ghost-btn"
+        (click)="back()"
+      >
+        Back
+      </button>
+      <span class="foot-spacer"></span>
+      <button
+        *ngIf="step() !== 'result'"
+        nz-button
+        nzType="primary"
+        nzSize="large"
+        class="next-btn"
+        [disabled]="!canAdvance()"
+        (click)="next()"
+      >
+        Continue
+      </button>
+      <button
+        *ngIf="step() === 'result'"
+        nz-button
+        nzType="primary"
+        nzSize="large"
+        class="next-btn"
+        [nzLoading]="saving()"
+        (click)="finish()"
+      >
+        Start training
+      </button>
+    </footer>
+  </div>
+</div>

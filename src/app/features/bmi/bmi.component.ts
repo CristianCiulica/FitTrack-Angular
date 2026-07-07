@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -40,19 +40,19 @@ import {
   templateUrl: './bmi.component.html',
   styleUrls: ['./bmi.component.scss']
 })
-export class BmiComponent {
+export class BmiComponent implements OnDestroy {
   private readonly profileService = inject(ProfileService);
   private readonly authService = inject(AuthService);
 
-  // canonic metric — seedat din profil, sincronizat inapoi la profil (sursa unica de adevar)
+  // canonical metric — seeded from profile, synced back to profile (single source of truth)
   height = signal<number>(170); // cm
   weight = signal<number>(70);  // kg
   age = signal<number>(30);
   sex = signal<'male' | 'female'>('male');
 
-  // stare doar de calculator, nu se persista in profil
+  // calculator state only, not persisted in profile
   strengthTrainingDays = signal<number>(4);
-  goal = signal<'lose' | 'gain'>('lose');
+  goal = signal<'lose' | 'maintain' | 'gain'>('lose');
   goalRate = signal<number>(0.5);
 
   readonly units = this.profileService.units;
@@ -67,7 +67,7 @@ export class BmiComponent {
 
   constructor() {
     this.profileService.load().subscribe();
-    // seedam din profil o singura data, cand devine disponibil
+    // seed from profile once, when it becomes available
     effect(() => {
       const p = this.profileService.profile();
       if (!p || this.hydrated) return;
@@ -79,7 +79,11 @@ export class BmiComponent {
     });
   }
 
-// folosim computed pentru valori calc automat
+  ngOnDestroy() {
+    if (this.patchTimer) clearTimeout(this.patchTimer);
+  }
+
+  // use computed for auto calculated values
   bmi = computed(() => {
     const h = this.height() / 100;
     const w = this.weight();
@@ -121,6 +125,9 @@ export class BmiComponent {
   );
 
   targetCalories = computed(() => {
+    if (this.goal() === 'maintain') {
+      return this.maintenanceCalories();
+    }
     const target =
       this.goal() === 'lose'
         ? this.maintenanceCalories() - this.calorieAdjustment()
@@ -128,14 +135,14 @@ export class BmiComponent {
     return Math.max(this.basalCalories(), Math.round(target));
   });
 
-  setGoal(goal: 'lose' | 'gain') {
+  setGoal(goal: 'lose' | 'maintain' | 'gain') {
     this.goal.set(goal);
     if (goal === 'gain' && this.goalRate() > 0.5) {
       this.goalRate.set(0.5);
     }
   }
 
-  // modificarile datelor fizice se propaga in tot restul aplicatiei prin profil
+  // physical data changes propagate to the rest of the app via profile
   onHeightCm(value: number) {
     this.height.set(value);
     this.queueProfileSync();
@@ -177,7 +184,7 @@ export class BmiComponent {
           age: this.age(),
           sex: this.sex(),
         })
-        .subscribe({ error: () => {} });
+        .subscribe({ error: (err) => console.warn('[bmi] Failed to sync profile', err) });
     }, 600);
   }
 

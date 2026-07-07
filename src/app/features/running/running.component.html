@@ -1,4 +1,4 @@
-<nz-layout class="app-layout">
+<nz-layout class="app-layout run-layout">
   <nz-sider
     [nzWidth]="208"
     class="sidebar"
@@ -61,114 +61,114 @@
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
-      <div class="header-actions">
-        <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
-      </div>
+
     </nz-header>
 
     <nz-content class="app-content">
-      <nz-card class="weather-card" [ngClass]="weatherTheme">
-        <div class="weather-content weather-loading" *ngIf="weatherLoading">
-          Loading weather...
-        </div>
-        <div class="weather-content weather-error" *ngIf="!weatherLoading && weatherError">
-          {{ weatherError }}
-        </div>
-        <div class="weather-content" *ngIf="!weatherLoading && !weatherError && weather">
-          <button
-            type="button"
-            class="weather-summary"
-            [class.expanded]="weatherExpanded"
-            [attr.aria-expanded]="weatherExpanded"
-            (click)="toggleWeatherDetails()"
-          >
-            <div class="weather-summary-main">
-              <span class="weather-location">{{ weather.cityLabel }}</span>
-              <strong>{{ weather.temperature | number: '1.0-0' }}°</strong>
-              <span>{{ weather.conditionLabel }}</span>
-            </div>
-            <div class="weather-summary-score" [class.great]="scoreTone === 'great'" [class.poor]="scoreTone === 'poor'">
-              <strong>{{ weather.score }}</strong>
-              <span>{{ weather.scoreLabel }}</span>
-            </div>
-            <span class="weather-chevron" aria-hidden="true"></span>
-          </button>
-
-          <div class="weather-details" *ngIf="weatherExpanded">
-            <div class="weather-detail">
-              <span>Wind</span>
-              <strong>{{ weather.windSpeed | number: '1.0-0' }} km/h</strong>
-            </div>
-            <div class="weather-detail">
-              <span>Rain</span>
-              <strong>{{ weather.rainProbability | number: '1.0-0' }}%</strong>
-            </div>
-            <div class="weather-detail" *ngIf="weather.uvIndex !== undefined">
-              <span>UV index</span>
-              <strong>{{ weather.uvIndex | number: '1.0-0' }} · {{ uvLabel(weather.uvIndex) }}</strong>
-            </div>
-            <div class="weather-detail" *ngIf="weather.aqi !== undefined">
-              <span>Air quality</span>
-              <strong>{{ weather.aqi | number: '1.0-0' }} AQI</strong>
-            </div>
-            <p class="weather-alert" *ngIf="weather.willRain">
-              Rain likely{{ weather.rainWindow ? ' around ' + weather.rainWindow : '' }}.
-            </p>
+      <div class="run-dashboard">
+        <nz-card class="weather-card" [ngClass]="weatherTheme">
+          <div class="weather-content weather-loading" *ngIf="weatherLoading">
+            Loading weather...
           </div>
-        </div>
-      </nz-card>
-
-      <nz-card class="run-card">
-        <div class="run-card-top">
-          <button
-            type="button"
-            class="run-card-summary"
-            [class.expanded]="activityExpanded"
-            [attr.aria-expanded]="activityExpanded"
-            (click)="toggleActivityDetails()"
-          >
-            <div>
-              <span class="run-card-eyebrow">Activity</span>
-              <strong>{{ mode === 'running' ? 'Running' : 'Walking' }}</strong>
-            </div>
-            <div class="run-card-state">
-              <span class="gps-badge" *ngIf="isTracking && !isCalibrating">GPS active</span>
-              <span class="run-chevron" aria-hidden="true"></span>
-            </div>
-          </button>
-          <button
-            nz-button
-            type="button"
-            class="quick-run-button"
-            [class.stop]="isTracking"
-            (click)="isTracking ? stopTracking() : quickStartRun()"
-          >
-            <span nz-icon [nzType]="isTracking ? 'close' : 'play-circle'"></span>
-            {{ isTracking ? 'Stop' : 'Quick Run' }}
-          </button>
-        </div>
-        <div class="run-controls" *ngIf="activityExpanded">
-          <label class="mode-picker">
-            <span>Activity type</span>
-            <div class="mode-select-shell">
-              <select [value]="mode" (change)="onModeChange($event)" [disabled]="isTracking">
-                <option value="running">Running</option>
-                <option value="walking">Walking</option>
-              </select>
-              <span class="mode-select-chevron" aria-hidden="true"></span>
-            </div>
-          </label>
-          <div class="control-buttons">
-            <button nz-button class="start-button" (click)="startTracking()" [disabled]="isTracking">Start</button>
-            <button nz-button class="stop-button" (click)="stopTracking()" [disabled]="!isTracking">Stop</button>
+          <div class="weather-content weather-error" *ngIf="!weatherLoading && weatherError">
+            {{ weatherError }}
           </div>
-          <div class="status-text">{{ statusText }}</div>
-        </div>
-      </nz-card>
+          <div class="weather-content" *ngIf="!weatherLoading && !weatherError && weather">
+            <button
+              type="button"
+              class="weather-summary"
+              [class.expanded]="weatherExpanded"
+              [attr.aria-expanded]="weatherExpanded"
+              (click)="toggleWeatherDetails()"
+            >
+              <div class="weather-summary-main">
+                <span class="weather-location">{{ weather.cityLabel }}</span>
+                <strong>{{ weather.temperature | number: '1.0-0' }}°</strong>
+                <span>{{ weather.conditionLabel }}</span>
+              </div>
+              <div class="weather-summary-score" [class.great]="scoreTone === 'great'" [class.poor]="scoreTone === 'poor'">
+                <strong>{{ weather.score }}</strong>
+                <span>{{ weather.scoreLabel }}</span>
+              </div>
+              <span class="weather-chevron" aria-hidden="true"></span>
+            </button>
 
-      <!-- Harta live: ascunsa pana la Start, apoi fullscreen (stil Strava) -->
+            <div class="weather-details" *ngIf="weatherExpanded">
+              <div class="weather-detail">
+                <span>Wind</span>
+                <strong>{{ weather.windSpeed | number: '1.0-0' }} km/h</strong>
+              </div>
+              <div class="weather-detail">
+                <span>Rain</span>
+                <strong>{{ weather.rainProbability | number: '1.0-0' }}%</strong>
+              </div>
+              <div class="weather-detail" *ngIf="weather.uvIndex !== undefined">
+                <span>UV index</span>
+                <strong>{{ weather.uvIndex | number: '1.0-0' }} · {{ uvLabel(weather.uvIndex) }}</strong>
+              </div>
+              <div class="weather-detail" *ngIf="weather.aqi !== undefined">
+                <span>Air quality</span>
+                <strong>{{ weather.aqi | number: '1.0-0' }} AQI</strong>
+              </div>
+              <p class="weather-alert" *ngIf="weather.willRain">
+                Rain likely{{ weather.rainWindow ? ' around ' + weather.rainWindow : '' }}.
+              </p>
+            </div>
+          </div>
+        </nz-card>
+
+        <nz-card class="run-card">
+          <div class="run-card-top">
+            <button
+              type="button"
+              class="run-card-summary"
+              [class.expanded]="activityExpanded"
+              [attr.aria-expanded]="activityExpanded"
+              (click)="toggleActivityDetails()"
+            >
+              <div>
+                <span class="run-card-eyebrow">Activity</span>
+                <strong>{{ mode === 'running' ? 'Running' : 'Walking' }}</strong>
+              </div>
+              <div class="run-card-state">
+                <span class="gps-badge" *ngIf="isTracking && !isCalibrating">GPS active</span>
+                <span class="run-chevron" aria-hidden="true"></span>
+              </div>
+            </button>
+            <button
+              nz-button
+              type="button"
+              class="quick-run-button"
+              [class.stop]="isTracking"
+              (click)="isTracking ? stopTracking() : quickStartRun()"
+            >
+              <span nz-icon [nzType]="isTracking ? 'close' : 'play-circle'"></span>
+              {{ isTracking ? 'Stop' : 'Quick Run' }}
+            </button>
+          </div>
+          <div class="run-controls" *ngIf="activityExpanded">
+            <label class="mode-picker">
+              <span>Activity type</span>
+              <div class="mode-select-shell">
+                <select [value]="mode" (change)="onModeChange($event)" [disabled]="isTracking">
+                  <option value="running">Running</option>
+                  <option value="walking">Walking</option>
+                </select>
+                <span class="mode-select-chevron" aria-hidden="true"></span>
+              </div>
+            </label>
+            <div class="control-buttons">
+              <button nz-button class="start-button" (click)="startTracking()" [disabled]="isTracking">Start</button>
+              <button nz-button class="stop-button" (click)="stopTracking()" [disabled]="!isTracking">Stop</button>
+            </div>
+            <div class="status-text">{{ statusText }}</div>
+          </div>
+        </nz-card>
+      </div>
+
+      <!-- Live map: hidden until Start, then fullscreen (Strava style) -->
       <div class="live-map" [class.active]="isTracking">
-        <div id="running-map" class="map"></div>
+        <div #runningMap class="map"></div>
 
         <div class="live-top">
           <div class="live-status">
@@ -207,40 +207,13 @@
               <strong>{{ caloriesDisplay }}</strong>
             </div>
           </div>
-          <button type="button" class="live-stop" (click)="stopTracking()">
+          <button type="button" class="live-stop" (click)="confirmStopTracking()">
             <span nz-icon nzType="close"></span>
             Stop
           </button>
         </div>
       </div>
 
-      <div class="stats-grid">
-        <nz-card class="stat-card" data-tone="blue">
-          <div class="stat-icon"><span nz-icon nzType="ft:history"></span></div>
-          <div class="stat-value">{{ elapsedDisplay }}</div>
-          <div class="stat-label">Time</div>
-        </nz-card>
-        <nz-card class="stat-card" data-tone="purple">
-          <div class="stat-icon"><span nz-icon nzType="ft:run"></span></div>
-          <div class="stat-value">{{ steps }}</div>
-          <div class="stat-label">Steps</div>
-        </nz-card>
-        <nz-card class="stat-card" data-tone="cyan">
-          <div class="stat-icon"><span nz-icon nzType="rise"></span></div>
-          <div class="stat-value">{{ distanceKm }} km</div>
-          <div class="stat-label">Distance</div>
-        </nz-card>
-        <nz-card class="stat-card" data-tone="green">
-          <div class="stat-icon"><span nz-icon nzType="dashboard"></span></div>
-          <div class="stat-value">{{ avgSpeedDisplay }} km/h</div>
-          <div class="stat-label">Avg speed</div>
-        </nz-card>
-        <nz-card class="stat-card" data-tone="pink">
-          <div class="stat-icon"><span nz-icon nzType="fire"></span></div>
-          <div class="stat-value">{{ caloriesDisplay }} kcal</div>
-          <div class="stat-label">Calories</div>
-        </nz-card>
-      </div>
     </nz-content>
   </nz-layout>
 </nz-layout>

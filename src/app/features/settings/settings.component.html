@@ -1,0 +1,119 @@
+<nz-layout class="app-layout">
+  <nz-sider [nzWidth]="208" class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
+    </div>
+    <ul nz-menu nzMode="inline" class="sidebar-menu">
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/dashboard" aria-label="Dashboard">
+          <span nz-icon nzType="ft:home"></span><span>Home</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/workouts" aria-label="Workouts">
+          <span nz-icon nzType="ft:history"></span><span>History</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/start-workout" aria-label="Start workout">
+          <span nz-icon nzType="ft:workout"></span><span>Workout</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/running" aria-label="Running">
+          <span nz-icon nzType="ft:run"></span><span>Run</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/bmi" aria-label="Nutrition calculator">
+          <span nz-icon nzType="ft:nutrition"></span><span>Nutrition</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/account" aria-label="Account">
+          <span nz-icon nzType="user"></span><span>Account</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/settings" aria-label="Settings">
+          <span nz-icon nzType="setting"></span><span>Settings</span>
+        </a>
+      </li>
+    </ul>
+  </nz-sider>
+
+  <nz-layout class="main-layout">
+    <nz-header class="app-header">
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Settings</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
+
+    </nz-header>
+
+    <nz-content class="app-content">
+      <div class="settings-wrap">
+        <nz-card class="settings-card">
+          <div class="settings-heading">
+            <span>Preferences</span>
+            <h1>Settings</h1>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong>Units</strong>
+              <small>How weight and height are shown across the app.</small>
+            </div>
+            <div class="segmented">
+              <button type="button" [class.selected]="units() === 'metric'" (click)="setUnits('metric')">
+                Metric
+              </button>
+              <button type="button" [class.selected]="units() === 'imperial'" (click)="setUnits('imperial')">
+                Imperial
+              </button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong>Workout reminders</strong>
+              <small>Get a nudge after this many days without a workout.</small>
+            </div>
+            <nz-input-number
+              class="reminder-input"
+              [ngModel]="reminderDays()"
+              (ngModelChange)="onReminderChange($event)"
+              [nzMin]="1"
+              [nzMax]="30"
+              [nzStep]="1"
+            ></nz-input-number>
+          </div>
+        </nz-card>
+
+        <nz-card class="settings-card danger-card">
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong>Delete account</strong>
+              <small>Permanently removes your profile, workouts and runs. This can't be undone.</small>
+            </div>
+            <button
+              nz-button
+              nzDanger
+              [nzLoading]="deleting()"
+              nz-popconfirm
+              nzPopconfirmTitle="Delete your account and all data?"
+              nzOkText="Delete"
+              nzOkType="danger"
+              (nzOnConfirm)="deleteAccount()"
+            >
+              Delete account
+            </button>
+          </div>
+        </nz-card>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

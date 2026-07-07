@@ -42,7 +42,7 @@ export class LoginComponent {
   ) {
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, strongPasswordValidator]],
+      password: ['', [Validators.required]],
       remember: [false],
     });
   }
@@ -70,7 +70,29 @@ export class LoginComponent {
     this.passwordVisible = !this.passwordVisible;
   }
 
-  // logare cu google
+  forgotPassword() {
+    const emailControl = this.form.get('email');
+    if (!emailControl?.value || emailControl.invalid) {
+      this.message.warning('Please enter a valid email address to reset your password.');
+      emailControl?.markAsDirty();
+      return;
+    }
+
+    this.loading = true;
+    this.auth.resetPassword(emailControl.value).subscribe({
+      next: () => {
+        this.message.success('Password reset email sent! Check your inbox.');
+        this.loading = false;
+      },
+      error: (err) => {
+        this.message.error('Failed to send reset email. Please try again.');
+        console.warn('[auth] reset failed', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  // sign in with google
   signInWithGoogle() {
     this.googleLoading = true;
     this.auth.signInWithGoogle().subscribe({
@@ -86,7 +108,6 @@ export class LoginComponent {
   }
 
   private showGoogleError(error: { code?: string }) {
-    console.error('[google-auth]', error);
     if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
       this.message.warning('Google sign-in was cancelled.');
       return;
@@ -113,15 +134,4 @@ export class LoginComponent {
     }
     this.message.error(`Google sign-in failed${error?.code ? ' (' + error.code + ')' : ''}. Please try again.`);
   }
-}
-
-export function strongPasswordValidator(control: AbstractControl): ValidationErrors | null {
-  const value = control.value ?? '';
-  const hasUpper = /[A-Z]/.test(value);
-  const hasLower = /[a-z]/.test(value);
-  const hasNumber = /[0-9]/.test(value);
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
-  const hasLength = value.length >= 6;
-  if (hasUpper && hasLower && hasNumber && hasSpecial && hasLength) return null;
-  return { strongPassword: true };
 }

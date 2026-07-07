@@ -62,154 +62,114 @@
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
-      <div class="header-actions">
-        <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
-      </div>
+
     </nz-header>
 
     <nz-content class="app-content">
       <div class="container">
-        <nz-card class="bmi-card">
-          <div class="calculator-heading">
-            <span>Strength training nutrition</span>
-            <h1>Nutrition calculator</h1>
-            <p>Calculated with Mifflin–St Jeor and your weekly weight-training frequency.</p>
+        <div class="nutrition-page">
+          
+          <div class="hero-results">
+            <div class="calorie-target">
+              <span>Daily Calorie Target</span>
+              <strong>{{ targetCalories() | number: '1.0-0' }}</strong>
+              <small>kcal/day</small>
+            </div>
+
+            <div class="result-grid">
+              <div class="metric">
+                <span>BMI</span>
+                <strong>{{ bmi() }}</strong>
+                <nz-tag nzBorderless [nzColor]="bmiCategory().color">{{ bmiCategory().text }}</nz-tag>
+              </div>
+              <div class="metric">
+                <span>Maintenance</span>
+                <strong>{{ maintenanceCalories() }}</strong>
+                <small>kcal</small>
+              </div>
+              <div class="metric">
+                <span>Basal Met.</span>
+                <strong>{{ basalCalories() }}</strong>
+                <small>kcal</small>
+              </div>
+            </div>
           </div>
 
-          <div class="calculator-layout">
-            <div class="calculator-form">
-              <div class="input-grid">
-                <label class="calc-row" *ngIf="!isImperial()">
-                  <span>Height (cm)</span>
-                  <nz-input-number
-                    [ngModel]="height()"
-                    (ngModelChange)="onHeightCm($event)"
-                    [nzMin]="120"
-                    [nzMax]="230"
-                    [nzStep]="1">
-                  </nz-input-number>
-                </label>
+          <div class="settings-group">
+            <div class="settings-header">PERSONAL INFO</div>
+            <div class="settings-card">
+              <label class="calc-row" *ngIf="!isImperial()">
+                <span>Height (cm)</span>
+                <nz-input-number [ngModel]="height()" (ngModelChange)="onHeightCm($event)" [nzMin]="120" [nzMax]="230" [nzStep]="1" nzBorderless></nz-input-number>
+              </label>
 
-                <label class="calc-row" *ngIf="isImperial()">
-                  <span>Height (ft/in)</span>
-                  <div class="split-inputs">
-                    <nz-input-number
-                      [ngModel]="feet()"
-                      (ngModelChange)="onFeetInput($event)"
-                      [nzMin]="3"
-                      [nzMax]="8"
-                      [nzStep]="1">
-                    </nz-input-number>
-                    <nz-input-number
-                      [ngModel]="inches()"
-                      (ngModelChange)="onInchesInput($event)"
-                      [nzMin]="0"
-                      [nzMax]="11"
-                      [nzStep]="1">
-                    </nz-input-number>
-                  </div>
-                </label>
-
-                <label class="calc-row">
-                  <span>Weight ({{ weightUnit() }})</span>
-                  <nz-input-number
-                    [ngModel]="weightInput()"
-                    (ngModelChange)="onWeightInput($event)"
-                    [nzMin]="isImperial() ? 77 : 35"
-                    [nzMax]="isImperial() ? 660 : 300"
-                    [nzStep]="1">
-                  </nz-input-number>
-                </label>
-
-                <label class="calc-row">
-                  <span>Age</span>
-                  <nz-input-number
-                    [ngModel]="age()"
-                    (ngModelChange)="onAge($event)"
-                    [nzMin]="16"
-                    [nzMax]="90"
-                    [nzStep]="1">
-                  </nz-input-number>
-                </label>
-
-                <label class="calc-row">
-                  <span>Sex</span>
-                  <select [ngModel]="sex()" (ngModelChange)="onSex($event)">
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                  </select>
-                </label>
-
-                <label class="calc-row">
-                  <span>Strength sessions / week</span>
-                  <nz-input-number
-                    [(ngModel)]="strengthTrainingDays"
-                    [nzMin]="0"
-                    [nzMax]="7"
-                    [nzStep]="1">
-                  </nz-input-number>
-                </label>
-              </div>
-
-              <div class="goal-selector">
-                <span>Goal</span>
-                <div>
-                  <button type="button" [class.selected]="goal() === 'lose'" (click)="setGoal('lose')">
-                    Lose weight
-                  </button>
-                  <button type="button" [class.selected]="goal() === 'gain'" (click)="setGoal('gain')">
-                    Build muscle
-                  </button>
-                </div>
-              </div>
-
-              <label class="goal-rate">
-                <div>
-                  <span>Desired pace</span>
-                  <strong>{{ goalRate() | number: '1.1-1' }} kg/week</strong>
-                </div>
-                <input
-                  type="range"
-                  min="0.1"
-                  [max]="goal() === 'lose' ? 1 : 0.5"
-                  step="0.1"
-                  [ngModel]="goalRate()"
-                  (ngModelChange)="goalRate.set(+$event)"
-                />
-                <div class="range-labels">
-                  <span>Steady</span>
-                  <span>Faster</span>
+              <label class="calc-row" *ngIf="isImperial()">
+                <span>Height (ft/in)</span>
+                <div class="split-inputs">
+                  <nz-input-number [ngModel]="feet()" (ngModelChange)="onFeetInput($event)" [nzMin]="3" [nzMax]="8" [nzStep]="1" nzBorderless></nz-input-number>
+                  <nz-input-number [ngModel]="inches()" (ngModelChange)="onInchesInput($event)" [nzMin]="0" [nzMax]="11" [nzStep]="1" nzBorderless></nz-input-number>
                 </div>
               </label>
-            </div>
 
-            <div class="results-panel">
-              <div class="calorie-target">
-                <span>Daily calorie target</span>
-                <strong>{{ targetCalories() | number: '1.0-0' }}</strong>
-                <small>kcal/day</small>
-              </div>
+              <div class="divider"></div>
 
-              <div class="result-grid">
-                <div class="primary-result">
-                  <span>BMI</span>
-                  <strong>{{ bmi() }}</strong>
-                  <nz-tag [nzColor]="bmiCategory().color">{{ bmiCategory().text }}</nz-tag>
-                </div>
-                <div>
-                  <span>Maintenance</span>
-                  <strong>{{ maintenanceCalories() }}</strong>
-                  <small>kcal/day</small>
-                </div>
-                <div>
-                  <span>Basal metabolism</span>
-                  <strong>{{ basalCalories() }}</strong>
-                  <small>kcal/day</small>
-                </div>
-              </div>
+              <label class="calc-row">
+                <span>Weight ({{ weightUnit() }})</span>
+                <nz-input-number [ngModel]="weightInput()" (ngModelChange)="onWeightInput($event)" [nzMin]="isImperial() ? 77 : 35" [nzMax]="isImperial() ? 660 : 300" [nzStep]="1" nzBorderless></nz-input-number>
+              </label>
+
+              <div class="divider"></div>
+
+              <label class="calc-row">
+                <span>Age</span>
+                <nz-input-number [ngModel]="age()" (ngModelChange)="onAge($event)" [nzMin]="16" [nzMax]="90" [nzStep]="1" nzBorderless></nz-input-number>
+              </label>
+
+              <div class="divider"></div>
+
+              <label class="calc-row">
+                <span>Sex</span>
+                <select [ngModel]="sex()" (ngModelChange)="onSex($event)">
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </label>
             </div>
           </div>
-        </nz-card>
+
+          <div class="settings-group">
+            <div class="settings-header">TRAINING & GOALS</div>
+            <div class="settings-card">
+              <label class="calc-row">
+                <span>Strength sessions / week</span>
+                <nz-input-number [(ngModel)]="strengthTrainingDays" [nzMin]="0" [nzMax]="7" [nzStep]="1" nzBorderless></nz-input-number>
+              </label>
+              
+              <div class="divider"></div>
+
+              <div class="calc-row goal-selector-row">
+                <span>Goal</span>
+                <div class="ios-segmented">
+                  <button type="button" [class.selected]="goal() === 'lose'" (click)="setGoal('lose')">Lose Fat</button>
+                  <button type="button" [class.selected]="goal() === 'maintain'" (click)="setGoal('maintain')">Maintain</button>
+                  <button type="button" [class.selected]="goal() === 'gain'" (click)="setGoal('gain')">Bulk Up</button>
+                </div>
+              </div>
+
+              <div class="divider" *ngIf="goal() !== 'maintain'"></div>
+
+              <div class="calc-row pace-row" *ngIf="goal() !== 'maintain'">
+                <div class="pace-header">
+                  <span>Pace</span>
+                  <strong>{{ goalRate() | number: '1.1-1' }} kg/wk</strong>
+                </div>
+                <input type="range" min="0.1" [max]="goal() === 'lose' ? 1 : 0.5" step="0.1" [ngModel]="goalRate()" (ngModelChange)="goalRate.set(+$event)" />
+              </div>
+            </div>
+            <p class="settings-footer">Calculated using the Mifflin-St Jeor equation combined with your weekly weight-training frequency.</p>
+          </div>
+
+        </div>
       </div>
     </nz-content>
   </nz-layout>

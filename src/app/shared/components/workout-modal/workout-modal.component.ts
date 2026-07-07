@@ -101,7 +101,7 @@ export class WorkoutModalComponent implements OnChanges {
     });
   }
 
-  createExerciseGroup(ex?: any): FormGroup {
+  createExerciseGroup(ex?: Partial<{ exerciseName: string, muscleGroup: string, sets: number, reps: number, weight: number }>): FormGroup {
     return this.fb.group({
       exerciseName: [ex?.exerciseName || '', [Validators.required, Validators.minLength(2)]],
       muscleGroup: [ex?.muscleGroup || null, Validators.required],
@@ -111,7 +111,7 @@ export class WorkoutModalComponent implements OnChanges {
     });
   }
 
-  addExercise(ex?: any) {
+  addExercise(ex?: Partial<{ exerciseName: string, muscleGroup: string, sets: number, reps: number, weight: number }>) {
     this.exercises.push(this.createExerciseGroup(ex));
   }
 

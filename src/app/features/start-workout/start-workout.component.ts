@@ -137,7 +137,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   restTimeTarget = signal(60);
   restTimeRemaining = signal(60);
-  private timerInterval: any;
+  private timerInterval: ReturnType<typeof setInterval> | null = null;
 
   workoutInProgress = computed(() =>
     this.state() === 'active' || this.state() === 'rest',
@@ -182,13 +182,16 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   /* ------- progresul saptamanal din hero ------- */
 
-  readonly weeklyGoal = 4;
+  readonly weeklyGoal = computed(() => {
+    const days = this.profileService.profile()?.workoutReminderDays ?? 2;
+    return days > 0 ? Math.max(1, Math.round(7 / days)) : 4;
+  });
   readonly weeklyCount = computed(() => {
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return this.workoutService.workouts().filter((w) => new Date(w.date).getTime() >= weekAgo).length;
   });
   readonly weeklyPercent = computed(() =>
-    Math.min(100, Math.round((this.weeklyCount() / this.weeklyGoal) * 100)),
+    Math.min(100, Math.round((this.weeklyCount() / this.weeklyGoal()) * 100)),
   );
 
   progressPercent = computed(() => {
@@ -264,9 +267,16 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       notes: workout.notes ?? '',
       exercises: workout.exercises || [],
       isPredefined: false,
-    }).subscribe(() => {
-      this.modalVisible.set(false);
-      this.loadPersonalRoutines();
+    }).subscribe({
+      next: () => {
+        this.modalVisible.set(false);
+        this.loadPersonalRoutines();
+        this.message.success('Workout saved successfully.');
+      },
+      error: (err) => {
+        console.warn('[start-workout] Failed to save workout', err);
+        this.message.error('Failed to save workout.');
+      }
     });
   }
 
@@ -374,7 +384,13 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         reps: ex.reps,
         weight: ex.weight
       }))
-    }).subscribe();
+    }).subscribe({
+      next: () => this.message.success('Workout finished and saved!'),
+      error: (err) => {
+        console.warn('[start-workout] Failed to auto-save workout', err);
+        this.message.error('Failed to save workout data.');
+      }
+    });
   }
 
   reset() {

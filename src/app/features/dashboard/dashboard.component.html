@@ -61,9 +61,7 @@
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
-      <div class="header-actions">
-        <button nz-button nzDanger class="logout-button" (click)="logout()" style="margin-left: 8px">Logout</button>
-      </div>
+
     </nz-header>
 
     <nz-content class="app-content">
@@ -124,7 +122,7 @@
             </span>
             <strong>{{ goalPercent() }}%</strong>
           </div>
-          <span class="goal-meta">{{ thisWeekWorkouts() }}/{{ weeklyGoal }} workouts this week</span>
+          <span class="goal-meta">{{ thisWeekWorkouts() }}/{{ weeklyGoal() }} workouts this week</span>
         </div>
       </div>
 
@@ -189,7 +187,7 @@
           </div>
           <div *ngIf="recentWorkouts().length === 0" class="empty-state">
             <span nz-icon nzType="inbox" style="font-size:48px;color:#d1d1d6"></span>
-            <p>No workouts yet. <a routerLink="/workouts">Add your first!</a></p>
+            <p>No workouts yet. <a routerLink="/start-workout">Add your first!</a></p>
           </div>
         </div>
       </nz-card>

@@ -59,9 +59,7 @@
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
-      <div class="header-actions">
-        <button nz-button nzDanger class="logout-button" (click)="logout()">Logout</button>
-      </div>
+
     </nz-header>
 
     <nz-content class="app-content">
@@ -276,6 +274,7 @@
                         (nzOnConfirm)="deleteWorkout(w.id!)"
                       >
                         <span nz-icon nzType="delete"></span>
+                        Delete
                       </button>
                     </td>
                   </tr>
@@ -362,6 +361,7 @@
                   (nzOnConfirm)="deleteWorkout(w.id!)"
                 >
                   <span nz-icon nzType="delete"></span>
+                  Delete
                 </button>
               </div>
 

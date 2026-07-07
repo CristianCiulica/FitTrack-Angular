@@ -9,7 +9,6 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { strongPasswordValidator } from '../login/login.component';
 
 @Component({
   selector: 'app-register',
@@ -87,7 +86,6 @@ export class RegisterComponent {
   }
 
   private showGoogleError(error: { code?: string }) {
-    console.error('[google-auth]', error);
     if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
       this.message.warning('Google sign-in was cancelled.');
       return;
@@ -120,4 +118,15 @@ function passwordMatchValidator(group: AbstractControl): ValidationErrors | null
   const pass = group.get('password')?.value;
   const confirm = group.get('confirmPassword')?.value;
   return pass === confirm ? null : { passwordMismatch: true };
+}
+
+export function strongPasswordValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value ?? '';
+  const hasUpper = /[A-Z]/.test(value);
+  const hasLower = /[a-z]/.test(value);
+  const hasNumber = /[0-9]/.test(value);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value);
+  const hasLength = value.length >= 6;
+  if (hasUpper && hasLower && hasNumber && hasSpecial && hasLength) return null;
+  return { strongPassword: true };
 }

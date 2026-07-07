@@ -1,0 +1,14 @@
+node_modules
+.git
+.github
+.idea
+.vscode
+dist
+.angular
+.claude
+server/dist
+server/node_modules
+*.log
+firebase-service-account.json
+.env.local
+.env
