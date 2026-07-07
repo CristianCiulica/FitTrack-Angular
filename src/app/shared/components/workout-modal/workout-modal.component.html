@@ -22,7 +22,7 @@
       <label class="wm-field">
         <span class="wm-field-label">Workout name</span>
         <input
-          class="wm-input"
+          class="wm-input wm-input-hero"
           formControlName="name"
           placeholder="e.g. Upper body power"
           [class.is-invalid]="showError(form.get('name'))"
@@ -65,14 +65,14 @@
 
           <label class="wm-subfield">
             <span class="wm-subfield-label">Muscle group</span>
-            <nz-select
+            <select
               formControlName="muscleGroup"
-              nzPlaceHolder="Select a group"
-              class="wm-select"
+              class="wm-select-native"
               [class.is-invalid]="showError(ex.get('muscleGroup'))"
             >
-              <nz-option *ngFor="let m of muscleGroups" [nzValue]="m" [nzLabel]="m"></nz-option>
-            </nz-select>
+              <option value="null" disabled>Select a group</option>
+              <option *ngFor="let m of muscleGroups" [value]="m">{{ m }}</option>
+            </select>
           </label>
 
           <div class="wm-metrics">

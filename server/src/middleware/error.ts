@@ -18,6 +18,10 @@ export function errorHandler(
 
   console.error('[error]', err);
   const status = (err as { status?: number })?.status ?? 500;
+  const isProduction = process.env.NODE_ENV === 'production';
   const message = (err as Error)?.message ?? 'Internal server error';
-  res.status(status).json({ error: message });
+  
+  res.status(status).json({ 
+    error: status === 500 && isProduction ? 'Internal server error' : message 
+  });
 }

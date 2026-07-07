@@ -84,9 +84,16 @@ export class SettingsComponent implements OnInit {
           this.router.navigate(['/auth/register']);
         });
       },
-      error: () => {
+      error: (err) => {
         this.deleting.set(false);
-        this.message.error('Could not delete your account. Please try again.');
+        if (err?.error?.error === 'requires-recent-login') {
+          this.message.error(
+            'For your security, please log out and log back in to verify your identity before deleting your account.',
+            { nzDuration: 7000 }
+          );
+        } else {
+          this.message.error('Could not delete your account. Please try again.');
+        }
       },
     });
   }

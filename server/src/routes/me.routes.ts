@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { UserProfile } from '../models/user-profile.model';
 import { getAuth } from '../config/firebase-admin';
+import { strictLimiter } from '../middleware/rate-limit';
 
 const router = Router();
 
@@ -48,9 +49,16 @@ router.patch('/', async (req, res, next) => {
   }
 });
 
-router.delete('/', async (req, res, next) => {
+router.delete('/', strictLimiter, async (req, res, next) => {
   try {
     const user = req.user!;
+    
+    const nowSecs = Math.floor(Date.now() / 1000);
+    if (nowSecs - user.authTime > 300) {
+      res.status(403).json({ error: 'requires-recent-login' });
+      return;
+    }
+
     await Promise.all([
       UserProfile.deleteOne({ uid: user.uid }),
       (await import('../models/workout.model')).Workout.deleteMany({ userId: user.uid }),

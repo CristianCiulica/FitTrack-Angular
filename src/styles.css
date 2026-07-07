@@ -530,9 +530,77 @@ a:hover {
 }
 
 .glass-modal .ant-modal-confirm-btns .ant-btn-dangerous {
-  background: linear-gradient(180deg, #ff2a2a, #d90000) !important;
+  background: linear-gradient(180deg, #ff3b30, #d70015) !important;
   color: #fff !important;
-  box-shadow: 0 8px 16px rgba(217, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 8px 16px rgba(215, 0, 21, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Solid Modal (Pure White Confirmations) */
+.solid-modal .ant-modal-content {
+  background: #ffffff !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08) !important;
+}
+
+.solid-modal .ant-modal-confirm-body-wrapper {
+  text-align: center;
+}
+
+.solid-modal .ant-modal-confirm-body .anticon {
+  display: none !important;
+}
+
+.solid-modal .ant-modal-confirm-body {
+  padding-top: 8px;
+}
+
+.solid-modal .ant-modal-confirm-title {
+  display: block !important;
+  font-size: 21px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  margin-bottom: 8px !important;
+  color: #1d1d1f !important;
+}
+
+.solid-modal .ant-modal-confirm-content {
+  font-size: 15px !important;
+  color: #515154 !important;
+  margin-left: 0 !important;
+  margin-top: 0 !important;
+}
+
+.solid-modal .ant-modal-confirm-btns {
+  float: none !important;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px !important;
+}
+
+.solid-modal .ant-modal-confirm-btns button {
+  border-radius: 980px !important;
+  height: 44px !important;
+  padding: 0 24px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+.solid-modal .ant-modal-confirm-btns .ant-btn-default {
+  background: #ffffff !important;
+  color: #1d1d1f !important;
+  border: 2.5px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+.solid-modal .ant-modal-confirm-btns .ant-btn-dangerous {
+  background: linear-gradient(180deg, #ff3b30, #d70015) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 16px rgba(215, 0, 21, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
 }
 
 /* Popconfirm / popover / tooltip */
@@ -588,15 +656,15 @@ a:hover {
   min-height: 100vh;
 }
 
-/* Desktop sidebar: floating frosted rail */
+/* Desktop sidebar: ultra clean frosted rail */
 .app-layout > .sidebar {
   position: sticky;
   top: 0;
   height: 100vh;
-  background: rgba(251, 251, 253, 0.62) !important;
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
-  border-right: 1px solid rgba(0, 0, 0, 0.055);
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .sidebar .sidebar-logo {
@@ -631,15 +699,17 @@ a:hover {
 }
 
 .sidebar .sidebar-menu .ant-menu-item {
-  width: calc(100% - 24px) !important;
-  height: 42px;
-  line-height: 42px;
-  margin: 3px 12px !important;
-  color: var(--ink-secondary) !important;
-  border-radius: var(--radius-sm) !important;
-  font-weight: 560;
+  width: calc(100% - 32px) !important;
+  height: 44px;
+  line-height: 44px;
+  margin: 4px 16px !important;
+  padding: 0 14px !important;
+  color: #515154 !important;
+  border-radius: 10px !important;
+  font-weight: 500;
+  font-size: 15px;
   letter-spacing: -0.01em;
-  transition: background 180ms var(--ease-out), color 180ms var(--ease-out);
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .sidebar .sidebar-menu .ant-menu-item::after {
@@ -647,14 +717,14 @@ a:hover {
 }
 
 .sidebar .sidebar-menu .ant-menu-item:hover {
-  color: var(--ink) !important;
-  background: rgba(0, 0, 0, 0.045) !important;
+  color: #1d1d1f !important;
+  background: rgba(0, 0, 0, 0.04) !important;
 }
 
 .sidebar .sidebar-menu .ant-menu-item-selected {
-  color: var(--accent-deep) !important;
-  background: rgba(0, 113, 227, 0.1) !important;
-  font-weight: 620;
+  color: #0071e3 !important;
+  background: #eef5fc !important;
+  font-weight: 600;
 }
 
 .sidebar-menu .ant-menu-title-content > a {
@@ -665,8 +735,9 @@ a:hover {
   color: inherit;
 }
 
-.sidebar-menu .ant-menu-title-content > a .anticon + span {
-  margin-left: 10px;
+.sidebar-menu .ant-menu-title-content > a .anticon {
+  font-size: 18px;
+  margin-right: 12px;
 }
 
 /* Locked navigation while a workout is active */

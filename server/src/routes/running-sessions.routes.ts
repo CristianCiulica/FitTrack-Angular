@@ -9,11 +9,11 @@ const sessionBodySchema = z.object({
   mode: z.enum(['running', 'walking']),
   startedAt: z.string().min(1),
   endedAt: z.string().min(1),
-  durationSeconds: z.number().min(0),
-  distanceMeters: z.number().min(0),
-  steps: z.number().min(0),
+  durationSeconds: z.number().min(0).max(604800),
+  distanceMeters: z.number().min(0).max(500000),
+  steps: z.number().min(0).max(200000),
   averageSpeedKmh: z.number().min(0),
-  calories: z.number().min(0),
+  calories: z.number().min(0).max(20000),
   route: z.array(z.tuple([z.number(), z.number()])).max(5000).optional().default([]),
 });
 

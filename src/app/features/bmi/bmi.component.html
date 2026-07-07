@@ -144,21 +144,26 @@
                 <span>Strength sessions / week</span>
                 <nz-input-number [(ngModel)]="strengthTrainingDays" [nzMin]="0" [nzMax]="7" [nzStep]="1" nzBorderless></nz-input-number>
               </label>
-              
-              <div class="divider"></div>
+            </div>
+          </div>
 
-              <div class="calc-row goal-selector-row">
-                <span>Goal</span>
-                <div class="ios-segmented">
-                  <button type="button" [class.selected]="goal() === 'lose'" (click)="setGoal('lose')">Lose Fat</button>
-                  <button type="button" [class.selected]="goal() === 'maintain'" (click)="setGoal('maintain')">Maintain</button>
-                  <button type="button" [class.selected]="goal() === 'gain'" (click)="setGoal('gain')">Bulk Up</button>
-                </div>
-              </div>
+          <div class="settings-group">
+            <div class="settings-group-title">YOUR GOAL</div>
+            
+            <div class="goal-segmented-large">
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'lose'" (click)="setGoal('lose')">
+                Lose Fat
+              </button>
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'maintain'" (click)="setGoal('maintain')">
+                Maintain
+              </button>
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'gain'" (click)="setGoal('gain')">
+                Bulk Up
+              </button>
+            </div>
 
-              <div class="divider" *ngIf="goal() !== 'maintain'"></div>
-
-              <div class="calc-row pace-row" *ngIf="goal() !== 'maintain'">
+            <div class="settings-card" *ngIf="goal() !== 'maintain'">
+              <div class="calc-row pace-row">
                 <div class="pace-header">
                   <span>Pace</span>
                   <strong>{{ goalRate() | number: '1.1-1' }} kg/wk</strong>

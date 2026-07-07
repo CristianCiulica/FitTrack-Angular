@@ -194,24 +194,26 @@
    Custom controls
    ------------------------------------------------------------ */
 
-.ios-segmented {
+.goal-segmented-large {
   display: flex;
   background: rgba(118, 118, 128, 0.12);
-  border-radius: 8px;
-  padding: 2px;
+  border-radius: 12px;
+  padding: 3px;
+  margin-bottom: 24px;
   
-  button {
+  .goal-segment {
     flex: 1;
-    min-width: 70px;
     border: none;
     background: transparent;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: #1d1d1f;
-    padding: 6px 12px;
-    border-radius: 6px;
+    padding: 10px 4px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.2s;
+    text-align: center;
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    -webkit-tap-highlight-color: transparent;
 
     &.selected {
       background: #fff;

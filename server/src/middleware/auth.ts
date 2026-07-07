@@ -6,6 +6,7 @@ export interface AuthenticatedUser {
   uid: string;
   email: string;
   displayName: string;
+  authTime: number;
 }
 
 declare global {
@@ -31,6 +32,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       uid: decoded.uid,
       email: decoded.email ?? '',
       displayName: (decoded.name as string | undefined) ?? '',
+      authTime: decoded.auth_time ?? 0,
     };
     req.user = user;
 

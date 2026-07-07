@@ -82,8 +82,8 @@
 
 .cardio-session-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
 }
 
 .cardio-session-card {
@@ -175,9 +175,10 @@
 
 .cardio-session-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  padding-top: 14px;
+  grid-template-columns: repeat(2, 1fr);
+  row-gap: 16px;
+  column-gap: 12px;
+  padding-top: 16px;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 
   div {
@@ -235,50 +236,7 @@
   gap: 10px;
 }
 
-.search-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
 
-  > span[nz-icon] {
-    position: absolute;
-    left: 15px;
-    font-size: 14px;
-    color: #aeaeb2;
-    pointer-events: none;
-  }
-}
-
-.workout-search-input {
-  width: 230px;
-  height: 40px;
-  padding: 0 16px 0 40px;
-  font-size: 14px;
-  font-family: inherit;
-  color: #1d1d1f;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 980px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, width 0.25s cubic-bezier(0.22, 1, 0.36, 1);
-
-  &::placeholder {
-    color: #aeaeb2;
-  }
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.85);
-  }
-
-  &:focus {
-    width: 270px;
-    outline: none;
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 113, 227, 0.6);
-    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.13);
-  }
-}
 
 .table-card {
   border-radius: 24px;
@@ -299,7 +257,8 @@
 }
 
 .workout-name-cell strong {
-  font-weight: 620;
+  font-size: 15px;
+  font-weight: 600;
   letter-spacing: -0.015em;
   color: #1d1d1f;
 }
@@ -307,8 +266,44 @@
 .workout-date-cell,
 .workout-count-cell,
 .workout-volume-cell {
+  font-size: 14px;
   color: #515154;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
+}
+
+/* Apple style table overrides */
+::ng-deep .desktop-workout-table {
+  .ant-table {
+    background: transparent !important;
+    color: #1d1d1f;
+  }
+  
+  .ant-table-thead > tr > th {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+    color: #86868b !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 16px !important;
+  }
+  
+  .ant-table-thead > tr > th::before {
+    display: none !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+    padding: 14px 16px !important;
+    background: transparent !important;
+    transition: background 0.2s ease;
+  }
+
+  .ant-table-tbody > tr.ant-table-row:hover > td {
+    background: rgba(0, 0, 0, 0.02) !important;
+  }
 }
 
 /* chip-uri colorate pe grupa musculara, in loc de tag-ul gri implicit */
@@ -370,15 +365,19 @@
   }
 }
 
-.workout-details-row td {
-  background: rgba(0, 113, 227, 0.025) !important;
+.workout-details-row > td {
+  padding: 0 !important;
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
 }
 
 .desktop-exercise-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px 6px;
+  gap: 8px;
+  padding: 12px 16px 20px;
+  background: rgba(0, 0, 0, 0.015);
+  border-radius: 0 0 16px 16px;
 }
 
 .desktop-exercise-row {
@@ -454,148 +453,155 @@
   .history-table-controls {
     flex-wrap: wrap;
 
-    .search-input-wrapper {
-      flex: 1;
-    }
-
     .workout-search-input {
-      width: 100%;
-
-      &:focus {
-        width: 100%;
-      }
+      display: none;
     }
   }
 }
 
 .mobile-workout-card {
-  padding: 18px;
-  border-radius: 22px;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.54));
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.7));
   border: 1px solid rgba(255, 255, 255, 0.88);
-  box-shadow:
-    0 14px 36px rgba(15, 23, 42, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .mobile-workout-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 14px;
+  padding: 18px 20px 8px;
 
   h3 {
     margin: 0;
-    font-size: 17px;
+    font-size: 19px;
     font-weight: 650;
     letter-spacing: -0.02em;
     color: #1d1d1f;
   }
 }
 
-.mobile-workout-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 14px;
-
-  span {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 10px 12px;
-    border-radius: 14px;
-    background: rgba(0, 0, 0, 0.035);
-
-    small {
-      font-size: 10.5px;
-      font-weight: 650;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #86868b;
-    }
-
-    strong {
-      font-size: 14px;
-      font-weight: 650;
-      letter-spacing: -0.01em;
-      color: #1d1d1f;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-}
-
-.mobile-workout-actions {
+.mobile-workout-summary-clean {
   display: flex;
-  gap: 8px;
-
-  button {
-    flex: 1;
-
-    &:last-child {
-      flex: 0 0 auto;
-    }
-  }
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  padding: 0 20px 20px;
 }
 
-.mobile-exercise-list {
+.stat-clean {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  gap: 2px;
+  
+  .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #86868b;
+  }
+  
+  .stat-value {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+  }
 }
 
-.mobile-exercise-row {
+.mobile-workout-actions-clean {
+  display: flex;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(0, 0, 0, 0.015);
+  
+  .action-btn {
+    flex: 1;
+    padding: 14px 0;
+    font-size: 15px;
+    font-weight: 500;
+    color: #0071e3;
+    background: transparent;
+    border: none;
+    border-right: 1px solid rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s;
+    
+    &:last-child {
+      border-right: none;
+    }
+    
+    &.danger {
+      color: #ff3b30;
+    }
+
+    &:active {
+      background: rgba(0, 0, 0, 0.05);
+    }
+  }
+}
+
+.mobile-exercise-list-clean {
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 0 20px;
+  gap: 0;
+}
+
+.mobile-exercise-row-clean {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 11px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 
-  > div:first-child {
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .ex-info {
     display: flex;
     flex-direction: column;
     min-width: 0;
 
     strong {
-      font-size: 14px;
-      font-weight: 620;
+      font-size: 14.5px;
+      font-weight: 600;
       color: #1d1d1f;
       letter-spacing: -0.01em;
     }
 
     span {
-      font-size: 12px;
+      font-size: 12.5px;
       color: #86868b;
     }
   }
-}
 
-.mobile-exercise-stats {
-  display: flex;
-  gap: 6px;
-  flex: 0 0 auto;
+  .ex-stats {
+    display: flex;
+    gap: 4px;
+    flex: 0 0 auto;
 
-  span {
-    padding: 3px 9px;
-    font-size: 11.5px;
-    font-weight: 590;
-    color: #515154;
-    border-radius: 980px;
-    background: rgba(0, 0, 0, 0.05);
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
+    span {
+      font-size: 13px;
+      font-weight: 500;
+      color: #86868b;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      
+      &:not(:last-child)::after {
+        content: ', ';
+      }
+    }
   }
 }
 

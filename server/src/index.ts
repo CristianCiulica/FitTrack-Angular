@@ -12,6 +12,7 @@ import meRoutes from './routes/me.routes';
 import workoutsRoutes from './routes/workouts.routes';
 import runningRoutes from './routes/running-sessions.routes';
 import migrateRoutes from './routes/migrate.routes';
+import { apiLimiter } from './middleware/rate-limit';
 
 async function main() {
   initFirebaseAdmin();
@@ -30,6 +31,8 @@ async function main() {
   if (!isProduction) {
     app.use(morgan('dev'));
   }
+
+  app.use('/api/', apiLimiter);
 
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', uptime: process.uptime() });

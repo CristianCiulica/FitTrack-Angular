@@ -100,6 +100,9 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   ) {}
 
   ngOnInit(): void {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
     document.body.style.overflow = 'hidden';
     this.loadWeather();
   }

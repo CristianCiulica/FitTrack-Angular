@@ -13,6 +13,7 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { RouterLinkActive } from '@angular/router';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
@@ -35,6 +36,7 @@ type SortDirection = 'ascend' | 'descend' | null;
     NzPopconfirmModule,
     NzLayoutModule,
     NzMenuModule,
+    NzModalModule,
     WorkoutModalComponent,
     AppMenuComponent,
   ],
@@ -46,7 +48,6 @@ export class WorkoutsComponent implements OnInit {
   runningSessions = signal<RunningSession[]>([]);
   sortColumn = signal<WorkoutSortColumn>('date');
   sortDirection = signal<SortDirection>('descend');
-  searchQuery = signal<string>('');
   modalVisible = signal(false);
   editingWorkout = signal<Workout | null>(null);
   cardioHistoryOpen = signal(true);
@@ -56,17 +57,6 @@ export class WorkoutsComponent implements OnInit {
 
   filteredWorkouts = computed(() => {
     let data = [...this.workouts()];
-    const query = this.searchQuery().trim().toLowerCase();
-
-    if (query) {
-      data = data.filter(w =>
-        (w.name && w.name.toLowerCase().includes(query)) ||
-        (w.date && w.date.toLowerCase().includes(query)) ||
-        String(this.getWorkoutVolume(w)).includes(query) ||
-        (w.exercises && w.exercises.some(e => e.muscleGroup && e.muscleGroup.toLowerCase().includes(query))) ||
-        (w.exercises && w.exercises.some(e => e.exerciseName && e.exerciseName.toLowerCase().includes(query)))
-      );
-    }
 
     const sc = this.sortColumn();
     const sd = this.sortDirection();
@@ -84,12 +74,6 @@ export class WorkoutsComponent implements OnInit {
 
     return data;
   });
-
-  //cautare in lista
-  onSearch(event: Event) {
-    const value = (event.target as HTMLInputElement | null)?.value ?? '';
-    this.searchQuery.set(value);
-  }
 
   //sortare pe fiecare coloana
   onSortOrderChange(column: WorkoutSortColumn, direction: string | null) {
@@ -205,7 +189,8 @@ export class WorkoutsComponent implements OnInit {
     private runningSessionService: RunningSessionService,
     private authService: AuthService,
     private profileService: ProfileService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private modalService: NzModalService
   ) { }
 
   ngOnInit() {
@@ -256,12 +241,25 @@ export class WorkoutsComponent implements OnInit {
   }
 
   deleteWorkout(id: string) {
-    this.workoutService.deleteWorkout(id).subscribe({
-      next: () => {
-        this.message.success('Workout deleted!');
-        this.refreshWorkouts();
-      },
-      error: () => this.message.error('Delete failed.')
+    this.modalService.confirm({
+      nzTitle: 'Delete workout?',
+      nzContent: 'Are you sure you want to delete this workout?',
+      nzOkText: 'Delete',
+      nzOkType: 'primary',
+      nzOkDanger: true,
+      nzCancelText: 'Cancel',
+      nzCentered: true,
+      nzWidth: 320,
+      nzClassName: 'solid-modal',
+      nzOnOk: () => {
+        this.workoutService.deleteWorkout(id).subscribe({
+          next: () => {
+            this.message.success('Workout deleted!');
+            this.refreshWorkouts();
+          },
+          error: () => this.message.error('Delete failed.')
+        });
+      }
     });
   }
 

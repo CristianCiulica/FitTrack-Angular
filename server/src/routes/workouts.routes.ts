@@ -7,9 +7,9 @@ const router = Router();
 const exerciseSchema = z.object({
   exerciseName: z.string().trim().min(1),
   muscleGroup: z.enum(MUSCLE_GROUPS),
-  sets: z.number().min(0),
-  reps: z.number().min(0),
-  weight: z.number().min(0),
+  sets: z.number().min(0).max(50),
+  reps: z.number().min(0).max(500),
+  weight: z.number().min(0).max(1000),
 });
 
 const workoutBodySchema = z.object({
@@ -17,7 +17,7 @@ const workoutBodySchema = z.object({
   date: z.string().min(1),
   notes: z.string().max(2000).optional().default(''),
   isPredefined: z.boolean().optional().default(false),
-  exercises: z.array(exerciseSchema).default([]),
+  exercises: z.array(exerciseSchema).max(50).default([]),
 });
 
 function serialize(doc: any) {

@@ -138,16 +138,6 @@
             <h3>Workout history</h3>
           </div>
           <div class="history-table-controls">
-            <div class="search-input-wrapper">
-              <span nz-icon nzType="search" aria-hidden="true"></span>
-              <input
-                type="search"
-                aria-label="Search workouts"
-                placeholder="Search workouts..."
-                class="workout-search-input"
-                (input)="onSearch($event)"
-              />
-            </div>
             <button
               type="button"
               class="collapse-toggle workout-collapse-toggle"
@@ -269,9 +259,7 @@
                         nzType="text"
                         nzSize="small"
                         nzDanger
-                        nz-popconfirm
-                        nzPopconfirmTitle="Are you sure you want to delete?"
-                        (nzOnConfirm)="deleteWorkout(w.id!)"
+                        (click)="deleteWorkout(w.id!)"
                       >
                         <span nz-icon nzType="delete"></span>
                         Delete
@@ -321,62 +309,47 @@
                 </span>
               </div>
 
-              <div class="mobile-workout-summary">
-                <span>
-                  <small>Date</small>
-                  <strong>{{ w.date | date: 'd MMM y' }}</strong>
-                </span>
-                <span>
-                  <small>Exercises</small>
-                  <strong>{{ getExerciseCount(w) }}</strong>
-                </span>
-                <span>
-                  <small>Volume</small>
-                  <strong>{{ getWorkoutVolume(w) | number: '1.0-0' }} kg</strong>
-                </span>
-                <span>
-                  <small>Calories</small>
-                  <strong>~{{ getWorkoutCalories(w) }} kcal</strong>
-                </span>
+              <div class="mobile-workout-summary-clean">
+                <div class="stat-clean">
+                  <span class="stat-label">Date</span>
+                  <span class="stat-value">{{ w.date | date: 'd MMM y' }}</span>
+                </div>
+                <div class="stat-clean">
+                  <span class="stat-label">Exercises</span>
+                  <span class="stat-value">{{ getExerciseCount(w) }}</span>
+                </div>
+                <div class="stat-clean">
+                  <span class="stat-label">Volume</span>
+                  <span class="stat-value">{{ getWorkoutVolume(w) | number: '1.0-0' }} kg</span>
+                </div>
+                <div class="stat-clean">
+                  <span class="stat-label">Calories</span>
+                  <span class="stat-value">~{{ getWorkoutCalories(w) }} kcal</span>
+                </div>
               </div>
 
-              <div class="mobile-workout-actions">
-                <button
-                  nz-button
-                  nzType="default"
-                  (click)="onExpandChange(w.id!, !expandSet.has(w.id!))"
-                >
-                  <span nz-icon [nzType]="expandSet.has(w.id!) ? 'up' : 'down'"></span>
-                  {{ expandSet.has(w.id!) ? 'Hide' : 'Details' }}
-                </button>
-                <button nz-button nzType="default" (click)="openEdit(w)">
-                  <span nz-icon nzType="edit"></span>
-                  Edit
-                </button>
-                <button
-                  nz-button
-                  nzDanger
-                  nz-popconfirm
-                  nzPopconfirmTitle="Are you sure you want to delete?"
-                  (nzOnConfirm)="deleteWorkout(w.id!)"
-                >
-                  <span nz-icon nzType="delete"></span>
-                  Delete
-                </button>
-              </div>
-
-              <div class="mobile-exercise-list" *ngIf="expandSet.has(w.id!)">
-                <div class="mobile-exercise-row" *ngFor="let ex of w.exercises">
-                  <div>
+              <div class="mobile-exercise-list-clean" *ngIf="expandSet.has(w.id!)">
+                <div class="mobile-exercise-row-clean" *ngFor="let ex of w.exercises">
+                  <div class="ex-info">
                     <strong>{{ ex.exerciseName }}</strong>
                     <span>{{ ex.muscleGroup }}</span>
                   </div>
-                  <div class="mobile-exercise-stats">
+                  <div class="ex-stats">
                     <span>{{ ex.sets }} sets</span>
                     <span>{{ ex.reps }} reps</span>
                     <span>{{ ex.weight }} kg</span>
                   </div>
                 </div>
+              </div>
+
+              <div class="mobile-workout-actions-clean">
+                <button type="button" class="action-btn" (click)="onExpandChange(w.id!, !expandSet.has(w.id!))">
+                  {{ expandSet.has(w.id!) ? 'Hide Details' : 'Details' }}
+                </button>
+                <button type="button" class="action-btn" (click)="openEdit(w)">Edit</button>
+                <button type="button" class="action-btn danger" (click)="deleteWorkout(w.id!)">
+                  Delete
+                </button>
               </div>
             </article>
 
