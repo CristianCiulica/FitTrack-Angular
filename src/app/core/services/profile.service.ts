@@ -54,6 +54,22 @@ export class ProfileService {
     );
   }
 
+  exportData(): void {
+    this.api.get('/me/export', { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'fittrack_export.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => console.error('Failed to export data', err)
+    });
+  }
+
   deleteAccount(): Observable<void> {
     return this.api.delete<{ deleted: boolean }>('/me').pipe(map(() => void 0));
   }

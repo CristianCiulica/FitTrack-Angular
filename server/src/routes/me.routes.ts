@@ -29,8 +29,34 @@ router.get('/', async (req, res, next) => {
       { new: true, upsert: true },
     );
     res.json({ profile });
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/export', strictLimiter, async (req, res, next) => {
+  try {
+    const user = req.user!;
+    
+    const [profile, workouts, runningSessions] = await Promise.all([
+      UserProfile.findOne({ uid: user.uid }).lean(),
+      (await import('../models/workout.model')).Workout.find({ userId: user.uid }).lean(),
+      (await import('../models/running-session.model')).RunningSession.find({ userId: user.uid }).lean()
+    ]);
+
+    res.json({
+      exportedAt: new Date().toISOString(),
+      user: {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName
+      },
+      profile,
+      workouts,
+      runningSessions
+    });
+  } catch (error) {
+    next(error);
   }
 });
 

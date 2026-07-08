@@ -71,6 +71,10 @@ export class SettingsComponent implements OnInit {
     });
   }
 
+  exportData(): void {
+    this.profileService.exportData();
+  }
+
   deleteAccount(): void {
     this.deleting.set(true);
     // backend-ul sterge datele + contul din Firebase Auth (Admin SDK);

@@ -93,6 +93,22 @@
           </div>
         </nz-card>
 
+        <nz-card class="settings-card info-card" style="margin-bottom: 24px;">
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong>Export data</strong>
+              <small>Download a copy of your personal data, workouts, and running sessions as a JSON file.</small>
+            </div>
+            <button
+              nz-button
+              nzType="default"
+              (click)="exportData()"
+            >
+              <span nz-icon nzType="download"></span> Export
+            </button>
+          </div>
+        </nz-card>
+
         <nz-card class="settings-card danger-card">
           <div class="setting-row">
             <div class="setting-copy">
