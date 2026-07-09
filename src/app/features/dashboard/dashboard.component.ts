@@ -125,7 +125,7 @@ export class DashboardComponent implements OnInit {
 
   readonly selectedDate = signal<Date>(new Date());
 
-  private toKey(date: Date): string {
+  toKey(date: Date): string {
     const m = `${date.getMonth() + 1}`.padStart(2, '0');
     const d = `${date.getDate()}`.padStart(2, '0');
     return `${date.getFullYear()}-${m}-${d}`;

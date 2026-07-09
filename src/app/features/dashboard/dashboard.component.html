@@ -169,7 +169,7 @@
         </div>
       </div>
 
-      <a routerLink="/start-workout" class="hero-cta start-cta">
+      <a [routerLink]="['/start-workout']" [queryParams]="{ date: toKey(selectedDate()) }" class="hero-cta start-cta">
         <span nz-icon nzType="play-circle" nzTheme="fill"></span>
         Start a new workout
       </a>

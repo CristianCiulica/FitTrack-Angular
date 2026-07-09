@@ -1,6 +1,6 @@
 import { Component, HostListener, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, ActivatedRoute } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -123,6 +123,8 @@ const PREDEFINED_ROUTINES: Routine[] = [
   styleUrls: ['./start-workout.component.scss']
 })
 export class StartWorkoutComponent implements OnInit, OnDestroy {
+  targetDate = signal<string>(new Date().toISOString().split('T')[0]);
+
   state = signal<'setup' | 'active' | 'rest' | 'finished'>('setup');
 
   routines = PREDEFINED_ROUTINES;
@@ -211,9 +213,16 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     private workoutService: WorkoutService,
     private profileService: ProfileService,
     private message: NzMessageService,
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['date']) {
+        this.targetDate.set(params['date']);
+      }
+    });
+
     this.selectRoutine(this.routines[0], 'predefined-0');
     this.loadPersonalRoutines();
   }
@@ -263,7 +272,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.workoutService.addWorkout({
       userId: this.authService.currentUserId,
       name: workout.name || 'My workout',
-      date: workout.date || new Date().toISOString().split('T')[0],
+      date: workout.date || this.targetDate(),
       notes: workout.notes ?? '',
       exercises: workout.exercises || [],
       isPredefined: false,
@@ -368,7 +377,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   saveWorkout() {
     const workout = this.currentRoutine();
-    const dateStr = new Date().toISOString().split('T')[0];
+    const dateStr = this.targetDate();
     const uid = this.authService.currentUserId;
 
     this.workoutService.addWorkout({
