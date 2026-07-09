@@ -263,6 +263,17 @@
                         nz-button
                         nzType="text"
                         nzSize="small"
+                        (click)="shareToCommunity(w)"
+                        [nzLoading]="publishingIds().has(w.id!)"
+                        style="margin-right: 4px"
+                        nzTooltipTitle="Share to Community"
+                      >
+                        <span nz-icon nzType="share-alt"></span>
+                      </button>
+                      <button
+                        nz-button
+                        nzType="text"
+                        nzSize="small"
                         nzDanger
                         (click)="deleteWorkout(w.id!)"
                       >
@@ -350,6 +361,9 @@
               <div class="mobile-workout-actions-clean">
                 <button type="button" class="action-btn" (click)="onExpandChange(w.id!, !expandSet.has(w.id!))">
                   {{ expandSet.has(w.id!) ? 'Hide Details' : 'Details' }}
+                </button>
+                <button type="button" class="action-btn" (click)="shareToCommunity(w)" [disabled]="publishingIds().has(w.id!)">
+                  {{ publishingIds().has(w.id!) ? 'Sharing...' : 'Share' }}
                 </button>
                 <button type="button" class="action-btn" (click)="openEdit(w)">Edit</button>
                 <button type="button" class="action-btn danger" (click)="deleteWorkout(w.id!)">

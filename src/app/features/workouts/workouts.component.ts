@@ -19,6 +19,7 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { ProfileService } from '../../core/services/profile.service';
 import { estimateSessionCalories } from '../../core/utils/workout-calories';
+import { CommunityService } from '../../core/services/community.service';
 
 type WorkoutSortColumn = 'name' | 'date' | 'exerciseCount' | 'primaryMuscle' | 'volume';
 type SortDirection = 'ascend' | 'descend' | null;
@@ -54,6 +55,7 @@ export class WorkoutsComponent implements OnInit {
   workoutHistoryOpen = signal(true);
   readonly hideTableNoResult: string | undefined = undefined;
   expandSet = new Set<string>();
+  publishingIds = signal<Set<string>>(new Set());
 
   filteredWorkouts = computed(() => {
     let data = [...this.workouts()];
@@ -190,7 +192,8 @@ export class WorkoutsComponent implements OnInit {
     private authService: AuthService,
     private profileService: ProfileService,
     private message: NzMessageService,
-    private modalService: NzModalService
+    private modalService: NzModalService,
+    private communityService: CommunityService
   ) { }
 
   ngOnInit() {
@@ -265,5 +268,32 @@ export class WorkoutsComponent implements OnInit {
 
   logout() {
     this.authService.logout().subscribe();
+  }
+
+  shareToCommunity(workout: Workout) {
+    this.publishingIds.update(set => new Set(set).add(workout.id!));
+    this.communityService.publishWorkout({
+      originalWorkoutId: workout.id,
+      name: workout.name,
+      description: workout.notes || '',
+      exercises: workout.exercises
+    }).subscribe({
+      next: () => {
+        this.message.success('Workout shared to community!');
+        this.publishingIds.update(set => {
+          const newSet = new Set(set);
+          newSet.delete(workout.id!);
+          return newSet;
+        });
+      },
+      error: () => {
+        this.message.error('Failed to share workout.');
+        this.publishingIds.update(set => {
+          const newSet = new Set(set);
+          newSet.delete(workout.id!);
+          return newSet;
+        });
+      }
+    });
   }
 }

@@ -1,0 +1,58 @@
+<div class="community-wrap">
+  <div class="page-heading">
+    <h1>Discover Routines</h1>
+    <p>Find workout routines shared by other FitTrack users.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <nz-spin nzSimple nzSize="large"></nz-spin>
+    </div>
+  } @else if (workouts().length === 0) {
+    <nz-empty nzNotFoundContent="No community workouts found. Be the first to share one!"></nz-empty>
+  } @else {
+    <div class="workouts-grid">
+      @for (w of workouts(); track w.id) {
+        <nz-card class="workout-card">
+          <div class="card-header">
+            <h3>{{ w.name }}</h3>
+            <span class="author">by {{ w.authorName }}</span>
+          </div>
+          
+          @if (w.description) {
+            <p class="description">{{ w.description }}</p>
+          }
+
+          <div class="muscle-groups">
+            @for (group of getMuscleGroups(w); track group) {
+              <nz-tag [nzColor]="'processing'">{{ group }}</nz-tag>
+            }
+          </div>
+
+          <div class="exercises-preview">
+            <div class="exercise-count">{{ w.exercises.length }} exercises</div>
+            <ul class="exercise-list">
+              @for (ex of w.exercises | slice:0:3; track $index) {
+                <li>{{ ex.exerciseName }} ({{ ex.sets }}x{{ ex.reps }})</li>
+              }
+              @if (w.exercises.length > 3) {
+                <li class="more-text">+ {{ w.exercises.length - 3 }} more</li>
+              }
+            </ul>
+          </div>
+
+          <div class="card-footer">
+            <span class="date">{{ w.createdAt | date:'mediumDate' }}</span>
+            <button 
+              nz-button 
+              nzType="primary" 
+              [nzLoading]="savingIds().has(w.id)"
+              (click)="saveToMyWorkouts(w)">
+              Save
+            </button>
+          </div>
+        </nz-card>
+      }
+    </div>
+  }
+</div>

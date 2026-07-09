@@ -8,6 +8,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../core/services/auth.service';
 import { WorkoutService } from '../../core/services/workout.service';
@@ -16,6 +17,7 @@ import { MuscleGroup, Workout } from '../../core/models/workout.model';
 import { estimateSessionCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
+import { CommunityComponent } from '../community/community.component';
 
 interface PlannedExercise {
   name: string;
@@ -116,8 +118,10 @@ const PREDEFINED_ROUTINES: Routine[] = [
     NzCardModule,
     NzProgressModule,
     NzTagModule,
+    NzDrawerModule,
     WorkoutModalComponent,
     AppMenuComponent,
+    CommunityComponent,
   ],
   templateUrl: './start-workout.component.html',
   styleUrls: ['./start-workout.component.scss']
@@ -131,6 +135,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   personalRoutines = signal<Routine[]>([]);
   selectedRoutineKey = signal('predefined-0');
   modalVisible = signal(false);
+  communityDrawerVisible = signal(false);
 
   currentRoutine = signal<Routine>({ name: 'Custom Workout', exercises: [] });
 
@@ -291,6 +296,16 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   onModalCancel() {
     this.modalVisible.set(false);
+  }
+
+  openCommunityDrawer() {
+    this.communityDrawerVisible.set(true);
+  }
+
+  closeCommunityDrawer() {
+    this.communityDrawerVisible.set(false);
+    // Reload personal routines in case the user saved a community workout
+    this.loadPersonalRoutines();
   }
 
   private loadPersonalRoutines() {
