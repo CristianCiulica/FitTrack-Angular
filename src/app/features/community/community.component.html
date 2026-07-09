@@ -1,7 +1,14 @@
 <div class="community-wrap">
   <div class="page-heading">
-    <h1>Discover Routines</h1>
-    <p>Find workout routines shared by other FitTrack users.</p>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div>
+        <h1>Discover Routines</h1>
+        <p>Find workout routines shared by other FitTrack users.</p>
+      </div>
+      <button nz-button nzType="primary" (click)="shareModalVisible.set(true)">
+        <span nz-icon nzType="plus"></span> Share Workout
+      </button>
+    </div>
   </div>
 
   @if (loading()) {
@@ -56,3 +63,11 @@
     </div>
   }
 </div>
+
+<app-workout-modal
+  [visible]="shareModalVisible()"
+  [workout]="null"
+  (save)="onShareSave($event)"
+  (cancel)="shareModalVisible.set(false)"
+>
+</app-workout-modal>

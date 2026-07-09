@@ -16,6 +16,7 @@ import { WorkoutService } from '../../core/services/workout.service';
 import { CommunityWorkout, Workout } from '../../core/models/workout.model';
 import { ProfileService } from '../../core/services/profile.service';
 import { toCanonicalWeight, displayWeight } from '../../core/utils/units';
+import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 
 @Component({
   selector: 'app-community',
@@ -30,6 +31,7 @@ import { toCanonicalWeight, displayWeight } from '../../core/utils/units';
     NzTagModule,
     NzSpinModule,
     NzEmptyModule,
+    WorkoutModalComponent,
   ],
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],
@@ -46,6 +48,7 @@ export class CommunityComponent implements OnInit {
   readonly units = this.profileService.units;
 
   readonly savingIds = signal<Set<string>>(new Set());
+  readonly shareModalVisible = signal(false);
 
   ngOnInit(): void {
     this.communityService.loadCommunityWorkouts().subscribe({
@@ -83,6 +86,23 @@ export class CommunityComponent implements OnInit {
           return newSet;
         });
       },
+    });
+  }
+
+  onShareSave(workout: Partial<Workout>) {
+    const payload = {
+      name: workout.name || 'My workout',
+      description: workout.notes || '',
+      exercises: workout.exercises || []
+    };
+
+    this.communityService.publishWorkout(payload).subscribe({
+      next: () => {
+        this.shareModalVisible.set(false);
+        this.message.success('Workout shared to community!');
+        this.communityService.loadCommunityWorkouts().subscribe();
+      },
+      error: () => this.message.error('Failed to share workout')
     });
   }
 
