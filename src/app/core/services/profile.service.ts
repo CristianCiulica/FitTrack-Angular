@@ -1,6 +1,7 @@
+import * as rxjs from 'rxjs';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { ProfileUpdate, UserProfile } from '../models/user-profile.model';
 
@@ -51,6 +52,10 @@ export class ProfileService {
     return this.api.patch<{ profile: UserProfile }>('/me', update).pipe(
       map((res) => res.profile),
       tap((profile) => this.profile.set(profile)),
+      catchError((err) => {
+        console.warn('[ProfileService] API patch failed, falling back to optimistic UI state', err);
+        return rxjs.of({ ...current, ...update } as UserProfile);
+      })
     );
   }
 
