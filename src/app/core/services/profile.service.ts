@@ -3,11 +3,13 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { Auth } from '@angular/fire/auth';
 import { ProfileUpdate, UserProfile } from '../models/user-profile.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProfileService {
   private readonly api = inject(ApiService);
+  private readonly auth = inject(Auth);
 
   readonly profile = signal<UserProfile | null>(null);
   readonly loaded = signal(false);
@@ -26,6 +28,26 @@ export class ProfileService {
     return !!p && p.heightCm != null && p.weightKg != null && p.age != null;
   });
 
+  private getStorageKey(): string {
+    const uid = this.auth.currentUser?.uid || 'local';
+    return `fittrack_profile:${uid}`;
+  }
+
+  private loadLocal(): UserProfile | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(this.getStorageKey());
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private saveLocal(profile: UserProfile): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(this.getStorageKey(), JSON.stringify(profile));
+  }
+
   load(force = false): Observable<UserProfile | null> {
     if (this.loaded() && !force) {
       return of(this.profile());
@@ -33,9 +55,19 @@ export class ProfileService {
     return this.api.get<{ profile: UserProfile }>('/me').pipe(
       map((res) => res.profile),
       tap((profile) => {
+        this.saveLocal(profile);
         this.profile.set(profile);
         this.loaded.set(true);
       }),
+      catchError((err) => {
+        console.warn('API get profile failed, using local storage', err);
+        const local = this.loadLocal();
+        if (local) {
+          this.profile.set(local);
+        }
+        this.loaded.set(true);
+        return of(local);
+      })
     );
   }
 
@@ -44,17 +76,22 @@ export class ProfileService {
   }
 
   patch(update: ProfileUpdate): Observable<UserProfile> {
-    // update optimist ca UI-ul sa reflecte instant schimbarea
-    const current = this.profile();
-    if (current) {
-      this.profile.set({ ...current, ...update });
-    }
+    const current = this.profile() || {} as UserProfile;
+    const newProfile = { ...current, ...update };
+    
+    // Always optimistic update
+    this.profile.set(newProfile);
+    this.saveLocal(newProfile);
+    
     return this.api.patch<{ profile: UserProfile }>('/me', update).pipe(
       map((res) => res.profile),
-      tap((profile) => this.profile.set(profile)),
+      tap((profile) => {
+        this.profile.set(profile);
+        this.saveLocal(profile);
+      }),
       catchError((err) => {
         console.warn('[ProfileService] API patch failed, falling back to optimistic UI state', err);
-        return rxjs.of({ ...current, ...update } as UserProfile);
+        return rxjs.of(newProfile);
       })
     );
   }

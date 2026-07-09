@@ -1,16 +1,20 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+const fs = require('fs');
+const path = './src/app/core/services/workout.service.ts';
+let code = fs.readFileSync(path, 'utf8');
+
+code = `import { Injectable, signal, computed, inject } from '@angular/core';
 import { Workout } from '../models/workout.model';
 import { Observable, of } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
-import { Auth } from '@angular/fire/auth';
+import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorkoutService {
   totalWorkouts = signal<number>(0);
   workouts = signal<Workout[]>([]);
   private readonly api = inject(ApiService);
-  private readonly auth = inject(Auth);
+  private readonly auth = inject(AuthService);
 
   totalVolume = computed(() =>
     this.workouts().reduce((acc, w) => {
@@ -20,8 +24,8 @@ export class WorkoutService {
   );
 
   private getStorageKey(): string {
-    const uid = this.auth.currentUser?.uid || 'local';
-    return `fittrack_workouts:${uid}`;
+    const uid = this.auth.currentUser()?.uid || 'local';
+    return \`fittrack_workouts:\${uid}\`;
   }
 
   private loadLocal(): Workout[] {
@@ -84,7 +88,7 @@ export class WorkoutService {
     const updated = current.map(item => item.id === id ? { ...item, ...workout } : item) as Workout[];
     this.saveLocal(updated);
 
-    return this.api.put<{ workout: Workout }>(`/workouts/${id}`, workout).pipe(
+    return this.api.put<{ workout: Workout }>(\`/workouts/\${id}\`, workout).pipe(
       map((res) => res.workout),
       catchError((err) => {
         console.warn('API update workout failed, using local storage', err);
@@ -97,7 +101,7 @@ export class WorkoutService {
     const current = this.loadLocal();
     this.saveLocal(current.filter(item => item.id !== id));
 
-    return this.api.delete<{ deleted: boolean }>(`/workouts/${id}`).pipe(
+    return this.api.delete<{ deleted: boolean }>(\`/workouts/\${id}\`).pipe(
       map(() => void 0),
       catchError((err) => {
         console.warn('API delete workout failed, using local storage', err);
@@ -106,3 +110,7 @@ export class WorkoutService {
     );
   }
 }
+\`;
+
+fs.writeFileSync(path, code);
+console.log('patched workout service');
