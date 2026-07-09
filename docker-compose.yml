@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: fittrack_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Preia cheile din mediul local cand faci build-ul
+        - FIREBASE_API_KEY=${FIREBASE_API_KEY:-dummy}
+        - FIREBASE_AUTH_DOMAIN=${FIREBASE_AUTH_DOMAIN:-dummy}
+        - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID:-dummy}
+        - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET:-dummy}
+        - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID:-dummy}
+        - FIREBASE_APP_ID=${FIREBASE_APP_ID:-dummy}
+        - API_BASE_URL=${API_BASE_URL:-dummy}
+    container_name: fittrack_app
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env.local
+    environment:
+      # Suprascriem MONGO_URI din .env.local ca sa se conecteze la baza de date locala din docker
+      - MONGO_URI=mongodb://mongodb:27017/fittrack
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
