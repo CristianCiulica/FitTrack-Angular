@@ -8,8 +8,8 @@ export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = getApiBaseUrl();
 
-  get<T>(path: string): Observable<T> {
-    return this.http.get<T>(this.url(path));
+  get<T>(path: string, options?: any): Observable<T> {
+    return this.http.get(this.url(path), options) as Observable<T>;
   }
 
   post<T>(path: string, body: unknown): Observable<T> {

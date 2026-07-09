@@ -11,6 +11,8 @@ import {
   user,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   sendPasswordResetEmail,
   User,
 } from '@angular/fire/auth';
@@ -53,6 +55,15 @@ export class AuthService {
       this.profileService.load(true).subscribe({ error: (err) => console.warn('[auth] Failed to load profile', err) });
     });
 
+  // Handle redirect result when returning from Google sign-in (PWA standalone mode)
+  private readonly redirectSub = getRedirectResult(this.auth).then((result) => {
+    if (result?.user) {
+      this.router.navigate(['/dashboard']);
+    }
+  }).catch((err) => {
+    console.warn('[auth] redirect result error', err);
+  });
+
   // set persistence for remember me
   login(email: string, password: string, remember: boolean) {
     const persistence = remember ? browserLocalPersistence : browserSessionPersistence;
@@ -83,11 +94,9 @@ export class AuthService {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
 
-    return from(
-      setPersistence(this.auth, browserLocalPersistence).then(() =>
-        signInWithPopup(this.auth, provider),
-      ),
-    );
+    // iOS PWA requires synchronous popup execution (no async/awaits before calling signInWithPopup).
+    // Default persistence is already local, so we don't need to call setPersistence.
+    return from(signInWithPopup(this.auth, provider));
   }
 
   get currentUserId(): string {

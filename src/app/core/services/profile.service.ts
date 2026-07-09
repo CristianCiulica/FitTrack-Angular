@@ -57,7 +57,7 @@ export class ProfileService {
   exportData(): void {
     this.api.get('/me/export', { responseType: 'blob' }).subscribe({
       next: (blob) => {
-        const url = window.URL.createObjectURL(blob);
+        const url = window.URL.createObjectURL(blob as Blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'fittrack_export.json';
