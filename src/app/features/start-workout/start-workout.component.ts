@@ -187,20 +187,6 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     return ['blue', 'purple', 'cyan', 'green'][index % 4];
   }
 
-  /* ------- progresul saptamanal din hero ------- */
-
-  readonly weeklyGoal = computed(() => {
-    const days = this.profileService.profile()?.workoutReminderDays ?? 2;
-    return days > 0 ? Math.max(1, Math.round(7 / days)) : 4;
-  });
-  readonly weeklyCount = computed(() => {
-    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-    return this.workoutService.workouts().filter((w) => new Date(w.date).getTime() >= weekAgo).length;
-  });
-  readonly weeklyPercent = computed(() =>
-    Math.min(100, Math.round((this.weeklyCount() / this.weeklyGoal()) * 100)),
-  );
-
   progressPercent = computed(() => {
     const totalSets = this.currentRoutine().exercises.reduce((acc, ex) => acc + ex.sets, 0);
     if (totalSets === 0) return 0;

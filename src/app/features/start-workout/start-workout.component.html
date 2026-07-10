@@ -114,27 +114,17 @@
 
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
-          <!-- Hero: rutina selectata + progres saptamanal -->
-          <div class="progress-hero">
-            <div class="progress-hero-copy">
-              <span class="hero-eyebrow">Progress</span>
-              <h2>{{ currentRoutine().name }}</h2>
-              <p>{{ currentRoutine().category || 'Custom' }} · ~{{ routineMinutes(currentRoutine()) }} mins</p>
-              <button type="button" class="kcal-pill" (click)="startWorkout()">
-                <span class="kcal-num">~{{ routineKcal(currentRoutine()) }}</span>
-                <span class="kcal-label">calories</span>
-                <span class="kcal-arrow" aria-hidden="true">↗</span>
-              </button>
+          <!-- Promo permanent: antrenamentele comunitatii -->
+          <button type="button" class="community-promo" (click)="openCommunityDrawer()">
+            <div class="community-promo-copy">
+              <span class="promo-badge">New</span>
+              <h2>Try community workouts</h2>
+              <p>Discover routines shared by other athletes.</p>
             </div>
-            <div
-              class="weekly-ring"
-              role="img"
-              [attr.aria-label]="'Weekly goal ' + weeklyPercent() + '%'"
-              [style.--pct.%]="weeklyPercent()"
-            >
-              <span>{{ weeklyPercent() }}%</span>
-            </div>
-          </div>
+            <span class="promo-arrow" aria-hidden="true">
+              <span nz-icon nzType="global"></span>
+            </span>
+          </button>
 
           <!-- Planul -->
           <div class="plan-heading">
@@ -170,6 +160,15 @@
                 <span class="plan-count">{{ item.routine.exercises.length }} exercises · ~{{ routineKcal(item.routine) }} kcal</span>
               </div>
               <p class="plan-muscles">{{ muscleSummary(item.routine) }}</p>
+              <button
+                type="button"
+                class="plan-start"
+                *ngIf="selectedRoutineKey() === 'predefined-' + item.index"
+                (click)="$event.stopPropagation(); startWorkout()"
+              >
+                <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+                Start workout
+              </button>
             </div>
           </div>
 
@@ -195,6 +194,15 @@
                 <span class="plan-count">{{ routine.exercises.length }} exercises · ~{{ routineKcal(routine) }} kcal</span>
               </div>
               <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
+              <button
+                type="button"
+                class="plan-start"
+                *ngIf="selectedRoutineKey() === 'personal-' + routine.id"
+                (click)="$event.stopPropagation(); startWorkout()"
+              >
+                <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+                Start workout
+              </button>
             </div>
           </div>
           <ng-template #noPersonalRoutines>
@@ -202,12 +210,6 @@
               You have no personal workouts yet. Add your first workout.
             </button>
           </ng-template>
-
-          <div class="action-bar">
-            <button nz-button nzType="primary" nzSize="large" (click)="startWorkout()">
-              <span nz-icon nzType="play-circle"></span> Start workout
-            </button>
-          </div>
         </ng-container>
 
         <!-- ACTIVE STATE -->
