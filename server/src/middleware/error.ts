@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { Error as MongooseError } from 'mongoose';
 import { ZodError } from 'zod';
 
 export function notFound(_req: Request, res: Response): void {
@@ -13,6 +14,12 @@ export function errorHandler(
 ): void {
   if (err instanceof ZodError) {
     res.status(400).json({ error: 'Invalid request body', details: err.flatten() });
+    return;
+  }
+
+  // id invalid in URL (ex. id temporar creat offline) — nu e o eroare interna
+  if (err instanceof MongooseError.CastError) {
+    res.status(400).json({ error: 'Invalid id' });
     return;
   }
 

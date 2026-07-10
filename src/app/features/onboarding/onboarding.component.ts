@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -28,6 +28,16 @@ export class OnboardingComponent implements OnInit {
 
   readonly step = signal<Step>('name');
   readonly saving = signal(false);
+
+  constructor() {
+    // daca profilul soseste tarziu (race la boot) si userul e deja onboarded,
+    // il scoatem automat de pe acest ecran — dar nu in timp ce salveaza el insusi
+    effect(() => {
+      if (this.profileService.isOnboarded() && !this.saving()) {
+        this.router.navigate(['/dashboard']);
+      }
+    });
+  }
 
   readonly name = signal('');
   readonly age = signal(25);

@@ -20,6 +20,11 @@ async function main() {
 
   const app = express();
   app.disable('x-powered-by');
+  if (isProduction) {
+    // in productie stam dupa un reverse proxy; fara asta express-rate-limit
+    // nu poate identifica IP-ul real din X-Forwarded-For
+    app.set('trust proxy', 1);
+  }
   app.use(helmet());
   app.use(
     cors({

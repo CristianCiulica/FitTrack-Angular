@@ -1,6 +1,5 @@
-import * as rxjs from 'rxjs';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Auth } from '@angular/fire/auth';
@@ -63,10 +62,15 @@ export class ProfileService {
         console.warn('API get profile failed, using local storage', err);
         const local = this.loadLocal();
         if (local) {
+          // avem o copie locala valida — mergem offline cu ea
           this.profile.set(local);
+          this.loaded.set(true);
+          return of(local);
         }
-        this.loaded.set(true);
-        return of(local);
+        // fara copie locala NU marcam loaded si propagam eroarea:
+        // onboardingGuard are propriul catchError care lasa userul sa treaca,
+        // altfel un esec tranzitoriu la boot ar trimite gresit userul la /onboarding
+        return throwError(() => err);
       })
     );
   }
@@ -91,7 +95,7 @@ export class ProfileService {
       }),
       catchError((err) => {
         console.warn('[ProfileService] API patch failed, falling back to optimistic UI state', err);
-        return rxjs.of(newProfile);
+        return of(newProfile);
       })
     );
   }

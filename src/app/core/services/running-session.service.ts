@@ -14,7 +14,9 @@ export class RunningSessionService {
 
   private getStorageKey(): string {
     const uid = this.auth.currentUser?.uid || 'local';
-    return `fittrack_running_sessions:${uid}`;
+    // IMPORTANT: prefix diferit de `fittrack_running_sessions:` — acela e citit de
+    // MigrationService ca "date vechi de migrat"; cache-ul nu trebuie sa ajunga acolo.
+    return `fittrack_cache_sessions:${uid}`;
   }
 
   private loadLocal(): RunningSession[] {
@@ -37,10 +39,22 @@ export class RunningSessionService {
     this.trackingActive.set(active);
   }
 
+  // sesiunile salvate offline primesc id temporar pana ajung pe server
+  private isTempId(id?: string): boolean {
+    return !!id && id.startsWith('r_');
+  }
+
   getSessions(): Observable<RunningSession[]> {
     return this.api.get<{ sessions: RunningSession[] }>('/running-sessions').pipe(
       map((res) => res.sessions),
-      tap((sessions) => this.saveLocal(sessions)),
+      map((serverSessions) => {
+        // nu pierdem sesiunile salvate offline: le pastram si le re-trimitem
+        const pending = this.loadLocal().filter((s) => this.isTempId(s.id));
+        const merged = [...pending, ...serverSessions];
+        this.saveLocal(merged);
+        this.resyncPending(pending);
+        return merged;
+      }),
       catchError((err) => {
         console.warn('API get running sessions failed, using local storage', err);
         const local = this.loadLocal();
@@ -48,6 +62,18 @@ export class RunningSessionService {
         return of(local);
       })
     );
+  }
+
+  private resyncPending(pending: RunningSession[]): void {
+    for (const session of pending) {
+      this.api.post<{ session: RunningSession }>('/running-sessions', session).subscribe({
+        next: ({ session: saved }) => {
+          const updated = this.loadLocal().map((s) => (s.id === session.id ? saved : s));
+          this.saveLocal(updated);
+        },
+        error: (err) => console.warn('[running] resync failed, will retry next load', err),
+      });
+    }
   }
 
   saveSession(session: Omit<RunningSession, 'id'>): Observable<RunningSession> {
