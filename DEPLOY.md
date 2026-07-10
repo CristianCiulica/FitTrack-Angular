@@ -36,19 +36,14 @@ HTTPS blocheaza oricum apelurile HTTP (mixed content).
 5. Deploy. La final primesti un URL gen `https://fittrack-api.onrender.com`.
    Verifica: `https://<url>/api/health` trebuie sa raspunda `{"status":"ok",...}`.
 
-## 3. Refa build-ul frontend cu API-ul public — la fiecare deploy
+## 3. Deploy frontend — la fiecare publicare
 
-In `.env` (radacina proiectului) seteaza:
-```
-API_BASE_URL=https://<serviciul-tau>.onrender.com/api
-```
-apoi:
-```
-npm run build && npx firebase deploy --only hosting
-```
+Backend-ul live: **https://fittrack-angular.onrender.com**
 
-> Pentru dezvoltare locala pune inapoi `API_BASE_URL=http://localhost:4000/api`
-> (sau tine doua fisiere si copiaza-l pe cel potrivit inainte de build).
+O singura comanda (override de env doar pentru build, `.env` local ramane pe localhost):
+```
+API_BASE_URL=https://fittrack-angular.onrender.com/api npm run build && npx firebase deploy --only hosting
+```
 
 ## Note
 
