@@ -12,6 +12,7 @@ import meRoutes from './routes/me.routes';
 import workoutsRoutes from './routes/workouts.routes';
 import runningRoutes from './routes/running-sessions.routes';
 import migrateRoutes from './routes/migrate.routes';
+import communityRoutes from './routes/community.routes';
 import { apiLimiter } from './middleware/rate-limit';
 
 async function main() {
@@ -47,6 +48,7 @@ async function main() {
   app.use('/api/workouts', requireAuth, workoutsRoutes);
   app.use('/api/running-sessions', requireAuth, runningRoutes);
   app.use('/api/migrate', requireAuth, migrateRoutes);
+  app.use('/api/community', requireAuth, communityRoutes);
 
   if (isProduction) {
     // În funcție de versiunea exactă de Angular, build-ul ajunge fie în dist/FitTrack-Angular/browser, fie în dist/fit-track-angular/browser

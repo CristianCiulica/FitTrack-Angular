@@ -58,6 +58,7 @@
             <span>Nutrition</span>
           </a>
         </li>
+
         <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
           <a
             [routerLink]="workoutInProgress() ? null : '/account'"
@@ -97,7 +98,11 @@
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
-      <div class="header-actions">
+      <div class="header-actions" style="display: flex; gap: 8px;">
+        <button nz-button (click)="openCommunityDrawer()">
+          <span nz-icon nzType="global"></span>
+          <span class="button-label">Community</span>
+        </button>
         <button nz-button nzType="primary" (click)="openAddWorkout()">
           <span class="button-label">+ Create workout</span>
         </button>
@@ -294,3 +299,16 @@
   (cancel)="onModalCancel()"
 >
 </app-workout-modal>
+
+<nz-drawer
+  [nzVisible]="communityDrawerVisible()"
+  [nzWidth]="'100%'"
+  [nzBodyStyle]="{ padding: '0', background: 'var(--bg-primary)' }"
+  nzPlacement="right"
+  nzTitle="Community Workouts"
+  (nzOnClose)="closeCommunityDrawer()"
+>
+  <ng-container *nzDrawerContent>
+    <app-community></app-community>
+  </ng-container>
+</nz-drawer>

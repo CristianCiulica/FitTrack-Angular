@@ -1,0 +1,171 @@
+
+.community-wrap {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.page-heading {
+  margin-bottom: 32px;
+  
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+  }
+
+  p {
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.workouts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+.workout-card {
+  border-radius: 16px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  ::ng-deep .ant-card-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px var(--shadow-color);
+  }
+
+  .card-header {
+    margin-bottom: 12px;
+
+    h3 {
+      margin: 0 0 4px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-color);
+      line-height: 1.3;
+    }
+
+    .author {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+  }
+
+  .description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+
+  .muscle-groups {
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    nz-tag {
+      margin: 0;
+      border-radius: 4px;
+      border: none;
+      background: rgba(24, 144, 255, 0.1);
+      color: #1890ff;
+      font-weight: 500;
+    }
+  }
+
+  .exercises-preview {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    flex: 1;
+
+    .exercise-count {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .exercise-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        font-size: 13px;
+        color: var(--text-color);
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        &.more-text {
+          color: var(--text-secondary);
+          font-style: italic;
+          font-size: 12px;
+          margin-top: 8px;
+        }
+      }
+    }
+  }
+
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+
+    .date {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    button {
+      border-radius: 8px;
+      font-weight: 500;
+    }
+  }
+}

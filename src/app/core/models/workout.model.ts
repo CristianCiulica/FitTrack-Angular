@@ -17,6 +17,17 @@ export interface Workout {
   isPredefined?: boolean;
 }
 
+export interface CommunityWorkout {
+  id: string;
+  originalWorkoutId?: string;
+  authorId: string;
+  authorName: string;
+  name: string;
+  description: string;
+  exercises: ExerciseLog[];
+  createdAt: string;
+}
+
 
 export type MuscleGroup =
   | 'Chest'
