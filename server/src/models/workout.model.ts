@@ -18,6 +18,7 @@ const exerciseLogSchema = new Schema(
     sets: { type: Number, required: true, min: 0 },
     reps: { type: Number, required: true, min: 0 },
     weight: { type: Number, required: true, min: 0 },
+    setWeights: { type: [Number], default: undefined },
   },
   { _id: false },
 );

@@ -109,9 +109,18 @@ export class WorkoutsComponent implements OnInit {
     return this.muscleTones[muscleGroup] ?? 'graphite';
   }
 
+  // greutatile reale pe seturi, ex. "60 / 62.5 / 65 kg"
+  formatSetWeights(setWeights: number[]): string {
+    return setWeights.join(' / ') + ' kg';
+  }
+
   getWorkoutVolume(workout: Workout): number {
     return workout.exercises?.reduce(
-      (total, exercise) => total + exercise.sets * exercise.reps * exercise.weight,
+      (total, exercise) =>
+        total +
+        (exercise.setWeights?.length
+          ? exercise.reps * exercise.setWeights.reduce((s, w) => s + w, 0)
+          : exercise.sets * exercise.reps * exercise.weight),
       0,
     ) ?? 0;
   }

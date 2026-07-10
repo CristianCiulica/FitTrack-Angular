@@ -230,10 +230,34 @@
                 <label>Reps</label>
                 <div class="value">{{ ex.reps }}</div>
               </div>
-              <div class="stat">
+              <div class="stat stat-weight">
                 <label>Weight (kg)</label>
-                <div class="value">{{ ex.weight }}</div>
+                <div class="weight-stepper">
+                  <button type="button" class="stepper-btn" aria-label="Decrease weight" (click)="adjustWeight(-2.5)">−</button>
+                  <input
+                    class="weight-input"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    step="0.5"
+                    [value]="currentWeight()"
+                    (change)="onWeightInput($any($event.target).value)"
+                  />
+                  <button type="button" class="stepper-btn" aria-label="Increase weight" (click)="adjustWeight(2.5)">+</button>
+                </div>
               </div>
+            </div>
+
+            <div class="overload-hint" *ngIf="lastTimeWeight() as last">
+              <span class="hint-label">Last time: <strong>{{ last }} kg</strong></span>
+              <span
+                class="hint-delta"
+                *ngIf="overloadDelta() as delta"
+                [class.up]="delta > 0"
+                [class.down]="delta < 0"
+              >
+                {{ delta > 0 ? '+' + delta : delta }} kg {{ delta > 0 ? '· progressive overload!' : '' }}
+              </span>
             </div>
 
             <div class="action-bar active-action dual-actions">

@@ -10,6 +10,7 @@ const exerciseSchema = z.object({
   sets: z.number().min(0).max(50),
   reps: z.number().min(0).max(500),
   weight: z.number().min(0).max(1000),
+  setWeights: z.array(z.number().min(0).max(1000)).max(50).optional(),
 });
 
 const workoutBodySchema = z.object({

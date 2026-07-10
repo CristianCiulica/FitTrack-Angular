@@ -142,6 +142,26 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   currentExerciseIndex = signal(0);
   currentSetIndex = signal(1);
 
+  // progressive overload: greutatea setului curent + ce ai logat la fiecare set
+  currentWeight = signal(0);
+  private loggedWeights: number[][] = [];
+  // ultima greutate folosita pe fiecare exercitiu, din istoricul salvat
+  private lastWeights = signal(new Map<string, number>());
+
+  // greutatea folosita data trecuta la exercitiul curent (hint de progres)
+  lastTimeWeight = computed(() => {
+    const ex = this.currentExercise();
+    if (!ex) return null;
+    return this.lastWeights().get(ex.name.toLowerCase()) ?? null;
+  });
+
+  // diferenta fata de data trecuta (pozitiv = progres)
+  overloadDelta = computed(() => {
+    const last = this.lastTimeWeight();
+    if (last === null || last === 0) return null;
+    return Math.round((this.currentWeight() - last) * 10) / 10;
+  });
+
   restTimeTarget = signal(60);
   restTimeRemaining = signal(60);
   private timerInterval: ReturnType<typeof setInterval> | null = null;
@@ -318,10 +338,52 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.currentRoutine().exercises.length === 0) return;
     this.currentExerciseIndex.set(0);
     this.currentSetIndex.set(1);
+    this.loggedWeights = this.currentRoutine().exercises.map(() => []);
+    this.loadLastWeights();
+    this.syncCurrentWeight();
     this.state.set('active');
   }
 
+  // cauta in istoricul salvat ultima greutate folosita la fiecare exercitiu
+  private loadLastWeights() {
+    this.lastWeights.set(new Map());
+    this.workoutService.getWorkouts().subscribe((workouts) => {
+      const map = new Map<string, number>();
+      const sorted = [...workouts].sort((a, b) => b.date.localeCompare(a.date));
+      for (const w of sorted) {
+        for (const ex of w.exercises) {
+          const key = ex.exerciseName.toLowerCase();
+          if (map.has(key)) continue;
+          const logged = ex.setWeights?.length ? Math.max(...ex.setWeights) : ex.weight;
+          if (logged > 0) map.set(key, logged);
+        }
+      }
+      this.lastWeights.set(map);
+    });
+  }
+
+  // greutatea propusa pentru setul curent: ultimul set logat sau planul
+  private syncCurrentWeight() {
+    const exIdx = this.currentExerciseIndex();
+    const logged = this.loggedWeights[exIdx];
+    const planned = this.currentExercise()?.weight ?? 0;
+    this.currentWeight.set(logged?.length ? logged[logged.length - 1] : planned);
+  }
+
+  adjustWeight(delta: number) {
+    this.currentWeight.set(Math.max(0, Math.round((this.currentWeight() + delta) * 10) / 10));
+  }
+
+  onWeightInput(value: string) {
+    const parsed = parseFloat(value);
+    if (!isNaN(parsed) && parsed >= 0 && parsed <= 1000) {
+      this.currentWeight.set(Math.round(parsed * 10) / 10);
+    }
+  }
+
   finishSet() {
+    const exIdx = this.currentExerciseIndex();
+    this.loggedWeights[exIdx]?.push(this.currentWeight());
     this.state.set('rest');
     this.restTimeRemaining.set(this.restTimeTarget());
 
@@ -342,11 +404,13 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
     if (this.currentSetIndex() < currEx.sets) {
       this.currentSetIndex.set(this.currentSetIndex() + 1);
+      this.syncCurrentWeight();
       this.state.set('active');
     } else {
       if (this.currentExerciseIndex() + 1 < this.currentRoutine().exercises.length) {
         this.currentExerciseIndex.set(this.currentExerciseIndex() + 1);
         this.currentSetIndex.set(1);
+        this.syncCurrentWeight();
         this.state.set('active');
       } else {
         this.finishWorkout();
@@ -387,13 +451,18 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       date: dateStr,
       notes: 'Auto-finished workout',
       isPredefined: false,
-      exercises: workout.exercises.map(ex => ({
-        exerciseName: ex.name,
-        muscleGroup: ex.muscleGroup,
-        sets: ex.sets,
-        reps: ex.reps,
-        weight: ex.weight
-      }))
+      exercises: workout.exercises.map((ex, i) => {
+        const logged = this.loggedWeights[i] ?? [];
+        return {
+          exerciseName: ex.name,
+          muscleGroup: ex.muscleGroup,
+          sets: ex.sets,
+          reps: ex.reps,
+          // greutatea "oficiala" devine maximul lucrat efectiv
+          weight: logged.length ? Math.max(...logged) : ex.weight,
+          ...(logged.length ? { setWeights: logged } : {}),
+        };
+      })
     }).subscribe({
       next: () => this.message.success('Workout finished and saved!'),
       error: (err) => {
