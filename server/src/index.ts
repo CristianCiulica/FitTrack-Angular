@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs';
 import path from 'path';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -51,13 +52,17 @@ async function main() {
   app.use('/api/community', requireAuth, communityRoutes);
 
   if (isProduction) {
-    // În funcție de versiunea exactă de Angular, build-ul ajunge fie în dist/FitTrack-Angular/browser, fie în dist/fit-track-angular/browser
+    // Serveste frontend-ul doar daca build-ul exista langa server (deploy all-in-one).
+    // Pe un host doar-API (Render/Railway, cu frontend-ul pe Firebase Hosting) folderul
+    // lipseste si sarim peste, ca sa nu crape sendFile pe fisier inexistent.
     const frontendPath = path.join(__dirname, '../../dist/FitTrack-Angular/browser');
-    app.use(express.static(frontendPath));
-    app.get('*', (_req, res, next) => {
-      if (_req.path.startsWith('/api/')) return next();
-      res.sendFile(path.join(frontendPath, 'index.html'));
-    });
+    if (fs.existsSync(path.join(frontendPath, 'index.html'))) {
+      app.use(express.static(frontendPath));
+      app.get('*', (_req, res, next) => {
+        if (_req.path.startsWith('/api/')) return next();
+        res.sendFile(path.join(frontendPath, 'index.html'));
+      });
+    }
   }
 
   app.use(notFound);
