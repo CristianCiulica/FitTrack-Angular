@@ -1,14 +1,15 @@
 <div class="community-wrap">
-  <div class="page-heading">
-    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-      <div>
-        <h1>Discover Routines</h1>
-        <p>Find workout routines shared by other FitTrack users.</p>
-      </div>
-      <button nz-button nzType="primary" (click)="shareModalVisible.set(true)">
-        <span nz-icon nzType="plus"></span> Share Workout
-      </button>
+  <!-- Heading in stilul paginilor aplicatiei -->
+  <div class="community-heading">
+    <div>
+      <span class="community-eyebrow">Community</span>
+      <h1>Discover routines</h1>
+      <p>Workouts shared by other FitTrack athletes.</p>
     </div>
+    <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
+      <span nz-icon nzType="plus"></span>
+      <span class="share-label">Share workout</span>
+    </button>
   </div>
 
   @if (loading()) {
@@ -16,49 +17,70 @@
       <nz-spin nzSimple nzSize="large"></nz-spin>
     </div>
   } @else if (workouts().length === 0) {
-    <nz-empty nzNotFoundContent="No community workouts found. Be the first to share one!"></nz-empty>
+    <div class="community-empty">
+      <strong>No community workouts yet</strong>
+      <p>Be the first to share a routine with everyone.</p>
+      <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
+        <span nz-icon nzType="plus"></span>
+        Share workout
+      </button>
+    </div>
   } @else {
-    <div class="workouts-grid">
-      @for (w of workouts(); track w.id) {
-        <nz-card class="workout-card">
-          <div class="card-header">
-            <h3>{{ w.name }}</h3>
-            <span class="author">by {{ w.authorName }}</span>
+    <div class="community-grid">
+      @for (w of workouts(); track w.id; let i = $index) {
+        <article class="community-card" [attr.data-tone]="cardTone(i)">
+          <div class="duration-badge">
+            <strong>{{ workoutMinutes(w) }}</strong>
+            <span>mins</span>
           </div>
-          
+
+          <div class="author-row">
+            <span class="author-avatar">{{ authorInitials(w.authorName) }}</span>
+            <div class="author-copy">
+              <strong>{{ w.authorName }}</strong>
+              <small>{{ w.createdAt | date: 'd MMM y' }}</small>
+            </div>
+          </div>
+
+          <h3>{{ w.name }}</h3>
+
           @if (w.description) {
-            <p class="description">{{ w.description }}</p>
+            <p class="community-description">{{ w.description }}</p>
           }
 
-          <div class="muscle-groups">
+          <div class="community-meta">
+            {{ w.exercises.length }} exercises · ~{{ workoutKcal(w) }} kcal
+          </div>
+
+          <div class="muscle-row">
             @for (group of getMuscleGroups(w); track group) {
-              <nz-tag [nzColor]="'processing'">{{ group }}</nz-tag>
+              <span class="muscle-chip" [attr.data-tone]="muscleTone(group)">{{ group }}</span>
             }
           </div>
 
-          <div class="exercises-preview">
-            <div class="exercise-count">{{ w.exercises.length }} exercises</div>
-            <ul class="exercise-list">
-              @for (ex of w.exercises | slice:0:3; track $index) {
-                <li>{{ ex.exerciseName }} ({{ ex.sets }}x{{ ex.reps }})</li>
-              }
-              @if (w.exercises.length > 3) {
-                <li class="more-text">+ {{ w.exercises.length - 3 }} more</li>
-              }
-            </ul>
-          </div>
+          <ul class="exercise-preview">
+            @for (ex of w.exercises | slice: 0 : 3; track $index) {
+              <li>
+                <span class="exercise-name">{{ ex.exerciseName }}</span>
+                <span class="exercise-detail">{{ ex.sets }}×{{ ex.reps }}@if (ex.weight > 0) { · {{ formatWeight(ex.weight) }}}</span>
+              </li>
+            }
+            @if (w.exercises.length > 3) {
+              <li class="more-row">+ {{ w.exercises.length - 3 }} more exercises</li>
+            }
+          </ul>
 
-          <div class="card-footer">
-            <span class="date">{{ w.createdAt | date:'mediumDate' }}</span>
-            <button 
-              nz-button 
-              nzType="primary" 
-              [nzLoading]="savingIds().has(w.id)"
-              (click)="saveToMyWorkouts(w)">
-              Save
-            </button>
-          </div>
-        </nz-card>
+          <button
+            type="button"
+            class="save-btn"
+            [class.saving]="savingIds().has(w.id)"
+            [disabled]="savingIds().has(w.id)"
+            (click)="saveToMyWorkouts(w)"
+          >
+            <span nz-icon [nzType]="savingIds().has(w.id) ? 'loading' : 'download'"></span>
+            {{ savingIds().has(w.id) ? 'Saving...' : 'Save to my workouts' }}
+          </button>
+        </article>
       }
     </div>
   }

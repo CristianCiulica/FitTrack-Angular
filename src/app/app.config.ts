@@ -33,6 +33,9 @@ import {
   EyeOutline,
   SettingOutline,
   LogoutOutline,
+  GlobalOutline,
+  DownloadOutline,
+  LoadingOutline,
 } from '@ant-design/icons-angular/icons';
 import { getFirebaseConfig } from './core/config/runtime-config';
 import { routes } from './app.routes';
@@ -83,6 +86,9 @@ export const appConfig: ApplicationConfig = {
       EyeInvisibleOutline,
       SettingOutline,
       LogoutOutline,
+      GlobalOutline,
+      DownloadOutline,
+      LoadingOutline,
     ]),
     { provide: NZ_I18N, useValue: en_US },
   ],

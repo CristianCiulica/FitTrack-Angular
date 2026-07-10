@@ -1,171 +1,410 @@
+/* ============================================================
+   Community — Liquid Glass, in limbajul vizual al aplicatiei
+   ============================================================ */
 
 .community-wrap {
-  padding: 24px;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
-
-  @media (max-width: 768px) {
-    padding: 16px;
-  }
+  padding: 24px 20px 40px;
 }
 
-.page-heading {
-  margin-bottom: 32px;
-  
-  h1 {
-    font-size: 32px;
+/* ------------------------------------------------------------
+   Heading
+   ------------------------------------------------------------ */
+
+.community-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+
+  .community-eyebrow {
+    display: block;
+    font-size: 12px;
     font-weight: 700;
-    color: var(--text-color);
-    margin: 0 0 8px 0;
-    letter-spacing: -0.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #0066cc;
+  }
+
+  h1 {
+    margin: 4px 0 6px;
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 750;
+    letter-spacing: -0.035em;
+    color: #1d1d1f;
   }
 
   p {
-    color: var(--text-secondary);
-    font-size: 16px;
     margin: 0;
+    font-size: 14.5px;
+    color: #6e6e73;
   }
 }
 
-.loading-state {
-  display: flex;
-  justify-content: center;
+.share-btn {
+  display: inline-flex;
   align-items: center;
-  min-height: 200px;
-}
-
-.workouts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-}
-
-.workout-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 12px var(--shadow-color);
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  transition: transform 0.2s, box-shadow 0.2s;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
-  ::ng-deep .ant-card-body {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 12px 22px;
+  font-size: 15px;
+  font-weight: 620;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  border-radius: 980px;
+  background: linear-gradient(180deg, #1a86f0, #0071e3);
+  box-shadow:
+    0 12px 26px rgba(0, 113, 227, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px var(--shadow-color);
+    transform: translateY(-1px);
+    box-shadow:
+      0 15px 32px rgba(0, 113, 227, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
   }
 
-  .card-header {
-    margin-bottom: 12px;
+  &:active {
+    transform: scale(0.98);
+  }
+}
 
-    h3 {
-      margin: 0 0 4px 0;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text-color);
-      line-height: 1.3;
-    }
+/* ------------------------------------------------------------
+   Stari: loading + gol
+   ------------------------------------------------------------ */
 
-    .author {
-      font-size: 13px;
-      color: var(--text-secondary);
-      font-weight: 500;
-    }
+.loading-state {
+  display: grid;
+  place-items: center;
+  padding: 80px 0;
+}
+
+.community-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 56px 24px;
+  text-align: center;
+  border: 1px dashed rgba(0, 0, 0, 0.14);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.4);
+
+  strong {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1d1d1f;
   }
 
-  .description {
+  p {
+    margin: 0 0 16px;
     font-size: 14px;
-    color: var(--text-secondary);
-    margin-bottom: 16px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.5;
+    color: #86868b;
+  }
+}
+
+/* ------------------------------------------------------------
+   Grila + carduri (aceeasi anatomie ca "Your plan")
+   ------------------------------------------------------------ */
+
+.community-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.community-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 22px 20px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 18px 44px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.22s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 24px 56px rgba(15, 23, 42, 0.11),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
   }
 
-  .muscle-groups {
-    margin-bottom: 16px;
+  &[data-tone='blue'] {
+    background:
+      radial-gradient(85% 140% at 90% 0%, rgba(10, 132, 255, 0.18), transparent 62%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(224, 240, 255, 0.6));
+  }
+
+  &[data-tone='purple'] {
+    background:
+      radial-gradient(85% 140% at 90% 0%, rgba(175, 82, 222, 0.16), transparent 62%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(240, 230, 252, 0.6));
+  }
+
+  &[data-tone='cyan'] {
+    background:
+      radial-gradient(85% 140% at 90% 0%, rgba(100, 210, 255, 0.22), transparent 62%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(224, 246, 255, 0.6));
+  }
+
+  &[data-tone='green'] {
+    background:
+      radial-gradient(85% 140% at 90% 0%, rgba(52, 199, 89, 0.15), transparent 62%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(228, 248, 234, 0.6));
+  }
+
+  .duration-badge {
+    position: absolute;
+    top: 18px;
+    right: 18px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-
-    nz-tag {
-      margin: 0;
-      border-radius: 4px;
-      border: none;
-      background: rgba(24, 144, 255, 0.1);
-      color: #1890ff;
-      font-weight: 500;
-    }
-  }
-
-  .exercises-preview {
-    background: var(--bg-secondary);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 20px;
-    flex: 1;
-
-    .exercise-count {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-    }
-
-    .exercise-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-
-      li {
-        font-size: 13px;
-        color: var(--text-color);
-        margin-bottom: 6px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-
-        &.more-text {
-          color: var(--text-secondary);
-          font-style: italic;
-          font-size: 12px;
-          margin-top: 8px;
-        }
-      }
-    }
-  }
-
-  .card-footer {
-    display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    margin-top: auto;
-    padding-top: 16px;
-    border-top: 1px solid var(--border-color);
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow:
+      0 10px 24px rgba(15, 23, 42, 0.12),
+      inset 0 1px 0 #fff;
 
-    .date {
-      font-size: 13px;
-      color: var(--text-secondary);
+    strong {
+      font-size: 17px;
+      font-weight: 750;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
     }
 
-    button {
-      border-radius: 8px;
-      font-weight: 500;
+    span {
+      font-size: 10px;
+      font-weight: 650;
+      color: #86868b;
     }
+  }
+
+  h3 {
+    margin: 0 0 6px;
+    padding-right: 64px;
+    font-size: 19px;
+    font-weight: 750;
+    letter-spacing: -0.026em;
+    line-height: 1.15;
+    color: #1d1d1f;
+  }
+}
+
+.author-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-right: 64px;
+
+  .author-avatar {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 auto;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    border-radius: 50%;
+    background: linear-gradient(150deg, #1a86f0, #0071e3);
+    box-shadow:
+      0 6px 14px rgba(0, 113, 227, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  .author-copy {
+    min-width: 0;
+    line-height: 1.2;
+
+    strong {
+      display: block;
+      font-size: 13.5px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      color: #1d1d1f;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    small {
+      font-size: 11.5px;
+      color: #86868b;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+.community-description {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #515154;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.community-meta {
+  margin-bottom: 10px;
+  font-size: 12.5px;
+  font-weight: 590;
+  color: #515154;
+  font-variant-numeric: tabular-nums;
+}
+
+.muscle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+/* aceleasi chip-uri colorate ca in History */
+.muscle-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -0.005em;
+  border-radius: 980px;
+  white-space: nowrap;
+
+  &[data-tone='blue'] { color: #0066cc; background: rgba(0, 113, 227, 0.12); }
+  &[data-tone='green'] { color: #248a3d; background: rgba(52, 199, 89, 0.14); }
+  &[data-tone='purple'] { color: #8e3bb5; background: rgba(175, 82, 222, 0.14); }
+  &[data-tone='cyan'] { color: #2596a6; background: rgba(48, 176, 199, 0.16); }
+  &[data-tone='indigo'] { color: #4745c9; background: rgba(94, 92, 230, 0.14); }
+  &[data-tone='pink'] { color: #d70041; background: rgba(255, 45, 85, 0.13); }
+  &[data-tone='red'] { color: #d70015; background: rgba(255, 59, 48, 0.12); }
+  &[data-tone='graphite'] { color: #515154; background: rgba(0, 0, 0, 0.06); }
+}
+
+.exercise-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    .exercise-name {
+      font-size: 13.5px;
+      font-weight: 620;
+      letter-spacing: -0.01em;
+      color: #1d1d1f;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .exercise-detail {
+      flex: 0 0 auto;
+      font-size: 12px;
+      font-weight: 590;
+      color: #86868b;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    &.more-row {
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 620;
+      color: #0066cc;
+      background: rgba(0, 113, 227, 0.06);
+      border-color: rgba(0, 113, 227, 0.12);
+    }
+  }
+}
+
+.save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  height: 46px;
+  font-size: 14.5px;
+  font-weight: 650;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  border-radius: 980px;
+  background: linear-gradient(180deg, #1a86f0, #0071e3);
+  box-shadow:
+    0 10px 24px rgba(0, 113, 227, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+
+  &:hover:not(:disabled) {
+    box-shadow:
+      0 13px 30px rgba(0, 113, 227, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: default;
+  }
+}
+
+/* ------------------------------------------------------------
+   Responsive
+   ------------------------------------------------------------ */
+
+@media (max-width: 600px) {
+  .community-wrap {
+    padding: 18px 14px 32px;
+  }
+
+  .community-heading {
+    flex-direction: column;
+    align-items: stretch;
+
+    .share-btn {
+      justify-content: center;
+    }
+  }
+
+  .community-grid {
+    grid-template-columns: 1fr;
   }
 }

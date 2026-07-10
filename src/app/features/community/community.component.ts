@@ -15,7 +15,8 @@ import { CommunityService } from '../../core/services/community.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { CommunityWorkout, Workout } from '../../core/models/workout.model';
 import { ProfileService } from '../../core/services/profile.service';
-import { toCanonicalWeight, displayWeight } from '../../core/utils/units';
+import { displayWeight } from '../../core/utils/units';
+import { estimateSessionCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 
 @Component({
@@ -119,5 +120,44 @@ export class CommunityComponent implements OnInit {
     const val = displayWeight(w, this.units());
     const unitStr = this.units() === 'imperial' ? 'lb' : 'kg';
     return `${val} ${unitStr}`;
+  }
+
+  /* ------- helpere de prezentare, in limbajul vizual al aplicatiei ------- */
+
+  workoutKcal(cw: CommunityWorkout): number {
+    return estimateSessionCalories(cw.exercises, this.profileService.weightKg());
+  }
+
+  workoutMinutes(cw: CommunityWorkout): number {
+    return estimateSessionMinutes(cw.exercises);
+  }
+
+  authorInitials(name: string): string {
+    const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return '?';
+    return parts.length === 1
+      ? parts[0].charAt(0).toUpperCase()
+      : (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  }
+
+  // tonuri alternante, la fel ca pe cardurile din Your plan
+  cardTone(index: number): string {
+    return ['blue', 'purple', 'cyan', 'green'][index % 4];
+  }
+
+  // aceleasi culori pe grupe musculare ca in History
+  private readonly muscleTones: Record<string, string> = {
+    Chest: 'blue',
+    Back: 'green',
+    Shoulders: 'purple',
+    Arms: 'cyan',
+    Legs: 'indigo',
+    Core: 'pink',
+    Cardio: 'red',
+    'Full Body': 'graphite',
+  };
+
+  muscleTone(muscleGroup: string): string {
+    return this.muscleTones[muscleGroup] ?? 'graphite';
   }
 }
