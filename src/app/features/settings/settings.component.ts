@@ -8,7 +8,6 @@ import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
@@ -29,7 +28,6 @@ import { Units } from '../../core/models/user-profile.model';
     NzButtonModule,
     NzIconModule,
     NzCardModule,
-    NzInputNumberModule,
     NzPopconfirmModule,
     AppMenuComponent,
   ],
@@ -44,30 +42,16 @@ export class SettingsComponent implements OnInit {
   private readonly message = inject(NzMessageService);
 
   readonly units = this.profileService.units;
-  readonly reminderDays = signal<number>(2);
   readonly deleting = signal(false);
 
   ngOnInit(): void {
-    this.profileService.load().subscribe(() => this.hydrate());
-    this.hydrate();
-  }
-
-  private hydrate(): void {
-    const p = this.profileService.profile();
-    if (p) this.reminderDays.set(p.workoutReminderDays ?? 2);
+    this.profileService.load().subscribe();
   }
 
   setUnits(units: Units): void {
     if (this.units() === units) return;
     this.profileService.patch({ units }).subscribe({
       error: () => this.message.error('Could not update units.'),
-    });
-  }
-
-  onReminderChange(days: number): void {
-    this.reminderDays.set(days);
-    this.profileService.patch({ workoutReminderDays: days }).subscribe({
-      error: () => this.message.error('Could not update reminders.'),
     });
   }
 
@@ -88,16 +72,9 @@ export class SettingsComponent implements OnInit {
           this.router.navigate(['/auth/register']);
         });
       },
-      error: (err) => {
+      error: () => {
         this.deleting.set(false);
-        if (err?.error?.error === 'requires-recent-login') {
-          this.message.error(
-            'For your security, please log out and log back in to verify your identity before deleting your account.',
-            { nzDuration: 7000 }
-          );
-        } else {
-          this.message.error('Could not delete your account. Please try again.');
-        }
+        this.message.error('Could not delete your account. Please try again.');
       },
     });
   }

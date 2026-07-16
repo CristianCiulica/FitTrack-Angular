@@ -9,10 +9,10 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { ProfileService } from '../../core/services/profile.service';
 import { Sex } from '../../core/models/user-profile.model';
 
-type Step = 'name' | 'age' | 'body' | 'goal' | 'result';
+type Step = 'name' | 'age' | 'body' | 'goal' | 'training' | 'result';
 type Goal = 'lose' | 'maintain' | 'gain';
 
-const STEP_ORDER: Step[] = ['name', 'age', 'body', 'goal', 'result'];
+const STEP_ORDER: Step[] = ['name', 'age', 'body', 'goal', 'training', 'result'];
 
 @Component({
   selector: 'app-onboarding',
@@ -46,6 +46,8 @@ export class OnboardingComponent implements OnInit {
   readonly sex = signal<Exclude<Sex, ''>>('male');
   readonly goal = signal<Goal>('maintain');
   readonly goalRate = signal(0.5);
+  readonly weeklyWorkoutGoal = signal(4);
+  readonly workoutOptions = [1, 2, 3, 4, 5, 6, 7];
 
   readonly stepIndex = computed(() => STEP_ORDER.indexOf(this.step()));
   readonly progress = computed(() =>
@@ -104,6 +106,9 @@ export class OnboardingComponent implements OnInit {
       if (profile.heightCm) this.heightCm.set(profile.heightCm);
       if (profile.weightKg) this.weightKg.set(profile.weightKg);
       if (profile.sex === 'male' || profile.sex === 'female') this.sex.set(profile.sex);
+      if (profile.goal) this.goal.set(profile.goal);
+      if (profile.goalRate) this.goalRate.set(profile.goalRate);
+      if (profile.weeklyWorkoutGoal) this.weeklyWorkoutGoal.set(profile.weeklyWorkoutGoal);
     }
   }
 
@@ -151,6 +156,9 @@ export class OnboardingComponent implements OnInit {
         heightCm: this.heightCm(),
         weightKg: this.weightKg(),
         sex: this.sex(),
+        goal: this.goal(),
+        goalRate: this.goalRate(),
+        weeklyWorkoutGoal: this.weeklyWorkoutGoal(),
       })
       .subscribe({
         next: () => {

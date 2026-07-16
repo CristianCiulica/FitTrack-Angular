@@ -84,11 +84,11 @@
               <span class="wm-subfield-label">Reps</span>
               <nz-input-number formControlName="reps" [nzMin]="1" [nzStep]="1"></nz-input-number>
             </label>
-            <label class="wm-subfield">
-              <span class="wm-subfield-label">Weight (kg)</span>
-              <nz-input-number formControlName="weight" [nzMin]="0" [nzStep]="2.5"></nz-input-number>
-            </label>
           </div>
+          <p class="wm-weight-hint">
+            <span nz-icon nzType="bulb" nzTheme="outline"></span>
+            You'll set the weight while training — we remember it for next time.
+          </p>
         </div>
       </div>
 
@@ -107,12 +107,8 @@
           <span>exercises</span>
         </div>
         <div>
-          <strong>~{{ estimatedCalories }}</strong>
-          <span>kcal</span>
-        </div>
-        <div>
-          <strong>{{ totalVolume | number: '1.0-0' }}</strong>
-          <span>kg volume</span>
+          <strong>{{ totalSets }}</strong>
+          <span>sets</span>
         </div>
       </div>
       <div class="wm-actions">

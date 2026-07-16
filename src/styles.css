@@ -890,6 +890,12 @@ a:hover {
     display: block !important;
   }
 
+  /* In timpul antrenamentului fullscreen ascundem dock-ul de jos ca sa nu intre
+     peste butoanele Stop / Finish set din overlay */
+  body:has(.workout-live) .app-layout > .sidebar {
+    display: none !important;
+  }
+
   /* The dock: a floating liquid-glass bar */
   body .app-layout > .sidebar {
     position: fixed !important;

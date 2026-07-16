@@ -259,6 +259,52 @@
   }
 }
 
+/* Workouts-per-week picker */
+.workout-count-picker {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+
+  button {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    font-weight: 620;
+    font-family: inherit;
+    color: #515154;
+    cursor: pointer;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    background: rgba(255, 255, 255, 0.68);
+    font-variant-numeric: tabular-nums;
+    transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), border-color 0.18s ease, background 0.18s ease, box-shadow 0.2s ease, color 0.18s ease;
+
+    &:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.92); }
+    &:active { transform: scale(0.96); }
+
+    &.selected {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(150deg, #0a84ff, #0060df);
+      box-shadow: 0 6px 16px rgba(10, 132, 255, 0.32);
+    }
+  }
+}
+
+.workout-count-caption {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: #86868b;
+
+  strong {
+    color: #1d1d1f;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 /* Goal cards */
 .goal-options {
   display: flex;

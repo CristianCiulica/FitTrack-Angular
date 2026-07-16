@@ -109,17 +109,21 @@
             <span class="metric-icon" nz-icon nzType="rise"></span>
           </div>
           <strong class="metric-value">{{ stepsForDay() | number }}</strong>
-          <span class="metric-caption">
-            {{ workoutsOnDay() > 0 ? workoutsOnDay() + (workoutsOnDay() === 1 ? ' workout logged' : ' workouts logged') : 'steps' }}
+          <span class="metric-caption">steps today</span>
+          <span class="metric-caption" *ngIf="workoutsOnDay() > 0">
+            {{ workoutsOnDay() }}{{ workoutsOnDay() === 1 ? ' workout logged' : ' workouts logged' }}
           </span>
         </div>
 
-        <div class="metric-card goals-card">
+        <div class="metric-card goals-card" [class.goal-complete]="goalReached()">
           <div class="metric-head">
             <span class="metric-title">My Goals</span>
+            <span class="goal-check" *ngIf="goalReached()" aria-label="Weekly goal reached">
+              <span nz-icon nzType="check" nzTheme="outline"></span>
+            </span>
           </div>
           <span class="metric-caption goals-copy">
-            Keep it up, you can achieve your goals.
+            {{ goalReached() ? 'Weekly goal smashed. Amazing work!' : 'Keep it up, you can achieve your goals.' }}
           </span>
           <div class="goal-pill">
             <span class="goal-track" aria-hidden="true">

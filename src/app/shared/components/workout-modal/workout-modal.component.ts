@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -9,8 +9,6 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { Workout, MUSCLE_GROUPS } from '../../../core/models/workout.model';
-import { ProfileService } from '../../../core/services/profile.service';
-import { estimateSessionCalories } from '../../../core/utils/workout-calories';
 
 @Component({
   selector: 'app-workout-modal',
@@ -37,7 +35,6 @@ export class WorkoutModalComponent implements OnChanges {
 
   form: FormGroup;
   muscleGroups = MUSCLE_GROUPS;
-  private readonly profileService = inject(ProfileService);
 
   get isEdit() { return !!this.workout; }
   get title() { return this.isEdit ? 'Edit workout' : 'Add new workout'; }
@@ -48,24 +45,18 @@ export class WorkoutModalComponent implements OnChanges {
   }
   get exercises() { return this.form.get('exercises') as FormArray; }
 
-  // sumar live pentru footer
-  private get liveExercises() {
-    return this.exercises.controls.map((c) => ({
-      sets: Number(c.get('sets')?.value) || 0,
-      reps: Number(c.get('reps')?.value) || 0,
-      weight: Number(c.get('weight')?.value) || 0,
-    }));
-  }
   get filledExercises(): number {
     return this.exercises.controls.filter(
       (c) => (c.get('exerciseName')?.value || '').trim().length > 0,
     ).length;
   }
-  get totalVolume(): number {
-    return this.liveExercises.reduce((acc, e) => acc + e.sets * e.reps * e.weight, 0);
-  }
-  get estimatedCalories(): number {
-    return estimateSessionCalories(this.liveExercises, this.profileService.weightKg());
+  // greutatea se stabileste in timpul antrenamentului, asa ca sumarul din footer
+  // arata volumul de lucru (seturi), nu tonajul
+  get totalSets(): number {
+    return this.exercises.controls.reduce(
+      (acc, c) => acc + (Number(c.get('sets')?.value) || 0),
+      0,
+    );
   }
 
   // eroare vizibila doar dupa ce utilizatorul a atins campul

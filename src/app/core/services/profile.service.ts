@@ -20,6 +20,9 @@ export class ProfileService {
   readonly age = computed(() => this.profile()?.age ?? null);
   readonly sex = computed(() => this.profile()?.sex ?? '');
   readonly units = computed(() => this.profile()?.units ?? 'metric');
+  readonly goal = computed(() => this.profile()?.goal ?? 'maintain');
+  readonly goalRate = computed(() => this.profile()?.goalRate ?? 0.5);
+  readonly weeklyWorkoutGoal = computed(() => this.profile()?.weeklyWorkoutGoal ?? 4);
 
   // onboarding-ul e complet cand avem datele de baza pentru BMI
   readonly isOnboarded = computed(() => {

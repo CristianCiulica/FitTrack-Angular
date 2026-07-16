@@ -112,6 +112,28 @@
         </div>
       </section>
 
+      <!-- TRAINING -->
+      <section class="step" *ngIf="step() === 'training'">
+        <span class="eyebrow">Your routine</span>
+        <h1>How many workouts per week?</h1>
+        <p class="lead">We'll set this as your weekly goal — hit it to earn your ✅.</p>
+
+        <div class="workout-count-picker">
+          <button
+            type="button"
+            *ngFor="let n of workoutOptions"
+            [class.selected]="weeklyWorkoutGoal() === n"
+            (click)="weeklyWorkoutGoal.set(n)"
+          >
+            {{ n }}
+          </button>
+        </div>
+        <p class="workout-count-caption">
+          <strong>{{ weeklyWorkoutGoal() }}</strong>
+          {{ weeklyWorkoutGoal() === 1 ? 'workout' : 'workouts' }} every week
+        </p>
+      </section>
+
       <!-- RESULT -->
       <section class="step result" *ngIf="step() === 'result'">
         <span class="eyebrow">Your starting point</span>

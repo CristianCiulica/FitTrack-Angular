@@ -197,8 +197,26 @@
 
 .wm-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
+}
+
+.wm-weight-hint {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #6b6b70;
+  background: rgba(10, 132, 255, 0.07);
+  border-radius: 12px;
+
+  span[nz-icon] {
+    color: #0a84ff;
+    font-size: 15px;
+  }
 }
 
 /* ng-zorro controls inside the card */

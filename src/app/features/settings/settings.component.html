@@ -82,20 +82,6 @@
             </div>
           </div>
 
-          <div class="setting-row">
-            <div class="setting-copy">
-              <strong>Workout reminders</strong>
-              <small>Get a nudge after this many days without a workout.</small>
-            </div>
-            <nz-input-number
-              class="reminder-input"
-              [ngModel]="reminderDays()"
-              (ngModelChange)="onReminderChange($event)"
-              [nzMin]="1"
-              [nzMax]="30"
-              [nzStep]="1"
-            ></nz-input-number>
-          </div>
         </nz-card>
 
         <nz-card class="settings-card info-card" style="margin-bottom: 24px;">

@@ -64,10 +64,12 @@ export class BmiComponent implements OnDestroy {
 
   private hydrated = false;
   private patchTimer: ReturnType<typeof setTimeout> | null = null;
+  private goalTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.profileService.load().subscribe();
-    // seed from profile once, when it becomes available
+    // seed from profile once, when it becomes available — includem si obiectivul,
+    // ritmul si numarul de antrenamente alese la onboarding
     effect(() => {
       const p = this.profileService.profile();
       if (!p || this.hydrated) return;
@@ -75,12 +77,16 @@ export class BmiComponent implements OnDestroy {
       if (p.weightKg) this.weight.set(p.weightKg);
       if (p.age) this.age.set(p.age);
       if (p.sex === 'male' || p.sex === 'female') this.sex.set(p.sex);
+      if (p.goal) this.goal.set(p.goal);
+      if (p.goalRate) this.goalRate.set(p.goalRate);
+      if (p.weeklyWorkoutGoal) this.strengthTrainingDays.set(p.weeklyWorkoutGoal);
       this.hydrated = true;
     });
   }
 
   ngOnDestroy() {
     if (this.patchTimer) clearTimeout(this.patchTimer);
+    if (this.goalTimer) clearTimeout(this.goalTimer);
   }
 
   // use computed for auto calculated values
@@ -140,6 +146,33 @@ export class BmiComponent implements OnDestroy {
     if (goal === 'gain' && this.goalRate() > 0.5) {
       this.goalRate.set(0.5);
     }
+    this.queueGoalSync();
+  }
+
+  onGoalRate(value: number) {
+    this.goalRate.set(value);
+    this.queueGoalSync();
+  }
+
+  onStrengthDays(value: number) {
+    this.strengthTrainingDays.set(value);
+    this.queueGoalSync();
+  }
+
+  // obiectivul, ritmul si antrenamentele/saptamana sunt persistate in profil,
+  // ca sa ramana sincronizate cu onboarding-ul si dashboard-ul
+  private queueGoalSync() {
+    if (!this.profileService.profile()) return;
+    if (this.goalTimer) clearTimeout(this.goalTimer);
+    this.goalTimer = setTimeout(() => {
+      this.profileService
+        .patch({
+          goal: this.goal(),
+          goalRate: Math.round(this.goalRate() * 10) / 10,
+          weeklyWorkoutGoal: Math.max(1, Math.round(this.strengthTrainingDays())),
+        })
+        .subscribe({ error: (err) => console.warn('[bmi] Failed to sync goal', err) });
+    }, 600);
   }
 
   // physical data changes propagate to the rest of the app via profile

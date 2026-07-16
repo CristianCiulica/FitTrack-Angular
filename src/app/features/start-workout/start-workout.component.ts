@@ -359,15 +359,27 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         }
       }
       this.lastWeights.set(map);
+      // istoricul soseste asincron; reasezam greutatea propusa acum ca stim
+      // cat s-a lucrat data trecuta (doar daca userul nu a logat inca un set)
+      if (this.workoutInProgress() && !this.loggedWeights[this.currentExerciseIndex()]?.length) {
+        this.syncCurrentWeight();
+      }
     });
   }
 
-  // greutatea propusa pentru setul curent: ultimul set logat sau planul
+  // greutatea propusa pentru setul curent:
+  // ultimul set logat in aceasta sesiune > ultima greutate din istoric > planul
   private syncCurrentWeight() {
     const exIdx = this.currentExerciseIndex();
     const logged = this.loggedWeights[exIdx];
-    const planned = this.currentExercise()?.weight ?? 0;
-    this.currentWeight.set(logged?.length ? logged[logged.length - 1] : planned);
+    if (logged?.length) {
+      this.currentWeight.set(logged[logged.length - 1]);
+      return;
+    }
+    const ex = this.currentExercise();
+    const lastTime = ex ? this.lastWeights().get(ex.name.toLowerCase()) : undefined;
+    const planned = ex?.weight ?? 0;
+    this.currentWeight.set(lastTime && lastTime > 0 ? lastTime : planned);
   }
 
   adjustWeight(delta: number) {

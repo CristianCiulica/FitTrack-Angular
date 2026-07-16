@@ -111,10 +111,17 @@ export class DashboardComponent implements OnInit {
       return acc + vol;
     }, 0)
   );
-  thisWeekWorkouts = computed(() => {
+  // inceputul saptamanii calendaristice curente (luni, 00:00) — obiectivul se
+  // reseteaza la fiecare saptamana, nu pe o fereastra glisanta de 7 zile
+  private startOfWeek(): Date {
     const now = new Date();
-    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    return this.workouts().filter(w => new Date(w.date) >= weekAgo).length;
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+    return monday;
+  }
+  thisWeekWorkouts = computed(() => {
+    const monday = this.startOfWeek();
+    return this.workouts().filter(w => new Date(w.date) >= monday).length;
   });
   recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
 
@@ -216,13 +223,13 @@ export class DashboardComponent implements OnInit {
     return Math.min(100, Math.round((this.burnedKcal() / target) * 100));
   });
 
-  readonly weeklyGoal = computed(() => {
-    const days = this.profileService.profile()?.workoutReminderDays ?? 2;
-    return days > 0 ? Math.max(1, Math.round(7 / days)) : 4;
-  });
+  // tinta de antrenamente/saptamana aleasa la onboarding
+  readonly weeklyGoal = computed(() => this.profileService.weeklyWorkoutGoal());
   readonly goalPercent = computed(() =>
     Math.min(100, Math.round((this.thisWeekWorkouts() / this.weeklyGoal()) * 100)),
   );
+  // obiectivul saptamanal a fost atins
+  readonly goalReached = computed(() => this.thisWeekWorkouts() >= this.weeklyGoal());
 
   toggleChat() {
     this.isChatOpen.update(v => !v);

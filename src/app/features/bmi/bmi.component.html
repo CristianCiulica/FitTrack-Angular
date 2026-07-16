@@ -147,7 +147,7 @@
             <div class="settings-card">
               <label class="calc-row">
                 <span>Strength sessions / week</span>
-                <nz-input-number [(ngModel)]="strengthTrainingDays" [nzMin]="0" [nzMax]="7" [nzStep]="1" nzBorderless></nz-input-number>
+                <nz-input-number [ngModel]="strengthTrainingDays()" (ngModelChange)="onStrengthDays($event)" [nzMin]="0" [nzMax]="7" [nzStep]="1" nzBorderless></nz-input-number>
               </label>
             </div>
           </div>
@@ -173,7 +173,7 @@
                   <span>Pace</span>
                   <strong>{{ goalRate() | number: '1.1-1' }} kg/wk</strong>
                 </div>
-                <input type="range" min="0.1" [max]="goal() === 'lose' ? 1 : 0.5" step="0.1" [ngModel]="goalRate()" (ngModelChange)="goalRate.set(+$event)" />
+                <input type="range" min="0.1" [max]="goal() === 'lose' ? 1 : 0.5" step="0.1" [ngModel]="goalRate()" (ngModelChange)="onGoalRate(+$event)" />
               </div>
             </div>
             <p class="settings-footer">Calculated using the Mifflin-St Jeor equation combined with your weekly weight-training frequency.</p>

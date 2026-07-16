@@ -50,10 +50,18 @@ export class CommunityComponent implements OnInit {
 
   readonly savingIds = signal<Set<string>>(new Set());
   readonly shareModalVisible = signal(false);
+  readonly loadError = signal(false);
 
   ngOnInit(): void {
+    this.loadCommunity();
+  }
+
+  // fara toast: o eroare tranzitorie (ex. token inca neincarcat la boot) afiseaza
+  // o stare inline cu buton de reincercare, nu o notificare suparatoare
+  loadCommunity(): void {
+    this.loadError.set(false);
     this.communityService.loadCommunityWorkouts().subscribe({
-      error: () => this.message.error('Failed to load community workouts'),
+      error: () => this.loadError.set(true),
     });
   }
 

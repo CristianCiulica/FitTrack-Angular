@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { trigger, transition, style, animate, query, group } from '@angular/animations';
 import { NzIconService } from 'ng-zorro-antd/icon';
-import { ReminderService } from './core/services/reminder.service';
 import { LoadingService } from './core/services/loading.service';
 
 // iconite custom, stil SF Symbols, pentru navigarea principala.
@@ -54,7 +53,6 @@ const FT_ICONS: Record<string, string> = {
 })
 export class App implements OnInit {
   constructor(
-    private reminderService: ReminderService,
     private router: Router,
     public loadingService: LoadingService,
     iconService: NzIconService,
@@ -65,7 +63,6 @@ export class App implements OnInit {
   }
 
   ngOnInit(): void {
-    this.reminderService.scheduleCheck();
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         const pendingDuration = this.loadingService.consumePendingDuration();
