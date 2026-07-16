@@ -72,13 +72,13 @@
         <div class="section-heading">
           <div>
             <span>Outdoor activity</span>
-            <h3>Running & walking history</h3>
+            <h3>Running history</h3>
           </div>
           <button
             type="button"
             class="collapse-toggle"
             [attr.aria-expanded]="cardioHistoryOpen()"
-            aria-label="Toggle running and walking history"
+            aria-label="Toggle running history"
             (click)="toggleCardioHistory()"
           >
             <strong>{{ runningSessions().length }}</strong>
@@ -91,46 +91,110 @@
             class="cardio-session-grid"
             *ngIf="runningSessions().length > 0; else noCardioSessions"
           >
-            <article class="cardio-session-card" *ngFor="let session of runningSessions()">
+            <article
+              class="cardio-session-card"
+              *ngFor="let session of runningSessions()"
+              [class.expanded]="expandedRuns().has(session.id!)"
+            >
               <div class="cardio-session-header">
                 <div>
-                  <h4>{{ session.mode === 'running' ? 'Running' : 'Walking' }}</h4>
+                  <h4>Run</h4>
                   <span>{{ session.startedAt | date: 'd MMM y, HH:mm' }}</span>
                 </div>
                 <strong>{{ session.distanceMeters / 1000 | number: '1.2-2' }} km</strong>
               </div>
 
-              <div class="cardio-route" *ngIf="routePath(session) as path">
+              <!-- Traseul: buline de start/finish + gradient pe linie -->
+              <div
+                class="cardio-route"
+                [class.tall]="expandedRuns().has(session.id!)"
+                *ngIf="routePath(session) as path; else noRoute"
+              >
                 <svg viewBox="0 0 100 56" preserveAspectRatio="xMidYMid meet" aria-label="Route preview">
+                  <defs>
+                    <linearGradient [attr.id]="'routeGrad-' + session.id" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#34c759" />
+                      <stop offset="55%" stop-color="#0a84ff" />
+                      <stop offset="100%" stop-color="#0071e3" />
+                    </linearGradient>
+                  </defs>
                   <path [attr.d]="path" class="route-casing" />
-                  <path [attr.d]="path" class="route-line" />
+                  <path [attr.d]="path" class="route-line" [attr.stroke]="'url(#routeGrad-' + session.id + ')'" />
+                  <circle
+                    *ngIf="routeStart(session) as s"
+                    [attr.cx]="s.x" [attr.cy]="s.y" r="3"
+                    class="route-dot start"
+                  />
+                  <circle
+                    *ngIf="routeEnd(session) as e"
+                    [attr.cx]="e.x" [attr.cy]="e.y" r="3"
+                    class="route-dot end"
+                  />
                 </svg>
+                <div class="route-legend" *ngIf="expandedRuns().has(session.id!)">
+                  <span class="legend-item"><i class="dot start"></i>Start</span>
+                  <span class="legend-item"><i class="dot end"></i>Finish</span>
+                </div>
               </div>
+              <ng-template #noRoute>
+                <div class="cardio-route no-route">No GPS route recorded</div>
+              </ng-template>
 
+              <!-- Statistici principale -->
               <div class="cardio-session-stats">
                 <div>
                   <span><span nz-icon nzType="ft:history" class="stat-icon-inline"></span>Duration</span>
                   <strong>{{ formatDuration(session.durationSeconds) }}</strong>
                 </div>
                 <div>
-                  <span><span nz-icon nzType="dashboard" class="stat-icon-inline"></span>Avg speed</span>
-                  <strong>{{ session.averageSpeedKmh | number: '1.1-1' }} km/h</strong>
-                </div>
-                <div>
-                  <span><span nz-icon nzType="ft:run" class="stat-icon-inline"></span>Steps</span>
-                  <strong>{{ session.steps }}</strong>
+                  <span><span nz-icon nzType="ft:run" class="stat-icon-inline"></span>Pace</span>
+                  <strong>{{ formatPace(session) }} /km</strong>
                 </div>
                 <div>
                   <span><span nz-icon nzType="fire" class="stat-icon-inline"></span>Calories</span>
                   <strong>{{ session.calories }} kcal</strong>
                 </div>
               </div>
+
+              <!-- Detalii extinse -->
+              <div class="cardio-details" *ngIf="expandedRuns().has(session.id!)">
+                <div class="detail-row">
+                  <span>Avg speed</span>
+                  <strong>{{ session.averageSpeedKmh | number: '1.1-1' }} km/h</strong>
+                </div>
+                <div class="detail-row">
+                  <span>Steps</span>
+                  <strong>{{ session.steps }}</strong>
+                </div>
+                <div class="detail-row">
+                  <span>Started</span>
+                  <strong>{{ session.startedAt | date: 'HH:mm:ss' }}</strong>
+                </div>
+                <div class="detail-row">
+                  <span>Finished</span>
+                  <strong>{{ session.endedAt | date: 'HH:mm:ss' }}</strong>
+                </div>
+                <div class="detail-row" *ngIf="session.route?.length">
+                  <span>GPS points</span>
+                  <strong>{{ session.route!.length }}</strong>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="run-expand-btn"
+                [attr.aria-expanded]="expandedRuns().has(session.id!)"
+                (click)="toggleRun(session.id!)"
+              >
+                {{ expandedRuns().has(session.id!) ? 'Hide details' : 'Details' }}
+                <span nz-icon [nzType]="expandedRuns().has(session.id!) ? 'up' : 'down'"></span>
+              </button>
             </article>
           </div>
 
           <ng-template #noCardioSessions>
             <div class="empty-cardio-history">
-              Completed running and walking workouts will appear here.
+              Completed runs will appear here.
             </div>
           </ng-template>
         </div>

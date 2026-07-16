@@ -8,8 +8,19 @@ const exerciseLogSchema = new Schema(
     sets: { type: Number, required: true, min: 0 },
     reps: { type: Number, required: true, min: 0 },
     weight: { type: Number, required: true, min: 0 },
+    setWeights: { type: [Number], default: undefined },
   },
   { _id: false },
+);
+
+const commentSchema = new Schema(
+  {
+    authorId: { type: String, required: true },
+    authorName: { type: String, required: true },
+    text: { type: String, required: true, maxlength: 300 },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: true },
 );
 
 const communityWorkoutSchema = new Schema(
@@ -20,6 +31,10 @@ const communityWorkoutSchema = new Schema(
     name: { type: String, required: true },
     description: { type: String, default: '' },
     exercises: { type: [exerciseLogSchema], default: [] },
+    // social: like-uri (uid-uri), comentarii si numarul de salvari in biblioteci personale
+    likes: { type: [String], default: [] },
+    comments: { type: [commentSchema], default: [] },
+    saveCount: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

@@ -166,16 +166,132 @@
 
   .route-line {
     fill: none;
-    stroke: #0a84ff;
+    /* stroke-ul vine din template (gradient per sesiune); nu-l suprascriem aici */
     stroke-width: 2.6;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+
+  .route-dot {
+    stroke: #fff;
+    stroke-width: 1.2;
+
+    &.start { fill: #34c759; }
+    &.end { fill: #ff3b30; }
+  }
+
+  /* varianta marita, cand cardul e extins */
+  &.tall svg {
+    height: 170px;
+    transition: height 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .route-legend {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    padding-top: 6px;
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 620;
+      color: #86868b;
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: 1.5px solid #fff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+
+        &.start { background: #34c759; }
+        &.end { background: #ff3b30; }
+      }
+    }
+  }
+
+  &.no-route {
+    display: grid;
+    place-items: center;
+    height: 60px;
+    font-size: 12.5px;
+    font-weight: 590;
+    color: #a1a1a6;
+  }
+}
+
+/* detaliile extinse ale unei alergari */
+.cardio-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 14px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.028);
+  border: 1px solid rgba(0, 0, 0, 0.045);
+
+  .detail-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+
+    span {
+      font-size: 12px;
+      font-weight: 590;
+      color: #86868b;
+    }
+
+    strong {
+      font-size: 13px;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+  }
+}
+
+.run-expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 0;
+  font-size: 13px;
+  font-weight: 650;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  color: #0066cc;
+  cursor: pointer;
+  border: none;
+  border-radius: 980px;
+  background: rgba(0, 113, 227, 0.08);
+  transition: background 0.15s ease, transform 0.12s ease;
+
+  [nz-icon] {
+    font-size: 11px;
+  }
+
+  &:hover {
+    background: rgba(0, 113, 227, 0.13);
+  }
+
+  &:active {
+    transform: scale(0.985);
   }
 }
 
 .cardio-session-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   row-gap: 16px;
   column-gap: 12px;
   padding-top: 16px;
@@ -634,8 +750,12 @@
   }
 
   .cardio-session-stats {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     row-gap: 12px;
+  }
+
+  .cardio-details {
+    grid-template-columns: 1fr;
   }
 
   .section-heading h3,

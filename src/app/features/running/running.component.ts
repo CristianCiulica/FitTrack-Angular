@@ -55,7 +55,6 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   isTracking = false;
   isCalibrating = false;
-  mode: 'running' | 'walking' = 'running';
   statusText = 'Tap Start to begin tracking.';
   calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
   gpsAccuracy?: number;
@@ -130,21 +129,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.authService.logout().subscribe();
   }
 
-  setMode(mode: 'running' | 'walking') {
-    if (this.isTracking) return;
-    this.mode = mode;
-  }
-
-  onModeChange(event: Event) {
-    const mode = (event.target as HTMLSelectElement).value;
-    if (mode === 'running' || mode === 'walking') {
-      this.setMode(mode);
-    }
-  }
-
   quickStartRun() {
     if (this.isTracking) return;
-    this.mode = 'running';
     this.startTracking();
   }
 
@@ -342,10 +328,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     if (elapsedSeconds < 1) return;
 
     const segmentMeters = this.haversineMeters(previous.point, point);
-    const noiseThreshold = Math.max(
-      this.mode === 'running' ? 3 : 2,
-      Math.min(8, (accuracy + previous.accuracy) * 0.2),
-    );
+    const noiseThreshold = Math.max(3, Math.min(8, (accuracy + previous.accuracy) * 0.2));
 
     if (segmentMeters < noiseThreshold) {
       this.statusText = `GPS stable. Accuracy ~${Math.round(accuracy)}m.`;
@@ -353,7 +336,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     const segmentSpeedKmh = (segmentMeters / elapsedSeconds) * 3.6;
-    const maxPlausibleSpeedKmh = this.mode === 'running' ? 25 : 12;
+    const maxPlausibleSpeedKmh = 25;
     const reportedSpeedKmh =
       pos.coords.speed !== null && Number.isFinite(pos.coords.speed)
         ? pos.coords.speed * 3.6
@@ -374,7 +357,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.distanceMeters += segmentMeters;
     this.acceptPosition(point, timestamp, accuracy, true);
     this.updateMetrics();
-    this.statusText = `${this.mode === 'running' ? 'Run' : 'Walk'} tracking active. Accuracy ~${Math.round(accuracy)}m.`;
+    this.statusText = `Run tracking active. Accuracy ~${Math.round(accuracy)}m.`;
   }
 
   private handleError(err: GeolocationPositionError) {
@@ -412,10 +395,10 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const distanceKm = this.distanceMeters / 1000;
     this.avgSpeedKmh = distanceKm / (elapsedSeconds / 3600);
 
-    const strideMeters = this.mode === 'running' ? 1.2 : 0.78;
+    const strideMeters = 1.2;
     this.steps = Math.floor(this.distanceMeters / strideMeters);
 
-    const kcalPerKm = this.mode === 'running' ? 60 : 35;
+    const kcalPerKm = 60;
     this.calories = distanceKm * kcalPerKm;
   }
 
@@ -431,7 +414,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.runningSessionService
       .saveSession({
         userId,
-        mode: this.mode,
+        mode: 'running',
         startedAt: new Date(startedAt).toISOString(),
         endedAt: new Date(endedAt).toISOString(),
         durationSeconds: Math.max(1, Math.round((endedAt - startedAt) / 1000)),
@@ -519,7 +502,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       const elapsedSeconds = Math.max((timestamp - previous.timestamp) / 1000, 0.5);
       const distanceMeters = this.haversineMeters(previous.point, point);
       const displaySpeedKmh = (distanceMeters / elapsedSeconds) * 3.6;
-      const maxDisplaySpeedKmh = this.mode === 'running' ? 45 : 25;
+      const maxDisplaySpeedKmh = 45;
       const significantJump = distanceMeters > Math.max(25, accuracy + previous.accuracy);
 
       if (significantJump && displaySpeedKmh > maxDisplaySpeedKmh) {

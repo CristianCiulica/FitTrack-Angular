@@ -36,6 +36,9 @@ import {
   GlobalOutline,
   DownloadOutline,
   LoadingOutline,
+  HeartFill,
+  MessageOutline,
+  ReloadOutline,
 } from '@ant-design/icons-angular/icons';
 import { getFirebaseConfig } from './core/config/runtime-config';
 import { routes } from './app.routes';
@@ -89,6 +92,9 @@ export const appConfig: ApplicationConfig = {
       GlobalOutline,
       DownloadOutline,
       LoadingOutline,
+      HeartFill,
+      MessageOutline,
+      ReloadOutline,
     ]),
     { provide: NZ_I18N, useValue: en_US },
   ],

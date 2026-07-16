@@ -1,15 +1,30 @@
 <div class="community-wrap">
-  <!-- Heading in stilul paginilor aplicatiei -->
-  <div class="community-heading">
-    <div>
+  <!-- Bara de sus a feed-ului -->
+  <div class="feed-topbar">
+    <div class="feed-title">
       <span class="community-eyebrow">Community</span>
-      <h1>Discover routines</h1>
-      <p>Workouts shared by other FitTrack athletes.</p>
+      <h1>Feed</h1>
     </div>
-    <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
-      <span nz-icon nzType="plus"></span>
-      <span class="share-label">Share workout</span>
-    </button>
+    <div class="feed-actions">
+      <div class="sort-pills" role="tablist" aria-label="Sort feed">
+        <button
+          type="button"
+          role="tab"
+          [class.selected]="sort() === 'recent'"
+          (click)="sort.set('recent')"
+        >Recent</button>
+        <button
+          type="button"
+          role="tab"
+          [class.selected]="sort() === 'popular'"
+          (click)="sort.set('popular')"
+        >Popular</button>
+      </div>
+      <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
+        <span nz-icon nzType="plus"></span>
+        <span class="share-label">Share</span>
+      </button>
+    </div>
   </div>
 
   @if (loading()) {
@@ -25,7 +40,7 @@
         Retry
       </button>
     </div>
-  } @else if (workouts().length === 0) {
+  } @else if (feed().length === 0) {
     <div class="community-empty">
       <strong>No community workouts yet</strong>
       <p>Be the first to share a routine with everyone.</p>
@@ -35,60 +50,144 @@
       </button>
     </div>
   } @else {
-    <div class="community-grid">
-      @for (w of workouts(); track w.id; let i = $index) {
-        <article class="community-card" [attr.data-tone]="cardTone(i)">
-          <div class="duration-badge">
-            <strong>{{ workoutMinutes(w) }}</strong>
-            <span>mins</span>
-          </div>
-
-          <div class="author-row">
+    <div class="feed">
+      @for (w of feed(); track w.id; let i = $index) {
+        <article class="post">
+          <!-- Header: avatar + autor + timp + delete propriu -->
+          <header class="post-header">
             <span class="author-avatar">{{ authorInitials(w.authorName) }}</span>
-            <div class="author-copy">
+            <div class="post-author">
               <strong>{{ w.authorName }}</strong>
-              <small>{{ w.createdAt | date: 'd MMM y' }}</small>
+              <small>{{ timeAgo(w.createdAt) }}</small>
             </div>
+            @if (w.authorId === myUid) {
+              <button
+                type="button"
+                class="post-menu"
+                aria-label="Delete post"
+                nz-popconfirm
+                nzPopconfirmTitle="Delete this post?"
+                nzOkText="Delete"
+                [nzOkDanger]="true"
+                (nzOnConfirm)="deletePost(w)"
+              >
+                <span nz-icon nzType="delete"></span>
+              </button>
+            }
+          </header>
+
+          <!-- "Media": vitrina antrenamentului; dublu-tap = like -->
+          <div
+            class="post-media"
+            [attr.data-tone]="cardTone(i)"
+            (dblclick)="doubleTapLike(w)"
+          >
+            @if (burstId() === w.id) {
+              <span class="heart-burst" nz-icon nzType="heart" nzTheme="fill" aria-hidden="true"></span>
+            }
+            <div class="media-head">
+              <h3>{{ w.name }}</h3>
+              <p class="media-stats">
+                {{ workoutMinutes(w) }} mins · {{ w.exercises.length }} exercises · ~{{ workoutKcal(w) }} kcal
+              </p>
+              <div class="muscle-row">
+                @for (group of getMuscleGroups(w); track group) {
+                  <span class="muscle-chip" [attr.data-tone]="muscleTone(group)">{{ group }}</span>
+                }
+              </div>
+            </div>
+            <ul class="exercise-preview">
+              @for (ex of w.exercises | slice: 0 : 4; track $index) {
+                <li>
+                  <span class="exercise-name">{{ ex.exerciseName }}</span>
+                  <span class="exercise-detail">{{ ex.sets }}×{{ ex.reps }}@if (ex.weight > 0) { · {{ formatWeight(ex.weight) }}}</span>
+                </li>
+              }
+              @if (w.exercises.length > 4) {
+                <li class="more-row">+ {{ w.exercises.length - 4 }} more exercises</li>
+              }
+            </ul>
           </div>
 
-          <h3>{{ w.name }}</h3>
+          <!-- Actiuni: like / comment / save -->
+          <div class="post-actions">
+            <button
+              type="button"
+              class="action-btn like-btn"
+              [class.liked]="w.likedByMe"
+              [attr.aria-label]="w.likedByMe ? 'Unlike' : 'Like'"
+              (click)="toggleLike(w)"
+            >
+              <span nz-icon nzType="heart" [nzTheme]="w.likedByMe ? 'fill' : 'outline'"></span>
+              @if (w.likeCount > 0) { <span class="count">{{ w.likeCount }}</span> }
+            </button>
+            <button
+              type="button"
+              class="action-btn"
+              aria-label="Comments"
+              (click)="toggleComments(w.id)"
+            >
+              <span nz-icon nzType="message"></span>
+              @if (w.comments.length > 0) { <span class="count">{{ w.comments.length }}</span> }
+            </button>
+            <button
+              type="button"
+              class="action-btn save-action"
+              aria-label="Save to my workouts"
+              [disabled]="savingIds().has(w.id)"
+              (click)="saveToMyWorkouts(w)"
+            >
+              <span nz-icon [nzType]="savingIds().has(w.id) ? 'loading' : 'download'"></span>
+              @if (w.saveCount > 0) { <span class="count">{{ w.saveCount }}</span> }
+            </button>
+          </div>
 
+          <!-- Caption -->
           @if (w.description) {
-            <p class="community-description">{{ w.description }}</p>
+            <p class="post-caption"><strong>{{ w.authorName }}</strong> {{ w.description }}</p>
           }
 
-          <div class="community-meta">
-            {{ w.exercises.length }} exercises · ~{{ workoutKcal(w) }} kcal
-          </div>
+          <!-- Comentarii -->
+          @if (w.comments.length > 0) {
+            <div class="post-comments">
+              @if (w.comments.length > 2 && !expandedComments().has(w.id)) {
+                <button type="button" class="view-all" (click)="toggleComments(w.id)">
+                  View all {{ w.comments.length }} comments
+                </button>
+              }
+              @for (c of (expandedComments().has(w.id) ? w.comments : w.comments.slice(-2)); track c.id) {
+                <div class="comment">
+                  <p><strong>{{ c.authorName }}</strong> {{ c.text }}</p>
+                  <div class="comment-side">
+                    <small>{{ timeAgo(c.createdAt) }}</small>
+                    @if (canDeleteComment(w, c.authorId)) {
+                      <button
+                        type="button"
+                        class="comment-delete"
+                        aria-label="Delete comment"
+                        (click)="deleteComment(w, c.id)"
+                      >×</button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
 
-          <div class="muscle-row">
-            @for (group of getMuscleGroups(w); track group) {
-              <span class="muscle-chip" [attr.data-tone]="muscleTone(group)">{{ group }}</span>
+          <!-- Adauga comentariu -->
+          <div class="comment-composer">
+            <input
+              type="text"
+              maxlength="300"
+              placeholder="Add a comment..."
+              [ngModel]="draftFor(w.id)"
+              (ngModelChange)="setDraft(w.id, $event)"
+              (keyup.enter)="postComment(w)"
+            />
+            @if (draftFor(w.id).trim()) {
+              <button type="button" class="post-comment-btn" (click)="postComment(w)">Post</button>
             }
           </div>
-
-          <ul class="exercise-preview">
-            @for (ex of w.exercises | slice: 0 : 3; track $index) {
-              <li>
-                <span class="exercise-name">{{ ex.exerciseName }}</span>
-                <span class="exercise-detail">{{ ex.sets }}×{{ ex.reps }}@if (ex.weight > 0) { · {{ formatWeight(ex.weight) }}}</span>
-              </li>
-            }
-            @if (w.exercises.length > 3) {
-              <li class="more-row">+ {{ w.exercises.length - 3 }} more exercises</li>
-            }
-          </ul>
-
-          <button
-            type="button"
-            class="save-btn"
-            [class.saving]="savingIds().has(w.id)"
-            [disabled]="savingIds().has(w.id)"
-            (click)="saveToMyWorkouts(w)"
-          >
-            <span nz-icon [nzType]="savingIds().has(w.id) ? 'loading' : 'download'"></span>
-            {{ savingIds().has(w.id) ? 'Saving...' : 'Save to my workouts' }}
-          </button>
         </article>
       }
     </div>

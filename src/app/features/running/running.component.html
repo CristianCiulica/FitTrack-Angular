@@ -133,7 +133,7 @@
             >
               <div>
                 <span class="run-card-eyebrow">Activity</span>
-                <strong>{{ mode === 'running' ? 'Running' : 'Walking' }}</strong>
+                <strong>Running</strong>
               </div>
               <div class="run-card-state">
                 <span class="gps-badge" *ngIf="isTracking && !isCalibrating">GPS active</span>
@@ -152,16 +152,6 @@
             </button>
           </div>
           <div class="run-controls" *ngIf="activityExpanded">
-            <label class="mode-picker">
-              <span>Activity type</span>
-              <div class="mode-select-shell">
-                <select [value]="mode" (change)="onModeChange($event)" [disabled]="isTracking">
-                  <option value="running">Running</option>
-                  <option value="walking">Walking</option>
-                </select>
-                <span class="mode-select-chevron" aria-hidden="true"></span>
-              </div>
-            </label>
             <div class="control-buttons">
               <button nz-button class="start-button" (click)="startTracking()" [disabled]="isTracking">Start</button>
               <button nz-button class="stop-button" (click)="stopTracking()" [disabled]="!isTracking">Stop</button>

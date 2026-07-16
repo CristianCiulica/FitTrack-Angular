@@ -19,6 +19,14 @@ export interface Workout {
   isPredefined?: boolean;
 }
 
+export interface CommunityComment {
+  id: string;
+  authorId: string;
+  authorName: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface CommunityWorkout {
   id: string;
   originalWorkoutId?: string;
@@ -28,6 +36,10 @@ export interface CommunityWorkout {
   description: string;
   exercises: ExerciseLog[];
   createdAt: string;
+  likeCount: number;
+  likedByMe: boolean;
+  saveCount: number;
+  comments: CommunityComment[];
 }
 
 

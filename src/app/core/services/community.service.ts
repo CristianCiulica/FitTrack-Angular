@@ -24,4 +24,42 @@ export class CommunityService {
       .post<{ communityWorkout: CommunityWorkout }>('/community', workout)
       .pipe(map((res) => res.communityWorkout));
   }
+
+  deletePost(id: string): Observable<void> {
+    return this.api.delete<{ deleted: boolean }>(`/community/${id}`).pipe(
+      tap(() => this.communityWorkouts.update((list) => list.filter((w) => w.id !== id))),
+      map(() => void 0),
+    );
+  }
+
+  toggleLike(id: string): Observable<CommunityWorkout> {
+    return this.api
+      .post<{ communityWorkout: CommunityWorkout }>(`/community/${id}/like`, {})
+      .pipe(map((res) => res.communityWorkout), tap((w) => this.replace(w)));
+  }
+
+  addComment(id: string, text: string): Observable<CommunityWorkout> {
+    return this.api
+      .post<{ communityWorkout: CommunityWorkout }>(`/community/${id}/comments`, { text })
+      .pipe(map((res) => res.communityWorkout), tap((w) => this.replace(w)));
+  }
+
+  deleteComment(id: string, commentId: string): Observable<CommunityWorkout> {
+    return this.api
+      .delete<{ communityWorkout: CommunityWorkout }>(`/community/${id}/comments/${commentId}`)
+      .pipe(map((res) => res.communityWorkout), tap((w) => this.replace(w)));
+  }
+
+  registerSave(id: string): Observable<CommunityWorkout> {
+    return this.api
+      .post<{ communityWorkout: CommunityWorkout }>(`/community/${id}/save`, {})
+      .pipe(map((res) => res.communityWorkout), tap((w) => this.replace(w)));
+  }
+
+  // inlocuieste postarea in feed cu varianta actualizata de pe server
+  private replace(updated: CommunityWorkout): void {
+    this.communityWorkouts.update((list) =>
+      list.map((w) => (w.id === updated.id ? updated : w)),
+    );
+  }
 }

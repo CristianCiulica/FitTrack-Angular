@@ -130,8 +130,8 @@ export class WorkoutsComponent implements OnInit {
     return estimateSessionCalories(workout.exercises, this.profileService.weightKg());
   }
 
-  // deseneaza traseul GPS salvat ca path SVG normalizat in viewBox 100x56
-  routePath(session: RunningSession): string | null {
+  // proiecteaza traseul GPS in coordonate SVG (viewBox W x H), pastrand proportiile
+  private projectRoute(session: RunningSession, W: number, H: number, pad: number): { x: number; y: number }[] | null {
     const route = session.route;
     if (!route || route.length < 2) return null;
 
@@ -144,22 +144,54 @@ export class WorkoutsComponent implements OnInit {
     const spanLat = Math.max(maxLat - minLat, 1e-5);
     const spanLng = Math.max(maxLng - minLng, 1e-5);
 
-    const W = 100;
-    const H = 56;
-    const pad = 6;
-
-    // pastram proportiile traseului, centrat in viewBox
     const scale = Math.min((W - pad * 2) / spanLng, (H - pad * 2) / spanLat);
     const offsetX = (W - spanLng * scale) / 2;
     const offsetY = (H - spanLat * scale) / 2;
 
-    return route
-      .map((p, i) => {
-        const x = offsetX + (p[1] - minLng) * scale;
-        const y = H - (offsetY + (p[0] - minLat) * scale);
-        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
-      })
-      .join(' ');
+    return route.map((p) => ({
+      x: offsetX + (p[1] - minLng) * scale,
+      y: H - (offsetY + (p[0] - minLat) * scale),
+    }));
+  }
+
+  // path-ul SVG al traseului, in viewBox 100x56
+  routePath(session: RunningSession): string | null {
+    const pts = this.projectRoute(session, 100, 56, 6);
+    if (!pts) return null;
+    return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+  }
+
+  // punctele de start/finish pentru bulinele de pe traseu
+  routeStart(session: RunningSession): { x: number; y: number } | null {
+    const pts = this.projectRoute(session, 100, 56, 6);
+    return pts ? pts[0] : null;
+  }
+
+  routeEnd(session: RunningSession): { x: number; y: number } | null {
+    const pts = this.projectRoute(session, 100, 56, 6);
+    return pts ? pts[pts.length - 1] : null;
+  }
+
+  // ritmul mediu, in stil alergare: min/km (ex. 5'32")
+  formatPace(session: RunningSession): string {
+    const km = session.distanceMeters / 1000;
+    if (km <= 0) return '–';
+    const secPerKm = session.durationSeconds / km;
+    if (!Number.isFinite(secPerKm) || secPerKm <= 0) return '–';
+    const mins = Math.floor(secPerKm / 60);
+    const secs = Math.round(secPerKm % 60);
+    return `${mins}'${secs.toString().padStart(2, '0')}"`;
+  }
+
+  // expandarea cardurilor de alergare din History
+  readonly expandedRuns = signal<Set<string>>(new Set());
+
+  toggleRun(id: string): void {
+    this.expandedRuns.update((set) => {
+      const next = new Set(set);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
   }
 
   private getSortValue(workout: Workout, column: WorkoutSortColumn): string | number {
