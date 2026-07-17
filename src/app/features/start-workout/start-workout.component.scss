@@ -276,6 +276,9 @@
 }
 
 .legend-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -383,6 +386,49 @@
     border-top: 2px solid #a1a1a6;
     transform: rotate(45deg);
   }
+}
+
+/* silueta legendei, ca arta de fundal pe card si pe hero */
+.legend-art {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  z-index: -1;
+  height: 118%;
+  aspect-ratio: 100 / 120;
+  transform: translateY(-50%);
+  opacity: 0.12;
+  pointer-events: none;
+  /* silueta se topeste spre stanga, ca un watermark */
+  -webkit-mask-image: linear-gradient(to left, black 55%, transparent 100%);
+  mask-image: linear-gradient(to left, black 55%, transparent 100%);
+
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  &[data-tone='purple'] { color: #8e3bb5; }
+  &[data-tone='blue'] { color: #0071e3; }
+  &[data-tone='cyan'] { color: #2596a6; }
+  &[data-tone='green'] { color: #248a3d; }
+  &[data-tone='pink'] { color: #d70041; }
+
+  &.hero-art {
+    top: auto;
+    bottom: -6%;
+    right: 6px;
+    height: 88%;
+    transform: none;
+    opacity: 0.1;
+  }
+}
+
+.plan-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .legends-back {
