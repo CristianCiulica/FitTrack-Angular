@@ -101,7 +101,128 @@ const PREDEFINED_ROUTINES: Routine[] = [
       { name: 'Plank', sets: 3, reps: 1, weight: 0, muscleGroup: 'Core' },
       { name: 'Mountain Climbers', sets: 4, reps: 30, weight: 0, muscleGroup: 'Cardio' },
     ]
+  },
+  {
+    name: 'HIIT Fat Burner',
+    category: 'Cardio',
+    exercises: [
+      { name: 'Burpees', sets: 4, reps: 15, weight: 0, muscleGroup: 'Cardio' },
+      { name: 'Jump Squats', sets: 4, reps: 15, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Mountain Climbers', sets: 4, reps: 40, weight: 0, muscleGroup: 'Cardio' },
+      { name: 'Kettlebell Swings', sets: 4, reps: 20, weight: 16, muscleGroup: 'Full Body' },
+    ]
+  },
+  {
+    name: 'Steady Cardio & Core',
+    category: 'Cardio',
+    exercises: [
+      { name: 'Jumping Jacks', sets: 4, reps: 40, weight: 0, muscleGroup: 'Cardio' },
+      { name: 'High Knees', sets: 4, reps: 30, weight: 0, muscleGroup: 'Cardio' },
+      { name: 'Russian Twists', sets: 3, reps: 24, weight: 8, muscleGroup: 'Core' },
+      { name: 'Plank', sets: 3, reps: 1, weight: 0, muscleGroup: 'Core' },
+    ]
+  },
+  {
+    name: 'Back & Biceps Builder',
+    category: 'Pull',
+    exercises: [
+      { name: 'Deadlifts', sets: 4, reps: 6, weight: 90, muscleGroup: 'Back' },
+      { name: 'Lat Pulldown', sets: 4, reps: 10, weight: 50, muscleGroup: 'Back' },
+      { name: 'Seated Cable Rows', sets: 3, reps: 12, weight: 45, muscleGroup: 'Back' },
+      { name: 'Hammer Curls', sets: 3, reps: 12, weight: 14, muscleGroup: 'Arms' },
+    ]
+  },
+  {
+    name: 'Glutes & Hamstrings',
+    category: 'Legs',
+    exercises: [
+      { name: 'Hip Thrusts', sets: 4, reps: 10, weight: 80, muscleGroup: 'Legs' },
+      { name: 'Stiff-Leg Deadlifts', sets: 4, reps: 10, weight: 60, muscleGroup: 'Legs' },
+      { name: 'Walking Lunges', sets: 3, reps: 20, weight: 20, muscleGroup: 'Legs' },
+      { name: 'Leg Curls', sets: 3, reps: 12, weight: 35, muscleGroup: 'Legs' },
+    ]
   }
+];
+
+// planuri "oficiale": colectii de rutine cu identitate proprie, prezentate ca
+// promo-uri (in stilul Try community workouts) care deschid propriul drawer
+interface OfficialPlan {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  tone: string;
+  routines: Routine[];
+}
+
+const OFFICIAL_PLANS: OfficialPlan[] = [
+  {
+    id: 'arnold',
+    name: 'Arnold Official Plan',
+    tagline: "The Austrian Oak's Golden Era split — 5 classic routines.",
+    description:
+      "Train like the 7x Mr. Olympia. Arnold's legendary high-volume split: chest & back supersets, brutal shoulder and arm days, and the famous Golden Six for full-body foundations.",
+    tone: 'purple',
+    routines: [
+      {
+        name: 'The Golden Six',
+        category: 'Full body',
+        exercises: [
+          { name: 'Back Squats', sets: 4, reps: 10, weight: 60, muscleGroup: 'Legs' },
+          { name: 'Wide-Grip Bench Press', sets: 3, reps: 10, weight: 50, muscleGroup: 'Chest' },
+          { name: 'Chin-ups', sets: 3, reps: 8, weight: 0, muscleGroup: 'Back' },
+          { name: 'Behind-the-Neck Press', sets: 4, reps: 10, weight: 30, muscleGroup: 'Shoulders' },
+          { name: 'Barbell Curls', sets: 3, reps: 10, weight: 25, muscleGroup: 'Arms' },
+          { name: 'Bent-Knee Sit-ups', sets: 3, reps: 20, weight: 0, muscleGroup: 'Core' },
+        ],
+      },
+      {
+        name: 'Chest & Back',
+        category: 'Superset day',
+        exercises: [
+          { name: 'Bench Press', sets: 5, reps: 8, weight: 70, muscleGroup: 'Chest' },
+          { name: 'Incline Bench Press', sets: 4, reps: 10, weight: 50, muscleGroup: 'Chest' },
+          { name: 'Dumbbell Pullovers', sets: 4, reps: 12, weight: 20, muscleGroup: 'Chest' },
+          { name: 'Wide-Grip Pull-ups', sets: 5, reps: 8, weight: 0, muscleGroup: 'Back' },
+          { name: 'Bent-Over Rows', sets: 5, reps: 10, weight: 55, muscleGroup: 'Back' },
+          { name: 'Deadlifts', sets: 3, reps: 8, weight: 100, muscleGroup: 'Back' },
+        ],
+      },
+      {
+        name: 'Shoulders & Arms',
+        category: 'Pump day',
+        exercises: [
+          { name: 'Clean & Press', sets: 4, reps: 8, weight: 40, muscleGroup: 'Shoulders' },
+          { name: 'Lateral Raises', sets: 4, reps: 12, weight: 10, muscleGroup: 'Shoulders' },
+          { name: 'Barbell Curls', sets: 5, reps: 10, weight: 30, muscleGroup: 'Arms' },
+          { name: 'Concentration Curls', sets: 4, reps: 10, weight: 12, muscleGroup: 'Arms' },
+          { name: 'Close-Grip Bench Press', sets: 4, reps: 10, weight: 40, muscleGroup: 'Arms' },
+          { name: 'Tricep Pushdowns', sets: 4, reps: 12, weight: 25, muscleGroup: 'Arms' },
+        ],
+      },
+      {
+        name: 'Legs & Lower Back',
+        category: 'Foundation day',
+        exercises: [
+          { name: 'Back Squats', sets: 5, reps: 10, weight: 80, muscleGroup: 'Legs' },
+          { name: 'Walking Lunges', sets: 4, reps: 12, weight: 20, muscleGroup: 'Legs' },
+          { name: 'Leg Curls', sets: 4, reps: 12, weight: 35, muscleGroup: 'Legs' },
+          { name: 'Stiff-Leg Deadlifts', sets: 4, reps: 10, weight: 60, muscleGroup: 'Legs' },
+          { name: 'Standing Calf Raises', sets: 5, reps: 15, weight: 50, muscleGroup: 'Legs' },
+        ],
+      },
+      {
+        name: 'Abs & Core Finisher',
+        category: 'Core day',
+        exercises: [
+          { name: 'Sit-ups', sets: 4, reps: 25, weight: 0, muscleGroup: 'Core' },
+          { name: 'Hanging Leg Raises', sets: 4, reps: 12, weight: 0, muscleGroup: 'Core' },
+          { name: 'Russian Twists', sets: 4, reps: 20, weight: 10, muscleGroup: 'Core' },
+          { name: 'Plank', sets: 3, reps: 1, weight: 0, muscleGroup: 'Core' },
+        ],
+      },
+    ],
+  },
 ];
 
 @Component({
@@ -132,10 +253,13 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   state = signal<'setup' | 'active' | 'rest' | 'finished'>('setup');
 
   routines = PREDEFINED_ROUTINES;
+  officialPlans = OFFICIAL_PLANS;
   personalRoutines = signal<Routine[]>([]);
   selectedRoutineKey = signal('predefined-0');
   modalVisible = signal(false);
   communityDrawerVisible = signal(false);
+  // planul oficial deschis in drawer (ex. Arnold)
+  activePlan = signal<OfficialPlan | null>(null);
 
   currentRoutine = signal<Routine>({ name: 'Custom Workout', exercises: [] });
 
@@ -306,6 +430,21 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   openCommunityDrawer() {
     this.communityDrawerVisible.set(true);
+  }
+
+  openPlan(plan: OfficialPlan) {
+    this.activePlan.set(plan);
+  }
+
+  closePlan() {
+    this.activePlan.set(null);
+  }
+
+  // porneste direct o rutina dintr-un plan oficial (inchide drawer-ul intai)
+  startFromPlan(routine: Routine, planId: string, index: number) {
+    this.selectRoutine(routine, `plan-${planId}-${index}`);
+    this.closePlan();
+    this.startWorkout();
   }
 
   closeCommunityDrawer() {

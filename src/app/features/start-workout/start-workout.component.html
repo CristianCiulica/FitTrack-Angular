@@ -122,6 +122,24 @@
             </span>
           </button>
 
+          <!-- Planuri oficiale (ex. Arnold) -->
+          <button
+            type="button"
+            class="community-promo plan-promo"
+            *ngFor="let plan of officialPlans"
+            [attr.data-tone]="plan.tone"
+            (click)="openPlan(plan)"
+          >
+            <div class="community-promo-copy">
+              <span class="promo-badge">New</span>
+              <h2>{{ plan.name }}</h2>
+              <p>{{ plan.tagline }}</p>
+            </div>
+            <span class="promo-arrow" aria-hidden="true">
+              <span nz-icon nzType="trophy"></span>
+            </span>
+          </button>
+
           <!-- Planul -->
           <div class="plan-heading">
             <h3>Your plan</h3>
@@ -241,6 +259,63 @@
 >
   <ng-container *nzDrawerContent>
     <app-community></app-community>
+  </ng-container>
+</nz-drawer>
+
+<!-- Drawer pentru planurile oficiale (ex. Arnold) -->
+<nz-drawer
+  [nzVisible]="activePlan() !== null"
+  [nzWidth]="'100%'"
+  [nzBodyStyle]="{ padding: '0', background: '#f5f5f7' }"
+  nzPlacement="right"
+  [nzTitle]="activePlan()?.name ?? ''"
+  (nzOnClose)="closePlan()"
+>
+  <ng-container *nzDrawerContent>
+    <div class="plan-drawer" *ngIf="activePlan() as plan">
+      <div class="plan-hero" [attr.data-tone]="plan.tone">
+        <span class="plan-hero-badge">
+          <span nz-icon nzType="trophy"></span>
+          Official plan
+        </span>
+        <h2>{{ plan.name }}</h2>
+        <p>{{ plan.description }}</p>
+        <span class="plan-hero-meta">{{ plan.routines.length }} routines · pick one and start</span>
+      </div>
+
+      <div class="plan-list drawer-plan-list">
+        <div
+          class="plan-card"
+          *ngFor="let routine of plan.routines; let i = index"
+          [attr.data-tone]="cardTone(i)"
+        >
+          <div class="duration-badge">
+            <strong>{{ routineMinutes(routine) }}</strong>
+            <span>mins</span>
+          </div>
+          <h3>{{ routine.name }}</h3>
+          <div class="plan-chips">
+            <span class="plan-chip">{{ routine.category }}</span>
+            <span class="plan-count">{{ routine.exercises.length }} exercises · ~{{ routineKcal(routine) }} kcal</span>
+          </div>
+          <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
+          <ul class="plan-exercise-list">
+            <li *ngFor="let ex of routine.exercises">
+              <span>{{ ex.name }}</span>
+              <span class="ex-detail">{{ ex.sets }}×{{ ex.reps }}<ng-container *ngIf="ex.weight > 0"> · {{ ex.weight }} kg</ng-container></span>
+            </li>
+          </ul>
+          <button
+            type="button"
+            class="plan-start always"
+            (click)="startFromPlan(routine, plan.id, i)"
+          >
+            <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+            Start workout
+          </button>
+        </div>
+      </div>
+    </div>
   </ng-container>
 </nz-drawer>
 
