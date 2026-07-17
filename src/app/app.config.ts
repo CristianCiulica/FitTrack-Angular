@@ -39,6 +39,7 @@ import {
   HeartFill,
   MessageOutline,
   ReloadOutline,
+  ArrowLeftOutline,
 } from '@ant-design/icons-angular/icons';
 import { getFirebaseConfig } from './core/config/runtime-config';
 import { routes } from './app.routes';
@@ -95,6 +96,7 @@ export const appConfig: ApplicationConfig = {
       HeartFill,
       MessageOutline,
       ReloadOutline,
+      ArrowLeftOutline,
     ]),
     { provide: NZ_I18N, useValue: en_US },
   ],

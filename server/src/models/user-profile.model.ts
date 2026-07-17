@@ -14,6 +14,8 @@ const userProfileSchema = new Schema(
     goal: { type: String, enum: ['lose', 'maintain', 'gain'], default: 'maintain' },
     goalRate: { type: Number, default: 0.5 },
     weeklyWorkoutGoal: { type: Number, default: 4 },
+    // uid-urile autorilor urmariti in Community
+    following: { type: [String], default: [] },
     migratedFromLocalStorage: { type: Boolean, default: false },
   },
   { timestamps: true },

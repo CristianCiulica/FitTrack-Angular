@@ -583,13 +583,7 @@
   }
 
   .feed-topbar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-
-    .feed-actions {
-      justify-content: space-between;
-    }
+    align-items: center;
   }
 
   .share-btn .share-label {
@@ -599,4 +593,403 @@
   .share-btn {
     padding: 10px 14px;
   }
+}
+
+/* ------------------------------------------------------------
+   V3: cautare, tab-uri, filtre, picks, follow, profil autor
+   ------------------------------------------------------------ */
+
+.feed-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 11px 16px;
+  border-radius: 980px;
+  background: rgba(0, 0, 0, 0.05);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+
+  [nz-icon] {
+    font-size: 15px;
+    color: #86868b;
+  }
+
+  input {
+    flex: 1;
+    font-size: 14px;
+    font-family: inherit;
+    color: #1d1d1f;
+    border: none;
+    outline: none;
+    background: transparent;
+
+    &::placeholder { color: #a1a1a6; }
+    &::-webkit-search-cancel-button { -webkit-appearance: none; }
+  }
+
+  &:focus-within {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.18);
+  }
+}
+
+.feed-tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+  padding: 3px;
+  border-radius: 980px;
+  background: rgba(0, 0, 0, 0.05);
+
+  button {
+    flex: 1;
+    padding: 8px 0;
+    font-size: 13.5px;
+    font-weight: 640;
+    font-family: inherit;
+    letter-spacing: -0.01em;
+    color: #515154;
+    cursor: pointer;
+    border: none;
+    border-radius: 980px;
+    background: transparent;
+    transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+
+    &.selected {
+      color: #1d1d1f;
+      background: #fff;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.12);
+    }
+  }
+}
+
+.filter-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar { display: none; }
+
+  &.duration-row {
+    margin-bottom: 16px;
+  }
+}
+
+.filter-chip {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 640;
+  font-family: inherit;
+  letter-spacing: -0.005em;
+  color: #515154;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 980px;
+  background: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+
+  &:active { transform: scale(0.96); }
+
+  &.selected {
+    color: #fff;
+    border-color: transparent;
+    background: linear-gradient(180deg, #1a86f0, #0071e3);
+    box-shadow: 0 6px 14px rgba(0, 113, 227, 0.3);
+  }
+}
+
+/* ---------- FitTrack Picks ---------- */
+
+.picks-section {
+  margin-bottom: 20px;
+}
+
+.picks-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+
+  .picks-eyebrow {
+    font-size: 13px;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    color: #1d1d1f;
+  }
+
+  .picks-sub {
+    font-size: 12px;
+    color: #86868b;
+  }
+}
+
+.picks-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.pick-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: 0 0 190px;
+  padding: 14px 14px 12px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
+
+  &:hover { transform: translateY(-2px); }
+
+  &[data-tone='blue'] { background: radial-gradient(90% 130% at 90% 0%, rgba(10, 132, 255, 0.16), transparent 62%), rgba(255, 255, 255, 0.8); }
+  &[data-tone='purple'] { background: radial-gradient(90% 130% at 90% 0%, rgba(175, 82, 222, 0.14), transparent 62%), rgba(255, 255, 255, 0.8); }
+  &[data-tone='cyan'] { background: radial-gradient(90% 130% at 90% 0%, rgba(100, 210, 255, 0.2), transparent 62%), rgba(255, 255, 255, 0.8); }
+  &[data-tone='green'] { background: radial-gradient(90% 130% at 90% 0%, rgba(52, 199, 89, 0.14), transparent 62%), rgba(255, 255, 255, 0.8); }
+
+  .pick-name {
+    max-width: 100%;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1d1d1f;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pick-meta {
+    font-size: 11.5px;
+    font-weight: 590;
+    color: #86868b;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pick-author {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    max-width: 100%;
+    font-size: 12px;
+    font-weight: 620;
+    color: #515154;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pick-saves {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    font-weight: 680;
+    color: #0066cc;
+    font-variant-numeric: tabular-nums;
+
+    [nz-icon] { font-size: 12px; }
+  }
+}
+
+/* ---------- follow + autor ---------- */
+
+.author-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+
+  .post-author {
+    display: block;
+    min-width: 0;
+    line-height: 1.25;
+  }
+}
+
+.follow-btn {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 680;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  color: #0071e3;
+  cursor: pointer;
+  border: 1.5px solid rgba(0, 113, 227, 0.35);
+  border-radius: 980px;
+  background: rgba(0, 113, 227, 0.06);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+
+  &:hover { background: rgba(0, 113, 227, 0.12); }
+  &:active { transform: scale(0.95); }
+
+  &.following {
+    color: #515154;
+    border-color: rgba(0, 0, 0, 0.12);
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &.hero {
+    padding: 10px 34px;
+    font-size: 14px;
+  }
+}
+
+.author-page {
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 16px;
+    padding: 9px 16px;
+    font-size: 13.5px;
+    font-weight: 640;
+    font-family: inherit;
+    color: #1d1d1f;
+    cursor: pointer;
+    border: none;
+    border-radius: 980px;
+    background: rgba(0, 0, 0, 0.05);
+    transition: background 0.15s ease;
+
+    &:hover { background: rgba(0, 0, 0, 0.09); }
+  }
+}
+
+.author-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 26px 20px;
+  text-align: center;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  background:
+    radial-gradient(85% 140% at 50% 0%, rgba(10, 132, 255, 0.14), transparent 65%),
+    rgba(255, 255, 255, 0.72);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    color: #1d1d1f;
+  }
+}
+
+.author-avatar.big {
+  width: 72px;
+  height: 72px;
+  font-size: 24px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #1a86f0, #0071e3);
+  box-shadow: 0 12px 26px rgba(0, 113, 227, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.author-avatar.tiny {
+  width: 18px;
+  height: 18px;
+  font-size: 8.5px;
+  display: inline-grid;
+  place-items: center;
+  color: #fff;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #1a86f0, #0071e3);
+}
+
+.author-stats {
+  display: flex;
+  gap: 26px;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+
+    strong {
+      font-size: 17px;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+      color: #1d1d1f;
+      font-variant-numeric: tabular-nums;
+    }
+
+    span {
+      font-size: 11.5px;
+      font-weight: 620;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #86868b;
+    }
+  }
+}
+
+/* ---------- dificultate + sfarsitul feed-ului ---------- */
+
+.media-badges {
+  margin-bottom: 8px;
+}
+
+.difficulty-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 980px;
+
+  &[data-tone='green'] { color: #248a3d; background: rgba(52, 199, 89, 0.16); }
+  &[data-tone='blue'] { color: #0066cc; background: rgba(0, 113, 227, 0.13); }
+  &[data-tone='pink'] { color: #d70041; background: rgba(255, 45, 85, 0.14); }
+  &[data-tone='graphite'] { color: #515154; background: rgba(0, 0, 0, 0.07); }
+}
+
+.feed-sentinel {
+  height: 1px;
+}
+
+.loading-more {
+  display: grid;
+  place-items: center;
+  padding: 20px 0;
+}
+
+.feed-end {
+  margin: 22px 0 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 590;
+  color: #86868b;
 }

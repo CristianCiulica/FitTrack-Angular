@@ -1,30 +1,104 @@
 <div class="community-wrap">
-  <!-- Bara de sus a feed-ului -->
+
+  <!-- ===================== PROFIL AUTOR (peste feed) ===================== -->
+  @if (authorView(); as view) {
+    <div class="author-page">
+      <button type="button" class="back-btn" (click)="closeAuthor()">
+        <span nz-icon nzType="arrow-left"></span>
+        Feed
+      </button>
+
+      <div class="author-hero">
+        <span class="author-avatar big">{{ authorInitials(view.author.name) }}</span>
+        <h2>{{ view.author.name }}</h2>
+        <div class="author-stats">
+          <div><strong>{{ view.author.postCount }}</strong><span>posts</span></div>
+          <div><strong>{{ view.author.followers }}</strong><span>followers</span></div>
+          <div><strong>{{ view.author.totalLikes }}</strong><span>likes</span></div>
+          <div><strong>{{ view.author.totalSaves }}</strong><span>saves</span></div>
+        </div>
+        @if (view.author.uid !== myUid) {
+          <button
+            type="button"
+            class="follow-btn hero"
+            [class.following]="view.author.followedByMe"
+            (click)="toggleFollow(view.author.uid)"
+          >
+            {{ view.author.followedByMe ? 'Following' : 'Follow' }}
+          </button>
+        }
+      </div>
+
+      @if (view.posts.length === 0) {
+        <div class="community-empty">
+          <strong>No posts yet</strong>
+          <p>This athlete hasn't shared any routines.</p>
+        </div>
+      } @else {
+        <div class="feed">
+          @for (w of view.posts; track w.id; let i = $index) {
+            <ng-container
+              [ngTemplateOutlet]="postCard"
+              [ngTemplateOutletContext]="{ w, i, inProfile: true }"
+            />
+          }
+        </div>
+      }
+    </div>
+  } @else {
+
+  <!-- ===================== FEED ===================== -->
   <div class="feed-topbar">
     <div class="feed-title">
       <span class="community-eyebrow">Community</span>
       <h1>Feed</h1>
     </div>
-    <div class="feed-actions">
-      <div class="sort-pills" role="tablist" aria-label="Sort feed">
-        <button
-          type="button"
-          role="tab"
-          [class.selected]="sort() === 'recent'"
-          (click)="sort.set('recent')"
-        >Recent</button>
-        <button
-          type="button"
-          role="tab"
-          [class.selected]="sort() === 'popular'"
-          (click)="sort.set('popular')"
-        >Popular</button>
-      </div>
-      <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
-        <span nz-icon nzType="plus"></span>
-        <span class="share-label">Share</span>
-      </button>
-    </div>
+    <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
+      <span nz-icon nzType="plus"></span>
+      <span class="share-label">Share</span>
+    </button>
+  </div>
+
+  <!-- Cautare -->
+  <div class="feed-search">
+    <span nz-icon nzType="search" aria-hidden="true"></span>
+    <input
+      type="search"
+      placeholder="Search routines or athletes..."
+      [ngModel]="search()"
+      (ngModelChange)="onSearchChange($event)"
+    />
+  </div>
+
+  <!-- Tab-uri -->
+  <div class="feed-tabs" role="tablist" aria-label="Feed">
+    <button type="button" role="tab" [class.selected]="tab() === 'foryou'" (click)="setTab('foryou')">For You</button>
+    <button type="button" role="tab" [class.selected]="tab() === 'following'" (click)="setTab('following')">Following</button>
+    <button type="button" role="tab" [class.selected]="tab() === 'recent'" (click)="setTab('recent')">Recent</button>
+  </div>
+
+  <!-- Filtre: grupe musculare + durata -->
+  <div class="filter-row" aria-label="Filter by muscle group">
+    <button type="button" class="filter-chip" [class.selected]="!muscle()" (click)="setMuscle(null)">All</button>
+    @for (group of muscleGroups; track group) {
+      <button
+        type="button"
+        class="filter-chip"
+        [attr.data-tone]="muscleTone(group)"
+        [class.selected]="muscle() === group"
+        (click)="setMuscle(group)"
+      >{{ group }}</button>
+    }
+  </div>
+  <div class="filter-row duration-row" aria-label="Filter by duration">
+    @for (d of durations; track d.label) {
+      <button
+        type="button"
+        class="filter-chip"
+        [class.selected]="maxMinutes() === d.value"
+        (click)="setDuration(d.value)"
+      >{{ d.label }}</button>
+    }
   </div>
 
   @if (loading()) {
@@ -35,164 +109,208 @@
     <div class="community-empty">
       <strong>Couldn't load community workouts</strong>
       <p>The server may be waking up — give it a few seconds and try again.</p>
-      <button type="button" class="share-btn" (click)="loadCommunity()">
+      <button type="button" class="share-btn" (click)="reload()">
         <span nz-icon nzType="reload"></span>
         Retry
       </button>
     </div>
   } @else if (feed().length === 0) {
     <div class="community-empty">
-      <strong>No community workouts yet</strong>
-      <p>Be the first to share a routine with everyone.</p>
-      <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
-        <span nz-icon nzType="plus"></span>
-        Share workout
-      </button>
-    </div>
-  } @else {
-    <div class="feed">
-      @for (w of feed(); track w.id; let i = $index) {
-        <article class="post">
-          <!-- Header: avatar + autor + timp + delete propriu -->
-          <header class="post-header">
-            <span class="author-avatar">{{ authorInitials(w.authorName) }}</span>
-            <div class="post-author">
-              <strong>{{ w.authorName }}</strong>
-              <small>{{ timeAgo(w.createdAt) }}</small>
-            </div>
-            @if (w.authorId === myUid) {
-              <button
-                type="button"
-                class="post-menu"
-                aria-label="Delete post"
-                nz-popconfirm
-                nzPopconfirmTitle="Delete this post?"
-                nzOkText="Delete"
-                [nzOkDanger]="true"
-                (nzOnConfirm)="deletePost(w)"
-              >
-                <span nz-icon nzType="delete"></span>
-              </button>
-            }
-          </header>
-
-          <!-- "Media": vitrina antrenamentului; dublu-tap = like -->
-          <div
-            class="post-media"
-            [attr.data-tone]="cardTone(i)"
-            (dblclick)="doubleTapLike(w)"
-          >
-            @if (burstId() === w.id) {
-              <span class="heart-burst" nz-icon nzType="heart" nzTheme="fill" aria-hidden="true"></span>
-            }
-            <div class="media-head">
-              <h3>{{ w.name }}</h3>
-              <p class="media-stats">
-                {{ workoutMinutes(w) }} mins · {{ w.exercises.length }} exercises · ~{{ workoutKcal(w) }} kcal
-              </p>
-              <div class="muscle-row">
-                @for (group of getMuscleGroups(w); track group) {
-                  <span class="muscle-chip" [attr.data-tone]="muscleTone(group)">{{ group }}</span>
-                }
-              </div>
-            </div>
-            <ul class="exercise-preview">
-              @for (ex of w.exercises | slice: 0 : 4; track $index) {
-                <li>
-                  <span class="exercise-name">{{ ex.exerciseName }}</span>
-                  <span class="exercise-detail">{{ ex.sets }}×{{ ex.reps }}@if (ex.weight > 0) { · {{ formatWeight(ex.weight) }}}</span>
-                </li>
-              }
-              @if (w.exercises.length > 4) {
-                <li class="more-row">+ {{ w.exercises.length - 4 }} more exercises</li>
-              }
-            </ul>
-          </div>
-
-          <!-- Actiuni: like / comment / save -->
-          <div class="post-actions">
-            <button
-              type="button"
-              class="action-btn like-btn"
-              [class.liked]="w.likedByMe"
-              [attr.aria-label]="w.likedByMe ? 'Unlike' : 'Like'"
-              (click)="toggleLike(w)"
-            >
-              <span nz-icon nzType="heart" [nzTheme]="w.likedByMe ? 'fill' : 'outline'"></span>
-              @if (w.likeCount > 0) { <span class="count">{{ w.likeCount }}</span> }
-            </button>
-            <button
-              type="button"
-              class="action-btn"
-              aria-label="Comments"
-              (click)="toggleComments(w.id)"
-            >
-              <span nz-icon nzType="message"></span>
-              @if (w.comments.length > 0) { <span class="count">{{ w.comments.length }}</span> }
-            </button>
-            <button
-              type="button"
-              class="action-btn save-action"
-              aria-label="Save to my workouts"
-              [disabled]="savingIds().has(w.id)"
-              (click)="saveToMyWorkouts(w)"
-            >
-              <span nz-icon [nzType]="savingIds().has(w.id) ? 'loading' : 'download'"></span>
-              @if (w.saveCount > 0) { <span class="count">{{ w.saveCount }}</span> }
-            </button>
-          </div>
-
-          <!-- Caption -->
-          @if (w.description) {
-            <p class="post-caption"><strong>{{ w.authorName }}</strong> {{ w.description }}</p>
-          }
-
-          <!-- Comentarii -->
-          @if (w.comments.length > 0) {
-            <div class="post-comments">
-              @if (w.comments.length > 2 && !expandedComments().has(w.id)) {
-                <button type="button" class="view-all" (click)="toggleComments(w.id)">
-                  View all {{ w.comments.length }} comments
-                </button>
-              }
-              @for (c of (expandedComments().has(w.id) ? w.comments : w.comments.slice(-2)); track c.id) {
-                <div class="comment">
-                  <p><strong>{{ c.authorName }}</strong> {{ c.text }}</p>
-                  <div class="comment-side">
-                    <small>{{ timeAgo(c.createdAt) }}</small>
-                    @if (canDeleteComment(w, c.authorId)) {
-                      <button
-                        type="button"
-                        class="comment-delete"
-                        aria-label="Delete comment"
-                        (click)="deleteComment(w, c.id)"
-                      >×</button>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-          }
-
-          <!-- Adauga comentariu -->
-          <div class="comment-composer">
-            <input
-              type="text"
-              maxlength="300"
-              placeholder="Add a comment..."
-              [ngModel]="draftFor(w.id)"
-              (ngModelChange)="setDraft(w.id, $event)"
-              (keyup.enter)="postComment(w)"
-            />
-            @if (draftFor(w.id).trim()) {
-              <button type="button" class="post-comment-btn" (click)="postComment(w)">Post</button>
-            }
-          </div>
-        </article>
+      @if (tab() === 'following') {
+        <strong>Your Following feed is empty</strong>
+        <p>Follow athletes from their posts or profiles and their routines will show up here.</p>
+      } @else if (search().trim() || muscle() || maxMinutes()) {
+        <strong>No routines match your filters</strong>
+        <p>Try a different muscle group, duration or search term.</p>
+      } @else {
+        <strong>No community workouts yet</strong>
+        <p>Be the first to share a routine with everyone.</p>
+        <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
+          <span nz-icon nzType="plus"></span>
+          Share workout
+        </button>
       }
     </div>
+  } @else {
+
+    <!-- FitTrack Picks -->
+    @if (showPicks()) {
+      <div class="picks-section">
+        <div class="picks-heading">
+          <span class="picks-eyebrow">FitTrack Picks</span>
+          <span class="picks-sub">Most saved this month</span>
+        </div>
+        <div class="picks-row">
+          @for (p of picks(); track p.id; let i = $index) {
+            <button type="button" class="pick-card" [attr.data-tone]="cardTone(i)" (click)="openAuthor(p.authorId)">
+              <strong class="pick-name">{{ p.name }}</strong>
+              <span class="pick-meta">{{ p.estimatedMinutes }} min · {{ p.exercises.length }} ex</span>
+              <span class="pick-author">
+                <span class="author-avatar tiny">{{ authorInitials(p.authorName) }}</span>
+                {{ p.authorName }}
+              </span>
+              <span class="pick-saves"><span nz-icon nzType="download"></span>{{ p.saveCount }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="feed">
+      @for (w of feed(); track w.id; let i = $index) {
+        <ng-container
+          [ngTemplateOutlet]="postCard"
+          [ngTemplateOutletContext]="{ w, i, inProfile: false }"
+        />
+      }
+    </div>
+
+    <!-- santinela pentru infinite scroll -->
+    <div #feedSentinel class="feed-sentinel" aria-hidden="true"></div>
+    @if (loadingMore()) {
+      <div class="loading-more"><nz-spin nzSimple></nz-spin></div>
+    } @else if (!hasMore() && feed().length > 3) {
+      <p class="feed-end">You're all caught up 🎉</p>
+    }
+  }
   }
 </div>
+
+<!-- ===================== TEMPLATE POSTARE ===================== -->
+<ng-template #postCard let-wu="w" let-iu="i" let-inProfile="inProfile">
+  @let w = asPost(wu);
+  @let i = asIndex(iu);
+  <article class="post">
+    <header class="post-header">
+      <button type="button" class="author-link" (click)="!inProfile && openAuthor(w.authorId)">
+        <span class="author-avatar">{{ authorInitials(w.authorName) }}</span>
+        <span class="post-author">
+          <strong>{{ w.authorName }}</strong>
+          <small>{{ timeAgo(w.createdAt) }}</small>
+        </span>
+      </button>
+      @if (w.authorId !== myUid && !w.authorFollowedByMe && !inProfile) {
+        <button type="button" class="follow-btn" (click)="toggleFollow(w.authorId)">Follow</button>
+      }
+      @if (w.authorId === myUid) {
+        <button
+          type="button"
+          class="post-menu"
+          aria-label="Delete post"
+          nz-popconfirm
+          nzPopconfirmTitle="Delete this post?"
+          nzOkText="Delete"
+          [nzOkDanger]="true"
+          (nzOnConfirm)="deletePost(w)"
+        >
+          <span nz-icon nzType="delete"></span>
+        </button>
+      }
+    </header>
+
+    <div class="post-media" [attr.data-tone]="cardTone(i)" (dblclick)="doubleTapLike(w)">
+      @if (burstId() === w.id) {
+        <span class="heart-burst" nz-icon nzType="heart" nzTheme="fill" aria-hidden="true"></span>
+      }
+      <div class="media-head">
+        <div class="media-badges">
+          <span class="difficulty-chip" [attr.data-tone]="difficultyTone(w.difficulty)">{{ w.difficulty }}</span>
+        </div>
+        <h3>{{ w.name }}</h3>
+        <p class="media-stats">
+          {{ w.estimatedMinutes }} mins · {{ w.exercises.length }} exercises · ~{{ workoutKcal(w) }} kcal
+        </p>
+        <div class="muscle-row">
+          @for (group of getMuscleGroups(w); track group) {
+            <span class="muscle-chip" [attr.data-tone]="muscleTone(group)">{{ group }}</span>
+          }
+        </div>
+      </div>
+      <ul class="exercise-preview">
+        @for (ex of w.exercises | slice: 0 : 4; track $index) {
+          <li>
+            <span class="exercise-name">{{ ex.exerciseName }}</span>
+            <span class="exercise-detail">{{ ex.sets }}×{{ ex.reps }}@if (ex.weight > 0) { · {{ formatWeight(ex.weight) }}}</span>
+          </li>
+        }
+        @if (w.exercises.length > 4) {
+          <li class="more-row">+ {{ w.exercises.length - 4 }} more exercises</li>
+        }
+      </ul>
+    </div>
+
+    <div class="post-actions">
+      <button
+        type="button"
+        class="action-btn like-btn"
+        [class.liked]="w.likedByMe"
+        [attr.aria-label]="w.likedByMe ? 'Unlike' : 'Like'"
+        (click)="toggleLike(w)"
+      >
+        <span nz-icon nzType="heart" [nzTheme]="w.likedByMe ? 'fill' : 'outline'"></span>
+        @if (w.likeCount > 0) { <span class="count">{{ w.likeCount }}</span> }
+      </button>
+      <button type="button" class="action-btn" aria-label="Comments" (click)="toggleComments(w.id)">
+        <span nz-icon nzType="message"></span>
+        @if (w.comments.length > 0) { <span class="count">{{ w.comments.length }}</span> }
+      </button>
+      <button
+        type="button"
+        class="action-btn save-action"
+        aria-label="Save to my workouts"
+        [disabled]="savingIds().has(w.id)"
+        (click)="saveToMyWorkouts(w)"
+      >
+        <span nz-icon [nzType]="savingIds().has(w.id) ? 'loading' : 'download'"></span>
+        @if (w.saveCount > 0) { <span class="count">{{ w.saveCount }}</span> }
+      </button>
+    </div>
+
+    @if (w.description) {
+      <p class="post-caption"><strong>{{ w.authorName }}</strong> {{ w.description }}</p>
+    }
+
+    @if (w.comments.length > 0) {
+      <div class="post-comments">
+        @if (w.comments.length > 2 && !expandedComments().has(w.id)) {
+          <button type="button" class="view-all" (click)="toggleComments(w.id)">
+            View all {{ w.comments.length }} comments
+          </button>
+        }
+        @for (c of (expandedComments().has(w.id) ? w.comments : w.comments.slice(-2)); track c.id) {
+          <div class="comment">
+            <p><strong>{{ c.authorName }}</strong> {{ c.text }}</p>
+            <div class="comment-side">
+              <small>{{ timeAgo(c.createdAt) }}</small>
+              @if (canDeleteComment(w, c.authorId)) {
+                <button
+                  type="button"
+                  class="comment-delete"
+                  aria-label="Delete comment"
+                  (click)="deleteComment(w, c.id)"
+                >×</button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="comment-composer">
+      <input
+        type="text"
+        maxlength="300"
+        placeholder="Add a comment..."
+        [ngModel]="draftFor(w.id)"
+        (ngModelChange)="setDraft(w.id, $event)"
+        (keyup.enter)="postComment(w)"
+      />
+      @if (draftFor(w.id).trim()) {
+        <button type="button" class="post-comment-btn" (click)="postComment(w)">Post</button>
+      }
+    </div>
+  </article>
+</ng-template>
 
 <app-workout-modal
   [visible]="shareModalVisible()"

@@ -27,11 +27,14 @@ export interface CommunityComment {
   createdAt: string;
 }
 
+export type CommunityDifficulty = 'Beginner' | 'Intermediate' | 'Advanced';
+
 export interface CommunityWorkout {
   id: string;
   originalWorkoutId?: string;
   authorId: string;
   authorName: string;
+  authorFollowedByMe: boolean;
   name: string;
   description: string;
   exercises: ExerciseLog[];
@@ -39,7 +42,19 @@ export interface CommunityWorkout {
   likeCount: number;
   likedByMe: boolean;
   saveCount: number;
+  estimatedMinutes: number;
+  difficulty: CommunityDifficulty;
   comments: CommunityComment[];
+}
+
+export interface CommunityAuthor {
+  uid: string;
+  name: string;
+  postCount: number;
+  totalLikes: number;
+  totalSaves: number;
+  followers: number;
+  followedByMe: boolean;
 }
 
 

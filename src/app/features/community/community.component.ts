@@ -1,4 +1,14 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -7,16 +17,20 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 
-import { CommunityService } from '../../core/services/community.service';
+import { CommunityService, FeedTab } from '../../core/services/community.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { AuthService } from '../../core/services/auth.service';
-import { CommunityWorkout, Workout } from '../../core/models/workout.model';
+import {
+  CommunityAuthor,
+  CommunityWorkout,
+  MUSCLE_GROUPS,
+  MuscleGroup,
+  Workout,
+} from '../../core/models/workout.model';
 import { ProfileService } from '../../core/services/profile.service';
 import { displayWeight } from '../../core/utils/units';
-import { estimateSessionCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
+import { estimateSessionCalories } from '../../core/utils/workout-calories';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
-
-type FeedSort = 'recent' | 'popular';
 
 @Component({
   selector: 'app-community',
@@ -33,50 +47,168 @@ type FeedSort = 'recent' | 'popular';
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],
 })
-export class CommunityComponent implements OnInit {
+export class CommunityComponent implements OnInit, OnDestroy {
   private readonly communityService = inject(CommunityService);
   private readonly workoutService = inject(WorkoutService);
   private readonly profileService = inject(ProfileService);
   private readonly authService = inject(AuthService);
   private readonly message = inject(NzMessageService);
 
+  readonly muscleGroups = MUSCLE_GROUPS;
+  readonly durations = [
+    { label: 'Any length', value: null },
+    { label: '< 20 min', value: 20 },
+    { label: '< 40 min', value: 40 },
+  ];
+
+  readonly feed = this.communityService.communityWorkouts;
+  readonly picks = this.communityService.picks;
   readonly loading = this.communityService.loading;
+  readonly loadingMore = this.communityService.loadingMore;
+  readonly hasMore = this.communityService.hasMore;
   readonly units = this.profileService.units;
 
   readonly savingIds = signal<Set<string>>(new Set());
   readonly shareModalVisible = signal(false);
   readonly loadError = signal(false);
 
-  // feed: sortare Recent / Popular
-  readonly sort = signal<FeedSort>('recent');
-  readonly feed = computed(() => {
-    const list = [...this.communityService.communityWorkouts()];
-    if (this.sort() === 'popular') {
-      list.sort((a, b) => b.likeCount - a.likeCount || b.saveCount - a.saveCount);
-    }
-    return list;
-  });
+  // filtrele feed-ului
+  readonly tab = signal<FeedTab>('foryou');
+  readonly muscle = signal<MuscleGroup | null>(null);
+  readonly maxMinutes = signal<number | null>(null);
+  readonly search = signal('');
+  private searchDebounce: ReturnType<typeof setTimeout> | null = null;
 
-  // comentarii: care postari sunt extinse + draft-ul per postare
+  // picks apar doar pe For You, fara filtre active
+  readonly showPicks = computed(
+    () =>
+      this.tab() === 'foryou' &&
+      !this.muscle() &&
+      !this.maxMinutes() &&
+      !this.search().trim() &&
+      this.picks().length > 0,
+  );
+
+  // profilul de autor deschis peste feed
+  readonly authorView = signal<{ author: CommunityAuthor; posts: CommunityWorkout[] } | null>(null);
+  readonly authorLoading = signal(false);
+
+  // comentarii extinse + draft-uri + inima de dublu-tap
   readonly expandedComments = signal<Set<string>>(new Set());
   readonly commentDrafts = signal<Record<string, string>>({});
-  // inima animata la dublu-tap, per postare
   readonly burstId = signal<string | null>(null);
+
+  // santinela apare abia dupa ce se incarca feed-ul, deci o urmarim ca signal
+  private readonly sentinel = viewChild<ElementRef<HTMLElement>>('feedSentinel');
+  private observer?: IntersectionObserver;
+
+  constructor() {
+    // infinite scroll: cand santinela devine vizibila, incarcam pagina urmatoare
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries.some((e) => e.isIntersecting) &&
+          this.hasMore() &&
+          !this.loading() &&
+          !this.loadingMore()
+        ) {
+          this.communityService.loadMore().subscribe({ error: () => {} });
+        }
+      },
+      { rootMargin: '400px' },
+    );
+    effect(() => {
+      const el = this.sentinel()?.nativeElement;
+      this.observer?.disconnect();
+      if (el) this.observer?.observe(el);
+    });
+  }
 
   get myUid(): string {
     return this.authService.currentUserId;
   }
 
   ngOnInit(): void {
-    this.loadCommunity();
+    this.reload();
+    this.communityService.loadPicks().subscribe({ error: () => {} });
   }
 
-  // fara toast: o eroare tranzitorie (ex. token inca neincarcat la boot) afiseaza
-  // o stare inline cu buton de reincercare, nu o notificare suparatoare
-  loadCommunity(): void {
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+    if (this.searchDebounce) clearTimeout(this.searchDebounce);
+  }
+
+  /* ----------------------------- feed + filtre ----------------------------- */
+
+  reload(): void {
     this.loadError.set(false);
-    this.communityService.loadCommunityWorkouts().subscribe({
-      error: () => this.loadError.set(true),
+    this.communityService
+      .loadFeed({
+        tab: this.tab(),
+        muscle: this.muscle(),
+        q: this.search(),
+        maxMinutes: this.maxMinutes(),
+      })
+      .subscribe({ error: () => this.loadError.set(true) });
+  }
+
+  setTab(tab: FeedTab): void {
+    if (this.tab() === tab) return;
+    this.tab.set(tab);
+    this.reload();
+  }
+
+  setMuscle(muscle: MuscleGroup | null): void {
+    this.muscle.set(this.muscle() === muscle ? null : muscle);
+    this.reload();
+  }
+
+  setDuration(value: number | null): void {
+    this.maxMinutes.set(value);
+    this.reload();
+  }
+
+  onSearchChange(value: string): void {
+    this.search.set(value);
+    if (this.searchDebounce) clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => this.reload(), 350);
+  }
+
+  /* ----------------------------- profil autor ----------------------------- */
+
+  openAuthor(uid: string): void {
+    this.authorLoading.set(true);
+    this.communityService.loadAuthor(uid).subscribe({
+      next: (data) => {
+        this.authorView.set(data);
+        this.authorLoading.set(false);
+      },
+      error: () => {
+        this.authorLoading.set(false);
+        this.message.error('Could not load profile');
+      },
+    });
+  }
+
+  closeAuthor(): void {
+    this.authorView.set(null);
+  }
+
+  toggleFollow(uid: string): void {
+    this.communityService.toggleFollow(uid).subscribe({
+      next: ({ following, followers }) => {
+        const view = this.authorView();
+        if (view && view.author.uid === uid) {
+          this.authorView.set({
+            ...view,
+            author: { ...view.author, followedByMe: following, followers },
+            posts: view.posts.map((p) => ({ ...p, authorFollowedByMe: following })),
+          });
+        }
+        // pe tab-ul Following, un unfollow trebuie sa scoata autorul din feed
+        if (this.tab() === 'following' && !following) this.reload();
+      },
+      error: () => this.message.error('Could not update follow'),
     });
   }
 
@@ -84,11 +216,11 @@ export class CommunityComponent implements OnInit {
 
   toggleLike(cw: CommunityWorkout): void {
     this.communityService.toggleLike(cw.id).subscribe({
+      next: (updated) => this.patchAuthorView(updated),
       error: () => this.message.error('Could not update like'),
     });
   }
 
-  // dublu-tap pe "media" = like, ca pe Instagram (doar like, nu unlike)
   doubleTapLike(cw: CommunityWorkout): void {
     this.burstId.set(cw.id);
     setTimeout(() => this.burstId.set(null), 900);
@@ -115,10 +247,10 @@ export class CommunityComponent implements OnInit {
     const text = this.draftFor(cw.id).trim();
     if (!text) return;
     this.communityService.addComment(cw.id, text).subscribe({
-      next: () => {
+      next: (updated) => {
         this.setDraft(cw.id, '');
-        // dupa ce comentezi, vezi lista completa
         this.expandedComments.update((set) => new Set(set).add(cw.id));
+        this.patchAuthorView(updated);
       },
       error: () => this.message.error('Could not post comment'),
     });
@@ -126,19 +258,40 @@ export class CommunityComponent implements OnInit {
 
   deleteComment(cw: CommunityWorkout, commentId: string): void {
     this.communityService.deleteComment(cw.id, commentId).subscribe({
+      next: (updated) => this.patchAuthorView(updated),
       error: () => this.message.error('Could not delete comment'),
     });
   }
 
   deletePost(cw: CommunityWorkout): void {
     this.communityService.deletePost(cw.id).subscribe({
-      next: () => this.message.success('Post deleted'),
+      next: () => {
+        this.message.success('Post deleted');
+        const view = this.authorView();
+        if (view) {
+          this.authorView.set({
+            ...view,
+            author: { ...view.author, postCount: view.author.postCount - 1 },
+            posts: view.posts.filter((p) => p.id !== cw.id),
+          });
+        }
+      },
       error: () => this.message.error('Could not delete post'),
     });
   }
 
   canDeleteComment(cw: CommunityWorkout, authorId: string): boolean {
     return authorId === this.myUid || cw.authorId === this.myUid;
+  }
+
+  // postarile din vederea de profil trebuie sa reflecte like-urile/comentariile noi
+  private patchAuthorView(updated: CommunityWorkout): void {
+    const view = this.authorView();
+    if (!view) return;
+    this.authorView.set({
+      ...view,
+      posts: view.posts.map((p) => (p.id === updated.id ? updated : p)),
+    });
   }
 
   /* --------------------------- save & share --------------------------- */
@@ -158,39 +311,50 @@ export class CommunityComponent implements OnInit {
     this.workoutService.addWorkout(newWorkout).subscribe({
       next: () => {
         this.message.success('Saved to your workouts!');
-        this.communityService.registerSave(cw.id).subscribe();
+        this.communityService.registerSave(cw.id).subscribe({
+          next: (updated) => this.patchAuthorView(updated),
+        });
         this.savingIds.update((set) => {
-          const newSet = new Set(set);
-          newSet.delete(cw.id);
-          return newSet;
+          const next = new Set(set);
+          next.delete(cw.id);
+          return next;
         });
       },
       error: () => {
         this.message.error('Failed to save workout');
         this.savingIds.update((set) => {
-          const newSet = new Set(set);
-          newSet.delete(cw.id);
-          return newSet;
+          const next = new Set(set);
+          next.delete(cw.id);
+          return next;
         });
       },
     });
   }
 
   onShareSave(workout: Partial<Workout>) {
-    const payload = {
-      name: workout.name || 'My workout',
-      description: workout.notes || '',
-      exercises: workout.exercises || []
-    };
+    const exercises = workout.exercises || [];
+    const description = (workout.notes || '').trim();
+    // pragurile de calitate, validate si pe server
+    if (exercises.length < 2) {
+      this.message.error('Add at least 2 exercises before sharing.');
+      return;
+    }
+    if (description.length < 10) {
+      this.message.error('Add a short description (at least 10 characters) so others know what to expect.');
+      return;
+    }
 
-    this.communityService.publishWorkout(payload).subscribe({
-      next: () => {
-        this.shareModalVisible.set(false);
-        this.message.success('Workout shared to community!');
-        this.communityService.loadCommunityWorkouts().subscribe();
-      },
-      error: () => this.message.error('Failed to share workout')
-    });
+    this.communityService
+      .publishWorkout({ name: workout.name || 'My workout', description, exercises })
+      .subscribe({
+        next: () => {
+          this.shareModalVisible.set(false);
+          this.message.success('Workout shared to community!');
+          this.reload();
+          this.communityService.loadPicks().subscribe({ error: () => {} });
+        },
+        error: () => this.message.error('Failed to share workout'),
+      });
   }
 
   /* ------- helpere de prezentare, in limbajul vizual al aplicatiei ------- */
@@ -210,12 +374,17 @@ export class CommunityComponent implements OnInit {
     return `${val} ${unitStr}`;
   }
 
-  workoutKcal(cw: CommunityWorkout): number {
-    return estimateSessionCalories(cw.exercises, this.profileService.weightKg());
+  // cast-uri pentru contextul ng-template (strict templates)
+  asPost(value: unknown): CommunityWorkout {
+    return value as CommunityWorkout;
   }
 
-  workoutMinutes(cw: CommunityWorkout): number {
-    return estimateSessionMinutes(cw.exercises);
+  asIndex(value: unknown): number {
+    return value as number;
+  }
+
+  workoutKcal(cw: CommunityWorkout): number {
+    return estimateSessionCalories(cw.exercises, this.profileService.weightKg());
   }
 
   authorInitials(name: string): string {
@@ -246,6 +415,10 @@ export class CommunityComponent implements OnInit {
     return ['blue', 'purple', 'cyan', 'green'][index % 4];
   }
 
+  difficultyTone(difficulty: string): string {
+    return { Beginner: 'green', Intermediate: 'blue', Advanced: 'pink' }[difficulty] ?? 'graphite';
+  }
+
   // aceleasi culori pe grupe musculare ca in History
   private readonly muscleTones: Record<string, string> = {
     Chest: 'blue',
@@ -260,9 +433,5 @@ export class CommunityComponent implements OnInit {
 
   muscleTone(muscleGroup: string): string {
     return this.muscleTones[muscleGroup] ?? 'graphite';
-  }
-
-  trackPost(_i: number, cw: CommunityWorkout): string {
-    return cw.id;
   }
 }
