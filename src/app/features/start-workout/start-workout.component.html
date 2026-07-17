@@ -122,18 +122,17 @@
             </span>
           </button>
 
-          <!-- Planuri oficiale (ex. Arnold) -->
+          <!-- Hub-ul planurilor oficiale ale legendelor -->
           <button
             type="button"
             class="community-promo plan-promo"
-            *ngFor="let plan of officialPlans"
-            [attr.data-tone]="plan.tone"
-            (click)="openPlan(plan)"
+            data-tone="purple"
+            (click)="openLegends()"
           >
             <div class="community-promo-copy">
               <span class="promo-badge">New</span>
-              <h2>{{ plan.name }}</h2>
-              <p>{{ plan.tagline }}</p>
+              <h2>Legends' Official Plans</h2>
+              <p>Arnold, Cbum, Mentzer & more — train like the greats.</p>
             </div>
             <span class="promo-arrow" aria-hidden="true">
               <span nz-icon nzType="trophy"></span>
@@ -262,17 +261,54 @@
   </ng-container>
 </nz-drawer>
 
-<!-- Drawer pentru planurile oficiale (ex. Arnold) -->
+<!-- Drawer-ul Legends' Plans: lista de staruri sau planul selectat -->
 <nz-drawer
-  [nzVisible]="activePlan() !== null"
+  [nzVisible]="legendsOpen()"
   [nzWidth]="'100%'"
   [nzBodyStyle]="{ padding: '0', background: '#f5f5f7' }"
   nzPlacement="right"
-  [nzTitle]="activePlan()?.name ?? ''"
+  [nzTitle]="activePlan()?.name ?? 'Legends\' Plans'"
   (nzOnClose)="closePlan()"
 >
   <ng-container *nzDrawerContent>
+    <!-- Nivelul 1: hub-ul cu toate legendele -->
+    <div class="plan-drawer legends-hub" *ngIf="activePlan() === null">
+      <div class="legends-intro">
+        <span class="plan-hero-badge">
+          <span nz-icon nzType="trophy"></span>
+          Official plans
+        </span>
+        <h2>Train like the greats</h2>
+        <p>Authentic training styles from the legends of bodybuilding. Pick an athlete, pick a day, hit start.</p>
+      </div>
+      <div class="legends-list">
+        <button
+          type="button"
+          class="legend-card"
+          *ngFor="let plan of officialPlans"
+          [attr.data-tone]="plan.tone"
+          (click)="openPlan(plan)"
+        >
+          <span class="legend-avatar" [attr.data-tone]="plan.tone">{{ athleteInitials(plan.athlete) }}</span>
+          <span class="legend-copy">
+            <strong>{{ plan.athlete }}</strong>
+            <span class="legend-title">{{ plan.title }}</span>
+            <span class="legend-tagline">{{ plan.tagline }}</span>
+          </span>
+          <span class="legend-side">
+            <span class="legend-count">{{ plan.routines.length }} routines</span>
+            <span class="legend-chevron" aria-hidden="true"></span>
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Nivelul 2: planul unei legende -->
     <div class="plan-drawer" *ngIf="activePlan() as plan">
+      <button type="button" class="legends-back" (click)="backToLegends()">
+        <span nz-icon nzType="arrow-left"></span>
+        All legends
+      </button>
       <div class="plan-hero" [attr.data-tone]="plan.tone">
         <span class="plan-hero-badge">
           <span nz-icon nzType="trophy"></span>

@@ -140,6 +140,30 @@
       linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(240, 230, 252, 0.6));
   }
 
+  &[data-tone='blue'] {
+    background:
+      radial-gradient(85% 140% at 90% 0%, rgba(10, 132, 255, 0.2), transparent 62%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(224, 240, 255, 0.6));
+  }
+
+  &[data-tone='cyan'] {
+    background:
+      radial-gradient(85% 140% at 90% 0%, rgba(100, 210, 255, 0.24), transparent 62%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(224, 246, 255, 0.6));
+  }
+
+  &[data-tone='green'] {
+    background:
+      radial-gradient(85% 140% at 90% 0%, rgba(52, 199, 89, 0.18), transparent 62%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(228, 248, 234, 0.6));
+  }
+
+  &[data-tone='pink'] {
+    background:
+      radial-gradient(85% 140% at 90% 0%, rgba(255, 45, 85, 0.16), transparent 62%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(255, 232, 238, 0.6));
+  }
+
   .plan-hero-badge {
     display: inline-flex;
     align-items: center;
@@ -220,6 +244,164 @@
 .plan-start.always {
   animation: none;
   margin-top: 14px;
+}
+
+/* ---------- hub-ul Legends' Plans ---------- */
+
+.legends-intro {
+  margin-bottom: 20px;
+  text-align: center;
+
+  h2 {
+    margin: 12px 0 6px;
+    font-size: clamp(24px, 3vw, 30px);
+    font-weight: 750;
+    letter-spacing: -0.032em;
+    color: #1d1d1f;
+  }
+
+  p {
+    max-width: 440px;
+    margin: 0 auto;
+    font-size: 14px;
+    line-height: 1.55;
+    color: #6e6e73;
+  }
+}
+
+.legends-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 22px;
+  box-shadow:
+    0 14px 34px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 20px 44px rgba(15, 23, 42, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+
+  &:active { transform: scale(0.99); }
+
+  &[data-tone='purple'] { background: radial-gradient(80% 130% at 92% 0%, rgba(175, 82, 222, 0.15), transparent 62%), rgba(255, 255, 255, 0.78); }
+  &[data-tone='blue'] { background: radial-gradient(80% 130% at 92% 0%, rgba(10, 132, 255, 0.15), transparent 62%), rgba(255, 255, 255, 0.78); }
+  &[data-tone='cyan'] { background: radial-gradient(80% 130% at 92% 0%, rgba(100, 210, 255, 0.2), transparent 62%), rgba(255, 255, 255, 0.78); }
+  &[data-tone='green'] { background: radial-gradient(80% 130% at 92% 0%, rgba(52, 199, 89, 0.14), transparent 62%), rgba(255, 255, 255, 0.78); }
+  &[data-tone='pink'] { background: radial-gradient(80% 130% at 92% 0%, rgba(255, 45, 85, 0.13), transparent 62%), rgba(255, 255, 255, 0.78); }
+}
+
+.legend-avatar {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  font-weight: 750;
+  color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+
+  &[data-tone='purple'] { background: linear-gradient(150deg, #bf5af2, #8e3bb5); }
+  &[data-tone='blue'] { background: linear-gradient(150deg, #1a86f0, #0071e3); }
+  &[data-tone='cyan'] { background: linear-gradient(150deg, #64d2ff, #2596a6); }
+  &[data-tone='green'] { background: linear-gradient(150deg, #34c759, #248a3d); }
+  &[data-tone='pink'] { background: linear-gradient(150deg, #ff2d55, #d70041); }
+}
+
+.legend-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+
+  strong {
+    font-size: 16px;
+    font-weight: 720;
+    letter-spacing: -0.02em;
+    color: #1d1d1f;
+  }
+
+  .legend-title {
+    font-size: 12px;
+    font-weight: 680;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8e3bb5;
+  }
+
+  .legend-tagline {
+    margin-top: 3px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: #6e6e73;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.legend-side {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+
+  .legend-count {
+    font-size: 11.5px;
+    font-weight: 650;
+    color: #86868b;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .legend-chevron {
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #a1a1a6;
+    border-top: 2px solid #a1a1a6;
+    transform: rotate(45deg);
+  }
+}
+
+.legends-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 16px;
+  padding: 9px 16px;
+  font-size: 13.5px;
+  font-weight: 640;
+  font-family: inherit;
+  color: #1d1d1f;
+  cursor: pointer;
+  border: none;
+  border-radius: 980px;
+  background: rgba(0, 0, 0, 0.05);
+  transition: background 0.15s ease;
+
+  &:hover { background: rgba(0, 0, 0, 0.09); }
 }
 
 .plan-heading {

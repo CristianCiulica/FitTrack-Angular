@@ -144,11 +144,13 @@ const PREDEFINED_ROUTINES: Routine[] = [
   }
 ];
 
-// planuri "oficiale": colectii de rutine cu identitate proprie, prezentate ca
-// promo-uri (in stilul Try community workouts) care deschid propriul drawer
+// planuri "oficiale" ale legendelor fitness-ului: colectii de rutine cu
+// identitate proprie, adunate intr-un hub deschis din promo-ul Legends' Plans
 interface OfficialPlan {
   id: string;
   name: string;
+  athlete: string;
+  title: string;
   tagline: string;
   description: string;
   tone: string;
@@ -159,6 +161,8 @@ const OFFICIAL_PLANS: OfficialPlan[] = [
   {
     id: 'arnold',
     name: 'Arnold Official Plan',
+    athlete: 'Arnold Schwarzenegger',
+    title: '7× Mr. Olympia',
     tagline: "The Austrian Oak's Golden Era split — 5 classic routines.",
     description:
       "Train like the 7x Mr. Olympia. Arnold's legendary high-volume split: chest & back supersets, brutal shoulder and arm days, and the famous Golden Six for full-body foundations.",
@@ -223,6 +227,215 @@ const OFFICIAL_PLANS: OfficialPlan[] = [
       },
     ],
   },
+  {
+    id: 'mentzer',
+    name: 'Mike Mentzer Heavy Duty',
+    athlete: 'Mike Mentzer',
+    title: 'Mr. Universe 1978',
+    tagline: 'High intensity, low volume — every set to absolute failure.',
+    description:
+      "Mentzer's Heavy Duty philosophy: brief, brutally intense workouts with few working sets taken beyond failure, then days of full recovery. The opposite of volume training — quality over quantity.",
+    tone: 'blue',
+    routines: [
+      {
+        name: 'Chest & Back HIT',
+        category: 'Heavy Duty',
+        exercises: [
+          { name: 'Incline Bench Press', sets: 2, reps: 8, weight: 70, muscleGroup: 'Chest' },
+          { name: 'Pec Deck Flys', sets: 2, reps: 8, weight: 50, muscleGroup: 'Chest' },
+          { name: 'Close-Grip Pulldowns', sets: 2, reps: 8, weight: 60, muscleGroup: 'Back' },
+          { name: 'Deadlifts', sets: 1, reps: 8, weight: 120, muscleGroup: 'Back' },
+        ],
+      },
+      {
+        name: 'Legs HIT',
+        category: 'Heavy Duty',
+        exercises: [
+          { name: 'Leg Extensions', sets: 2, reps: 10, weight: 50, muscleGroup: 'Legs' },
+          { name: 'Leg Press', sets: 2, reps: 10, weight: 200, muscleGroup: 'Legs' },
+          { name: 'Standing Calf Raises', sets: 2, reps: 12, weight: 70, muscleGroup: 'Legs' },
+        ],
+      },
+      {
+        name: 'Shoulders & Arms HIT',
+        category: 'Heavy Duty',
+        exercises: [
+          { name: 'Lateral Raises', sets: 2, reps: 10, weight: 12, muscleGroup: 'Shoulders' },
+          { name: 'Rear Delt Flys', sets: 2, reps: 10, weight: 10, muscleGroup: 'Shoulders' },
+          { name: 'Barbell Curls', sets: 1, reps: 8, weight: 35, muscleGroup: 'Arms' },
+          { name: 'Tricep Dips', sets: 2, reps: 8, weight: 20, muscleGroup: 'Arms' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'cbum',
+    name: 'Cbum Classic Plan',
+    athlete: 'Chris Bumstead',
+    title: '6× Classic Physique Mr. Olympia',
+    tagline: 'The modern classic physique split, straight from Cbum.',
+    description:
+      "Chris Bumstead's aesthetic-first training: controlled tempo, full range of motion and smart volume across a 5-day split. Built for that timeless Classic Physique look — proportion over pure mass.",
+    tone: 'cyan',
+    routines: [
+      {
+        name: 'Cbum Back Day',
+        category: 'Pull',
+        exercises: [
+          { name: 'Deadlifts', sets: 4, reps: 6, weight: 140, muscleGroup: 'Back' },
+          { name: 'Lat Pulldown', sets: 4, reps: 10, weight: 60, muscleGroup: 'Back' },
+          { name: 'T-Bar Rows', sets: 4, reps: 10, weight: 60, muscleGroup: 'Back' },
+          { name: 'Straight-Arm Pulldown', sets: 3, reps: 12, weight: 30, muscleGroup: 'Back' },
+          { name: 'Rear Delt Flys', sets: 3, reps: 15, weight: 10, muscleGroup: 'Shoulders' },
+        ],
+      },
+      {
+        name: 'Cbum Chest Day',
+        category: 'Push',
+        exercises: [
+          { name: 'Incline Dumbbell Press', sets: 4, reps: 10, weight: 32, muscleGroup: 'Chest' },
+          { name: 'Bench Press', sets: 4, reps: 8, weight: 90, muscleGroup: 'Chest' },
+          { name: 'Cable Flys', sets: 3, reps: 12, weight: 20, muscleGroup: 'Chest' },
+          { name: 'Weighted Dips', sets: 3, reps: 10, weight: 20, muscleGroup: 'Chest' },
+        ],
+      },
+      {
+        name: 'Cbum Quad Day',
+        category: 'Legs',
+        exercises: [
+          { name: 'Back Squats', sets: 4, reps: 8, weight: 140, muscleGroup: 'Legs' },
+          { name: 'Hack Squats', sets: 4, reps: 10, weight: 120, muscleGroup: 'Legs' },
+          { name: 'Leg Extensions', sets: 4, reps: 12, weight: 55, muscleGroup: 'Legs' },
+          { name: 'Walking Lunges', sets: 3, reps: 20, weight: 24, muscleGroup: 'Legs' },
+        ],
+      },
+      {
+        name: 'Cbum Shoulders & Arms',
+        category: 'Push',
+        exercises: [
+          { name: 'Dumbbell Shoulder Press', sets: 4, reps: 10, weight: 28, muscleGroup: 'Shoulders' },
+          { name: 'Lateral Raises', sets: 4, reps: 15, weight: 12, muscleGroup: 'Shoulders' },
+          { name: 'EZ-Bar Curls', sets: 4, reps: 10, weight: 30, muscleGroup: 'Arms' },
+          { name: 'Skull Crushers', sets: 4, reps: 10, weight: 30, muscleGroup: 'Arms' },
+        ],
+      },
+      {
+        name: 'Cbum Hamstrings & Glutes',
+        category: 'Legs',
+        exercises: [
+          { name: 'Romanian Deadlifts', sets: 4, reps: 10, weight: 100, muscleGroup: 'Legs' },
+          { name: 'Hip Thrusts', sets: 4, reps: 10, weight: 120, muscleGroup: 'Legs' },
+          { name: 'Leg Curls', sets: 4, reps: 12, weight: 45, muscleGroup: 'Legs' },
+          { name: 'Standing Calf Raises', sets: 4, reps: 15, weight: 60, muscleGroup: 'Legs' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'ronnie',
+    name: 'Ronnie Coleman Power Plan',
+    athlete: 'Ronnie Coleman',
+    title: '8× Mr. Olympia',
+    tagline: 'Yeah buddy! Heavy power-bodybuilding, lightweight baby!',
+    description:
+      "The King's power-bodybuilding: squat and deadlift heavy like a powerlifter, then pump like a bodybuilder. Massive compound lifts, serious volume, zero excuses — everybody wants to be a bodybuilder...",
+    tone: 'green',
+    routines: [
+      {
+        name: 'Heavy Back & Deads',
+        category: 'Power day',
+        exercises: [
+          { name: 'Deadlifts', sets: 5, reps: 5, weight: 180, muscleGroup: 'Back' },
+          { name: 'Barbell Rows', sets: 4, reps: 8, weight: 90, muscleGroup: 'Back' },
+          { name: 'T-Bar Rows', sets: 4, reps: 10, weight: 70, muscleGroup: 'Back' },
+          { name: 'Lat Pulldown', sets: 3, reps: 12, weight: 65, muscleGroup: 'Back' },
+        ],
+      },
+      {
+        name: 'Heavy Squat Day',
+        category: 'Power day',
+        exercises: [
+          { name: 'Back Squats', sets: 5, reps: 5, weight: 180, muscleGroup: 'Legs' },
+          { name: 'Front Squats', sets: 4, reps: 8, weight: 100, muscleGroup: 'Legs' },
+          { name: 'Leg Press', sets: 4, reps: 12, weight: 300, muscleGroup: 'Legs' },
+          { name: 'Leg Curls', sets: 3, reps: 12, weight: 45, muscleGroup: 'Legs' },
+        ],
+      },
+      {
+        name: 'Chest & Triceps Power',
+        category: 'Push',
+        exercises: [
+          { name: 'Bench Press', sets: 5, reps: 6, weight: 120, muscleGroup: 'Chest' },
+          { name: 'Incline Dumbbell Press', sets: 4, reps: 10, weight: 40, muscleGroup: 'Chest' },
+          { name: 'Cable Flys', sets: 3, reps: 12, weight: 22, muscleGroup: 'Chest' },
+          { name: 'Close-Grip Bench Press', sets: 4, reps: 8, weight: 80, muscleGroup: 'Arms' },
+        ],
+      },
+      {
+        name: 'Shoulders & Biceps Pump',
+        category: 'Pump day',
+        exercises: [
+          { name: 'Military Press', sets: 4, reps: 8, weight: 60, muscleGroup: 'Shoulders' },
+          { name: 'Lateral Raises', sets: 4, reps: 12, weight: 14, muscleGroup: 'Shoulders' },
+          { name: 'Barbell Curls', sets: 4, reps: 10, weight: 40, muscleGroup: 'Arms' },
+          { name: 'Hammer Curls', sets: 3, reps: 12, weight: 18, muscleGroup: 'Arms' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'dorian',
+    name: 'Dorian Yates Blood & Guts',
+    athlete: 'Dorian Yates',
+    title: '6× Mr. Olympia',
+    tagline: 'One all-out working set. Nothing left in the tank.',
+    description:
+      "The Shadow's Blood & Guts training: warm up, then ONE working set per exercise past failure — forced reps, drop sets, total war. Short, savage sessions that changed bodybuilding forever.",
+    tone: 'pink',
+    routines: [
+      {
+        name: 'Blood & Guts Back',
+        category: 'HIT',
+        exercises: [
+          { name: 'Lat Pulldown', sets: 2, reps: 8, weight: 70, muscleGroup: 'Back' },
+          { name: 'Barbell Rows', sets: 2, reps: 8, weight: 100, muscleGroup: 'Back' },
+          { name: 'Seated Cable Rows', sets: 1, reps: 8, weight: 80, muscleGroup: 'Back' },
+          { name: 'Deadlifts', sets: 1, reps: 8, weight: 150, muscleGroup: 'Back' },
+        ],
+      },
+      {
+        name: 'Blood & Guts Chest & Delts',
+        category: 'HIT',
+        exercises: [
+          { name: 'Incline Bench Press', sets: 2, reps: 8, weight: 90, muscleGroup: 'Chest' },
+          { name: 'Machine Chest Press', sets: 1, reps: 8, weight: 80, muscleGroup: 'Chest' },
+          { name: 'Cable Flys', sets: 1, reps: 10, weight: 25, muscleGroup: 'Chest' },
+          { name: 'Lateral Raises', sets: 2, reps: 10, weight: 15, muscleGroup: 'Shoulders' },
+        ],
+      },
+      {
+        name: 'Blood & Guts Legs',
+        category: 'HIT',
+        exercises: [
+          { name: 'Leg Extensions', sets: 2, reps: 12, weight: 55, muscleGroup: 'Legs' },
+          { name: 'Leg Press', sets: 2, reps: 10, weight: 250, muscleGroup: 'Legs' },
+          { name: 'Hack Squats', sets: 1, reps: 10, weight: 120, muscleGroup: 'Legs' },
+          { name: 'Leg Curls', sets: 2, reps: 10, weight: 50, muscleGroup: 'Legs' },
+          { name: 'Standing Calf Raises', sets: 2, reps: 12, weight: 80, muscleGroup: 'Legs' },
+        ],
+      },
+      {
+        name: 'Blood & Guts Arms',
+        category: 'HIT',
+        exercises: [
+          { name: 'Barbell Curls', sets: 2, reps: 8, weight: 40, muscleGroup: 'Arms' },
+          { name: 'Preacher Curls', sets: 1, reps: 8, weight: 30, muscleGroup: 'Arms' },
+          { name: 'Tricep Pushdowns', sets: 2, reps: 10, weight: 35, muscleGroup: 'Arms' },
+          { name: 'Weighted Dips', sets: 1, reps: 8, weight: 25, muscleGroup: 'Arms' },
+        ],
+      },
+    ],
+  },
 ];
 
 @Component({
@@ -258,7 +471,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   selectedRoutineKey = signal('predefined-0');
   modalVisible = signal(false);
   communityDrawerVisible = signal(false);
-  // planul oficial deschis in drawer (ex. Arnold)
+  // hub-ul Legends' Plans: drawer-ul + planul selectat in el (null = lista de staruri)
+  legendsOpen = signal(false);
   activePlan = signal<OfficialPlan | null>(null);
 
   currentRoutine = signal<Routine>({ name: 'Custom Workout', exercises: [] });
@@ -432,12 +646,29 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.communityDrawerVisible.set(true);
   }
 
+  openLegends() {
+    this.activePlan.set(null);
+    this.legendsOpen.set(true);
+  }
+
   openPlan(plan: OfficialPlan) {
     this.activePlan.set(plan);
   }
 
-  closePlan() {
+  backToLegends() {
     this.activePlan.set(null);
+  }
+
+  closePlan() {
+    this.legendsOpen.set(false);
+    this.activePlan.set(null);
+  }
+
+  athleteInitials(name: string): string {
+    const parts = name.trim().split(/\s+/);
+    return parts.length === 1
+      ? parts[0].charAt(0).toUpperCase()
+      : (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
   }
 
   // porneste direct o rutina dintr-un plan oficial (inchide drawer-ul intai)
