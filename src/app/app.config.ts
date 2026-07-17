@@ -40,6 +40,7 @@ import {
   MessageOutline,
   ReloadOutline,
   ArrowLeftOutline,
+  FilterOutline,
 } from '@ant-design/icons-angular/icons';
 import { getFirebaseConfig } from './core/config/runtime-config';
 import { routes } from './app.routes';
@@ -97,6 +98,7 @@ export const appConfig: ApplicationConfig = {
       MessageOutline,
       ReloadOutline,
       ArrowLeftOutline,
+      FilterOutline,
     ]),
     { provide: NZ_I18N, useValue: en_US },
   ],

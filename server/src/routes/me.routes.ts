@@ -22,14 +22,29 @@ const updateProfileSchema = z.object({
 router.get('/', async (req, res, next) => {
   try {
     const user = req.user!;
-    const profile = await UserProfile.findOneAndUpdate(
-      { uid: user.uid },
-      {
-        $set: { email: user.email },
-        $setOnInsert: { displayName: user.displayName, uid: user.uid },
-      },
-      { new: true, upsert: true },
-    );
+
+    let profile = await UserProfile.findOne({ uid: user.uid });
+    if (!profile) {
+      // Profil inexistent = prima logare SAU un request intarziat (ex. retry) cu
+      // un token ramas valid dupa stergerea contului. Tokenurile Firebase nu se
+      // invalideaza la deleteUser, asa ca fara verificarea asta un request
+      // intarziat ar re-crea prin upsert profilul abia sters.
+      try {
+        await getAuth().getUser(user.uid);
+      } catch {
+        res.status(401).json({ error: 'account-deleted' });
+        return;
+      }
+      profile = await UserProfile.create({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+      });
+    } else if (profile.email !== user.email) {
+      profile.email = user.email ?? '';
+      await profile.save();
+    }
+
     res.json({ profile });
   } catch (error) {
     next(error);

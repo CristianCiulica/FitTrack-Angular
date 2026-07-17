@@ -16,6 +16,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 
 import { CommunityService, FeedTab } from '../../core/services/community.service';
 import { WorkoutService } from '../../core/services/workout.service';
@@ -42,6 +43,7 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
     NzIconModule,
     NzSpinModule,
     NzPopconfirmModule,
+    NzDrawerModule,
     WorkoutModalComponent,
   ],
   templateUrl: './community.component.html',
@@ -78,6 +80,13 @@ export class CommunityComponent implements OnInit, OnDestroy {
   readonly maxMinutes = signal<number | null>(null);
   readonly search = signal('');
   private searchDebounce: ReturnType<typeof setTimeout> | null = null;
+
+  // cautarea e ascunsa in header; filtrele stau intr-un bottom sheet
+  readonly searchOpen = signal(false);
+  readonly filtersOpen = signal(false);
+  readonly activeFilterCount = computed(
+    () => (this.muscle() ? 1 : 0) + (this.maxMinutes() ? 1 : 0),
+  );
 
   // picks apar doar pe For You, fara filtre active
   readonly showPicks = computed(
@@ -172,6 +181,30 @@ export class CommunityComponent implements OnInit, OnDestroy {
     this.search.set(value);
     if (this.searchDebounce) clearTimeout(this.searchDebounce);
     this.searchDebounce = setTimeout(() => this.reload(), 350);
+  }
+
+  openSearch(): void {
+    this.searchOpen.set(true);
+    setTimeout(() => document.querySelector<HTMLInputElement>('.feed-search input')?.focus(), 60);
+  }
+
+  closeSearch(): void {
+    this.searchOpen.set(false);
+    if (this.search().trim()) {
+      this.search.set('');
+      this.reload();
+    }
+  }
+
+  clearFilters(): void {
+    if (!this.activeFilterCount()) return;
+    this.muscle.set(null);
+    this.maxMinutes.set(null);
+    this.reload();
+  }
+
+  durationLabel(value: number | null): string {
+    return this.durations.find((d) => d.value === value)?.label ?? '';
   }
 
   /* ----------------------------- profil autor ----------------------------- */

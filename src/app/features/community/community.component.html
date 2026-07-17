@@ -48,58 +48,67 @@
   } @else {
 
   <!-- ===================== FEED ===================== -->
-  <div class="feed-topbar">
-    <div class="feed-title">
-      <span class="community-eyebrow">Community</span>
-      <h1>Feed</h1>
+  <!-- Header compact: titlu + cautare / filtre / share -->
+  <div class="feed-header">
+    <h1>Community</h1>
+    <div class="header-actions">
+      <button type="button" class="icon-btn" aria-label="Search" (click)="openSearch()">
+        <span nz-icon nzType="search"></span>
+      </button>
+      <button
+        type="button"
+        class="icon-btn"
+        [class.active]="activeFilterCount() > 0"
+        aria-label="Filters"
+        (click)="filtersOpen.set(true)"
+      >
+        <span nz-icon nzType="filter"></span>
+        @if (activeFilterCount() > 0) {
+          <span class="filter-badge">{{ activeFilterCount() }}</span>
+        }
+      </button>
+      <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
+        <span nz-icon nzType="plus"></span>
+        <span class="share-label">Share</span>
+      </button>
     </div>
-    <button type="button" class="share-btn" (click)="shareModalVisible.set(true)">
-      <span nz-icon nzType="plus"></span>
-      <span class="share-label">Share</span>
-    </button>
   </div>
 
-  <!-- Cautare -->
-  <div class="feed-search">
-    <span nz-icon nzType="search" aria-hidden="true"></span>
-    <input
-      type="search"
-      placeholder="Search routines or athletes..."
-      [ngModel]="search()"
-      (ngModelChange)="onSearchChange($event)"
-    />
-  </div>
+  <!-- Cautarea inlocuieste tab-urile cat timp e deschisa -->
+  @if (searchOpen()) {
+    <div class="feed-search">
+      <span nz-icon nzType="search" aria-hidden="true"></span>
+      <input
+        type="search"
+        placeholder="Search routines or athletes..."
+        [ngModel]="search()"
+        (ngModelChange)="onSearchChange($event)"
+      />
+      <button type="button" class="search-cancel" (click)="closeSearch()">Cancel</button>
+    </div>
+  } @else {
+    <div class="feed-tabs" role="tablist" aria-label="Feed">
+      <button type="button" role="tab" [class.selected]="tab() === 'foryou'" (click)="setTab('foryou')">For You</button>
+      <button type="button" role="tab" [class.selected]="tab() === 'following'" (click)="setTab('following')">Following</button>
+      <button type="button" role="tab" [class.selected]="tab() === 'recent'" (click)="setTab('recent')">Recent</button>
+    </div>
+  }
 
-  <!-- Tab-uri -->
-  <div class="feed-tabs" role="tablist" aria-label="Feed">
-    <button type="button" role="tab" [class.selected]="tab() === 'foryou'" (click)="setTab('foryou')">For You</button>
-    <button type="button" role="tab" [class.selected]="tab() === 'following'" (click)="setTab('following')">Following</button>
-    <button type="button" role="tab" [class.selected]="tab() === 'recent'" (click)="setTab('recent')">Recent</button>
-  </div>
-
-  <!-- Filtre: grupe musculare + durata -->
-  <div class="filter-row" aria-label="Filter by muscle group">
-    <button type="button" class="filter-chip" [class.selected]="!muscle()" (click)="setMuscle(null)">All</button>
-    @for (group of muscleGroups; track group) {
-      <button
-        type="button"
-        class="filter-chip"
-        [attr.data-tone]="muscleTone(group)"
-        [class.selected]="muscle() === group"
-        (click)="setMuscle(group)"
-      >{{ group }}</button>
-    }
-  </div>
-  <div class="filter-row duration-row" aria-label="Filter by duration">
-    @for (d of durations; track d.label) {
-      <button
-        type="button"
-        class="filter-chip"
-        [class.selected]="maxMinutes() === d.value"
-        (click)="setDuration(d.value)"
-      >{{ d.label }}</button>
-    }
-  </div>
+  <!-- Filtrele active, ca chip-uri dismissible -->
+  @if (activeFilterCount() > 0) {
+    <div class="active-filters">
+      @if (muscle(); as m) {
+        <button type="button" class="active-chip" [attr.data-tone]="muscleTone(m)" (click)="setMuscle(m)">
+          {{ m }} <span aria-hidden="true">×</span>
+        </button>
+      }
+      @if (maxMinutes(); as mins) {
+        <button type="button" class="active-chip" (click)="setDuration(null)">
+          {{ durationLabel(mins) }} <span aria-hidden="true">×</span>
+        </button>
+      }
+    </div>
+  }
 
   @if (loading()) {
     <div class="loading-state">
@@ -319,3 +328,52 @@
   (cancel)="shareModalVisible.set(false)"
 >
 </app-workout-modal>
+
+<!-- Bottom sheet cu filtre, in stil Apple -->
+<nz-drawer
+  [nzVisible]="filtersOpen()"
+  nzPlacement="bottom"
+  [nzHeight]="'auto'"
+  [nzClosable]="false"
+  [nzBodyStyle]="{ padding: '0', background: 'transparent' }"
+  (nzOnClose)="filtersOpen.set(false)"
+>
+  <ng-container *nzDrawerContent>
+    <div class="filter-sheet">
+      <span class="sheet-handle" aria-hidden="true"></span>
+      <h3>Filters</h3>
+
+      <span class="sheet-label">Muscle group</span>
+      <div class="sheet-chips">
+        <button type="button" class="filter-chip" [class.selected]="!muscle()" (click)="setMuscle(null)">All</button>
+        @for (group of muscleGroups; track group) {
+          <button
+            type="button"
+            class="filter-chip"
+            [class.selected]="muscle() === group"
+            (click)="setMuscle(group)"
+          >{{ group }}</button>
+        }
+      </div>
+
+      <span class="sheet-label">Duration</span>
+      <div class="sheet-chips">
+        @for (d of durations; track d.label) {
+          <button
+            type="button"
+            class="filter-chip"
+            [class.selected]="maxMinutes() === d.value"
+            (click)="setDuration(d.value)"
+          >{{ d.label }}</button>
+        }
+      </div>
+
+      <div class="sheet-actions">
+        <button type="button" class="sheet-clear" [disabled]="!activeFilterCount()" (click)="clearFilters()">
+          Clear all
+        </button>
+        <button type="button" class="sheet-done" (click)="filtersOpen.set(false)">Done</button>
+      </div>
+    </div>
+  </ng-container>
+</nz-drawer>
