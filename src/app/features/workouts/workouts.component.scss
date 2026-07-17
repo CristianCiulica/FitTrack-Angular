@@ -561,14 +561,9 @@
     gap: 12px;
   }
 
-  .history-table-heading {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
+  /* heading-ul ramane pe rand, cu butonul de collapse in dreapta,
+     la fel ca la Running history */
   .history-table-controls {
-    flex-wrap: wrap;
-
     .workout-search-input {
       display: none;
     }
