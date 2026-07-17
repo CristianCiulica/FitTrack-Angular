@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import { trigger, transition, style, animate, query, group } from '@angular/animations';
 import { NzIconService } from 'ng-zorro-antd/icon';
 import { LoadingService } from './core/services/loading.service';
+import { ProfileService } from './core/services/profile.service';
 
 // iconite custom, stil SF Symbols, pentru navigarea principala.
 // fill="none" trebuie pus pe fiecare forma: ng-zorro suprascrie fill-ul de pe radacina svg.
@@ -52,6 +53,8 @@ const FT_ICONS: Record<string, string> = {
   ],
 })
 export class App implements OnInit {
+  private readonly profileService = inject(ProfileService);
+
   constructor(
     private router: Router,
     public loadingService: LoadingService,
@@ -60,6 +63,19 @@ export class App implements OnInit {
     for (const [name, svg] of Object.entries(FT_ICONS)) {
       iconService.addIconLiteral(name, svg);
     }
+
+    // plasa de siguranta pentru onboarding: daca API-ul e lent la prima incarcare
+    // (ex. serverul de pe Render se trezeste), guard-ul lasa userul sa treaca; cand
+    // profilul soseste totusi si nu e complet, il ducem la onboarding
+    effect(() => {
+      const loaded = this.profileService.loaded();
+      const profile = this.profileService.profile();
+      const onboarded = this.profileService.isOnboarded();
+      if (!loaded || !profile || onboarded) return;
+      const url = this.router.url;
+      if (url.startsWith('/onboarding') || url.startsWith('/auth')) return;
+      this.router.navigate(['/onboarding']);
+    });
   }
 
   ngOnInit(): void {
