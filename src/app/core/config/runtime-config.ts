@@ -2,7 +2,10 @@ import type { FirebaseOptions } from 'firebase/app';
 
 interface FitTrackRuntimeConfig {
   firebase?: FirebaseOptions;
-  apiBaseUrl?: string;
+  /** setat doar cand API_BASE_URL a fost dat explicit la build */
+  apiBaseUrl?: string | null;
+  localApiBaseUrl?: string;
+  prodApiBaseUrl?: string;
 }
 
 declare global {
@@ -24,9 +27,18 @@ export function getFirebaseConfig(): FirebaseOptions {
 }
 
 export function getApiBaseUrl(): string {
-  const url = window.__FITTRACK_CONFIG__?.apiBaseUrl;
-  if (!url) {
-    return 'http://localhost:4000/api';
+  const config = window.__FITTRACK_CONFIG__;
+
+  // URL fortat explicit la build (API_BASE_URL) are prioritate
+  if (config?.apiBaseUrl) {
+    return config.apiBaseUrl.replace(/\/$/, '');
   }
+
+  // altfel alegem la runtime: pe localhost -> backend-ul local, pe web -> Render.
+  // asa acelasi build merge si in dev si in productie, fara variabile de mediu.
+  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const url = isLocalhost
+    ? config?.localApiBaseUrl || 'http://localhost:4000/api'
+    : config?.prodApiBaseUrl || 'https://fittrack-angular.onrender.com/api';
   return url.replace(/\/$/, '');
 }

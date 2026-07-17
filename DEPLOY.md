@@ -40,10 +40,13 @@ HTTPS blocheaza oricum apelurile HTTP (mixed content).
 
 Backend-ul live: **https://fittrack-angular.onrender.com**
 
-O singura comanda (override de env doar pentru build, `.env` local ramane pe localhost):
+O singura comanda — nu mai e nevoie de variabile de mediu; aplicatia alege
+API-ul la runtime (localhost cand ruleaza local, Render cand e pe web):
 ```
-API_BASE_URL=https://fittrack-angular.onrender.com/api npm run build && npx firebase deploy --only hosting
+npm run build && npx firebase deploy --only hosting
 ```
+
+(Optional: `API_BASE_URL=<url>` la build forteaza un singur URL, util la debugging.)
 
 ## Note
 

@@ -47,7 +47,14 @@ const firebase = {
   measurementId: readValue('FIREBASE_MEASUREMENT_ID'),
 };
 
-const apiBaseUrl = readValue('API_BASE_URL') || 'http://localhost:4000/api';
+// Aplicatia alege API-ul la runtime: localhost in dev, Render pe web — asa
+// "npm run build && npx firebase deploy" merge fara variabile de mediu.
+// API_BASE_URL din .env e tratat ca URL-ul LOCAL de dev; doar API_BASE_URL dat
+// in linia de comanda (process.env) forteaza un singur URL peste tot (debugging).
+const apiBaseUrl = (process.env['API_BASE_URL'] || '').trim() || null;
+const localApiBaseUrl =
+  readValue('LOCAL_API_BASE_URL') || fileEnvironment['API_BASE_URL']?.trim() || 'http://localhost:4000/api';
+const prodApiBaseUrl = readValue('PROD_API_BASE_URL') || 'https://fittrack-angular.onrender.com/api';
 
 const requiredFields = [
   ['FIREBASE_API_KEY', firebase.apiKey],
@@ -73,7 +80,7 @@ mkdirSync(outputDirectory, { recursive: true });
 
 writeFileSync(
   outputPath,
-  `window.__FITTRACK_CONFIG__ = Object.freeze(${JSON.stringify({ firebase, apiBaseUrl }, null, 2)});\n`,
+  `window.__FITTRACK_CONFIG__ = Object.freeze(${JSON.stringify({ firebase, apiBaseUrl, localApiBaseUrl, prodApiBaseUrl }, null, 2)});\n`,
   'utf8',
 );
 
