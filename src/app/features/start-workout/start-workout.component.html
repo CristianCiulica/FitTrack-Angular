@@ -231,6 +231,29 @@
             <span nz-icon nzType="check-circle" style="font-size: 64px; color: #52c41a;"></span>
             <h2>Workout complete!</h2>
             <p>Great job! You burned ~{{ routineKcal(currentRoutine()) }} kcal. Your workout was saved to your history.</p>
+
+            <!-- totalul ridicat + progres fata de ultima sesiune identica -->
+            <div class="finish-volume">
+              <span class="fv-label">Total lifted</span>
+              <strong class="fv-value">{{ finishedVolume() | number: '1.0-0' }} kg</strong>
+              <span
+                class="fv-delta"
+                *ngIf="finishedDelta() !== null"
+                [class.up]="finishedDelta()! > 0"
+                [class.down]="finishedDelta()! < 0"
+              >
+                <ng-container *ngIf="finishedDelta()! > 0">
+                  +{{ finishedDelta() | number: '1.0-0' }} kg vs last time · progressive overload! 🔥
+                </ng-container>
+                <ng-container *ngIf="finishedDelta()! < 0">
+                  {{ finishedDelta() | number: '1.0-0' }} kg vs last time · lighter session
+                </ng-container>
+                <ng-container *ngIf="finishedDelta() === 0">
+                  Same as last time · consistency counts
+                </ng-container>
+              </span>
+            </div>
+
             <button nz-button nzType="primary" (click)="reset()" routerLink="/dashboard">Go to dashboard</button>
           </nz-card>
         </ng-container>
@@ -289,16 +312,13 @@
           [attr.data-tone]="plan.tone"
           (click)="openPlan(plan)"
         >
-          <span class="legend-avatar" [attr.data-tone]="plan.tone">{{ athleteInitials(plan.athlete) }}</span>
           <span class="legend-copy">
             <strong>{{ plan.athlete }}</strong>
             <span class="legend-title">{{ plan.title }}</span>
             <span class="legend-tagline">{{ plan.tagline }}</span>
+            <span class="legend-count">{{ plan.routines.length }} routines <span class="legend-chevron" aria-hidden="true"></span></span>
           </span>
-          <span class="legend-side">
-            <span class="legend-count">{{ plan.routines.length }} routines</span>
-            <span class="legend-chevron" aria-hidden="true"></span>
-          </span>
+          <img class="legend-photo" [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" loading="lazy" />
         </button>
       </div>
     </div>
@@ -310,13 +330,16 @@
         All legends
       </button>
       <div class="plan-hero" [attr.data-tone]="plan.tone">
-        <span class="plan-hero-badge">
-          <span nz-icon nzType="trophy"></span>
-          Official plan
-        </span>
-        <h2>{{ plan.name }}</h2>
-        <p>{{ plan.description }}</p>
-        <span class="plan-hero-meta">{{ plan.routines.length }} routines · pick one and start</span>
+        <div class="plan-hero-copy">
+          <span class="plan-hero-badge">
+            <span nz-icon nzType="trophy"></span>
+            Official plan
+          </span>
+          <h2>{{ plan.name }}</h2>
+          <p>{{ plan.description }}</p>
+          <span class="plan-hero-meta">{{ plan.routines.length }} routines · pick one and start</span>
+        </div>
+        <img class="plan-hero-photo" [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" />
       </div>
 
       <div class="plan-list drawer-plan-list">
@@ -424,7 +447,10 @@
         </div>
       </div>
       <div class="overload-hint" *ngIf="lastTimeWeight() as last">
-        <span class="hint-label">Last time: <strong>{{ last }} kg</strong></span>
+        <span class="hint-label">
+          Last time:
+          <strong>{{ last }} kg<ng-container *ngIf="lastTimeReps() as lr"> × {{ lr }} reps</ng-container></strong>
+        </span>
         <span
           class="hint-delta"
           *ngIf="overloadDelta() as delta"

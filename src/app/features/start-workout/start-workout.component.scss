@@ -309,23 +309,16 @@
   &[data-tone='pink'] { background: radial-gradient(80% 130% at 92% 0%, rgba(255, 45, 85, 0.13), transparent 62%), rgba(255, 255, 255, 0.78); }
 }
 
-.legend-avatar {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
+/* fotografia legendei, tile rotunjit in dreapta cardului */
+.legend-photo {
+  width: 84px;
+  height: 98px;
   flex: 0 0 auto;
-  font-size: 18px;
-  font-weight: 750;
-  color: #fff;
-  border-radius: 50%;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-
-  &[data-tone='purple'] { background: linear-gradient(150deg, #bf5af2, #8e3bb5); }
-  &[data-tone='blue'] { background: linear-gradient(150deg, #1a86f0, #0071e3); }
-  &[data-tone='cyan'] { background: linear-gradient(150deg, #64d2ff, #2596a6); }
-  &[data-tone='green'] { background: linear-gradient(150deg, #34c759, #248a3d); }
-  &[data-tone='pink'] { background: linear-gradient(150deg, #ff2d55, #d70041); }
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
 }
 
 .legend-copy {
@@ -360,27 +353,24 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-}
-
-.legend-side {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 0 0 auto;
 
   .legend-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 6px;
     font-size: 11.5px;
-    font-weight: 650;
-    color: #86868b;
+    font-weight: 680;
+    color: #0066cc;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
 
   .legend-chevron {
-    width: 8px;
-    height: 8px;
-    border-right: 2px solid #a1a1a6;
-    border-top: 2px solid #a1a1a6;
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid #0066cc;
+    border-top: 2px solid #0066cc;
     transform: rotate(45deg);
   }
 }
@@ -1279,5 +1269,82 @@
   .active-card ::ng-deep .ant-card-body,
   .rest-card ::ng-deep .ant-card-body {
     padding: 30px 20px 24px;
+  }
+}
+
+/* ---------- hero-ul planului cu fotografia legendei ---------- */
+
+.plan-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.plan-hero-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-hero-photo {
+  width: 108px;
+  height: 132px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+}
+
+@media (max-width: 480px) {
+  .plan-hero-photo {
+    width: 88px;
+    height: 110px;
+  }
+}
+
+/* ---------- rezumatul de volum de pe cardul de final ---------- */
+
+.finish-volume {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  max-width: 360px;
+  margin: 18px auto 22px;
+  padding: 16px 22px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  .fv-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #86868b;
+  }
+
+  .fv-value {
+    font-size: 34px;
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fv-delta {
+    margin-top: 3px;
+    padding: 5px 14px;
+    font-size: 12.5px;
+    font-weight: 650;
+    border-radius: 980px;
+    color: #515154;
+    background: rgba(0, 0, 0, 0.05);
+    font-variant-numeric: tabular-nums;
+
+    &.up { color: #248a3d; background: rgba(52, 199, 89, 0.14); }
+    &.down { color: #d70015; background: rgba(255, 59, 48, 0.1); }
   }
 }

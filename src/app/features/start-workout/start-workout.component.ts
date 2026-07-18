@@ -518,12 +518,24 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   // ultima greutate si ultimele repetari pe fiecare exercitiu, din istoric
   private lastWeights = signal(new Map<string, number>());
   private lastReps = signal(new Map<string, number>());
+  // istoricul complet, pentru comparatia de volum de la finalul antrenamentului
+  private historyWorkouts: Workout[] = [];
 
-  // greutatea folosita data trecuta la exercitiul curent (hint de progres)
+  // rezumatul de final: cat ai ridicat in total + diferenta fata de data trecuta
+  finishedVolume = signal(0);
+  finishedDelta = signal<number | null>(null);
+
+  // greutatea si repetarile folosite data trecuta la exercitiul curent
   lastTimeWeight = computed(() => {
     const ex = this.currentExercise();
     if (!ex) return null;
     return this.lastWeights().get(ex.name.toLowerCase()) ?? null;
+  });
+
+  lastTimeReps = computed(() => {
+    const ex = this.currentExercise();
+    if (!ex) return null;
+    return this.lastReps().get(ex.name.toLowerCase()) ?? null;
   });
 
   // diferenta fata de data trecuta (pozitiv = progres)
@@ -757,6 +769,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       const weights = new Map<string, number>();
       const reps = new Map<string, number>();
       const sorted = [...workouts].sort((a, b) => b.date.localeCompare(a.date));
+      this.historyWorkouts = sorted;
       for (const w of sorted) {
         for (const ex of w.exercises) {
           const key = ex.exerciseName.toLowerCase();
@@ -883,8 +896,40 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     }
   }
 
+  // volumul total al sesiunii curente: suma reps×kg pe fiecare set logat
+  private sessionVolume(): number {
+    return this.loggedWeights.reduce(
+      (total, weights, i) =>
+        total + weights.reduce((s, w, setIdx) => s + w * (this.loggedReps[i]?.[setIdx] ?? 0), 0),
+      0,
+    );
+  }
+
+  // volumul unui antrenament salvat, cu aceleasi reguli ca in History
+  private workoutVolume(w: Workout): number {
+    return w.exercises.reduce((total, ex) => {
+      const weights = ex.setWeights;
+      const reps = ex.setReps;
+      if (weights?.length && reps?.length === weights.length) {
+        return total + weights.reduce((s, wt, i) => s + wt * reps[i], 0);
+      }
+      if (weights?.length) {
+        return total + ex.reps * weights.reduce((s, wt) => s + wt, 0);
+      }
+      return total + ex.sets * ex.reps * ex.weight;
+    }, 0);
+  }
+
   private finishWorkout() {
     this.stopTimer();
+
+    // rezumatul de final: total ridicat + comparatie cu ultima sesiune identica
+    const volume = this.sessionVolume();
+    this.finishedVolume.set(Math.round(volume));
+    const name = this.currentRoutine().name.trim().toLowerCase();
+    const previous = this.historyWorkouts.find((w) => w.name.trim().toLowerCase() === name);
+    this.finishedDelta.set(previous ? Math.round(volume - this.workoutVolume(previous)) : null);
+
     this.saveWorkout();
     this.state.set('finished');
   }
