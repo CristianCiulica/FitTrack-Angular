@@ -251,13 +251,6 @@ export class DashboardComponent implements OnInit {
   // obiectivul saptamanal a fost atins
   readonly goalReached = computed(() => this.thisWeekWorkouts() >= this.weeklyGoal());
 
-  // SVG ring: circumference = 2 * π * r (r=42) ≈ 263.89
-  private readonly RING_CIRCUMFERENCE = 2 * Math.PI * 42;
-  readonly ringOffset = computed(() => {
-    const pct = Math.min(100, this.goalPercent()) / 100;
-    return this.RING_CIRCUMFERENCE * (1 - pct);
-  });
-
   toggleChat() {
     this.isChatOpen.update(v => !v);
     if (this.isChatOpen()) {
