@@ -149,8 +149,7 @@
           <div class="profile-list" *ngIf="followers().length > 0; else noFollowers">
             <div class="person-row" *ngFor="let person of followers()">
               <span class="person-avatar">
-                <img *ngIf="person.avatar" [src]="person.avatar" alt="" />
-                <ng-container *ngIf="!person.avatar">{{ initials(person.name) }}</ng-container>
+                <img [src]="person.avatar || '/images/default-avatar.jpg'" alt="" />
               </span>
               <strong class="person-name">{{ person.name }}</strong>
               <button
@@ -176,8 +175,7 @@
           <div class="profile-list" *ngIf="following().length > 0; else noFollowing">
             <div class="person-row" *ngFor="let person of following()">
               <span class="person-avatar">
-                <img *ngIf="person.avatar" [src]="person.avatar" alt="" />
-                <ng-container *ngIf="!person.avatar">{{ initials(person.name) }}</ng-container>
+                <img [src]="person.avatar || '/images/default-avatar.jpg'" alt="" />
               </span>
               <strong class="person-name">{{ person.name }}</strong>
               <button type="button" class="follow-btn following" (click)="toggleFollow(person)">

@@ -10,11 +10,7 @@
 
       <div class="author-hero">
         <span class="author-avatar big">
-          @if (view.author.avatar) {
-            <img [src]="view.author.avatar" alt="" />
-          } @else {
-            {{ authorInitials(view.author.name) }}
-          }
+          <img [src]="view.author.avatar || '/images/default-avatar.jpg'" alt="" />
         </span>
         <h2>{{ view.author.name }}</h2>
         <div class="author-stats">
@@ -162,11 +158,7 @@
               <span class="pick-meta">{{ p.estimatedMinutes }} min · {{ p.exercises.length }} ex</span>
               <span class="pick-author">
                 <span class="author-avatar tiny">
-                  @if (p.authorAvatar) {
-                    <img [src]="p.authorAvatar" alt="" />
-                  } @else {
-                    {{ authorInitials(p.authorName) }}
-                  }
+                  <img [src]="p.authorAvatar || '/images/default-avatar.jpg'" alt="" />
                 </span>
                 {{ p.authorName }}
               </span>
@@ -205,11 +197,7 @@
     <header class="post-header">
       <button type="button" class="author-link" (click)="!inProfile && openAuthor(w.authorId)">
         <span class="author-avatar">
-          @if (w.authorAvatar) {
-            <img [src]="w.authorAvatar" alt="" />
-          } @else {
-            {{ authorInitials(w.authorName) }}
-          }
+          <img [src]="w.authorAvatar || '/images/default-avatar.jpg'" alt="" />
         </span>
         <span class="post-author">
           <strong>{{ w.authorName }}</strong>
