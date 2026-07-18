@@ -593,16 +593,35 @@
     color: #1d1d1f;
   }
 
+  /* wrapper pentru start + delete */
+  .plan-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    margin-right: -72px; /* extinde in spatiul din dreapta pentru a fi direct sub duration-badge */
+    animation: plan-start-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+
+    .plan-start {
+      margin-top: 0;
+      flex: 1;
+      min-width: 0;
+      font-size: 15px;
+      padding: 0 16px;
+      white-space: nowrap;
+    }
+  }
+
   /* butonul de start apare direct pe cardul selectat */
   .plan-start {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 9px;
+    gap: 8px;
     width: 100%;
     height: 48px;
     margin-top: 16px;
-    font-size: 15.5px;
+    font-size: 15px;
     font-weight: 650;
     font-family: inherit;
     letter-spacing: -0.01em;
@@ -628,26 +647,23 @@
     }
   }
 
-  /* butonul de delete colt dreapta sus */
-  .plan-delete-corner {
-    position: absolute;
-    top: 16px;
-    right: 16px;
+  /* butonul de delete (trash) langa start */
+  .plan-delete {
     display: grid;
     place-items: center;
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
     border: none;
     border-radius: 50%;
     background: rgba(255, 59, 48, 0.12);
     color: #ff3b30;
-    font-size: 16px;
+    font-size: 18px;
     cursor: pointer;
-    animation: plan-start-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
     transition: all 0.2s ease;
 
     &:hover {
-      background: rgba(255, 59, 48, 0.2);
+      background: rgba(255, 59, 48, 0.22);
       transform: scale(1.05);
     }
 

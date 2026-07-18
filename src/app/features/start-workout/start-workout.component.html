@@ -202,19 +202,6 @@
               [class.selected]="selectedRoutineKey() === 'personal-' + routine.id"
               (click)="selectRoutine(routine, 'personal-' + routine.id)"
             >
-              <button
-                type="button"
-                class="plan-delete-corner"
-                *ngIf="selectedRoutineKey() === 'personal-' + routine.id"
-                nz-popconfirm
-                nzPopconfirmTitle="Delete workout?"
-                nzPopconfirmPlacement="bottomRight"
-                (nzOnConfirm)="deleteWorkout(routine.id)"
-                (click)="$event.stopPropagation()"
-              >
-                <span nz-icon nzType="delete" nzTheme="outline"></span>
-              </button>
-
               <div class="duration-badge">
                 <strong>{{ routineMinutes(routine) }}</strong>
                 <span>mins</span>
@@ -225,15 +212,27 @@
                 <span class="plan-count">{{ routine.exercises.length }} exercises · ~{{ routineKcal(routine) }} kcal</span>
               </div>
               <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
-              <button
-                type="button"
-                class="plan-start"
-                *ngIf="selectedRoutineKey() === 'personal-' + routine.id"
-                (click)="$event.stopPropagation(); startWorkout()"
-              >
-                <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-                Start workout
-              </button>
+              <div class="plan-actions" *ngIf="selectedRoutineKey() === 'personal-' + routine.id">
+                <button
+                  type="button"
+                  class="plan-start"
+                  (click)="$event.stopPropagation(); startWorkout()"
+                >
+                  <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+                  Start workout
+                </button>
+                <button
+                  type="button"
+                  class="plan-delete"
+                  nz-popconfirm
+                  nzPopconfirmTitle="Delete workout?"
+                  nzPopconfirmPlacement="topLeft"
+                  (nzOnConfirm)="deleteWorkout(routine.id)"
+                  (click)="$event.stopPropagation()"
+                >
+                  <span nz-icon nzType="delete" nzTheme="outline"></span>
+                </button>
+              </div>
             </div>
           </div>
           <ng-template #noPersonalRoutines>
