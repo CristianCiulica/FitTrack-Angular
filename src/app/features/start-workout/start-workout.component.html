@@ -178,16 +178,15 @@
                 <span class="plan-count">{{ item.routine.exercises.length }} exercises · ~{{ routineKcal(item.routine) }} kcal</span>
               </div>
               <p class="plan-muscles">{{ muscleSummary(item.routine) }}</p>
-              <div class="plan-actions" *ngIf="selectedRoutineKey() === 'predefined-' + item.index">
-                <button
-                  type="button"
-                  class="plan-start"
-                  (click)="$event.stopPropagation(); startWorkout()"
-                >
-                  <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-                  Start workout
-                </button>
-              </div>
+              <button
+                type="button"
+                class="plan-start"
+                *ngIf="selectedRoutineKey() === 'predefined-' + item.index"
+                (click)="$event.stopPropagation(); startWorkout()"
+              >
+                <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+                Start workout
+              </button>
             </div>
           </div>
 
@@ -203,6 +202,19 @@
               [class.selected]="selectedRoutineKey() === 'personal-' + routine.id"
               (click)="selectRoutine(routine, 'personal-' + routine.id)"
             >
+              <button
+                type="button"
+                class="plan-delete-corner"
+                *ngIf="selectedRoutineKey() === 'personal-' + routine.id"
+                nz-popconfirm
+                nzPopconfirmTitle="Delete workout?"
+                nzPopconfirmPlacement="bottomRight"
+                (nzOnConfirm)="deleteWorkout(routine.id)"
+                (click)="$event.stopPropagation()"
+              >
+                <span nz-icon nzType="delete" nzTheme="outline"></span>
+              </button>
+
               <div class="duration-badge">
                 <strong>{{ routineMinutes(routine) }}</strong>
                 <span>mins</span>
@@ -213,27 +225,15 @@
                 <span class="plan-count">{{ routine.exercises.length }} exercises · ~{{ routineKcal(routine) }} kcal</span>
               </div>
               <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
-              <div class="plan-actions" *ngIf="selectedRoutineKey() === 'personal-' + routine.id">
-                <button
-                  type="button"
-                  class="plan-start"
-                  (click)="$event.stopPropagation(); startWorkout()"
-                >
-                  <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-                  Start workout
-                </button>
-                <button
-                  type="button"
-                  class="plan-delete"
-                  nz-popconfirm
-                  nzPopconfirmTitle="Are you sure you want to delete this workout?"
-                  nzPopconfirmPlacement="top"
-                  (nzOnConfirm)="deleteWorkout(routine.id)"
-                  (click)="$event.stopPropagation()"
-                >
-                  <span nz-icon nzType="delete" nzTheme="outline"></span>
-                </button>
-              </div>
+              <button
+                type="button"
+                class="plan-start"
+                *ngIf="selectedRoutineKey() === 'personal-' + routine.id"
+                (click)="$event.stopPropagation(); startWorkout()"
+              >
+                <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+                Start workout
+              </button>
             </div>
           </div>
           <ng-template #noPersonalRoutines>

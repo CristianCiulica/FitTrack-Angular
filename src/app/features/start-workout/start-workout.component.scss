@@ -593,23 +593,15 @@
     color: #1d1d1f;
   }
 
-  /* wrapper pentru start + delete */
-  .plan-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 16px;
-    animation: plan-start-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
-  }
-
   /* butonul de start apare direct pe cardul selectat */
   .plan-start {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 9px;
-    flex: 1;
+    width: 100%;
     height: 48px;
+    margin-top: 16px;
     font-size: 15.5px;
     font-weight: 650;
     font-family: inherit;
@@ -622,6 +614,7 @@
     box-shadow:
       0 12px 26px rgba(0, 113, 227, 0.34),
       inset 0 1px 0 rgba(255, 255, 255, 0.32);
+    animation: plan-start-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
     transition: transform 0.15s ease, box-shadow 0.2s ease;
 
     &:hover {
@@ -635,18 +628,22 @@
     }
   }
 
-  /* butonul de delete (trash) */
-  .plan-delete {
+  /* butonul de delete colt dreapta sus */
+  .plan-delete-corner {
+    position: absolute;
+    top: 16px;
+    right: 16px;
     display: grid;
     place-items: center;
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     border: none;
     border-radius: 50%;
     background: rgba(255, 59, 48, 0.12);
     color: #ff3b30;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
+    animation: plan-start-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
     transition: all 0.2s ease;
 
     &:hover {
