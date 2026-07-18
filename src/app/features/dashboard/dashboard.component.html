@@ -123,21 +123,28 @@
 
         <div class="metric-card goals-card" [class.goal-complete]="goalReached()">
           <div class="metric-head">
-            <span class="metric-title">My Goals</span>
-            <span class="goal-check" *ngIf="goalReached()" aria-label="Weekly goal reached">
+            <span class="metric-title">Weekly Goal</span>
+            <span class="goal-badge" *ngIf="goalReached()">
               <span nz-icon nzType="check" nzTheme="outline"></span>
             </span>
           </div>
-          <span class="metric-caption goals-copy">
-            {{ goalReached() ? 'Weekly goal smashed. Amazing work!' : 'Keep it up, you can achieve your goals.' }}
-          </span>
-          <div class="goal-pill">
-            <span class="goal-track" aria-hidden="true">
-              <span class="goal-fill" [style.width.%]="goalPercent()"></span>
-            </span>
-            <strong>{{ goalPercent() }}%</strong>
+
+          <div class="goal-ring-wrap">
+            <svg class="goal-ring" viewBox="0 0 100 100">
+              <circle class="goal-ring-bg" cx="50" cy="50" r="42" />
+              <circle class="goal-ring-fill"
+                cx="50" cy="50" r="42"
+                [style.stroke-dashoffset]="ringOffset()" />
+            </svg>
+            <div class="goal-ring-label">
+              <strong>{{ thisWeekWorkouts() }}<small>/{{ weeklyGoal() }}</small></strong>
+              <span>workouts</span>
+            </div>
           </div>
-          <span class="goal-meta">{{ thisWeekWorkouts() }}/{{ weeklyGoal() }} workouts this week</span>
+
+          <span class="goal-status" [class.reached]="goalReached()">
+            {{ goalReached() ? '🎉 Goal reached!' : goalPercent() + '% complete' }}
+          </span>
         </div>
       </div>
 
