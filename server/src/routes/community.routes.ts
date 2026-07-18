@@ -67,7 +67,21 @@ function trendingScore(obj: any): number {
   return (1 + likes * 2 + saves * 3 + comments) * Math.exp(-ageDays / 7);
 }
 
-function serialize(doc: any, viewerUid?: string, followingSet?: Set<string>) {
+// avatarele autorilor pentru un set de postari (o singura interogare)
+async function avatarsFor(authorIds: string[]): Promise<Map<string, string>> {
+  const unique = Array.from(new Set(authorIds));
+  const profiles = await UserProfile.find({ uid: { $in: unique } })
+    .select('uid avatar')
+    .lean();
+  return new Map(profiles.map((p) => [p.uid, p.avatar ?? '']));
+}
+
+function serialize(
+  doc: any,
+  viewerUid?: string,
+  followingSet?: Set<string>,
+  avatarMap?: Map<string, string>,
+) {
   if (!doc) return doc;
   const obj = doc.toObject ? doc.toObject() : doc;
   const likes: string[] = obj.likes ?? [];
@@ -76,6 +90,7 @@ function serialize(doc: any, viewerUid?: string, followingSet?: Set<string>) {
     originalWorkoutId: obj.originalWorkoutId,
     authorId: obj.authorId,
     authorName: obj.authorName,
+    authorAvatar: avatarMap?.get(obj.authorId) ?? '',
     authorFollowedByMe: followingSet ? followingSet.has(obj.authorId) : false,
     name: obj.name,
     description: obj.description,
@@ -143,9 +158,10 @@ router.get('/', async (req, res, next) => {
 
     const start = query.page * query.limit;
     const pageItems = items.slice(start, start + query.limit);
+    const avatars = await avatarsFor(pageItems.map((i) => i.authorId));
 
     res.json({
-      communityWorkouts: pageItems.map((i) => serialize(i, uid, followingSet)),
+      communityWorkouts: pageItems.map((i) => serialize(i, uid, followingSet, avatars)),
       total: items.length,
       hasMore: start + query.limit < items.length,
     });
@@ -172,7 +188,8 @@ router.get('/picks', async (req, res, next) => {
       )
       .slice(0, 5)
       .filter((w) => (w.saveCount ?? 0) + (w.likes?.length ?? 0) > 0);
-    res.json({ picks: picks.map((p) => serialize(p, uid, followingSet)) });
+    const avatars = await avatarsFor(picks.map((p) => p.authorId));
+    res.json({ picks: picks.map((p) => serialize(p, uid, followingSet, avatars)) });
   } catch (err) {
     next(err);
   }
@@ -190,22 +207,66 @@ router.get('/author/:uid', async (req, res, next) => {
       UserProfile.countDocuments({ following: authorId }),
     ]);
 
-    const authorName =
-      posts[0]?.authorName ||
-      (await UserProfile.findOne({ uid: authorId }).select('displayName').lean())?.displayName ||
-      'Athlete';
+    const authorProfile = await UserProfile.findOne({ uid: authorId })
+      .select('displayName avatar')
+      .lean();
+    const authorName = posts[0]?.authorName || authorProfile?.displayName || 'Athlete';
+    const avatars = new Map([[authorId, authorProfile?.avatar ?? '']]);
 
     res.json({
       author: {
         uid: authorId,
         name: authorName,
+        avatar: authorProfile?.avatar ?? '',
         postCount: posts.length,
         totalLikes: posts.reduce((acc, p) => acc + (p.likes?.length ?? 0), 0),
         totalSaves: posts.reduce((acc, p) => acc + (p.saveCount ?? 0), 0),
         followers,
         followedByMe: followingSet.has(authorId),
       },
-      posts: posts.map((p) => serialize(p, viewer, followingSet)),
+      posts: posts.map((p) => serialize(p, viewer, followingSet, avatars)),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// listele mele: cine ma urmareste si pe cine urmaresc (pentru pagina Profile)
+router.get('/me/followers', async (req, res, next) => {
+  try {
+    const me = req.user!.uid;
+    const [followers, mine] = await Promise.all([
+      UserProfile.find({ following: me }).select('uid displayName avatar').limit(200).lean(),
+      viewerFollowing(me),
+    ]);
+    res.json({
+      people: followers.map((p) => ({
+        uid: p.uid,
+        name: p.displayName || 'Athlete',
+        avatar: p.avatar ?? '',
+        followedByMe: mine.has(p.uid),
+      })),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/me/following', async (req, res, next) => {
+  try {
+    const me = req.user!.uid;
+    const mine = await viewerFollowing(me);
+    const people = await UserProfile.find({ uid: { $in: Array.from(mine) } })
+      .select('uid displayName avatar')
+      .limit(200)
+      .lean();
+    res.json({
+      people: people.map((p) => ({
+        uid: p.uid,
+        name: p.displayName || 'Athlete',
+        avatar: p.avatar ?? '',
+        followedByMe: true,
+      })),
     });
   } catch (err) {
     next(err);
@@ -250,7 +311,9 @@ router.post('/', async (req, res, next) => {
       authorName,
     });
 
-    res.status(201).json({ communityWorkout: serialize(created, user.uid) });
+    res.status(201).json({
+      communityWorkout: serialize(created, user.uid, undefined, await avatarsFor([user.uid])),
+    });
   } catch (err) {
     next(err);
   }
@@ -288,7 +351,14 @@ router.post('/:id/like', async (req, res, next) => {
       already ? { $pull: { likes: uid } } : { $addToSet: { likes: uid } },
       { new: true },
     );
-    res.json({ communityWorkout: serialize(updated, uid, await viewerFollowing(uid)) });
+    res.json({
+      communityWorkout: serialize(
+        updated,
+        uid,
+        await viewerFollowing(uid),
+        await avatarsFor([updated!.authorId]),
+      ),
+    });
   } catch (err) {
     next(err);
   }
@@ -312,7 +382,14 @@ router.post('/:id/comments', async (req, res, next) => {
     }
     res
       .status(201)
-      .json({ communityWorkout: serialize(updated, user.uid, await viewerFollowing(user.uid)) });
+      .json({
+        communityWorkout: serialize(
+          updated,
+          user.uid,
+          await viewerFollowing(user.uid),
+          await avatarsFor([updated.authorId]),
+        ),
+      });
   } catch (err) {
     next(err);
   }
@@ -338,7 +415,9 @@ router.delete('/:id/comments/:commentId', async (req, res, next) => {
     }
     comment.deleteOne();
     await post.save();
-    res.json({ communityWorkout: serialize(post, uid, await viewerFollowing(uid)) });
+    res.json({
+      communityWorkout: serialize(post, uid, await viewerFollowing(uid), await avatarsFor([post.authorId])),
+    });
   } catch (err) {
     next(err);
   }
@@ -357,7 +436,9 @@ router.post('/:id/save', async (req, res, next) => {
       return;
     }
     const uid = req.user!.uid;
-    res.json({ communityWorkout: serialize(updated, uid, await viewerFollowing(uid)) });
+    res.json({
+      communityWorkout: serialize(updated, uid, await viewerFollowing(uid), await avatarsFor([updated.authorId])),
+    });
   } catch (err) {
     next(err);
   }

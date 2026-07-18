@@ -36,6 +36,7 @@ export interface CommunityWorkout {
   originalWorkoutId?: string;
   authorId: string;
   authorName: string;
+  authorAvatar: string;
   authorFollowedByMe: boolean;
   name: string;
   description: string;
@@ -52,10 +53,19 @@ export interface CommunityWorkout {
 export interface CommunityAuthor {
   uid: string;
   name: string;
+  avatar: string;
   postCount: number;
   totalLikes: number;
   totalSaves: number;
   followers: number;
+  followedByMe: boolean;
+}
+
+/** o persoana din listele de followers/following */
+export interface CommunityPerson {
+  uid: string;
+  name: string;
+  avatar: string;
   followedByMe: boolean;
 }
 

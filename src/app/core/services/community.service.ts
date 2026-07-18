@@ -1,5 +1,10 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { CommunityAuthor, CommunityWorkout, MuscleGroup } from '../models/workout.model';
+import {
+  CommunityAuthor,
+  CommunityPerson,
+  CommunityWorkout,
+  MuscleGroup,
+} from '../models/workout.model';
 import { Observable } from 'rxjs';
 import { map, tap, finalize } from 'rxjs/operators';
 import { ApiService } from './api.service';
@@ -87,6 +92,18 @@ export class CommunityService {
     return this.api.get<{ author: CommunityAuthor; posts: CommunityWorkout[] }>(
       `/community/author/${uid}`,
     );
+  }
+
+  loadMyFollowers(): Observable<CommunityPerson[]> {
+    return this.api
+      .get<{ people: CommunityPerson[] }>('/community/me/followers')
+      .pipe(map((res) => res.people));
+  }
+
+  loadMyFollowing(): Observable<CommunityPerson[]> {
+    return this.api
+      .get<{ people: CommunityPerson[] }>('/community/me/following')
+      .pipe(map((res) => res.people));
   }
 
   toggleFollow(uid: string): Observable<{ following: boolean; followers: number }> {

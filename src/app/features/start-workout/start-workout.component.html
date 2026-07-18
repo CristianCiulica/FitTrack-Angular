@@ -61,6 +61,17 @@
 
         <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
           <a
+            [routerLink]="workoutInProgress() ? null : '/profile'"
+            [attr.aria-disabled]="workoutInProgress()"
+            [class.navigation-locked]="workoutInProgress()"
+            (click)="blockNavigation($event)"
+            aria-label="Profile">
+            <span nz-icon nzType="idcard"></span>
+            <span>Profile</span>
+          </a>
+        </li>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+          <a
             [routerLink]="workoutInProgress() ? null : '/account'"
             [attr.aria-disabled]="workoutInProgress()"
             [class.navigation-locked]="workoutInProgress()"

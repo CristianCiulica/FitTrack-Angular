@@ -5,6 +5,8 @@ const userProfileSchema = new Schema(
     uid: { type: String, required: true, unique: true, index: true },
     email: { type: String, default: '' },
     displayName: { type: String, default: '' },
+    // poza de profil, ca data-URL redimensionat client-side (max ~200KB)
+    avatar: { type: String, default: '' },
     heightCm: { type: Number, default: null },
     weightKg: { type: Number, default: null },
     age: { type: Number, default: null },

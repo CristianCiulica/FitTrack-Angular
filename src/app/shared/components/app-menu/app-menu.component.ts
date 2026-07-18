@@ -29,6 +29,7 @@ export class AppMenuComponent {
 
   readonly profile = this.profileService.profile;
   readonly displayName = this.profileService.displayName;
+  readonly avatar = this.profileService.avatar;
   readonly initials = computed(() => {
     const name = this.profileService.displayName() || this.profile()?.email || '';
     const parts = name.trim().split(/[\s@.]+/).filter(Boolean);

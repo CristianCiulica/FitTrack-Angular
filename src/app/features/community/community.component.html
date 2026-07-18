@@ -9,7 +9,13 @@
       </button>
 
       <div class="author-hero">
-        <span class="author-avatar big">{{ authorInitials(view.author.name) }}</span>
+        <span class="author-avatar big">
+          @if (view.author.avatar) {
+            <img [src]="view.author.avatar" alt="" />
+          } @else {
+            {{ authorInitials(view.author.name) }}
+          }
+        </span>
         <h2>{{ view.author.name }}</h2>
         <div class="author-stats">
           <div><strong>{{ view.author.postCount }}</strong><span>posts</span></div>
@@ -155,7 +161,13 @@
               <strong class="pick-name">{{ p.name }}</strong>
               <span class="pick-meta">{{ p.estimatedMinutes }} min · {{ p.exercises.length }} ex</span>
               <span class="pick-author">
-                <span class="author-avatar tiny">{{ authorInitials(p.authorName) }}</span>
+                <span class="author-avatar tiny">
+                  @if (p.authorAvatar) {
+                    <img [src]="p.authorAvatar" alt="" />
+                  } @else {
+                    {{ authorInitials(p.authorName) }}
+                  }
+                </span>
                 {{ p.authorName }}
               </span>
               <span class="pick-saves"><span nz-icon nzType="download"></span>{{ p.saveCount }}</span>
@@ -192,7 +204,13 @@
   <article class="post">
     <header class="post-header">
       <button type="button" class="author-link" (click)="!inProfile && openAuthor(w.authorId)">
-        <span class="author-avatar">{{ authorInitials(w.authorName) }}</span>
+        <span class="author-avatar">
+          @if (w.authorAvatar) {
+            <img [src]="w.authorAvatar" alt="" />
+          } @else {
+            {{ authorInitials(w.authorName) }}
+          }
+        </span>
         <span class="post-author">
           <strong>{{ w.authorName }}</strong>
           <small>{{ timeAgo(w.createdAt) }}</small>

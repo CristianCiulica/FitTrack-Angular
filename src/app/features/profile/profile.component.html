@@ -1,0 +1,199 @@
+<nz-layout class="app-layout">
+  <nz-sider [nzWidth]="208" class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
+    </div>
+    <ul nz-menu nzMode="inline" class="sidebar-menu">
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/dashboard" aria-label="Dashboard">
+          <span nz-icon nzType="ft:home"></span><span>Home</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/workouts" aria-label="Workouts">
+          <span nz-icon nzType="ft:history"></span><span>History</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/start-workout" aria-label="Start workout">
+          <span nz-icon nzType="ft:workout"></span><span>Workout</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/running" aria-label="Running">
+          <span nz-icon nzType="ft:run"></span><span>Run</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/bmi" aria-label="Nutrition calculator">
+          <span nz-icon nzType="ft:nutrition"></span>
+          <span>Nutrition</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/profile" aria-label="Profile">
+          <span nz-icon nzType="idcard"></span><span>Profile</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/account" aria-label="Account">
+          <span nz-icon nzType="user"></span><span>Account</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/settings" aria-label="Settings">
+          <span nz-icon nzType="setting"></span><span>Settings</span>
+        </a>
+      </li>
+      <li nz-menu-item class="sidebar-logout-item" (click)="logout()">
+        <a aria-label="Logout">
+          <span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </nz-sider>
+
+  <nz-layout class="main-layout">
+    <nz-header class="app-header">
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Profile</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
+    </nz-header>
+
+    <nz-content class="app-content">
+      <div class="profile-wrap">
+
+        <!-- Hero: avatar + nume + statistici -->
+        <section class="profile-hero">
+          <div class="avatar-wrap">
+            <span class="profile-avatar">
+              <img *ngIf="avatar()" [src]="avatar()" alt="Profile photo" />
+              <ng-container *ngIf="!avatar()">{{ initials(displayName() || email()) }}</ng-container>
+            </span>
+            <label class="avatar-edit" [class.busy]="uploading()">
+              <span nz-icon [nzType]="uploading() ? 'loading' : 'camera'"></span>
+              <input type="file" accept="image/*" (change)="onAvatarSelected($event)" hidden />
+            </label>
+          </div>
+
+          <h1>{{ displayName() || 'Athlete' }}</h1>
+          <p class="profile-email">{{ email() }}</p>
+
+          <button type="button" class="avatar-remove" *ngIf="avatar()" (click)="removeAvatar()">
+            Remove photo
+          </button>
+
+          <div class="profile-stats" *ngIf="author() as a">
+            <div><strong>{{ a.postCount }}</strong><span>posts</span></div>
+            <div><strong>{{ a.followers }}</strong><span>followers</span></div>
+            <div><strong>{{ following().length }}</strong><span>following</span></div>
+            <div><strong>{{ a.totalLikes }}</strong><span>likes</span></div>
+            <div><strong>{{ a.totalSaves }}</strong><span>saves</span></div>
+          </div>
+        </section>
+
+        <!-- Tab-uri -->
+        <div class="profile-tabs" role="tablist" aria-label="Profile sections">
+          <button type="button" role="tab" [class.selected]="tab() === 'posts'" (click)="tab.set('posts')">Posts</button>
+          <button type="button" role="tab" [class.selected]="tab() === 'followers'" (click)="tab.set('followers')">Followers</button>
+          <button type="button" role="tab" [class.selected]="tab() === 'following'" (click)="tab.set('following')">Following</button>
+        </div>
+
+        <div class="loading-state" *ngIf="loading()">
+          <nz-spin nzSimple nzSize="large"></nz-spin>
+        </div>
+
+        <!-- Postarile mele -->
+        <ng-container *ngIf="!loading() && tab() === 'posts'">
+          <div class="profile-list" *ngIf="posts().length > 0; else noPosts">
+            <div class="post-row" *ngFor="let p of posts()">
+              <span class="post-tone" [attr.data-tone]="muscleTone(primaryMuscle(p))" aria-hidden="true"></span>
+              <div class="post-copy">
+                <strong>{{ p.name }}</strong>
+                <span class="post-meta">
+                  {{ p.exercises.length }} exercises · {{ timeAgo(p.createdAt) }}
+                </span>
+              </div>
+              <div class="post-side">
+                <span class="post-stat"><span nz-icon nzType="heart"></span>{{ p.likeCount }}</span>
+                <span class="post-stat"><span nz-icon nzType="download"></span>{{ p.saveCount }}</span>
+                <button
+                  type="button"
+                  class="post-delete"
+                  aria-label="Delete post"
+                  nz-popconfirm
+                  nzPopconfirmTitle="Delete this post?"
+                  nzOkText="Delete"
+                  [nzOkDanger]="true"
+                  (nzOnConfirm)="deletePost(p)"
+                >
+                  <span nz-icon nzType="delete"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <ng-template #noPosts>
+            <div class="profile-empty">
+              <strong>No posts yet</strong>
+              <p>Share a routine from the Community feed and it will show up here.</p>
+            </div>
+          </ng-template>
+        </ng-container>
+
+        <!-- Followers -->
+        <ng-container *ngIf="!loading() && tab() === 'followers'">
+          <div class="profile-list" *ngIf="followers().length > 0; else noFollowers">
+            <div class="person-row" *ngFor="let person of followers()">
+              <span class="person-avatar">
+                <img *ngIf="person.avatar" [src]="person.avatar" alt="" />
+                <ng-container *ngIf="!person.avatar">{{ initials(person.name) }}</ng-container>
+              </span>
+              <strong class="person-name">{{ person.name }}</strong>
+              <button
+                type="button"
+                class="follow-btn"
+                [class.following]="person.followedByMe"
+                (click)="toggleFollow(person)"
+              >
+                {{ person.followedByMe ? 'Following' : 'Follow back' }}
+              </button>
+            </div>
+          </div>
+          <ng-template #noFollowers>
+            <div class="profile-empty">
+              <strong>No followers yet</strong>
+              <p>Share great routines and athletes will start following you.</p>
+            </div>
+          </ng-template>
+        </ng-container>
+
+        <!-- Following -->
+        <ng-container *ngIf="!loading() && tab() === 'following'">
+          <div class="profile-list" *ngIf="following().length > 0; else noFollowing">
+            <div class="person-row" *ngFor="let person of following()">
+              <span class="person-avatar">
+                <img *ngIf="person.avatar" [src]="person.avatar" alt="" />
+                <ng-container *ngIf="!person.avatar">{{ initials(person.name) }}</ng-container>
+              </span>
+              <strong class="person-name">{{ person.name }}</strong>
+              <button type="button" class="follow-btn following" (click)="toggleFollow(person)">
+                Following
+              </button>
+            </div>
+          </div>
+          <ng-template #noFollowing>
+            <div class="profile-empty">
+              <strong>You're not following anyone</strong>
+              <p>Find athletes in the Community feed and follow their routines.</p>
+            </div>
+          </ng-template>
+        </ng-container>
+
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

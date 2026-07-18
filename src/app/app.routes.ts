@@ -44,6 +44,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/running/running.routes').then((m) => m.runningRoutes),
   },
   {
+    path: 'profile',
+    canActivate: [authGuard, onboardingGuard],
+    loadChildren: () => import('./features/profile/profile.routes').then((m) => m.profileRoutes),
+  },
+  {
     path: 'account',
     canActivate: [authGuard, onboardingGuard],
     loadChildren: () => import('./features/account/account.routes').then((m) => m.accountRoutes),

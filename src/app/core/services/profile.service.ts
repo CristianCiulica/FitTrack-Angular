@@ -15,6 +15,7 @@ export class ProfileService {
 
   // sursa unica de adevar pentru datele personale, folosita in Account, BMI, Nutrition, remindere
   readonly displayName = computed(() => this.profile()?.displayName ?? '');
+  readonly avatar = computed(() => this.profile()?.avatar ?? '');
   readonly heightCm = computed(() => this.profile()?.heightCm ?? null);
   readonly weightKg = computed(() => this.profile()?.weightKg ?? null);
   readonly age = computed(() => this.profile()?.age ?? null);

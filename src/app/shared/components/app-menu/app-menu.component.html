@@ -21,14 +21,18 @@
         </button>
       </div>
 
-      <div class="menu-profile">
-        <div class="avatar">{{ initials() }}</div>
-        <div class="profile-copy">
-          <strong>{{ displayName() || 'Your profile' }}</strong>
-          <small>{{ profile()?.email }}</small>
-        </div>
-      </div>
+      <!-- Cardul de profil: identitatea ta din comunitate, tap -> /profile -->
+      <button type="button" class="menu-hero" (click)="go('/profile')">
+        <span class="hero-avatar">
+          <img *ngIf="avatar()" [src]="avatar()" alt="" />
+          <ng-container *ngIf="!avatar()">{{ initials() }}</ng-container>
+        </span>
+        <strong class="hero-name">{{ displayName() || 'Your profile' }}</strong>
+        <small class="hero-email">{{ profile()?.email }}</small>
+        <span class="hero-cta-pill">View profile <span aria-hidden="true">›</span></span>
+      </button>
 
+      <span class="menu-section-label">Manage</span>
       <nav class="menu-links">
         <button type="button" *ngFor="let link of links" class="menu-link" (click)="go(link.path)">
           <span class="link-icon" nz-icon [nzType]="link.icon"></span>

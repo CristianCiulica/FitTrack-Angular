@@ -7,6 +7,8 @@ export interface UserProfile {
   uid: string;
   email: string;
   displayName: string;
+  /** poza de profil, ca data-URL (redimensionata client-side) */
+  avatar: string;
   heightCm: number | null;
   weightKg: number | null;
   age: number | null;
@@ -26,6 +28,7 @@ export type ProfileUpdate = Partial<
   Pick<
     UserProfile,
     | 'displayName'
+    | 'avatar'
     | 'heightCm'
     | 'weightKg'
     | 'age'

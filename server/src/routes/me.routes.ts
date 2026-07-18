@@ -8,6 +8,11 @@ const router = Router();
 
 const updateProfileSchema = z.object({
   displayName: z.string().trim().max(80).optional(),
+  avatar: z
+    .string()
+    .max(200_000)
+    .refine((v) => v === '' || v.startsWith('data:image/'), 'avatar must be an image data URL')
+    .optional(),
   heightCm: z.number().positive().max(300).nullable().optional(),
   weightKg: z.number().positive().max(500).nullable().optional(),
   age: z.number().int().positive().max(120).nullable().optional(),
