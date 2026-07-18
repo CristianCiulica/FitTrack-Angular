@@ -515,8 +515,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   currentReps = signal(0);
   private loggedWeights: number[][] = [];
   private loggedReps: number[][] = [];
-  // ultima greutate folosita pe fiecare exercitiu, din istoricul salvat
+  // ultima greutate si ultimele repetari pe fiecare exercitiu, din istoric
   private lastWeights = signal(new Map<string, number>());
+  private lastReps = signal(new Map<string, number>());
 
   // greutatea folosita data trecuta la exercitiul curent (hint de progres)
   lastTimeWeight = computed(() => {
@@ -748,25 +749,34 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.state.set('active');
   }
 
-  // cauta in istoricul salvat ultima greutate folosita la fiecare exercitiu
+  // cauta in istoricul salvat ultima greutate si ultimele repetari per exercitiu
   private loadLastWeights() {
     this.lastWeights.set(new Map());
+    this.lastReps.set(new Map());
     this.workoutService.getWorkouts().subscribe((workouts) => {
-      const map = new Map<string, number>();
+      const weights = new Map<string, number>();
+      const reps = new Map<string, number>();
       const sorted = [...workouts].sort((a, b) => b.date.localeCompare(a.date));
       for (const w of sorted) {
         for (const ex of w.exercises) {
           const key = ex.exerciseName.toLowerCase();
-          if (map.has(key)) continue;
-          const logged = ex.setWeights?.length ? Math.max(...ex.setWeights) : ex.weight;
-          if (logged > 0) map.set(key, logged);
+          if (!weights.has(key)) {
+            const logged = ex.setWeights?.length ? Math.max(...ex.setWeights) : ex.weight;
+            if (logged > 0) weights.set(key, logged);
+          }
+          // doar repetarile logate efectiv conteaza (reps oficial poate fi planul)
+          if (!reps.has(key) && ex.setReps?.length) {
+            reps.set(key, Math.max(...ex.setReps));
+          }
         }
       }
-      this.lastWeights.set(map);
-      // istoricul soseste asincron; reasezam greutatea propusa acum ca stim
+      this.lastWeights.set(weights);
+      this.lastReps.set(reps);
+      // istoricul soseste asincron; reasezam valorile propuse acum ca stim
       // cat s-a lucrat data trecuta (doar daca userul nu a logat inca un set)
       if (this.workoutInProgress() && !this.loggedWeights[this.currentExerciseIndex()]?.length) {
         this.syncCurrentWeight();
+        this.syncCurrentReps();
       }
     });
   }
@@ -797,7 +807,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     }
   }
 
-  // repetarile propuse pentru setul curent: ultimul set logat sau planul
+  // repetarile propuse pentru setul curent:
+  // ultimul set logat in aceasta sesiune > cate ai facut data trecuta > planul
   private syncCurrentReps() {
     const exIdx = this.currentExerciseIndex();
     const logged = this.loggedReps[exIdx];
@@ -805,7 +816,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       this.currentReps.set(logged[logged.length - 1]);
       return;
     }
-    this.currentReps.set(this.currentExercise()?.reps ?? 0);
+    const ex = this.currentExercise();
+    const lastTime = ex ? this.lastReps().get(ex.name.toLowerCase()) : undefined;
+    this.currentReps.set(lastTime && lastTime > 0 ? lastTime : ex?.reps ?? 0);
   }
 
   adjustReps(delta: number) {
