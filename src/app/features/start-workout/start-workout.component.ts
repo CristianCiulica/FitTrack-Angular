@@ -468,6 +468,8 @@ const OFFICIAL_PLANS: OfficialPlan[] = [
   },
 ];
 
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+
 @Component({
   selector: 'app-start-workout',
   standalone: true,
@@ -483,6 +485,7 @@ const OFFICIAL_PLANS: OfficialPlan[] = [
     NzProgressModule,
     NzTagModule,
     NzDrawerModule,
+    NzPopconfirmModule,
     WorkoutModalComponent,
     AppMenuComponent,
     CommunityComponent,
@@ -676,10 +679,22 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         this.loadPersonalRoutines();
         this.message.success('Workout saved successfully.');
       },
-      error: (err) => {
-        console.warn('[start-workout] Failed to save workout', err);
-        this.message.error('Failed to save workout.');
-      }
+      error: () => this.message.error('Failed to save workout.')
+    });
+  }
+
+  deleteWorkout(id: string | undefined) {
+    if (!id) return;
+    this.workoutService.deleteWorkout(id).subscribe({
+      next: () => {
+        this.message.success('Workout deleted successfully.');
+        // Re-select first predefined routine if we deleted the selected one
+        if (this.selectedRoutineKey() === 'personal-' + id) {
+          this.selectRoutine(this.routines[0], 'predefined-0');
+        }
+        this.loadPersonalRoutines();
+      },
+      error: () => this.message.error('Failed to delete workout.')
     });
   }
 

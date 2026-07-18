@@ -128,9 +128,6 @@
               <h2>Try community workouts</h2>
               <p>Discover routines shared by other athletes.</p>
             </div>
-            <span class="promo-arrow" aria-hidden="true">
-              <span nz-icon nzType="global"></span>
-            </span>
           </button>
 
           <!-- Hub-ul planurilor oficiale ale legendelor -->
@@ -145,9 +142,6 @@
               <h2>Legends' Official Plans</h2>
               <p>Arnold, Cbum, Mentzer & more — train like the greats.</p>
             </div>
-            <span class="promo-arrow" aria-hidden="true">
-              <span nz-icon nzType="trophy"></span>
-            </span>
           </button>
 
           <!-- Planul -->
@@ -218,15 +212,27 @@
                 <span class="plan-count">{{ routine.exercises.length }} exercises · ~{{ routineKcal(routine) }} kcal</span>
               </div>
               <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
-              <button
-                type="button"
-                class="plan-start"
-                *ngIf="selectedRoutineKey() === 'personal-' + routine.id"
-                (click)="$event.stopPropagation(); startWorkout()"
-              >
-                <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-                Start workout
-              </button>
+              <div class="plan-actions" *ngIf="selectedRoutineKey() === 'personal-' + routine.id">
+                <button
+                  type="button"
+                  class="plan-start"
+                  (click)="$event.stopPropagation(); startWorkout()"
+                >
+                  <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+                  Start workout
+                </button>
+                <button
+                  type="button"
+                  class="plan-delete"
+                  nz-popconfirm
+                  nzPopconfirmTitle="Are you sure you want to delete this workout?"
+                  nzPopconfirmPlacement="top"
+                  (nzOnConfirm)="deleteWorkout(routine.id)"
+                  (click)="$event.stopPropagation()"
+                >
+                  <span nz-icon nzType="delete" nzTheme="outline"></span>
+                </button>
+              </div>
             </div>
           </div>
           <ng-template #noPersonalRoutines>
