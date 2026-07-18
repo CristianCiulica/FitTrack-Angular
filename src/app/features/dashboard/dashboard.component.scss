@@ -258,53 +258,77 @@
 }
 
 .goals-card {
-  align-items: center;
-  text-align: center;
   background:
-    radial-gradient(80% 120% at 90% 0%, rgba(175, 82, 222, 0.13), transparent 60%),
-    linear-gradient(150deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.55));
+    radial-gradient(80% 120% at 90% 0%, rgba(175, 82, 222, 0.08), transparent 60%),
+    linear-gradient(150deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.6));
   transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
-
-  .metric-head {
-    width: 100%;
-  }
-
-  .goal-badge {
-    display: grid;
-    place-items: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: linear-gradient(150deg, #34c759, #248a3d);
-    color: #fff;
-    font-size: 14px;
-    box-shadow: 0 4px 12px rgba(52, 199, 89, 0.45);
-    animation: goal-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-  }
 
   &.goal-complete {
     background:
-      radial-gradient(80% 120% at 50% 30%, rgba(52, 199, 89, 0.18), transparent 60%),
-      linear-gradient(150deg, rgba(255, 255, 255, 0.82), rgba(233, 250, 238, 0.7));
-    border-color: rgba(52, 199, 89, 0.45);
+      radial-gradient(80% 120% at 50% 30%, rgba(52, 199, 89, 0.12), transparent 60%),
+      linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(233, 250, 238, 0.65));
+    border-color: rgba(52, 199, 89, 0.35);
     box-shadow:
-      0 18px 44px rgba(52, 199, 89, 0.16),
-      0 0 0 1px rgba(52, 199, 89, 0.1),
+      0 18px 44px rgba(52, 199, 89, 0.12),
+      0 0 0 1px rgba(52, 199, 89, 0.08),
       inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
     .goal-ring-fill {
       stroke: url(#goalGreenGrad);
-      filter: drop-shadow(0 0 6px rgba(52, 199, 89, 0.5));
+      filter: drop-shadow(0 0 5px rgba(52, 199, 89, 0.4));
     }
   }
+}
+
+/* ---- Goals header ---- */
+.goals-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.goals-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1d1d1f;
+}
+
+.goals-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #34c759;
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  transition: opacity 0.2s;
+
+  &:hover { opacity: 0.7; }
+
+  span[nz-icon] { font-size: 13px; }
+}
+
+/* ---- Goals body (ring + stats) ---- */
+.goals-body {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
 }
 
 /* ---- Circular ring ---- */
 .goal-ring-wrap {
   position: relative;
-  width: 96px;
-  height: 96px;
-  margin: 2px auto 4px;
+  width: 110px;
+  height: 110px;
+  flex: 0 0 110px;
 }
 
 .goal-ring {
@@ -315,14 +339,14 @@
 
 .goal-ring-bg {
   fill: none;
-  stroke: rgba(0, 0, 0, 0.06);
-  stroke-width: 7;
+  stroke: rgba(0, 0, 0, 0.05);
+  stroke-width: 8;
 }
 
 .goal-ring-fill {
   fill: none;
   stroke: url(#goalPurpleGrad);
-  stroke-width: 7;
+  stroke-width: 8;
   stroke-linecap: round;
   stroke-dasharray: 263.89;
   transition: stroke-dashoffset 0.6s cubic-bezier(0.22, 1, 0.36, 1);
@@ -337,7 +361,7 @@
   justify-content: center;
 
   strong {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 800;
     line-height: 1;
     letter-spacing: -0.04em;
@@ -345,38 +369,112 @@
     font-variant-numeric: tabular-nums;
 
     small {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 600;
       color: #86868b;
     }
   }
 
   span {
-    font-size: 10.5px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #aeaeb2;
-    margin-top: 1px;
+    margin-top: 3px;
   }
 }
 
-/* ---- Status line ---- */
-.goal-status {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #86868b;
-  letter-spacing: -0.01em;
+/* ---- Stat rows (right side) ---- */
+.goal-stats {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 
-  &.reached {
-    color: #248a3d;
-    font-weight: 700;
+.goal-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 50%;
+  font-size: 15px;
+
+  &.check {
+    color: #34c759;
+    background: rgba(52, 199, 89, 0.12);
   }
+
+  &.fire {
+    color: #0a84ff;
+    background: rgba(10, 132, 255, 0.12);
+  }
+
+  &.steps {
+    color: #af52de;
+    background: rgba(175, 82, 222, 0.12);
+  }
+}
+
+.stat-text {
+  min-width: 0;
+  line-height: 1.25;
+
+  strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    color: #1d1d1f;
+    font-variant-numeric: tabular-nums;
+
+    small {
+      font-size: 12px;
+      font-weight: 500;
+      color: #aeaeb2;
+    }
+  }
+
+  > span {
+    font-size: 11px;
+    font-weight: 500;
+    color: #86868b;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ---- Bottom pill / label ---- */
+.goal-achieved-pill {
+  margin-top: 8px;
+  padding: 5px 14px;
+  border-radius: 980px;
+  background: rgba(52, 199, 89, 0.12);
+  color: #248a3d;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  animation: goal-pop 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.goal-progress-label {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #aeaeb2;
 }
 
 @keyframes goal-pop {
-  0% { transform: scale(0); opacity: 0; }
-  60% { transform: scale(1.2); }
+  0% { transform: scale(0.85); opacity: 0; }
+  60% { transform: scale(1.05); }
   100% { transform: scale(1); opacity: 1; }
 }
 

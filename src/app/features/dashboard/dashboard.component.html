@@ -122,38 +122,67 @@
         </div>
 
         <div class="metric-card goals-card" [class.goal-complete]="goalReached()">
-          <div class="metric-head">
-            <span class="metric-title">Weekly Goal</span>
-            <span class="goal-badge" *ngIf="goalReached()">
-              <span nz-icon nzType="check" nzTheme="outline"></span>
-            </span>
+          <div class="goals-head">
+            <span class="goals-title">Goals</span>
+            <button type="button" class="goals-edit" routerLink="/settings">Edit <span nz-icon nzType="edit" nzTheme="outline"></span></button>
           </div>
 
-          <div class="goal-ring-wrap">
-            <svg class="goal-ring" viewBox="0 0 100 100">
-              <defs>
-                <linearGradient id="goalPurpleGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#af52de" />
-                  <stop offset="100%" stop-color="#0a84ff" />
-                </linearGradient>
-                <linearGradient id="goalGreenGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#34c759" />
-                  <stop offset="100%" stop-color="#248a3d" />
-                </linearGradient>
-              </defs>
-              <circle class="goal-ring-bg" cx="50" cy="50" r="42" />
-              <circle class="goal-ring-fill"
-                cx="50" cy="50" r="42"
-                [style.stroke-dashoffset]="ringOffset()" />
-            </svg>
-            <div class="goal-ring-label">
-              <strong>{{ thisWeekWorkouts() }}<small>/{{ weeklyGoal() }}</small></strong>
-              <span>workouts</span>
+          <div class="goals-body">
+            <!-- Ring -->
+            <div class="goal-ring-wrap">
+              <svg class="goal-ring" viewBox="0 0 100 100">
+                <defs>
+                  <linearGradient id="goalGreenGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#34c759" />
+                    <stop offset="100%" stop-color="#30a64d" />
+                  </linearGradient>
+                  <linearGradient id="goalPurpleGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#af52de" />
+                    <stop offset="100%" stop-color="#0a84ff" />
+                  </linearGradient>
+                </defs>
+                <circle class="goal-ring-bg" cx="50" cy="50" r="42" />
+                <circle class="goal-ring-fill"
+                  cx="50" cy="50" r="42"
+                  [style.stroke-dashoffset]="ringOffset()" />
+              </svg>
+              <div class="goal-ring-label">
+                <strong>{{ thisWeekWorkouts() }}<small>/{{ weeklyGoal() }}</small></strong>
+                <span>WORKOUTS</span>
+              </div>
+            </div>
+
+            <!-- Stat rows -->
+            <div class="goal-stats">
+              <div class="goal-stat-row">
+                <span class="stat-icon check" nz-icon nzType="check-circle" nzTheme="fill"></span>
+                <div class="stat-text">
+                  <strong>{{ thisWeekWorkouts() }} <small>/ {{ weeklyGoal() }}</small></strong>
+                  <span>Workouts</span>
+                </div>
+              </div>
+              <div class="goal-stat-row">
+                <span class="stat-icon fire" nz-icon nzType="fire" nzTheme="fill"></span>
+                <div class="stat-text">
+                  <strong>{{ burnedKcal() | number }} <small>/ {{ targetKcal() | number }}</small></strong>
+                  <span>Kcal burned</span>
+                </div>
+              </div>
+              <div class="goal-stat-row">
+                <span class="stat-icon steps" nz-icon nzType="thunderbolt" nzTheme="fill"></span>
+                <div class="stat-text">
+                  <strong>{{ stepsForDay() | number }} <small>/ 7,000</small></strong>
+                  <span>Steps</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <span class="goal-status" [class.reached]="goalReached()">
-            {{ goalReached() ? '🎉 Goal reached!' : goalPercent() + '% complete' }}
+          <div class="goal-achieved-pill" *ngIf="goalReached()">
+            Goal achieved! 🎉
+          </div>
+          <span class="goal-progress-label" *ngIf="!goalReached()">
+            {{ goalPercent() }}% complete
           </span>
         </div>
       </div>
