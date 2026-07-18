@@ -178,15 +178,16 @@
                 <span class="plan-count">{{ item.routine.exercises.length }} exercises · ~{{ routineKcal(item.routine) }} kcal</span>
               </div>
               <p class="plan-muscles">{{ muscleSummary(item.routine) }}</p>
-              <button
-                type="button"
-                class="plan-start"
-                *ngIf="selectedRoutineKey() === 'predefined-' + item.index"
-                (click)="$event.stopPropagation(); startWorkout()"
-              >
-                <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-                Start workout
-              </button>
+              <div class="plan-actions" *ngIf="selectedRoutineKey() === 'predefined-' + item.index">
+                <button
+                  type="button"
+                  class="plan-start"
+                  (click)="$event.stopPropagation(); startWorkout()"
+                >
+                  <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+                  Start workout
+                </button>
+              </div>
             </div>
           </div>
 
