@@ -13,6 +13,7 @@ const exerciseSchema = z.object({
   reps: z.number().min(0).max(500),
   weight: z.number().min(0).max(1000),
   setWeights: z.array(z.number().min(0).max(1000)).max(50).optional(),
+  setReps: z.array(z.number().min(0).max(500)).max(50).optional(),
 });
 
 // praguri de calitate la publicare: minim 2 exercitii si o descriere reala

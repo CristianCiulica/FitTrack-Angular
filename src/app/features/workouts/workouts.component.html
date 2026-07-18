@@ -356,7 +356,8 @@
                           </div>
                           <div class="desktop-exercise-stats">
                             <span>{{ ex.sets }} sets</span>
-                            <span>{{ ex.reps }} reps</span>
+                            <span *ngIf="!ex.setReps?.length">{{ ex.reps }} reps</span>
+                            <span class="set-weights" *ngIf="ex.setReps?.length">{{ formatSetReps(ex.setReps!) }}</span>
                             <span *ngIf="!ex.setWeights?.length">{{ ex.weight }} kg</span>
                             <span class="set-weights" *ngIf="ex.setWeights?.length">{{ formatSetWeights(ex.setWeights!) }}</span>
                           </div>
@@ -417,7 +418,8 @@
                   </div>
                   <div class="ex-stats">
                     <span>{{ ex.sets }} sets</span>
-                    <span>{{ ex.reps }} reps</span>
+                    <span *ngIf="!ex.setReps?.length">{{ ex.reps }} reps</span>
+                    <span class="set-weights" *ngIf="ex.setReps?.length">{{ formatSetReps(ex.setReps!) }}</span>
                     <span *ngIf="!ex.setWeights?.length">{{ ex.weight }} kg</span>
                     <span class="set-weights" *ngIf="ex.setWeights?.length">{{ formatSetWeights(ex.setWeights!) }}</span>
                   </div>

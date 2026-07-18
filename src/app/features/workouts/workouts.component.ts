@@ -114,15 +114,24 @@ export class WorkoutsComponent implements OnInit {
     return setWeights.join(' / ') + ' kg';
   }
 
+  // repetarile reale pe seturi, ex. "10 / 9 / 8 reps"
+  formatSetReps(setReps: number[]): string {
+    return setReps.join(' / ') + ' reps';
+  }
+
   getWorkoutVolume(workout: Workout): number {
-    return workout.exercises?.reduce(
-      (total, exercise) =>
-        total +
-        (exercise.setWeights?.length
-          ? exercise.reps * exercise.setWeights.reduce((s, w) => s + w, 0)
-          : exercise.sets * exercise.reps * exercise.weight),
-      0,
-    ) ?? 0;
+    return workout.exercises?.reduce((total, exercise) => {
+      const weights = exercise.setWeights;
+      const reps = exercise.setReps;
+      // perechi reale reps×kg pe set, cand au fost logate amandoua
+      if (weights?.length && reps?.length === weights.length) {
+        return total + weights.reduce((s, w, i) => s + w * reps[i], 0);
+      }
+      if (weights?.length) {
+        return total + exercise.reps * weights.reduce((s, w) => s + w, 0);
+      }
+      return total + exercise.sets * exercise.reps * exercise.weight;
+    }, 0) ?? 0;
   }
 
   // estimare de calorii arse, pe baza greutatii din profil

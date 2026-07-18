@@ -6,6 +6,8 @@ export interface ExerciseLog {
   weight: number;
   /** Greutatea folosita efectiv la fiecare set (progressive overload). */
   setWeights?: number[];
+  /** Repetarile facute efectiv la fiecare set (progressive overload). */
+  setReps?: number[];
 }
 
 export interface Workout {

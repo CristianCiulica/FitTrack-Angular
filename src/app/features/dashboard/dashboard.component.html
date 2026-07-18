@@ -182,24 +182,42 @@
         <span nz-icon nzType="fire"></span>
         Nutrition Assistant
       </button>
-      <nz-card class="recent-card" nzTitle="Recent workouts">
-        <div class="recent-list">
-          <div *ngFor="let w of recentWorkouts()" class="recent-item">
-            <div class="recent-left">
-              <div class="recent-name">{{ w.name || 'Untitled workout' }}</div>
-              <div class="recent-meta">{{ w.exercises.length || 0 }} exercises · ~{{ workoutKcal(w) }} kcal</div>
-            </div>
-            <div class="recent-right">
-              <nz-tag [nzColor]="'default'">{{ w.exercises && w.exercises.length > 0 ? w.exercises[0].muscleGroup : 'Mixed' }}</nz-tag>
-              <div class="recent-date">{{ w.date }}</div>
-            </div>
+      <section class="recent-section">
+        <div class="recent-heading">
+          <div>
+            <span class="recent-eyebrow">Training log</span>
+            <h3>Recent workouts</h3>
           </div>
-          <div *ngIf="recentWorkouts().length === 0" class="empty-state">
-            <span nz-icon nzType="inbox" style="font-size:48px;color:#d1d1d6"></span>
-            <p>No workouts yet. <a routerLink="/start-workout">Add your first!</a></p>
-          </div>
+          <a routerLink="/workouts" class="recent-see-all">See all</a>
         </div>
-      </nz-card>
+
+        <div class="recent-list" *ngIf="recentWorkouts().length > 0; else noRecent">
+          <a
+            *ngFor="let w of recentWorkouts()"
+            class="recent-item"
+            routerLink="/workouts"
+          >
+            <span class="recent-icon" [attr.data-tone]="muscleTone(getPrimaryMuscle(w))">
+              <span nz-icon nzType="ft:workout"></span>
+            </span>
+            <span class="recent-copy">
+              <span class="recent-name">{{ w.name || 'Untitled workout' }}</span>
+              <span class="recent-meta">{{ w.exercises.length || 0 }} exercises · ~{{ workoutKcal(w) }} kcal</span>
+            </span>
+            <span class="recent-side">
+              <span class="recent-chip" [attr.data-tone]="muscleTone(getPrimaryMuscle(w))">{{ getPrimaryMuscle(w) }}</span>
+              <span class="recent-date">{{ w.date | date: 'd MMM' }}</span>
+            </span>
+          </a>
+        </div>
+
+        <ng-template #noRecent>
+          <a routerLink="/start-workout" class="recent-empty">
+            <strong>No workouts yet</strong>
+            <span>Start your first workout →</span>
+          </a>
+        </ng-template>
+      </section>
 
       <nz-modal
         [nzVisible]="isChatOpen()"

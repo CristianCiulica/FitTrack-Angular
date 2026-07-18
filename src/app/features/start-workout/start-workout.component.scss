@@ -1100,37 +1100,54 @@
 
   .live-weight {
     width: 100%;
-    max-width: 360px;
+    max-width: 420px;
     padding: 18px;
     border-radius: 22px;
     background: rgba(255, 255, 255, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.9);
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
 
-    > label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 11.5px;
-      font-weight: 650;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #86868b;
+    /* doua steppere alaturate: Reps done + Weight */
+    .live-adjust-row {
+      display: flex;
+      gap: 14px;
+    }
+
+    .live-adjust {
+      flex: 1;
+      min-width: 0;
+
+      & + .live-adjust {
+        padding-left: 14px;
+        border-left: 1px solid rgba(0, 0, 0, 0.07);
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 11.5px;
+        font-weight: 650;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        text-align: center;
+        color: #86868b;
+      }
     }
 
     .weight-stepper {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 6px;
     }
 
     .stepper-btn {
       display: grid;
       place-items: center;
-      width: 44px;
-      height: 44px;
+      width: 38px;
+      height: 38px;
       flex: 0 0 auto;
-      font-size: 24px;
+      font-size: 21px;
       font-weight: 600;
       line-height: 1;
       color: #0066cc;
@@ -1145,9 +1162,9 @@
     }
 
     .weight-input {
-      width: 96px;
+      width: 68px;
       padding: 0;
-      font-size: 40px;
+      font-size: 32px;
       font-weight: 700;
       font-family: inherit;
       letter-spacing: -0.03em;

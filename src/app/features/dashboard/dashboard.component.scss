@@ -535,40 +535,112 @@
    Recent workouts
    ------------------------------------------------------------ */
 
-.recent-card {
-  border-radius: 24px !important;
+.recent-section {
+  margin-top: 4px;
+}
+
+.recent-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  .recent-eyebrow {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #86868b;
+  }
+
+  h3 {
+    margin: 2px 0 0;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.026em;
+    color: #1d1d1f;
+  }
+
+  .recent-see-all {
+    flex: 0 0 auto;
+    padding: 7px 15px;
+    font-size: 13px;
+    font-weight: 640;
+    letter-spacing: -0.01em;
+    color: #0066cc;
+    text-decoration: none;
+    border-radius: 980px;
+    background: rgba(0, 113, 227, 0.08);
+    transition: background 0.15s ease;
+
+    &:hover { background: rgba(0, 113, 227, 0.14); }
+  }
 }
 
 .recent-list {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .recent-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 15px 6px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
-  transition: background 0.18s ease, padding 0.18s ease;
-
-  &:last-child {
-    border-bottom: none;
-  }
+  gap: 13px;
+  padding: 13px 15px;
+  text-decoration: none;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.58));
+  box-shadow:
+    0 10px 26px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px) saturate(175%);
+  -webkit-backdrop-filter: blur(20px) saturate(175%);
+  transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.6);
-    padding-inline: 12px;
+    transform: translateY(-2px);
+    box-shadow:
+      0 16px 36px rgba(15, 23, 42, 0.09),
+      inset 0 1px 0 rgba(255, 255, 255, 0.92);
   }
 
-  .recent-left {
+  &:active { transform: scale(0.99); }
+
+  /* iconita tintata in tonul grupei musculare, stil iOS Settings */
+  .recent-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    font-size: 19px;
+    border-radius: 13px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+    &[data-tone='blue'] { color: #0066cc; background: rgba(0, 113, 227, 0.13); }
+    &[data-tone='green'] { color: #248a3d; background: rgba(52, 199, 89, 0.15); }
+    &[data-tone='purple'] { color: #8e3bb5; background: rgba(175, 82, 222, 0.15); }
+    &[data-tone='cyan'] { color: #2596a6; background: rgba(48, 176, 199, 0.17); }
+    &[data-tone='indigo'] { color: #4745c9; background: rgba(94, 92, 230, 0.15); }
+    &[data-tone='pink'] { color: #d70041; background: rgba(255, 45, 85, 0.14); }
+    &[data-tone='red'] { color: #d70015; background: rgba(255, 59, 48, 0.13); }
+    &[data-tone='graphite'] { color: #515154; background: rgba(0, 0, 0, 0.07); }
+  }
+
+  .recent-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
     min-width: 0;
+    flex: 1;
 
     .recent-name {
-      font-size: 15.5px;
-      font-weight: 620;
+      font-size: 15px;
+      font-weight: 650;
       letter-spacing: -0.015em;
       color: #1d1d1f;
       overflow: hidden;
@@ -577,24 +649,71 @@
     }
 
     .recent-meta {
-      margin-top: 2px;
-      font-size: 13px;
-      color: #86868b;
-    }
-  }
-
-  .recent-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 0 0 auto;
-
-    .recent-date {
-      font-size: 13px;
-      font-weight: 530;
+      font-size: 12.5px;
       color: #86868b;
       font-variant-numeric: tabular-nums;
     }
+  }
+
+  .recent-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex: 0 0 auto;
+
+    .recent-chip {
+      padding: 3px 11px;
+      font-size: 11.5px;
+      font-weight: 650;
+      border-radius: 980px;
+      white-space: nowrap;
+
+      &[data-tone='blue'] { color: #0066cc; background: rgba(0, 113, 227, 0.12); }
+      &[data-tone='green'] { color: #248a3d; background: rgba(52, 199, 89, 0.14); }
+      &[data-tone='purple'] { color: #8e3bb5; background: rgba(175, 82, 222, 0.14); }
+      &[data-tone='cyan'] { color: #2596a6; background: rgba(48, 176, 199, 0.16); }
+      &[data-tone='indigo'] { color: #4745c9; background: rgba(94, 92, 230, 0.14); }
+      &[data-tone='pink'] { color: #d70041; background: rgba(255, 45, 85, 0.13); }
+      &[data-tone='red'] { color: #d70015; background: rgba(255, 59, 48, 0.12); }
+      &[data-tone='graphite'] { color: #515154; background: rgba(0, 0, 0, 0.06); }
+    }
+
+    .recent-date {
+      font-size: 12px;
+      font-weight: 560;
+      color: #a1a1a6;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+.recent-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 34px 20px;
+  text-align: center;
+  text-decoration: none;
+  border: 1px dashed rgba(0, 0, 0, 0.14);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.4);
+  transition: background 0.15s ease;
+
+  &:hover { background: rgba(255, 255, 255, 0.65); }
+
+  strong {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1d1d1f;
+  }
+
+  span {
+    font-size: 13px;
+    font-weight: 620;
+    color: #0066cc;
   }
 }
 

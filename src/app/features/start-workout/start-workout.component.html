@@ -382,25 +382,46 @@
         <div class="value">{{ currentSetIndex() }} / {{ ex.sets }}</div>
       </div>
       <div class="live-stat">
-        <label>Reps</label>
-        <div class="value">{{ ex.reps }}</div>
+        <label>Target</label>
+        <div class="value">{{ ex.reps }} reps</div>
       </div>
     </div>
 
+    <!-- logheaza ce ai facut efectiv la setul curent: repetari + greutate -->
     <div class="live-weight">
-      <label>Weight (kg)</label>
-      <div class="weight-stepper">
-        <button type="button" class="stepper-btn" aria-label="Decrease weight" (click)="adjustWeight(-2.5)">−</button>
-        <input
-          class="weight-input"
-          type="number"
-          inputmode="decimal"
-          min="0"
-          step="0.5"
-          [value]="currentWeight()"
-          (change)="onWeightInput($any($event.target).value)"
-        />
-        <button type="button" class="stepper-btn" aria-label="Increase weight" (click)="adjustWeight(2.5)">+</button>
+      <div class="live-adjust-row">
+        <div class="live-adjust">
+          <label>Reps done</label>
+          <div class="weight-stepper">
+            <button type="button" class="stepper-btn" aria-label="Decrease reps" (click)="adjustReps(-1)">−</button>
+            <input
+              class="weight-input"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              step="1"
+              [value]="currentReps()"
+              (change)="onRepsInput($any($event.target).value)"
+            />
+            <button type="button" class="stepper-btn" aria-label="Increase reps" (click)="adjustReps(1)">+</button>
+          </div>
+        </div>
+        <div class="live-adjust">
+          <label>Weight (kg)</label>
+          <div class="weight-stepper">
+            <button type="button" class="stepper-btn" aria-label="Decrease weight" (click)="adjustWeight(-2.5)">−</button>
+            <input
+              class="weight-input"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.5"
+              [value]="currentWeight()"
+              (change)="onWeightInput($any($event.target).value)"
+            />
+            <button type="button" class="stepper-btn" aria-label="Increase weight" (click)="adjustWeight(2.5)">+</button>
+          </div>
+        </div>
       </div>
       <div class="overload-hint" *ngIf="lastTimeWeight() as last">
         <span class="hint-label">Last time: <strong>{{ last }} kg</strong></span>

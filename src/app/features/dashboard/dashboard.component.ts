@@ -125,6 +125,26 @@ export class DashboardComponent implements OnInit {
   });
   recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
 
+  // aceleasi tonuri pe grupe musculare ca in History/Community
+  private readonly muscleTones: Record<string, string> = {
+    Chest: 'blue',
+    Back: 'green',
+    Shoulders: 'purple',
+    Arms: 'cyan',
+    Legs: 'indigo',
+    Core: 'pink',
+    Cardio: 'red',
+    'Full Body': 'graphite',
+  };
+
+  getPrimaryMuscle(workout: Workout): string {
+    return workout.exercises?.[0]?.muscleGroup ?? 'Full Body';
+  }
+
+  muscleTone(muscleGroup: string): string {
+    return this.muscleTones[muscleGroup] ?? 'graphite';
+  }
+
   /* ---------------- Activity calendar + daily metrics ---------------- */
 
   private readonly runningSessionService = inject(RunningSessionService);
