@@ -316,6 +316,19 @@ export class WorkoutsComponent implements OnInit {
     });
   }
 
+  deleteRunningSession(id: string) {
+    if (!id) return;
+    this.runningSessionService.deleteSession(id).subscribe({
+      next: () => {
+        this.message.success('Running session deleted!');
+        this.runningSessionService.getSessions().subscribe((sessions) => {
+          this.runningSessions.set(sessions);
+        });
+      },
+      error: () => this.message.error('Delete failed.')
+    });
+  }
+
   logout() {
     this.authService.logout().subscribe();
   }

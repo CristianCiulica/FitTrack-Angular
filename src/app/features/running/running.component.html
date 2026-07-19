@@ -130,22 +130,15 @@
 
         <nz-card class="run-card">
           <div class="run-card-top">
-            <button
-              type="button"
-              class="run-card-summary"
-              [class.expanded]="activityExpanded"
-              [attr.aria-expanded]="activityExpanded"
-              (click)="toggleActivityDetails()"
-            >
+            <div class="run-card-summary">
               <div>
                 <span class="run-card-eyebrow">Activity</span>
                 <strong>Running</strong>
               </div>
-              <div class="run-card-state">
-                <span class="gps-badge" *ngIf="isTracking && !isCalibrating">GPS active</span>
-                <span class="run-chevron" aria-hidden="true"></span>
+              <div class="run-card-state" *ngIf="isTracking && !isCalibrating">
+                <span class="gps-badge">GPS active</span>
               </div>
-            </button>
+            </div>
             <button
               nz-button
               type="button"
@@ -156,13 +149,6 @@
               <span nz-icon [nzType]="isTracking ? 'close' : 'play-circle'"></span>
               {{ isTracking ? 'Stop' : 'Quick Run' }}
             </button>
-          </div>
-          <div class="run-controls" *ngIf="activityExpanded">
-            <div class="control-buttons">
-              <button nz-button class="start-button" (click)="startTracking()" [disabled]="isTracking">Start</button>
-              <button nz-button class="stop-button" (click)="stopTracking()" [disabled]="!isTracking">Stop</button>
-            </div>
-            <div class="status-text">{{ statusText }}</div>
           </div>
         </nz-card>
       </div>

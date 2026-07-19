@@ -95,4 +95,21 @@ export class RunningSessionService {
       })
     );
   }
+
+  deleteSession(id: string): Observable<void> {
+    const updated = this.loadLocal().filter((s) => s.id !== id);
+    this.saveLocal(updated);
+
+    if (this.isTempId(id)) {
+      return of(undefined);
+    }
+
+    return this.api.delete<{ deleted: boolean }>(`/running-sessions/${id}`).pipe(
+      map(() => undefined),
+      catchError((err) => {
+        console.warn('API delete running session failed, removed locally', err);
+        return of(undefined);
+      })
+    );
+  }
 }

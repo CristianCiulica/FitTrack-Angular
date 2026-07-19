@@ -107,7 +107,20 @@
                   <h4>Run</h4>
                   <span>{{ session.startedAt | date: 'd MMM y, HH:mm' }}</span>
                 </div>
-                <strong>{{ session.distanceMeters / 1000 | number: '1.2-2' }} km</strong>
+                <div class="cardio-header-right">
+                  <strong>{{ session.distanceMeters / 1000 | number: '1.2-2' }} km</strong>
+                  <button
+                    type="button"
+                    class="cardio-delete-btn"
+                    nz-popconfirm
+                    nzPopconfirmTitle="Delete session?"
+                    nzPopconfirmPlacement="left"
+                    (nzOnConfirm)="deleteRunningSession(session.id!)"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <span nz-icon nzType="delete" nzTheme="outline"></span>
+                  </button>
+                </div>
               </div>
 
               <!-- Traseul: buline de start/finish + gradient pe linie -->
