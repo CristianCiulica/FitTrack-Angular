@@ -30,7 +30,7 @@ and two steppers for the reps you actually did and the weight you used. Sets are
 `setWeights`), so History shows `10 / 9 / 8 reps` against `62.5 / 65 / 67.5 kg` instead of one flattened average.
 Finish the session and you get total volume lifted plus the delta against the last time you ran that routine.
 
-**Legends' Plans.** Real training splits from Arnold Schwarzenegger, Mike Mentzer, Chris Bumstead, Ronnie Coleman
+**Legends'Plans.** Real training splits from Arnold Schwarzenegger, Mike Mentzer, Chris Bumstead, Ronnie Coleman
 and Dorian Yates, with full exercise lists and one tap to start any day. Adding another athlete is a data entry in
 `start-workout.component.ts` and nothing else.
 
