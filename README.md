@@ -1,6 +1,6 @@
 <div align="center">
   <img src="public/images/fittrack-logo.png" alt="FitTrack" width="88" />
-  <h1>FitTrack</h1>
+  <h1> FitTrack </h1>
   <p><strong>A gym and running tracker built around progressive overload — not step counting.</strong></p>
 
   [![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)](https://angular.dev)
