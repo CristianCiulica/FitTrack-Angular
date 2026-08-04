@@ -34,6 +34,7 @@ Finish the session and you get total volume lifted plus the delta against the la
 and Dorian Yates, with full exercise lists and one tap to start any day. Adding another athlete is a data entry in
 `start-workout.component.ts` and nothing else.
 
+
 **Running with GPS.** A Leaflet map that stays hidden until you hit start, then goes fullscreen. The tracker
 filters GPS noise — accuracy thresholds, implausible speed jumps, a short calibration window — so one bad fix
 doesn't add 200 m to your distance. Routes are saved and redrawn in History as SVG with start/finish markers,
