@@ -80,6 +80,7 @@ npm install --prefix server
 
 Copy the frontend config template and fill in your Firebase Web App values:
 
+
 ```bash
 cp .env.example .env.local
 ```
