@@ -23,7 +23,6 @@ and next time that exercise comes up the app hands you last session's numbers so
 `pwa` · `leaflet` · `gps-tracking` · `capacitor` · `fitness-tracker` · `progressive-overload`
 
 ## What's in it
-
 **Set-by-set workout logging.** Start a routine and you get a fullscreen session view: current set, target reps,
 and two steppers for the reps you actually did and the weight you used. Sets are stored individually (`setReps`,
 `setWeights`), so History shows `10 / 9 / 8 reps` against `62.5 / 65 / 67.5 kg` instead of one flattened average.
