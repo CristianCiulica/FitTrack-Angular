@@ -20,6 +20,7 @@ Most training apps are good at logging that you *did* something and useless at t
 good. FitTrack starts from the other end: every set you finish records the reps and the weight you actually hit,
 and next time that exercise comes up the app hands you last session's numbers so you know what to beat.
 
+
 **Topics:** `angular` · `signals` · `typescript` · `express` · `mongodb` · `mongoose` · `firebase-auth` ·
 `pwa` · `leaflet` · `gps-tracking` · `capacitor` · `fitness-tracker` · `progressive-overload`
 
