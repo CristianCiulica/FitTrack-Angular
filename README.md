@@ -48,6 +48,7 @@ routines.
 **Profile.** Avatar upload (resized client-side to 256 px, stored as a data URL so there's no object storage to
 provision), follower and following lists, your posts with their like and save counts.
 
+
 **Nutrition.** BMI, BMR and a daily calorie target derived from the profile you set at onboarding, plus a
 chat-style assistant for macro questions. Workout calories are MET estimates from
 `core/utils/workout-calories.ts`, weighted by your body weight.
