@@ -67,7 +67,6 @@ lets you log a workout with no signal and resyncs it when you reconnect.
 | Database | MongoDB + Mongoose 8 | Local in dev, Atlas in production |
 | Maps | Leaflet + Capacitor Geolocation | |
 | Hosting | Firebase Hosting + Render | Static frontend, API on Render |
-
 ## Running it locally
 
 You need Node 20+, a running MongoDB, and a Firebase project (free tier is fine).
