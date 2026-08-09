@@ -53,6 +53,7 @@ provision), follower and following lists, your posts with their like and save co
 chat-style assistant for macro questions. Workout calories are MET estimates from
 `core/utils/workout-calories.ts`, weighted by your body weight.
 
+
 **Works offline.** Service worker app-shell caching, installable on iOS and Android, and a local cache layer that
 lets you log a workout with no signal and resyncs it when you reconnect.
 
