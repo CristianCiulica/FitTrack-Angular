@@ -36,6 +36,7 @@ and Dorian Yates, with full exercise lists and one tap to start any day. Adding 
 `start-workout.component.ts` and nothing else.
 
 
+
 **Running with GPS.** A Leaflet map that stays hidden until you hit start, then goes fullscreen. The tracker
 filters GPS noise — accuracy thresholds, implausible speed jumps, a short calibration window — so one bad fix
 doesn't add 200 m to your distance. Routes are saved and redrawn in History as SVG with start/finish markers,
