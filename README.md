@@ -5,7 +5,8 @@
  [![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white)](https://angular.dev)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
   [![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)](https://expressjs.com)
-  [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose%208-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com)
+ 
+ [![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose%208-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com)
   [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%2B%20Hosting-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com)
   [![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
   [![Live demo](https://img.shields.io/badge/demo-live-0071e3)](https://fittrack-angular-7ca07.web.app)
