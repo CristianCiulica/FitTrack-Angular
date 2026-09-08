@@ -96,6 +96,7 @@ Do the same for the API, then drop in a service account key from
 cp server/.env.example server/.env
 ```
 
+
 Run both halves in two terminals:
 
 ```bash
