@@ -109,6 +109,7 @@ One thing worth knowing up front: if your Firebase Web API key has HTTP referrer
 be on the allowlist** or Google sign-in dies with `auth/requests-from-referer-...-are-blocked`. `ng serve` grabbing
 a different port is the usual cause.
 
+
 ## Layout
 
 ```
