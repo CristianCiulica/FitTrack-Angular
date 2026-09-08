@@ -92,6 +92,7 @@ Do the same for the API, then drop in a service account key from
 *Firebase console → Project settings → Service accounts → Generate new private key*, saved as
 `server/firebase-service-account.json`:
 
+
 ```bash
 cp server/.env.example server/.env
 ```
