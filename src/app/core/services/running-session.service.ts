@@ -1,8 +1,9 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { RunningSession } from '../models/running-session.model';
 import { Observable, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, tap, catchError, finalize, shareReplay, switchMap } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { routeForStorage } from '../utils/route';
 import { Auth } from '@angular/fire/auth';
 
 @Injectable({ providedIn: 'root' })
@@ -11,6 +12,8 @@ export class RunningSessionService {
   readonly sessions = signal<RunningSession[]>([]);
   private readonly api = inject(ApiService);
   private readonly auth = inject(Auth);
+  private readonly uploads = new Map<string, Observable<RunningSession>>();
+  private readonly uploadedIds = new Map<string, string>();
 
   private getStorageKey(): string {
     const uid = this.auth.currentUser?.uid || 'local';
@@ -23,16 +26,22 @@ export class RunningSessionService {
     if (typeof window === 'undefined') return [];
     try {
       const raw = localStorage.getItem(this.getStorageKey());
-      return raw ? JSON.parse(raw) : [];
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
   }
 
   private saveLocal(sessions: RunningSession[]): void {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(this.getStorageKey(), JSON.stringify(sessions));
     this.sessions.set(sessions);
+    if (typeof window === 'undefined') return;
+    // A full/blocked browser cache must not prevent uploading a recorded route.
+    try {
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(sessions));
+    } catch (error) {
+      console.warn('[running] browser cache unavailable', error);
+    }
   }
 
   setTrackingActive(active: boolean): void {
@@ -65,30 +74,41 @@ export class RunningSessionService {
   }
 
   private resyncPending(pending: RunningSession[]): void {
-    for (const session of pending) {
-      this.api.post<{ session: RunningSession }>('/running-sessions', session).subscribe({
-        next: ({ session: saved }) => {
-          const updated = this.loadLocal().map((s) => (s.id === session.id ? saved : s));
-          this.saveLocal(updated);
-        },
-        error: (err) => console.warn('[running] resync failed, will retry next load', err),
+    for (const item of pending) {
+      if (item.id && this.uploads.has(item.id)) continue;
+      this.upload(item).subscribe({
+        error: (err) => console.warn('[sessions] resync failed, will retry next load', err),
       });
     }
   }
 
+  private upload(item: RunningSession): Observable<RunningSession> {
+    const tempId = item.id!;
+    const existing = this.uploads.get(tempId);
+    if (existing) return existing;
+    const upload = this.api.post<{ session: RunningSession }>('/running-sessions', { ...item, route: routeForStorage(item.route) }).pipe(
+      map(response => response.session),
+      tap(saved => {
+        if (saved.id) this.uploadedIds.set(tempId, saved.id);
+        this.saveLocal(this.loadLocal().map(record => record.id === tempId ? saved : record));
+      }),
+      finalize(() => this.uploads.delete(tempId)),
+      // A delete waits for the same POST instead of starting another upload.
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    this.uploads.set(tempId, upload);
+    return upload;
+  }
+
   saveSession(session: Omit<RunningSession, 'id'>): Observable<RunningSession> {
-    const tempId = 'r_' + Date.now();
+    session = { ...session, route: routeForStorage(session.route) };
+    const tempId = 'r_' + crypto.randomUUID();
     const newSession = { ...session, id: tempId } as RunningSession;
     
     const current = this.loadLocal();
     this.saveLocal([newSession, ...current]);
 
-    return this.api.post<{ session: RunningSession }>('/running-sessions', session).pipe(
-      map((res) => res.session),
-      tap((saved) => {
-        const updated = this.loadLocal().map(s => s.id === tempId ? saved : s);
-        this.saveLocal(updated);
-      }),
+    return this.upload(newSession).pipe(
       catchError((err) => {
         console.warn('API save running session failed, using local storage', err);
         return of(newSession);
@@ -97,19 +117,22 @@ export class RunningSessionService {
   }
 
   deleteSession(id: string): Observable<void> {
-    const updated = this.loadLocal().filter((s) => s.id !== id);
-    this.saveLocal(updated);
-
-    if (this.isTempId(id)) {
-      return of(undefined);
+    const upload = this.uploads.get(id);
+    if (upload) {
+      // An offline item may already be uploading when its Delete button is
+      // pressed. Wait for its server id, then delete that record as well.
+      return upload.pipe(switchMap(saved => this.deleteSession(saved.id!)));
     }
-
+    id = this.uploadedIds.get(id) ?? id;
+    const removeLocal = () => this.saveLocal(this.loadLocal().filter(item => item.id !== id));
+    if (this.isTempId(id)) {
+      removeLocal();
+      return of(void 0);
+    }
+    // A failed server deletion leaves the saved record available for retry.
     return this.api.delete<{ deleted: boolean }>(`/running-sessions/${id}`).pipe(
-      map(() => undefined),
-      catchError((err) => {
-        console.warn('API delete running session failed, removed locally', err);
-        return of(undefined);
-      })
+      tap(removeLocal),
+      map(() => void 0),
     );
   }
 }

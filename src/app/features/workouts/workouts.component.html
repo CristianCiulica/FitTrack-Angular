@@ -74,6 +74,7 @@
     </nz-header>
 
     <nz-content class="app-content">
+      <section class="history-intro"><span>YOUR ACTIVITY</span><h1>A little stronger.<br>Every session.</h1><p>Your runs and workouts, all in one place.</p></section>
       <section class="cardio-history">
         <div class="section-heading">
           <div>
@@ -123,41 +124,9 @@
                 </div>
               </div>
 
-              <!-- Traseul: buline de start/finish + gradient pe linie -->
-              <div
-                class="cardio-route"
-                [class.tall]="expandedRuns().has(session.id!)"
-                *ngIf="routePath(session) as path; else noRoute"
-              >
-                <svg viewBox="0 0 100 56" preserveAspectRatio="xMidYMid meet" aria-label="Route preview">
-                  <defs>
-                    <linearGradient [attr.id]="'routeGrad-' + session.id" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stop-color="#34c759" />
-                      <stop offset="55%" stop-color="#0a84ff" />
-                      <stop offset="100%" stop-color="#0071e3" />
-                    </linearGradient>
-                  </defs>
-                  <path [attr.d]="path" class="route-casing" />
-                  <path [attr.d]="path" class="route-line" [attr.stroke]="'url(#routeGrad-' + session.id + ')'" />
-                  <circle
-                    *ngIf="routeStart(session) as s"
-                    [attr.cx]="s.x" [attr.cy]="s.y" r="3"
-                    class="route-dot start"
-                  />
-                  <circle
-                    *ngIf="routeEnd(session) as e"
-                    [attr.cx]="e.x" [attr.cy]="e.y" r="3"
-                    class="route-dot end"
-                  />
-                </svg>
-                <div class="route-legend" *ngIf="expandedRuns().has(session.id!)">
-                  <span class="legend-item"><i class="dot start"></i>Start</span>
-                  <span class="legend-item"><i class="dot end"></i>Finish</span>
-                </div>
+              <div class="cardio-route" [class.tall]="expandedRuns().has(session.id!)">
+                <app-route-map [route]="session.route" label="Recorded running route"></app-route-map>
               </div>
-              <ng-template #noRoute>
-                <div class="cardio-route no-route">No GPS route recorded</div>
-              </ng-template>
 
               <!-- Statistici principale -->
               <div class="cardio-session-stats">
@@ -346,17 +315,6 @@
                         nz-button
                         nzType="text"
                         nzSize="small"
-                        (click)="shareToCommunity(w)"
-                        [nzLoading]="publishingIds().has(w.id!)"
-                        style="margin-right: 4px"
-                        nzTooltipTitle="Share to Community"
-                      >
-                        <span nz-icon nzType="share-alt"></span>
-                      </button>
-                      <button
-                        nz-button
-                        nzType="text"
-                        nzSize="small"
                         nzDanger
                         (click)="deleteWorkout(w.id!)"
                       >
@@ -448,9 +406,6 @@
               <div class="mobile-workout-actions-clean">
                 <button type="button" class="action-btn" (click)="onExpandChange(w.id!, !expandSet.has(w.id!))">
                   {{ expandSet.has(w.id!) ? 'Hide Details' : 'Details' }}
-                </button>
-                <button type="button" class="action-btn" (click)="shareToCommunity(w)" [disabled]="publishingIds().has(w.id!)">
-                  {{ publishingIds().has(w.id!) ? 'Sharing...' : 'Share' }}
                 </button>
                 <button type="button" class="action-btn" (click)="openEdit(w)">Edit</button>
                 <button type="button" class="action-btn danger" (click)="deleteWorkout(w.id!)">

@@ -4,22 +4,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
-import { CommunityService } from '../../core/services/community.service';
-import {
-  CommunityAuthor,
-  CommunityPerson,
-  CommunityWorkout,
-} from '../../core/models/workout.model';
-
-type ProfileTab = 'posts' | 'followers' | 'following';
-
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -30,8 +19,6 @@ type ProfileTab = 'posts' | 'followers' | 'following';
     NzLayoutModule,
     NzMenuModule,
     NzIconModule,
-    NzSpinModule,
-    NzPopconfirmModule,
     AppMenuComponent,
   ],
   templateUrl: './profile.component.html',
@@ -39,48 +26,18 @@ type ProfileTab = 'posts' | 'followers' | 'following';
 })
 export class ProfileComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
-  private readonly communityService = inject(CommunityService);
   private readonly authService = inject(AuthService);
   private readonly message = inject(NzMessageService);
 
   readonly displayName = this.profileService.displayName;
-  readonly avatar = this.profileService.avatar;
+  readonly avatar = computed(() => this.profileService.profile()?.avatar ?? '');
   readonly email = computed(() => this.profileService.profile()?.email ?? '');
 
-  readonly author = signal<CommunityAuthor | null>(null);
-  readonly posts = signal<CommunityWorkout[]>([]);
-  readonly followers = signal<CommunityPerson[]>([]);
-  readonly following = signal<CommunityPerson[]>([]);
-  readonly loading = signal(true);
   readonly uploading = signal(false);
-  readonly tab = signal<ProfileTab>('posts');
-
-  get myUid(): string {
-    return this.authService.currentUserId;
-  }
 
   ngOnInit(): void {
-    this.profileService.load().subscribe();
-    this.refresh();
-  }
-
-  private refresh(): void {
-    this.loading.set(true);
-    this.communityService.loadAuthor(this.myUid).subscribe({
-      next: ({ author, posts }) => {
-        this.author.set(author);
-        this.posts.set(posts);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false),
-    });
-    this.communityService.loadMyFollowers().subscribe({
-      next: (people) => this.followers.set(people),
-      error: () => {},
-    });
-    this.communityService.loadMyFollowing().subscribe({
-      next: (people) => this.following.set(people),
-      error: () => {},
+    this.profileService.load().subscribe({
+      error: () => this.message.error('Could not load your profile.'),
     });
   }
 
@@ -150,88 +107,12 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  /* ------------------------- social ------------------------- */
-
-  toggleFollow(person: CommunityPerson): void {
-    this.communityService.toggleFollow(person.uid).subscribe({
-      next: ({ following }) => {
-        this.followers.update((list) =>
-          list.map((p) => (p.uid === person.uid ? { ...p, followedByMe: following } : p)),
-        );
-        if (following) {
-          this.following.update((list) =>
-            list.some((p) => p.uid === person.uid)
-              ? list
-              : [...list, { ...person, followedByMe: true }],
-          );
-        } else {
-          this.following.update((list) => list.filter((p) => p.uid !== person.uid));
-        }
-      },
-      error: () => this.message.error('Could not update follow'),
-    });
-  }
-
-  deletePost(post: CommunityWorkout): void {
-    this.communityService.deletePost(post.id).subscribe({
-      next: () => {
-        this.posts.update((list) => list.filter((p) => p.id !== post.id));
-        const a = this.author();
-        if (a) {
-          this.author.set({
-            ...a,
-            postCount: a.postCount - 1,
-            totalLikes: a.totalLikes - post.likeCount,
-            totalSaves: a.totalSaves - post.saveCount,
-          });
-        }
-        this.message.success('Post deleted');
-      },
-      error: () => this.message.error('Could not delete post'),
-    });
-  }
-
-  /* ------------------------- helpere ------------------------- */
-
   initials(name: string): string {
     const parts = (name || '').trim().split(/[\s@.]+/).filter(Boolean);
     if (!parts.length) return '?';
     return parts.length === 1
       ? parts[0].charAt(0).toUpperCase()
       : (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
-  }
-
-  timeAgo(dateStr: string): string {
-    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-    if (seconds < 60) return 'now';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d`;
-    const weeks = Math.floor(days / 7);
-    if (weeks < 5) return `${weeks}w`;
-    return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-
-  private readonly muscleTones: Record<string, string> = {
-    Chest: 'blue',
-    Back: 'green',
-    Shoulders: 'purple',
-    Arms: 'cyan',
-    Legs: 'indigo',
-    Core: 'pink',
-    Cardio: 'red',
-    'Full Body': 'graphite',
-  };
-
-  primaryMuscle(post: CommunityWorkout): string {
-    return post.exercises?.[0]?.muscleGroup ?? 'Full Body';
-  }
-
-  muscleTone(group: string): string {
-    return this.muscleTones[group] ?? 'graphite';
   }
 
   logout(): void {

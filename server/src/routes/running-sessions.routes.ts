@@ -14,7 +14,7 @@ const sessionBodySchema = z.object({
   steps: z.number().min(0).max(200000),
   averageSpeedKmh: z.number().min(0),
   calories: z.number().min(0).max(20000),
-  route: z.array(z.tuple([z.number(), z.number()])).max(5000).optional().default([]),
+  route: z.array(z.tuple([z.number().finite().min(-90).max(90), z.number().finite().min(-180).max(180)])).max(5000).optional().default([]),
 });
 
 function serialize(doc: Document | any) {

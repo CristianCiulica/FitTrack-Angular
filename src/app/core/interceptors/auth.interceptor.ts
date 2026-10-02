@@ -14,7 +14,7 @@ export const firebaseAuthInterceptor: HttpInterceptorFn = (req, next) => {
 
   // Asteptam ca Firebase sa termine restaurarea sesiunii (persistence) inainte de a
   // trimite requestul. Daca citim auth.currentUser sincron, la boot e inca null si
-  // requestul pleaca fara token -> 401 (ex. "Failed to load community workouts").
+  // requestul pleaca fara token -> 401.
   return user(auth).pipe(
     take(1),
     switchMap((currentUser) =>

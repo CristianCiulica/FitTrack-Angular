@@ -1,4 +1,4 @@
-<nz-layout class="app-layout">
+<nz-layout class="app-layout" [attr.inert]="workoutInProgress() ? '' : null">
   <!-- Sidebar -->
   <nz-sider
     [nzWidth]="208"
@@ -105,11 +105,11 @@
       <div class="header-left">
         <app-menu></app-menu>
         <h2>
-          <span class="desktop-page-title">Start Workout</span>
+          <span class="desktop-page-title">Workout</span>
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
-      <div class="header-actions" style="display: flex; gap: 8px;" *ngIf="!workoutInProgress()">
+      <div class="header-actions"  *ngIf="!workoutInProgress()">
         <button nz-button nzType="primary" (click)="openAddWorkout()">
           <span class="button-label">+ Create workout</span>
         </button>
@@ -121,125 +121,41 @@
 
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
-          <!-- Promo permanent: antrenamentele comunitatii -->
-          <button type="button" class="community-promo" (click)="openCommunityDrawer()">
-            <div class="community-promo-copy">
-              <span class="promo-badge">New</span>
-              <h2>Try community workouts</h2>
-              <p>Discover routines shared by other athletes.</p>
-            </div>
-          </button>
-
-          <!-- Hub-ul planurilor oficiale ale legendelor -->
-          <button
-            type="button"
-            class="community-promo plan-promo"
-            data-tone="purple"
-            (click)="openLegends()"
-          >
-            <div class="community-promo-copy">
-              <span class="promo-badge">New</span>
-              <h2>Legends' Official Plans</h2>
-              <p>Arnold, Cbum, Mentzer & more — train like the greats.</p>
-            </div>
-          </button>
-
-          <!-- Planul -->
-          <div class="plan-heading">
-            <h3>Your plan</h3>
-          </div>
-
-          <div class="filter-pills" role="tablist" aria-label="Workout categories">
-            <button
-              type="button"
-              *ngFor="let filter of routineFilters"
-              [class.selected]="routineFilter() === filter"
-              (click)="routineFilter.set(filter)"
-            >
-              {{ filter }}
+          <section class="workout-intro">
+            <div><span class="section-eyebrow">WORKOUTS</span><h1>A good day<br>to get stronger.</h1><p>Choose a routine and pick up where you left off.</p></div>
+            <button type="button" class="plan-promo" (click)="openLegends()">
+              <span class="promo-symbol" nz-icon nzType="trophy"></span>
+              <span class="promo-copy"><small>THE COLLECTION</small><strong>Legends’ plans</strong><span>Explore iconic training splits</span></span>
+              <span nz-icon nzType="arrow-right"></span>
             </button>
-          </div>
+          </section>
 
-          <div class="plan-list">
-            <div
-              class="plan-card"
-              *ngFor="let item of filteredPredefined(); let i = index"
-              [attr.data-tone]="cardTone(i)"
-              [class.selected]="selectedRoutineKey() === 'predefined-' + item.index"
-              (click)="selectRoutine(item.routine, 'predefined-' + item.index)"
-            >
-              <div class="duration-badge">
-                <strong>{{ routineMinutes(item.routine) }}</strong>
-                <span>mins</span>
-              </div>
-              <h3>{{ item.routine.name }}</h3>
-              <div class="plan-chips">
-                <span class="plan-chip">{{ item.routine.category }}</span>
-                <span class="plan-count">{{ item.routine.exercises.length }} exercises · ~{{ routineKcal(item.routine) }} kcal</span>
-              </div>
-              <p class="plan-muscles">{{ muscleSummary(item.routine) }}</p>
-              <button
-                type="button"
-                class="plan-start"
-                *ngIf="selectedRoutineKey() === 'predefined-' + item.index"
-                (click)="$event.stopPropagation(); startWorkout()"
-              >
-                <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-                Start workout
-              </button>
+          <section class="personal-section">
+            <div class="plan-heading"><div><span class="section-eyebrow">BUILT BY YOU</span><h2>My workouts <span class="heading-count">{{ personalRoutines().length }}</span></h2></div><button type="button" class="text-action" (click)="openAddWorkout()"><span nz-icon nzType="plus"></span> New workout</button></div>
+            <div class="plan-list personal-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
+              <article class="plan-card" *ngFor="let routine of personalRoutines()" [class.selected]="selectedRoutineKey() === 'personal-' + routine.id">
+                <div class="card-topline"><span class="plan-chip">Custom</span><button type="button" class="plan-delete" [disabled]="deletingIds().has(routine.id!)" [attr.aria-label]="'Delete ' + routine.name" nz-popconfirm nzPopconfirmTitle="Delete this workout from your library and history?" nzOkText="Delete" nzCancelText="Keep" (nzOnConfirm)="deleteWorkout(routine.id)"><span nz-icon nzType="delete"></span><span>{{ deletingIds().has(routine.id!) ? 'Deleting…' : 'Delete' }}</span></button></div>
+                <h3>{{ routine.name }}</h3><p class="plan-muscles">{{ muscleSummary(routine) }}</p>
+                <div class="routine-facts"><span><strong>{{ routineMinutes(routine) }}</strong> min</span><span><strong>{{ routine.exercises.length }}</strong> exercises</span></div>
+                <button type="button" class="plan-start" (click)="selectRoutine(routine, 'personal-' + routine.id); startWorkout()"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start workout</button>
+              </article>
             </div>
-          </div>
+            <ng-template #noPersonalRoutines><button type="button" class="empty-personal-routines" (click)="openAddWorkout()"><span class="empty-plus" nz-icon nzType="plus"></span><span><strong>Your routine, your way.</strong><span>Add the exercises you love and keep them here.</span></span><span nz-icon nzType="arrow-right"></span></button></ng-template>
+          </section>
 
-          <!-- Biblioteca personala -->
-          <div class="plan-heading personal-heading">
-            <h3>My workouts</h3>
-          </div>
-          <div class="plan-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
-            <div
-              class="plan-card"
-              *ngFor="let routine of personalRoutines(); let i = index"
-              [attr.data-tone]="cardTone(i + 1)"
-              [class.selected]="selectedRoutineKey() === 'personal-' + routine.id"
-              (click)="selectRoutine(routine, 'personal-' + routine.id)"
-            >
-              <div class="duration-badge">
-                <strong>{{ routineMinutes(routine) }}</strong>
-                <span>mins</span>
-              </div>
-              <h3>{{ routine.name }}</h3>
-              <div class="plan-chips">
-                <span class="plan-chip">Custom</span>
-                <span class="plan-count">{{ routine.exercises.length }} exercises · ~{{ routineKcal(routine) }} kcal</span>
-              </div>
-              <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
-              <div class="plan-actions" *ngIf="selectedRoutineKey() === 'personal-' + routine.id">
-                <button
-                  type="button"
-                  class="plan-start"
-                  (click)="$event.stopPropagation(); startWorkout()"
-                >
-                  <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-                  Start workout
-                </button>
-                <button
-                  type="button"
-                  class="plan-delete"
-                  nz-popconfirm
-                  nzPopconfirmTitle="Delete workout?"
-                  nzPopconfirmPlacement="topLeft"
-                  (nzOnConfirm)="deleteWorkout(routine.id)"
-                  (click)="$event.stopPropagation()"
-                >
-                  <span nz-icon nzType="delete" nzTheme="outline"></span>
-                </button>
-              </div>
+          <section class="routine-library">
+            <div class="plan-heading"><div><span class="section-eyebrow">FIND YOUR FOCUS</span><h2>Ready to train</h2></div><span class="library-count">{{ filteredPredefined().length }} routines</span></div>
+            <div class="filter-pills" role="group" aria-label="Workout categories"><button type="button" *ngFor="let filter of routineFilters" [class.selected]="routineFilter() === filter" [attr.aria-pressed]="routineFilter() === filter" (click)="routineFilter.set(filter)">{{ filter }}</button></div>
+            <div class="plan-list">
+              <article class="plan-card" *ngFor="let item of filteredPredefined()" [class.selected]="selectedRoutineKey() === 'predefined-' + item.index">
+                <div class="card-topline"><span class="routine-symbol" nz-icon nzType="ft:workout"></span><span class="plan-chip">{{ item.routine.category }}</span></div>
+                <h3>{{ item.routine.name }}</h3><p class="plan-muscles">{{ muscleSummary(item.routine) }}</p>
+                <div class="routine-facts"><span><strong>{{ routineMinutes(item.routine) }}</strong> min</span><span><strong>{{ item.routine.exercises.length }}</strong> exercises</span><span>~{{ routineKcal(item.routine) }} kcal</span></div>
+                <div class="exercise-preview"><span *ngFor="let exercise of item.routine.exercises | slice:0:3">{{ exercise.name }}<small>{{ exercise.sets }} × {{ exercise.reps }}</small></span></div>
+                <button type="button" class="plan-start" (click)="selectRoutine(item.routine, 'predefined-' + item.index); startWorkout()"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start workout</button>
+              </article>
             </div>
-          </div>
-          <ng-template #noPersonalRoutines>
-            <button type="button" class="empty-personal-routines" (click)="openAddWorkout()">
-              You have no personal workouts yet. Add your first workout.
-            </button>
-          </ng-template>
+          </section>
         </ng-container>
 
         <!-- FINISHED STATE -->
@@ -247,7 +163,7 @@
           <nz-card class="finish-card">
             <span nz-icon nzType="check-circle" style="font-size: 64px; color: #52c41a;"></span>
             <h2>Workout complete!</h2>
-            <p>Great job! You burned ~{{ routineKcal(currentRoutine()) }} kcal. Your workout was saved to your history.</p>
+            <p>Great job! You burned ~{{ finishedCalories() }} kcal. Your workout was saved to your history.</p>
 
             <!-- totalul ridicat + progres fata de ultima sesiune identica -->
             <div class="finish-volume">
@@ -287,19 +203,6 @@
   (cancel)="onModalCancel()"
 >
 </app-workout-modal>
-
-<nz-drawer
-  [nzVisible]="communityDrawerVisible()"
-  [nzWidth]="'100%'"
-  [nzBodyStyle]="{ padding: '0', background: '#f5f5f7' }"
-  nzPlacement="right"
-  nzTitle="Community Workouts"
-  (nzOnClose)="closeCommunityDrawer()"
->
-  <ng-container *nzDrawerContent>
-    <app-community></app-community>
-  </ng-container>
-</nz-drawer>
 
 <!-- Drawer-ul Legends' Plans: lista de staruri sau planul selectat -->
 <nz-drawer
@@ -403,7 +306,7 @@
       <span class="live-eyebrow">Workout in progress</span>
       <h2>{{ currentRoutine().name }}</h2>
     </div>
-    <div class="live-progress-ring">{{ progressPercent() }}%</div>
+    <div class="live-progress-ring"><strong>{{ completedSets() }}</strong><span>/ {{ totalSets() }} sets</span></div>
   </div>
   <div class="live-progress-track" aria-hidden="true">
     <span [style.width.%]="progressPercent()"></span>
@@ -438,7 +341,9 @@
               class="weight-input"
               type="number"
               inputmode="numeric"
+              aria-label="Repetitions completed"
               min="0"
+              max="500"
               step="1"
               [value]="currentReps()"
               (change)="onRepsInput($any($event.target).value)"
@@ -454,7 +359,9 @@
               class="weight-input"
               type="number"
               inputmode="decimal"
+              aria-label="Weight in kilograms"
               min="0"
+              max="1000"
               step="0.5"
               [value]="currentWeight()"
               (change)="onWeightInput($any($event.target).value)"
@@ -494,9 +401,21 @@
     </div>
   </div>
 
+  <div class="live-body review" *ngIf="state() === 'review'">
+    <span class="review-symbol" nz-icon nzType="check-circle"></span>
+    <span class="rest-label">Session review</span><h1>Ready to wrap up?</h1>
+    <p>{{ completedSets() }} of {{ totalSets() }} sets completed.</p>
+    <p class="review-note">{{ completedSets() === 0 ? 'Go back and complete a set to save this workout.' : 'Only completed sets are saved. You can still go back to a skipped set.' }}</p>
+  </div>
+
+  <div class="set-navigation">
+    <button type="button" class="set-back" [disabled]="!canGoBack() || saving()" (click)="previousSet()"><span nz-icon nzType="arrow-left"></span>{{ state() === 'rest' ? 'Edit this set' : 'Previous set' }}</button>
+    <span *ngIf="currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} · Set {{ currentSetIndex() }} of {{ exercise.sets }}</span>
+    <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">Skip set <span nz-icon nzType="arrow-right"></span></button>
+  </div>
   <!-- Actiuni, fixate jos -->
   <div class="live-actions">
-    <button nz-button nzDanger nzSize="large" class="live-stop" (click)="cancelWorkout()">
+    <button nz-button nzDanger nzSize="large" class="live-stop" [disabled]="saving()" nz-popconfirm nzPopconfirmTitle="Stop this workout? Unsaved sets will be lost." nzOkText="Stop workout" nzCancelText="Keep training" (nzOnConfirm)="cancelWorkout()">
       <span nz-icon nzType="close"></span> Stop
     </button>
     <button
@@ -519,5 +438,6 @@
     >
       <span nz-icon nzType="forward"></span> Skip rest
     </button>
+    <button *ngIf="state() === 'review'" nz-button nzType="primary" nzSize="large" class="live-primary" [disabled]="completedSets() === 0" [nzLoading]="saving()" (click)="finishWorkout()"><span nz-icon nzType="check"></span> Save workout</button>
   </div>
 </div>

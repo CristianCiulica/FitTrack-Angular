@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Workout } from '../models/workout.model';
 import { Observable, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, tap, catchError, finalize, shareReplay, switchMap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Auth } from '@angular/fire/auth';
 
@@ -11,6 +11,8 @@ export class WorkoutService {
   workouts = signal<Workout[]>([]);
   private readonly api = inject(ApiService);
   private readonly auth = inject(Auth);
+  private readonly uploads = new Map<string, Observable<Workout>>();
+  private readonly uploadedIds = new Map<string, string>();
 
   totalVolume = computed(() =>
     this.workouts().reduce((acc, w) => {
@@ -72,32 +74,41 @@ export class WorkoutService {
 
   // re-trimite pe server workout-urile salvate doar local cat timp API-ul era picat
   private resyncPending(pending: Workout[]): void {
-    for (const workout of pending) {
-      this.api.post<{ workout: Workout }>('/workouts', workout).subscribe({
-        next: ({ workout: saved }) => {
-          const updated = this.loadLocal().map((item) => (item.id === workout.id ? saved : item));
-          this.saveLocal(updated);
-        },
+    for (const item of pending) {
+      if (item.id && this.uploads.has(item.id)) continue;
+      this.upload(item).subscribe({
         error: (err) => console.warn('[workouts] resync failed, will retry next load', err),
       });
     }
   }
 
+  private upload(item: Workout): Observable<Workout> {
+    const tempId = item.id!;
+    const existing = this.uploads.get(tempId);
+    if (existing) return existing;
+    const upload = this.api.post<{ workout: Workout }>('/workouts', item).pipe(
+      map(response => response.workout),
+      tap(saved => {
+        if (saved.id) this.uploadedIds.set(tempId, saved.id);
+        this.saveLocal(this.loadLocal().map(record => record.id === tempId ? saved : record));
+      }),
+      finalize(() => this.uploads.delete(tempId)),
+      // A delete waits for the same POST instead of starting another upload.
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+    this.uploads.set(tempId, upload);
+    return upload;
+  }
+
   addWorkout(workout: Omit<Workout, 'id'>): Observable<Workout> {
-    const tempId = 'w_' + Date.now();
+    const tempId = 'w_' + crypto.randomUUID();
     const newWorkout = { ...workout, id: tempId } as Workout;
     
     // Optimistic local update
     const current = this.loadLocal();
     this.saveLocal([newWorkout, ...current]);
 
-    return this.api.post<{ workout: Workout }>('/workouts', workout).pipe(
-      map((res) => res.workout),
-      tap((w) => {
-        // Replace temp workout with real one from API
-        const updated = this.loadLocal().map(item => item.id === tempId ? w : item);
-        this.saveLocal(updated);
-      }),
+    return this.upload(newWorkout).pipe(
       catchError((err) => {
         console.warn('API add workout failed, using local storage', err);
         return of(newWorkout);
@@ -106,40 +117,37 @@ export class WorkoutService {
   }
 
   updateWorkout(id: string, workout: Partial<Workout>): Observable<Workout> {
+    id = this.uploadedIds.get(id) ?? id;
     const current = this.loadLocal();
     const updated = current.map(item => item.id === id ? { ...item, ...workout } : item) as Workout[];
-    this.saveLocal(updated);
     const local = updated.find(item => item.id === id) ?? ({ ...workout, id } as Workout);
-
-    // id temporar = inca nu exista pe server; PUT-ul ar da CastError
     if (this.isTempId(id)) {
+      this.saveLocal(updated);
       return of(local);
     }
-
     return this.api.put<{ workout: Workout }>(`/workouts/${id}`, workout).pipe(
-      map((res) => res.workout),
-      catchError((err) => {
-        console.warn('API update workout failed, using local storage', err);
-        return of(local);
-      })
+      map(res => res.workout),
+      tap(saved => this.saveLocal(this.loadLocal().map(item => item.id === id ? saved : item))),
     );
   }
 
   deleteWorkout(id: string): Observable<void> {
-    const current = this.loadLocal();
-    this.saveLocal(current.filter(item => item.id !== id));
-
-    // id temporar = exista doar local; nu are ce sterge pe server
+    const upload = this.uploads.get(id);
+    if (upload) {
+      // An offline item may already be uploading when its Delete button is
+      // pressed. Wait for its server id, then delete that record as well.
+      return upload.pipe(switchMap(saved => this.deleteWorkout(saved.id!)));
+    }
+    id = this.uploadedIds.get(id) ?? id;
+    const removeLocal = () => this.saveLocal(this.loadLocal().filter(item => item.id !== id));
     if (this.isTempId(id)) {
+      removeLocal();
       return of(void 0);
     }
-
+    // A failed server deletion leaves the saved record available for retry.
     return this.api.delete<{ deleted: boolean }>(`/workouts/${id}`).pipe(
+      tap(removeLocal),
       map(() => void 0),
-      catchError((err) => {
-        console.warn('API delete workout failed, using local storage', err);
-        return of(void 0);
-      })
     );
   }
 }

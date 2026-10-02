@@ -57,14 +57,11 @@
   margin-bottom: 0;
   overflow: hidden;
   border-radius: 32px !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 
-    0 24px 54px rgba(15, 23, 42, 0.2),
-    0 4px 16px rgba(15, 23, 42, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01)) !important;
-  backdrop-filter: blur(3px) saturate(115%);
-  -webkit-backdrop-filter: blur(3px) saturate(115%);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow), var(--glass-edge) !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   pointer-events: auto;
 }
 
@@ -96,13 +93,13 @@
   &.sun {
     background:
       radial-gradient(70% 130% at 88% 0%, rgba(10, 132, 255, 0.15), transparent 60%),
-      linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01)) !important;
+      var(--glass-bg) !important;
   }
 
   &.rain {
     background:
       radial-gradient(70% 130% at 88% 0%, rgba(10, 132, 255, 0.15), transparent 60%),
-      linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01)) !important;
+      var(--glass-bg) !important;
   }
 }
 
@@ -471,7 +468,7 @@
   z-index: 1;
   background: #e9edf3;
   pointer-events: auto;
-  transition: all 0.3s ease;
+  isolation: isolate;
 
   &.active {
     position: fixed;
@@ -518,13 +515,11 @@
     max-width: 100%;
     padding: 8px 10px 8px 8px;
     border-radius: 980px;
-    background: linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.65));
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow:
-      0 12px 30px rgba(15, 23, 42, 0.14),
-      inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), var(--glass-edge);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
 
     .live-status-text {
       font-size: 12.5px;
@@ -547,8 +542,8 @@
     gap: 8px;
     text-align: center;
     background: rgba(245, 245, 247, 0.55);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
 
     strong {
       font-size: 16px;
@@ -599,13 +594,11 @@
     margin: 0 auto;
     padding: 18px 18px 16px;
     border-radius: 28px;
-    background: linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.01));
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow:
-      0 24px 60px rgba(15, 23, 42, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(3px) saturate(115%);
-    -webkit-backdrop-filter: blur(3px) saturate(115%);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow), var(--glass-edge);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
   }
 
   .live-stats {
@@ -714,4 +707,14 @@
       flex: 1;
     }
   }
+}
+
+/* Keep the map's credits visible above the recording controls. */
+:host ::ng-deep .live-map .leaflet-control-attribution {
+  font-size: 9px;
+  background: rgba(255, 255, 255, .9);
+}
+
+:host ::ng-deep .live-map.active .leaflet-bottom {
+  bottom: calc(188px + env(safe-area-inset-bottom));
 }

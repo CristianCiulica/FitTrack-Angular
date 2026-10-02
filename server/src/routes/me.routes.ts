@@ -28,7 +28,7 @@ router.get('/', async (req, res, next) => {
   try {
     const user = req.user!;
 
-    let profile = await UserProfile.findOne({ uid: user.uid });
+    let profile = await UserProfile.findOne({ uid: user.uid }).select('-following');
     if (!profile) {
       // Profil inexistent = prima logare SAU un request intarziat (ex. retry) cu
       // un token ramas valid dupa stergerea contului. Tokenurile Firebase nu se
@@ -61,7 +61,7 @@ router.get('/export', strictLimiter, async (req, res, next) => {
     const user = req.user!;
     
     const [profile, workouts, runningSessions] = await Promise.all([
-      UserProfile.findOne({ uid: user.uid }).lean(),
+      UserProfile.findOne({ uid: user.uid }).select('-following').lean(),
       (await import('../models/workout.model')).Workout.find({ userId: user.uid }).lean(),
       (await import('../models/running-session.model')).RunningSession.find({ userId: user.uid }).lean()
     ]);
@@ -90,7 +90,7 @@ router.patch('/', async (req, res, next) => {
       { uid: user.uid },
       { $set: update },
       { new: true, upsert: true },
-    );
+    ).select('-following');
     res.json({ profile });
   } catch (err) {
     next(err);
@@ -100,6 +100,18 @@ router.patch('/', async (req, res, next) => {
 router.delete('/', strictLimiter, async (req, res, next) => {
   try {
     const user = req.user!;
+
+    // Community is retired, but account deletion must still erase any legacy
+    // posts, comments, likes and follow relationships belonging to this user.
+    const legacyPosts = UserProfile.db.collection<{
+      authorId: string;
+      likes: string[];
+      comments: { authorId: string }[];
+    }>('communityworkouts');
+    const legacyProfiles = UserProfile.db.collection<{
+      uid: string;
+      following: string[];
+    }>(UserProfile.collection.collectionName);
 
     // Nota: nu mai cerem "recent login". auth_time din tokenul Firebase nu se
     // reimprospateaza la refresh, asa ca orice user logat de peste 5 min ramanea
@@ -111,6 +123,15 @@ router.delete('/', strictLimiter, async (req, res, next) => {
       (await import('../models/running-session.model')).RunningSession.deleteMany({
         userId: user.uid,
       }),
+      legacyPosts.deleteMany({ authorId: user.uid }),
+      legacyPosts.updateMany(
+        { authorId: { $ne: user.uid } },
+        { $pull: { likes: user.uid, comments: { authorId: user.uid } } },
+      ),
+      legacyProfiles.updateMany(
+        { following: user.uid },
+        { $pull: { following: user.uid } },
+      ),
     ]);
 
     // stergem si contul din Firebase Auth (Admin SDK) ca sa nu ramana un cont orfan

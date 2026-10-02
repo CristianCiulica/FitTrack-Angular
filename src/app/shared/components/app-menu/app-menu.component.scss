@@ -283,6 +283,6 @@
 ::ng-deep .app-menu-drawer .ant-drawer-body {
   padding: 0;
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(245, 247, 251, 0.92));
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }

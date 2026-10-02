@@ -8,7 +8,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { Workout, MUSCLE_GROUPS } from '../../../core/models/workout.model';
+import { Workout, ExerciseLog, MUSCLE_GROUPS } from '../../../core/models/workout.model';
 
 @Component({
   selector: 'app-workout-modal',
@@ -33,6 +33,7 @@ export class WorkoutModalComponent implements OnChanges {
   @Output() save = new EventEmitter<Partial<Workout>>();
   @Output() cancel = new EventEmitter<void>();
 
+  private originalExercises = new WeakMap<AbstractControl, Partial<ExerciseLog>>();
   form: FormGroup;
   muscleGroups = MUSCLE_GROUPS;
 
@@ -70,6 +71,7 @@ export class WorkoutModalComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['visible'] && this.visible) {
+      this.originalExercises = new WeakMap();
       this.form = this.buildForm();
       if (this.workout) {
         this.form.patchValue({
@@ -87,22 +89,25 @@ export class WorkoutModalComponent implements OnChanges {
 
   buildForm(): FormGroup {
     return this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(120), Validators.pattern(/.*\S.*/)]],
       exercises: this.fb.array([this.createExerciseGroup()])
     });
   }
 
-  createExerciseGroup(ex?: Partial<{ exerciseName: string, muscleGroup: string, sets: number, reps: number, weight: number }>): FormGroup {
-    return this.fb.group({
+  createExerciseGroup(ex?: Partial<ExerciseLog>): FormGroup {
+    const group = this.fb.group({
       exerciseName: [ex?.exerciseName || '', [Validators.required, Validators.minLength(2)]],
       muscleGroup: [ex?.muscleGroup || null, Validators.required],
-      sets: [ex?.sets || 3, [Validators.required, Validators.min(1)]],
-      reps: [ex?.reps || 10, [Validators.required, Validators.min(1)]],
-      weight: [ex?.weight || 0, [Validators.required, Validators.min(0)]]
+      sets: [ex?.sets ?? 3, [Validators.required, Validators.min(1), Validators.max(50), Validators.pattern(/^\d+$/)]],
+      reps: [ex?.reps ?? 10, [Validators.required, Validators.min(0), Validators.max(500), Validators.pattern(/^\d+$/)]],
+      weight: [ex?.weight ?? 0, [Validators.required, Validators.min(0), Validators.max(1000)]]
     });
+    if (ex) this.originalExercises.set(group, ex);
+    return group;
   }
 
-  addExercise(ex?: Partial<{ exerciseName: string, muscleGroup: string, sets: number, reps: number, weight: number }>) {
+  addExercise(ex?: Partial<ExerciseLog>) {
+    if (this.exercises.length >= 50) return;
     this.exercises.push(this.createExerciseGroup(ex));
   }
 
@@ -114,10 +119,26 @@ export class WorkoutModalComponent implements OnChanges {
 
   submit() {
     if (this.form.invalid) {
-      Object.values(this.form.controls).forEach(c => c.markAsDirty());
+      this.form.markAllAsTouched();
       return;
     }
-    this.save.emit(this.form.value);
+    this.save.emit({
+      name: this.form.value.name.trim(),
+      exercises: this.exercises.controls.map(control => {
+        const value = control.value as ExerciseLog;
+        const original = this.originalExercises.get(control);
+        // Renaming a workout/exercise must not erase the individual sets.
+        // A changed set count or rep target explicitly replaces those metrics.
+        const sameCount = original?.sets === value.sets;
+        return {
+          ...value, exerciseName: value.exerciseName.trim(),
+          ...(sameCount && original?.setWeights ? { setWeights: [...original.setWeights] } : {}),
+          ...(sameCount && original?.setReps ? {
+            setReps: original.reps === value.reps ? [...original.setReps] : Array(value.sets).fill(value.reps),
+          } : {}),
+        };
+      }),
+    });
   }
 
   onCancel() {

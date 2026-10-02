@@ -1,3 +1,4 @@
+import { MAP_TILE_URL, MAP_TILE_OPTIONS } from '../../core/config/map-tiles';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -13,10 +14,8 @@ import { RunningSessionService } from '../../core/services/running-session.servi
 import { WeatherService, WeatherSummary } from '../../core/services/weather.service';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { routeForStorage } from '../../core/utils/route';
 
-const LEAFLET_ICON_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
-const LEAFLET_ICON_RETINA_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png';
-const LEAFLET_SHADOW_URL = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
 const GPS_CALIBRATION_MS = 5000;
 const GPS_CALIBRATION_TIMEOUT_MS = 8000;
 const GPS_REQUIRED_FIXES = 3;
@@ -42,7 +41,6 @@ interface AcceptedPosition {
     NzMenuModule,
     NzButtonModule,
     NzIconModule,
-    NzCardModule,
     NzCardModule,
     AppMenuComponent,
     NzModalModule,
@@ -87,8 +85,24 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private bestCalibrationPosition: AcceptedPosition | null = null;
   private calibrationTimer: ReturnType<typeof setInterval> | null = null;
   private movementConfirmed = false;
+  private resizeObserver?: ResizeObserver;
+  private resizeFrame?: number;
+  private trackingGeneration = 0;
+  private destroyed = false;
+  private initialPosition?: L.LatLng;
+  private previousBodyOverflow = '';
 
-  private resizeHandler = () => this.map?.invalidateSize();
+  private resizeMap = () => {
+    if (this.resizeFrame !== undefined) cancelAnimationFrame(this.resizeFrame);
+    this.resizeFrame = requestAnimationFrame(() => {
+      if (!this.destroyed) this.map?.invalidateSize({ animate: false });
+    });
+  };
+  private visibilityHandler = () => {
+    if (document.visibilityState === 'visible') this.resizeMap();
+  };
+
+  private resizeHandler = () => this.resizeMap();
 
   constructor(
     public authService: AuthService,
@@ -102,23 +116,33 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
+    this.previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     this.loadWeather();
   }
 
   ngAfterViewInit(): void {
-    this.configureLeafletIcons();
     this.initMap();
     window.addEventListener('resize', this.resizeHandler);
-    setTimeout(() => this.map?.invalidateSize(), 0);
+    document.addEventListener('visibilitychange', this.visibilityHandler);
+    if (typeof ResizeObserver !== 'undefined' && this.mapContainer) {
+      this.resizeObserver = new ResizeObserver(this.resizeMap);
+      this.resizeObserver.observe(this.mapContainer.nativeElement);
+    }
+    this.resizeMap();
   }
 
   ngOnDestroy(): void {
-    document.body.style.overflow = '';
+    this.destroyed = true;
+    document.body.style.overflow = this.previousBodyOverflow;
+    this.resizeObserver?.disconnect();
+    if (this.resizeFrame !== undefined) cancelAnimationFrame(this.resizeFrame);
+    document.removeEventListener('visibilitychange', this.visibilityHandler);
     this.stopTracking(false);
     this.stopElapsedTimer();
     window.removeEventListener('resize', this.resizeHandler);
     this.map?.remove();
+    this.map = undefined;
   }
 
   logout() {
@@ -136,16 +160,18 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   // GPS tracking logic
   startTracking() {
+    if (this.isTracking || this.destroyed) return;
     if (!navigator.geolocation) {
       this.message.error('Geolocation is not supported on this device.');
       return;
     }
 
     this.resetTracking(false);
+    const generation = this.trackingGeneration;
     this.isTracking = true;
     this.isCalibrating = true;
     // fullscreen overlay just became visible; map needs to be resized
-    setTimeout(() => this.map?.invalidateSize(), 80);
+    this.resizeMap();
     this.runningSessionService.setTrackingActive(true);
     this.calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
     this.statusText = 'Allow location access to start tracking.';
@@ -158,7 +184,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        if (!this.isTracking) return;
+        if (!this.isTracking || this.destroyed || generation !== this.trackingGeneration) return;
 
         this.sessionStartedAt = Date.now();
         this.calibrationStartedAt = Date.now();
@@ -167,12 +193,18 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         this.handlePosition(position);
 
         this.watchId = navigator.geolocation.watchPosition(
-          (pos) => this.handlePosition(pos),
-          (err) => this.handleError(err),
+          (pos) => {
+            if (generation === this.trackingGeneration) this.handlePosition(pos);
+          },
+          (err) => {
+            if (generation === this.trackingGeneration) this.handleError(err, true);
+          },
           locationOptions,
         );
       },
-      (err) => this.handleError(err),
+      (err) => {
+        if (generation === this.trackingGeneration) this.handleError(err);
+      },
       locationOptions,
     );
   }
@@ -192,6 +224,11 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   stopTracking(saveSession = true) {
     const wasTracking = this.isTracking;
+    this.trackingGeneration += 1;
+    if (this.startTime) {
+      this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+      this.updateMetrics();
+    }
     this.stopCalibrationTimer();
     this.stopElapsedTimer();
     if (this.watchId !== null) {
@@ -203,6 +240,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       this.isCalibrating = false;
       this.statusText = 'Tracking stopped.';
       this.runningSessionService.setTrackingActive(false);
+      if (!this.destroyed) this.resizeMap();
       if (saveSession) {
         this.saveCompletedSession();
       }
@@ -210,6 +248,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   resetTracking(clearStatus = true) {
+    this.trackingGeneration += 1;
     if (this.watchId !== null) {
       navigator.geolocation.clearWatch(this.watchId);
       this.watchId = null;
@@ -265,6 +304,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.elapsedTimer = setInterval(() => {
       if (this.startTime) {
         this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+        this.updateMetrics();
       }
     }, 1000);
   }
@@ -288,20 +328,22 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const container = this.mapContainer?.nativeElement;
     if (!container) return;
 
-    this.map = L.map(container, { zoomControl: false, attributionControl: false }).setView([44.4268, 26.1025], 16);
-    // voyager: streets, POIs and richer colors than the light variant
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 20,
-    }).addTo(this.map);
+    this.map = L.map(container, { zoomControl: false, attributionControl: true }).setView(this.initialPosition ?? [44.4268, 26.1025], 16);
+    this.map.attributionControl.setPrefix(false);
+    L.tileLayer(MAP_TILE_URL, MAP_TILE_OPTIONS).addTo(this.map);
 
     // route with white casing, Strava style
     this.polylineCasing = L.polyline([], { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(this.map);
     this.polyline = L.polyline([], { color: '#0a84ff', weight: 5 }).addTo(this.map);
-    setTimeout(() => this.map?.invalidateSize(), 0);
+    this.resizeMap();
   }
 
   private handlePosition(pos: GeolocationPosition) {
+    if (!this.isTracking || this.destroyed) return;
     const { latitude, longitude, accuracy } = pos.coords;
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+        Math.abs(latitude) > 90 || Math.abs(longitude) > 180 ||
+        !Number.isFinite(accuracy) || accuracy < 0) return;
     const point = L.latLng(latitude, longitude);
     const timestamp = pos.timestamp || Date.now();
     this.gpsAccuracy = accuracy;
@@ -360,7 +402,15 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.statusText = `Run tracking active. Accuracy ~${Math.round(accuracy)}m.`;
   }
 
-  private handleError(err: GeolocationPositionError) {
+  private handleError(err: GeolocationPositionError, fromWatch = false) {
+    if (!this.isTracking || this.destroyed) return;
+    // A watch remains alive after a timeout/unavailable fix. Keep the session so
+    // a brief tunnel, screen lock or radio interruption cannot discard the run.
+    if (fromWatch && err.code !== 1) {
+      this.statusText = 'GPS signal interrupted. Your run is still recording; waiting for a new fix.';
+      return;
+    }
+    this.trackingGeneration += 1;
     this.stopCalibrationTimer();
     this.stopElapsedTimer();
     if (this.watchId !== null) {
@@ -370,6 +420,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.isTracking = false;
     this.isCalibrating = false;
     this.runningSessionService.setTrackingActive(false);
+    this.resizeMap();
+    if (this.startTime && this.routePoints.length) this.saveCompletedSession();
 
     if (err.code === err.PERMISSION_DENIED) {
       this.statusText = 'Location permission denied.';
@@ -422,7 +474,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         steps: this.steps,
         averageSpeedKmh: Number(this.avgSpeedKmh.toFixed(1)),
         calories: Math.round(this.calories),
-        route: this.routePoints,
+        route: routeForStorage(this.routePoints),
       })
       .subscribe({
         next: () => this.message.success('Workout saved in History.'),
@@ -459,6 +511,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.isCalibrating = false;
     this.stopCalibrationTimer();
     this.startTime = Date.now();
+    this.sessionStartedAt = this.startTime;
     this.elapsedSeconds = 0;
     this.startElapsedTimer();
     this.lastAcceptedPosition = position;
@@ -554,7 +607,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       this.statusText = 'Calibrating GPS. Waiting for a stable signal...';
     }
 
-    if (elapsedMs >= GPS_CALIBRATION_TIMEOUT_MS && this.bestCalibrationPosition) {
+    if (elapsedMs >= GPS_CALIBRATION_TIMEOUT_MS && this.bestCalibrationPosition &&
+        this.bestCalibrationPosition.accuracy <= GPS_MAX_ACCURACY_METERS) {
       this.completeCalibration(this.bestCalibrationPosition);
     }
   }
@@ -586,14 +640,6 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     return earthRadius * c;
   }
 
-  private configureLeafletIcons() {
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: LEAFLET_ICON_RETINA_URL,
-      iconUrl: LEAFLET_ICON_URL,
-      shadowUrl: LEAFLET_SHADOW_URL,
-    });
-  }
-
   // gets weather for current location (GPS), wherever the phone is
   private loadWeather() {
     this.weatherLoading = true;
@@ -606,7 +652,9 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        if (this.destroyed) return;
         const { latitude, longitude } = position.coords;
+        this.initialPosition = L.latLng(latitude, longitude);
         if (this.map && !this.isTracking) {
           this.map.setView([latitude, longitude], 17);
         }
@@ -621,7 +669,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
           },
         });
       },
-      () => this.loadWeatherForFallbackCity(),
+      () => { if (!this.destroyed) this.loadWeatherForFallbackCity(); },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
     );
   }
@@ -667,12 +715,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   toggleWeatherDetails() {
     this.weatherExpanded = !this.weatherExpanded;
-    setTimeout(() => this.map?.invalidateSize(), 0);
+    this.resizeMap();
   }
 
   toggleActivityDetails() {
     this.activityExpanded = !this.activityExpanded;
-    setTimeout(() => this.map?.invalidateSize(), 0);
+    this.resizeMap();
   }
 
   blockNavigation(event: Event) {

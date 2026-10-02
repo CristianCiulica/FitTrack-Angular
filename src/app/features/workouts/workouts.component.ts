@@ -5,6 +5,7 @@ import { WorkoutService } from '../../core/services/workout.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Workout } from '../../core/models/workout.model';
+import { RouteMapComponent } from '../../shared/components/route-map/route-map.component';
 import { RunningSession } from '../../core/models/running-session.model';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -19,7 +20,6 @@ import { WorkoutModalComponent } from '../../shared/components/workout-modal/wor
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { ProfileService } from '../../core/services/profile.service';
 import { estimateSessionCalories } from '../../core/utils/workout-calories';
-import { CommunityService } from '../../core/services/community.service';
 
 type WorkoutSortColumn = 'name' | 'date' | 'exerciseCount' | 'primaryMuscle' | 'volume';
 type SortDirection = 'ascend' | 'descend' | null;
@@ -40,6 +40,7 @@ type SortDirection = 'ascend' | 'descend' | null;
     NzModalModule,
     WorkoutModalComponent,
     AppMenuComponent,
+    RouteMapComponent,
   ],
   templateUrl: './workouts.component.html',
   styleUrls: ['./workouts.component.scss']
@@ -55,7 +56,6 @@ export class WorkoutsComponent implements OnInit {
   workoutHistoryOpen = signal(true);
   readonly hideTableNoResult: string | undefined = undefined;
   expandSet = new Set<string>();
-  publishingIds = signal<Set<string>>(new Set());
 
   filteredWorkouts = computed(() => {
     let data = [...this.workouts()];
@@ -139,48 +139,6 @@ export class WorkoutsComponent implements OnInit {
     return estimateSessionCalories(workout.exercises, this.profileService.weightKg());
   }
 
-  // proiecteaza traseul GPS in coordonate SVG (viewBox W x H), pastrand proportiile
-  private projectRoute(session: RunningSession, W: number, H: number, pad: number): { x: number; y: number }[] | null {
-    const route = session.route;
-    if (!route || route.length < 2) return null;
-
-    const lats = route.map((p) => p[0]);
-    const lngs = route.map((p) => p[1]);
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
-    const spanLat = Math.max(maxLat - minLat, 1e-5);
-    const spanLng = Math.max(maxLng - minLng, 1e-5);
-
-    const scale = Math.min((W - pad * 2) / spanLng, (H - pad * 2) / spanLat);
-    const offsetX = (W - spanLng * scale) / 2;
-    const offsetY = (H - spanLat * scale) / 2;
-
-    return route.map((p) => ({
-      x: offsetX + (p[1] - minLng) * scale,
-      y: H - (offsetY + (p[0] - minLat) * scale),
-    }));
-  }
-
-  // path-ul SVG al traseului, in viewBox 100x56
-  routePath(session: RunningSession): string | null {
-    const pts = this.projectRoute(session, 100, 56, 6);
-    if (!pts) return null;
-    return pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
-  }
-
-  // punctele de start/finish pentru bulinele de pe traseu
-  routeStart(session: RunningSession): { x: number; y: number } | null {
-    const pts = this.projectRoute(session, 100, 56, 6);
-    return pts ? pts[0] : null;
-  }
-
-  routeEnd(session: RunningSession): { x: number; y: number } | null {
-    const pts = this.projectRoute(session, 100, 56, 6);
-    return pts ? pts[pts.length - 1] : null;
-  }
-
   // ritmul mediu, in stil alergare: min/km (ex. 5'32")
   formatPace(session: RunningSession): string {
     const km = session.distanceMeters / 1000;
@@ -242,8 +200,7 @@ export class WorkoutsComponent implements OnInit {
     private authService: AuthService,
     private profileService: ProfileService,
     private message: NzMessageService,
-    private modalService: NzModalService,
-    private communityService: CommunityService
+    private modalService: NzModalService
   ) { }
 
   ngOnInit() {
@@ -281,12 +238,12 @@ export class WorkoutsComponent implements OnInit {
     if (!editing?.id) return;
     this.workoutService.updateWorkout(editing.id, workout).subscribe({
       next: () => {
+        this.modalVisible.set(false);
         this.message.success('Workout updated!');
         this.refreshWorkouts();
       },
       error: () => this.message.error('Update failed.')
     });
-    this.modalVisible.set(false);
   }
 
   onModalCancel() {
@@ -333,30 +290,4 @@ export class WorkoutsComponent implements OnInit {
     this.authService.logout().subscribe();
   }
 
-  shareToCommunity(workout: Workout) {
-    this.publishingIds.update(set => new Set(set).add(workout.id!));
-    this.communityService.publishWorkout({
-      originalWorkoutId: workout.id,
-      name: workout.name,
-      description: workout.notes || '',
-      exercises: workout.exercises
-    }).subscribe({
-      next: () => {
-        this.message.success('Workout shared to community!');
-        this.publishingIds.update(set => {
-          const newSet = new Set(set);
-          newSet.delete(workout.id!);
-          return newSet;
-        });
-      },
-      error: () => {
-        this.message.error('Failed to share workout.');
-        this.publishingIds.update(set => {
-          const newSet = new Set(set);
-          newSet.delete(workout.id!);
-          return newSet;
-        });
-      }
-    });
-  }
 }

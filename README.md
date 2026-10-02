@@ -38,16 +38,11 @@ and Dorian Yates, with full exercise lists and one tap to start any day. Adding 
 
 **Running with GPS.** A Leaflet map that stays hidden until you hit start, then goes fullscreen. The tracker
 filters GPS noise — accuracy thresholds, implausible speed jumps, a short calibration window — so one bad fix
-doesn't add 200 m to your distance. Routes are saved and redrawn in History as SVG with start/finish markers,
+doesn't add 200 m to your distance. Routes are saved and displayed on geographic OpenStreetMap tiles in History with start/finish markers,
 pace per kilometre and expandable details.
 
-**Community feed.** Publish a routine, like it, comment, save someone else's into your own library. Ranked by a
-trending score (interactions with exponential time decay), filterable by muscle group and duration, with
-For You / Following / Recent tabs, search, infinite scroll and a "FitTrack Picks" row of the month's most-saved
-routines.
-
 **Profile.** Avatar upload (resized client-side to 256 px, stored as a data URL so there's no object storage to
-provision), follower and following lists, your posts with their like and save counts.
+provision), with a direct link to personal account details.
 
 
 **Nutrition.** BMI, BMR and a daily calorie target derived from the profile you set at onboarding, plus a
@@ -115,16 +110,16 @@ a different port is the usual cause.
 ```
 src/app/
   core/
-    services/     # api, auth, profile, workout, running-session, community, weather, migration
+    services/     # api, auth, profile, workout, running-session, weather, migration
     guards/       # auth, guest, onboarding
     interceptors/ # attaches the Firebase ID token once the session is restored
     utils/        # unit conversion, MET calorie estimates
-  features/       # dashboard, workouts, start-workout, running, bmi, community,
+  features/       # dashboard, workouts, start-workout, running, bmi,
                   # profile, account, settings, onboarding, auth
   shared/         # workout modal, mobile menu drawer
 
 server/src/
-  routes/         # me, workouts, running-sessions, community, migrate
+  routes/         # me, workouts, running-sessions, migrate
   models/         # mongoose schemas
   middleware/     # requireAuth, error handler, rate limits
 ```
@@ -143,12 +138,6 @@ Everything under `/api` needs a valid Firebase ID token (`Authorization: Bearer 
 | `GET` | `/api/me/export` | Download all your data as JSON |
 | `GET` `POST` `PUT` `DELETE` | `/api/workouts` | Workout CRUD, including per-set reps and weights |
 | `GET` `POST` `DELETE` | `/api/running-sessions` | Runs with their GPS routes |
-| `GET` | `/api/community` | Feed with paging, filters and trending / recent sorting |
-| `GET` | `/api/community/picks` | Most-saved routines of the last 30 days |
-| `GET` | `/api/community/author/:uid` | Public author profile and posts |
-| `POST` | `/api/community/:id/like` · `/save` · `/comments` | Social actions |
-| `POST` | `/api/community/follow/:uid` | Follow / unfollow toggle |
-| `GET` | `/api/community/me/followers` · `me/following` | Your social graph |
 
 ## Deploying
 

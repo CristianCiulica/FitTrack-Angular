@@ -48,6 +48,7 @@
             <span class="wm-exercise-num">{{ i + 1 }}</span>
             <input
               class="wm-input wm-exercise-name"
+              [attr.aria-label]="'Exercise ' + (i + 1) + ' name'"
               formControlName="exerciseName"
               placeholder="Exercise name"
               [class.is-invalid]="showError(ex.get('exerciseName'))"
@@ -78,14 +79,14 @@
           <div class="wm-metrics">
             <label class="wm-subfield">
               <span class="wm-subfield-label">Sets</span>
-              <nz-input-number formControlName="sets" [nzMin]="1" [nzStep]="1"></nz-input-number>
+              <nz-input-number formControlName="sets" [nzMin]="1" [nzMax]="50" [nzStep]="1"></nz-input-number>
             </label>
             <label class="wm-subfield">
               <span class="wm-subfield-label">Reps</span>
-              <nz-input-number formControlName="reps" [nzMin]="1" [nzStep]="1"></nz-input-number>
+              <nz-input-number formControlName="reps" [nzMin]="0" [nzMax]="500" [nzStep]="1"></nz-input-number>
             </label>
           </div>
-          <p class="wm-weight-hint">
+          <p class="wm-weight-hint" *ngIf="!isEdit">
             <span nz-icon nzType="bulb" nzTheme="outline"></span>
             You'll set the weight while training — we remember it for next time.
           </p>

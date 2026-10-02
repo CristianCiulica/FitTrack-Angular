@@ -5,6 +5,7 @@ import { trigger, transition, style, animate, query, group } from '@angular/anim
 import { NzIconService } from 'ng-zorro-antd/icon';
 import { LoadingService } from './core/services/loading.service';
 import { ProfileService } from './core/services/profile.service';
+import { LiquidGlassComponent } from './shared/components/liquid-glass/liquid-glass.component';
 
 // iconite custom, stil SF Symbols, pentru navigarea principala.
 // fill="none" trebuie pus pe fiecare forma: ng-zorro suprascrie fill-ul de pe radacina svg.
@@ -21,8 +22,9 @@ const FT_ICONS: Record<string, string> = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, LiquidGlassComponent],
   template: `
+    <app-liquid-glass />
     <div class="route-shell" [@routeAnimations]="prepareRoute(outlet)">
       <router-outlet #outlet="outlet" />
       <div class="loading-overlay" *ngIf="loadingService.isLoading()">
