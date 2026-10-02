@@ -259,8 +259,8 @@ export class WorkoutsComponent implements OnInit {
       nzOkDanger: true,
       nzCancelText: 'Cancel',
       nzCentered: true,
-      nzWidth: 320,
-      nzClassName: 'solid-modal',
+      nzWidth: 'min(400px, calc(100vw - 32px))',
+      nzClassName: 'solid-modal workout-confirm',
       nzOnOk: () => {
         this.workoutService.deleteWorkout(id).subscribe({
           next: () => {

@@ -1267,3 +1267,47 @@ html body .app-layout .app-header .header-actions .logout-button {
   :root { --glass-bg: #f9fafc; }
   body .app-layout > .sidebar::before { background: #f9fafc; }
 }
+
+/* Centred confirmations stay inside small screens and above active sessions. */
+.workout-confirm { max-width: calc(100vw - 32px); }
+.workout-confirm .ant-modal-content { border-radius: 24px; }
+.workout-confirm .ant-modal-body { padding: 24px; }
+.workout-confirm .ant-modal-confirm-title,
+.workout-confirm .ant-modal-confirm-content { white-space: normal; overflow-wrap: anywhere; }
+.workout-confirm .ant-modal-confirm-btns { float: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.workout-confirm .ant-modal-confirm-btns .ant-btn { flex: 1 1 120px; margin: 0; height: auto; min-height: 44px; padding: 10px 14px; white-space: normal; }
+body:has(.workout-live) .cdk-overlay-container { z-index: 1200; }
+
+/* Same rim refraction as the dock, resized to each Run panel. */
+body .run-layout .liquid-panel.ant-card {
+  position: relative;
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.liquid-panel::before, .liquid-panel::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+}
+.liquid-panel::before {
+  z-index: 0;
+  background: linear-gradient(150deg, #ffffffb3, #ffffff60 48%, #ffffff99);
+  backdrop-filter: blur(16px) saturate(165%);
+  -webkit-backdrop-filter: blur(16px) saturate(165%);
+}
+.liquid-panel.has-panel-lens::before { backdrop-filter: var(--panel-lens) blur(2px) saturate(145%); }
+.liquid-panel::after {
+  z-index: 2; padding: 1px;
+  background: radial-gradient(80% 140% at 24% 0%, white, #ffffffbf 25%, transparent 62%), linear-gradient(145deg, #ffffffe6, transparent 40%, #5c6f8d33 65%, #ffffffd9);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+.liquid-panel > .ant-card-body { position: relative; z-index: 1; }
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  body .run-layout .liquid-panel.ant-card { background: #f8fafc !important; }
+  .liquid-panel::before, .liquid-panel::after { display: none; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body .run-layout .liquid-panel.ant-card { background: #f8fafc !important; }
+}

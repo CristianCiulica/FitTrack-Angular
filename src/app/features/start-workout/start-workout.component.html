@@ -123,7 +123,7 @@
             <div class="plan-heading"><div><span class="section-eyebrow">BUILT BY YOU</span><h2>My workouts <span class="heading-count">{{ personalRoutines().length }}</span></h2></div><button type="button" class="text-action" (click)="openAddWorkout()"><span nz-icon nzType="plus"></span> New workout</button></div>
             <div class="plan-list personal-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
               <article class="plan-card" *ngFor="let routine of personalRoutines()" [class.selected]="selectedRoutineKey() === 'personal-' + routine.id">
-                <div class="card-topline"><span class="plan-chip">Custom</span><button type="button" class="plan-delete" [disabled]="deletingIds().has(routine.id!)" [attr.aria-label]="'Delete ' + routine.name" nz-popconfirm nzPopconfirmTitle="Delete this workout from your library and history?" nzOkText="Delete" nzCancelText="Keep" (nzOnConfirm)="deleteWorkout(routine.id)"><span nz-icon nzType="delete"></span><span>{{ deletingIds().has(routine.id!) ? 'Deleting…' : 'Delete' }}</span></button></div>
+                <div class="card-topline"><span class="plan-chip">Custom</span><button type="button" class="plan-delete" [disabled]="deletingIds().has(routine.id!)" [attr.aria-label]="'Delete ' + routine.name" (click)="confirmDeleteWorkout(routine.id)"><span nz-icon nzType="delete"></span><span>{{ deletingIds().has(routine.id!) ? 'Deleting…' : 'Delete' }}</span></button></div>
                 <h3>{{ routine.name }}</h3><p class="plan-muscles">{{ muscleSummary(routine) }}</p>
                 <div class="routine-facts"><span><strong>{{ routineMinutes(routine) }}</strong> min</span><span><strong>{{ routine.exercises.length }}</strong> exercises</span></div>
                 <button type="button" class="plan-start" (click)="selectRoutine(routine, 'personal-' + routine.id); startWorkout()"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start workout</button>
@@ -134,11 +134,12 @@
 
           <section class="routine-library">
             <div class="plan-heading"><div><span class="section-eyebrow">FIND YOUR FOCUS</span><h2>Ready to train</h2></div><span class="library-count">{{ filteredPredefined().length }} routines</span></div>
+            <p class="library-guidance">Start light, leave 2 reps in reserve, and build up gradually. Set your own load; unilateral reps are per side.</p>
             <div class="filter-pills" role="group" aria-label="Workout categories"><button type="button" *ngFor="let filter of routineFilters" [class.selected]="routineFilter() === filter" [attr.aria-pressed]="routineFilter() === filter" (click)="routineFilter.set(filter)">{{ filter }}</button></div>
             <div class="plan-list">
               <article class="plan-card" *ngFor="let item of filteredPredefined()" [class.selected]="selectedRoutineKey() === 'predefined-' + item.index">
                 <div class="card-topline"><span class="routine-symbol" nz-icon nzType="ft:workout"></span><span class="plan-chip">{{ item.routine.category }}</span></div>
-                <h3>{{ item.routine.name }}</h3><p class="plan-muscles">{{ muscleSummary(item.routine) }}</p>
+                <h3>{{ item.routine.name }}</h3><p class="plan-muscles">{{ item.routine.description }}</p>
                 <div class="routine-facts"><span><strong>{{ routineMinutes(item.routine) }}</strong> min</span><span><strong>{{ item.routine.exercises.length }}</strong> exercises</span><span>~{{ routineKcal(item.routine) }} kcal</span></div>
                 <div class="exercise-preview"><span *ngFor="let exercise of item.routine.exercises | slice:0:3">{{ exercise.name }}<small>{{ exercise.sets }} × {{ exercise.reps }}</small></span></div>
                 <button type="button" class="plan-start" (click)="selectRoutine(item.routine, 'predefined-' + item.index); startWorkout()"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start workout</button>
@@ -404,7 +405,7 @@
   </div>
   <!-- Actiuni, fixate jos -->
   <div class="live-actions">
-    <button nz-button nzDanger nzSize="large" class="live-stop" [disabled]="saving()" nz-popconfirm nzPopconfirmTitle="Stop this workout? Unsaved sets will be lost." nzOkText="Stop workout" nzCancelText="Keep training" (nzOnConfirm)="cancelWorkout()">
+    <button nz-button nzDanger nzSize="large" class="live-stop" [disabled]="saving()" (click)="confirmStopWorkout()">
       <span nz-icon nzType="close"></span> Stop
     </button>
     <button

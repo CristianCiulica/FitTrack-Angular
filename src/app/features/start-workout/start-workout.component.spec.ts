@@ -14,6 +14,7 @@ describe('Workout session recovery', () => {
       { weightKg: () => 75 } as any,
       { success: vi.fn(), error: vi.fn(), warning: vi.fn() } as any,
       { queryParams: of({}) } as any,
+      { confirm: vi.fn() } as any,
     );
     component.selectRoutine({ name: 'Two exercises', exercises: [
       { name: 'Press', sets: 2, reps: 10, weight: 50, muscleGroup: 'Chest' },

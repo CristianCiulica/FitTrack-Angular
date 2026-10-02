@@ -71,7 +71,7 @@
 
     <nz-content class="app-content">
       <div class="run-dashboard">
-        <nz-card class="weather-card" [ngClass]="weatherTheme">
+        <nz-card appLiquidGlass class="weather-card" [ngClass]="weatherTheme">
           <div class="weather-content weather-loading" *ngIf="weatherLoading">
             Loading weather...
           </div>
@@ -122,7 +122,7 @@
           </div>
         </nz-card>
 
-        <nz-card class="run-card">
+        <nz-card appLiquidGlass class="run-card">
           <div class="run-card-top">
             <div class="run-card-summary">
               <div>

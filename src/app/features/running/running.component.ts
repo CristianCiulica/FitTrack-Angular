@@ -1,3 +1,4 @@
+import { LiquidGlassDirective } from '../../shared/components/liquid-glass/liquid-glass.directive';
 import { MAP_TILE_URL, MAP_TILE_OPTIONS } from '../../core/config/map-tiles';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -34,6 +35,7 @@ interface AcceptedPosition {
   selector: 'app-running',
   standalone: true,
   imports: [
+    LiquidGlassDirective,
     CommonModule,
     RouterLink,
     RouterLinkActive,

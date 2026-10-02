@@ -13,3 +13,15 @@ describe('dock refraction lens', () => {
     expect(at(358, 33)[0]).toBeGreaterThan(128);
   });
 });
+
+it('keeps a tall rounded panel flat inside and refracts all four rims', () => {
+  const width = 280, height = 420;
+  const pixels = glassLensPixels(width, height, 32);
+  const channel = (x: number, y: number, c: number) => pixels[(y * width + x) * 4 + c];
+  expect(channel(140, 210, 0)).toBe(128);
+  expect(channel(140, 210, 1)).toBe(128);
+  expect(channel(1, 210, 0)).toBeLessThan(128);
+  expect(channel(278, 210, 0)).toBeGreaterThan(128);
+  expect(channel(140, 1, 1)).toBeLessThan(128);
+  expect(channel(140, 418, 1)).toBeGreaterThan(128);
+});

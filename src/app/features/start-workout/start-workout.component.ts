@@ -30,115 +30,384 @@ interface Routine {
   id?: string;
   name: string;
   category?: string;
+  description?: string;
+  restSeconds?: number;
   exercises: PlannedExercise[];
 }
 
+// General-purpose templates; users choose loads appropriate to their experience.
 const PREDEFINED_ROUTINES: Routine[] = [
   {
-    name: 'Push Day (Chest, Shoulders, Triceps)',
-    category: 'Push',
-    exercises: [
-      { name: 'Bench Press', sets: 4, reps: 10, weight: 60, muscleGroup: 'Chest' },
-      { name: 'Overhead Press', sets: 3, reps: 10, weight: 40, muscleGroup: 'Shoulders' },
-      { name: 'Tricep Pushdowns', sets: 3, reps: 12, weight: 20, muscleGroup: 'Arms' },
+    "name": "Foundation · A",
+    "category": "Full body",
+    "description": "Your first strength session. Squat, push, pull and hinge. Alternate with Foundation B.",
+    "restSeconds": 90,
+    "exercises": [
+      {
+        "name": "Goblet Squat",
+        "sets": 3,
+        "reps": 8,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Dumbbell Bench Press",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Chest"
+      },
+      {
+        "name": "Chest-Supported Dumbbell Row",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Back"
+      },
+      {
+        "name": "Dumbbell Romanian Deadlift",
+        "sets": 2,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Dead Bug",
+        "sets": 2,
+        "reps": 8,
+        "weight": 0,
+        "muscleGroup": "Core"
+      }
     ]
   },
   {
-    name: 'Pull Day (Back, Biceps)',
-    category: 'Pull',
-    exercises: [
-      { name: 'Pull-ups', sets: 4, reps: 8, weight: 0, muscleGroup: 'Back' },
-      { name: 'Barbell Rows', sets: 4, reps: 10, weight: 50, muscleGroup: 'Back' },
-      { name: 'Bicep Curls', sets: 3, reps: 12, weight: 15, muscleGroup: 'Arms' },
+    "name": "Foundation · B",
+    "category": "Full body",
+    "description": "The other half of your week. Single-leg work, vertical pulling and controlled pressing.",
+    "restSeconds": 90,
+    "exercises": [
+      {
+        "name": "Reverse Lunge",
+        "sets": 3,
+        "reps": 8,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Lat Pulldown",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Back"
+      },
+      {
+        "name": "Seated Dumbbell Shoulder Press",
+        "sets": 2,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Shoulders"
+      },
+      {
+        "name": "Glute Bridge",
+        "sets": 3,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Pallof Press",
+        "sets": 2,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Core"
+      }
     ]
   },
   {
-    name: 'Leg Day',
-    category: 'Legs',
-    exercises: [
-      { name: 'Squats', sets: 4, reps: 8, weight: 80, muscleGroup: 'Legs' },
-      { name: 'Leg Press', sets: 3, reps: 12, weight: 120, muscleGroup: 'Legs' },
-      { name: 'Calf Raises', sets: 4, reps: 15, weight: 60, muscleGroup: 'Legs' },
+    "name": "Push · Strength & Shape",
+    "category": "Push",
+    "description": "Press first, then shoulders and triceps. Controlled reps through a comfortable full range.",
+    "restSeconds": 120,
+    "exercises": [
+      {
+        "name": "Barbell Bench Press",
+        "sets": 3,
+        "reps": 6,
+        "weight": 0,
+        "muscleGroup": "Chest"
+      },
+      {
+        "name": "Incline Dumbbell Press",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Chest"
+      },
+      {
+        "name": "Seated Dumbbell Shoulder Press",
+        "sets": 2,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Shoulders"
+      },
+      {
+        "name": "Cable Lateral Raise",
+        "sets": 3,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Shoulders"
+      },
+      {
+        "name": "Overhead Cable Triceps Extension",
+        "sets": 2,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Arms"
+      }
     ]
   },
   {
-    name: 'Full Body Strength',
-    category: 'Full body',
-    exercises: [
-      { name: 'Back Squats', sets: 4, reps: 6, weight: 80, muscleGroup: 'Legs' },
-      { name: 'Bench Press', sets: 4, reps: 8, weight: 60, muscleGroup: 'Chest' },
-      { name: 'Barbell Rows', sets: 4, reps: 8, weight: 50, muscleGroup: 'Back' },
-      { name: 'Romanian Deadlifts', sets: 3, reps: 10, weight: 70, muscleGroup: 'Legs' },
+    "name": "Pull · Back & Arms",
+    "category": "Pull",
+    "description": "Balanced vertical and horizontal pulling, with supported rows to keep your lower back fresh.",
+    "restSeconds": 120,
+    "exercises": [
+      {
+        "name": "Lat Pulldown",
+        "sets": 3,
+        "reps": 8,
+        "weight": 0,
+        "muscleGroup": "Back"
+      },
+      {
+        "name": "Chest-Supported Row",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Back"
+      },
+      {
+        "name": "Single-Arm Cable Row",
+        "sets": 2,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Back"
+      },
+      {
+        "name": "Reverse Pec Deck",
+        "sets": 2,
+        "reps": 15,
+        "weight": 0,
+        "muscleGroup": "Shoulders"
+      },
+      {
+        "name": "Incline Dumbbell Curl",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Arms"
+      }
     ]
   },
   {
-    name: 'Upper Body Power',
-    category: 'Push',
-    exercises: [
-      { name: 'Incline Bench Press', sets: 4, reps: 8, weight: 50, muscleGroup: 'Chest' },
-      { name: 'Pull-ups', sets: 4, reps: 8, weight: 0, muscleGroup: 'Back' },
-      { name: 'Shoulder Press', sets: 3, reps: 10, weight: 32.5, muscleGroup: 'Shoulders' },
-      { name: 'Hammer Curls', sets: 3, reps: 12, weight: 14, muscleGroup: 'Arms' },
+    "name": "Lower · Squat Focus",
+    "category": "Legs",
+    "description": "Quads lead the session. Hamstrings, calves and trunk round it out.",
+    "restSeconds": 120,
+    "exercises": [
+      {
+        "name": "Back Squat",
+        "sets": 3,
+        "reps": 6,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Leg Press",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Seated Leg Curl",
+        "sets": 3,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Standing Calf Raise",
+        "sets": 3,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Cable Crunch",
+        "sets": 2,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Core"
+      }
     ]
   },
   {
-    name: 'Lower Body & Glutes',
-    category: 'Legs',
-    exercises: [
-      { name: 'Hip Thrusts', sets: 4, reps: 10, weight: 80, muscleGroup: 'Legs' },
-      { name: 'Bulgarian Split Squats', sets: 3, reps: 10, weight: 20, muscleGroup: 'Legs' },
-      { name: 'Romanian Deadlifts', sets: 4, reps: 8, weight: 70, muscleGroup: 'Legs' },
-      { name: 'Leg Curls', sets: 3, reps: 12, weight: 35, muscleGroup: 'Legs' },
+    "name": "Lower · Hinge Focus",
+    "category": "Legs",
+    "description": "A second lower-body day built around hamstrings, glutes and single-leg strength.",
+    "restSeconds": 120,
+    "exercises": [
+      {
+        "name": "Romanian Deadlift",
+        "sets": 3,
+        "reps": 8,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Hip Thrust",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Reverse Lunge",
+        "sets": 2,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Lying Leg Curl",
+        "sets": 2,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Seated Calf Raise",
+        "sets": 3,
+        "reps": 15,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      }
     ]
   },
   {
-    name: 'Core & Conditioning',
-    category: 'Core',
-    exercises: [
-      { name: 'Weighted Crunches', sets: 3, reps: 15, weight: 10, muscleGroup: 'Core' },
-      { name: 'Hanging Leg Raises', sets: 3, reps: 12, weight: 0, muscleGroup: 'Core' },
-      { name: 'Plank', sets: 3, reps: 1, weight: 0, muscleGroup: 'Core' },
-      { name: 'Mountain Climbers', sets: 4, reps: 30, weight: 0, muscleGroup: 'Cardio' },
+    "name": "Dumbbells · The Essentials",
+    "category": "Full body",
+    "description": "A complete session with a pair of dumbbells and a bench. Simple equipment, purposeful work.",
+    "restSeconds": 90,
+    "exercises": [
+      {
+        "name": "Dumbbell Front Squat",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Dumbbell Floor Press",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Chest"
+      },
+      {
+        "name": "Bench-Supported One-Arm Row",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Back"
+      },
+      {
+        "name": "Dumbbell Romanian Deadlift",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Dumbbell Lateral Raise",
+        "sets": 2,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Shoulders"
+      }
     ]
   },
   {
-    name: 'HIIT Fat Burner',
-    category: 'Cardio',
-    exercises: [
-      { name: 'Burpees', sets: 4, reps: 15, weight: 0, muscleGroup: 'Cardio' },
-      { name: 'Jump Squats', sets: 4, reps: 15, weight: 0, muscleGroup: 'Legs' },
-      { name: 'Mountain Climbers', sets: 4, reps: 40, weight: 0, muscleGroup: 'Cardio' },
-      { name: 'Kettlebell Swings', sets: 4, reps: 20, weight: 16, muscleGroup: 'Full Body' },
+    "name": "Core · Control & Stability",
+    "category": "Core",
+    "description": "Train trunk control without racing the clock. Pause briefly at the end of each rep.",
+    "restSeconds": 60,
+    "exercises": [
+      {
+        "name": "Dead Bug",
+        "sets": 3,
+        "reps": 8,
+        "weight": 0,
+        "muscleGroup": "Core"
+      },
+      {
+        "name": "Bird Dog",
+        "sets": 2,
+        "reps": 8,
+        "weight": 0,
+        "muscleGroup": "Core"
+      },
+      {
+        "name": "Pallof Press",
+        "sets": 3,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Core"
+      },
+      {
+        "name": "Reverse Crunch",
+        "sets": 2,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Core"
+      }
     ]
   },
   {
-    name: 'Steady Cardio & Core',
-    category: 'Cardio',
-    exercises: [
-      { name: 'Jumping Jacks', sets: 4, reps: 40, weight: 0, muscleGroup: 'Cardio' },
-      { name: 'High Knees', sets: 4, reps: 30, weight: 0, muscleGroup: 'Cardio' },
-      { name: 'Russian Twists', sets: 3, reps: 24, weight: 8, muscleGroup: 'Core' },
-      { name: 'Plank', sets: 3, reps: 1, weight: 0, muscleGroup: 'Core' },
-    ]
-  },
-  {
-    name: 'Back & Biceps Builder',
-    category: 'Pull',
-    exercises: [
-      { name: 'Deadlifts', sets: 4, reps: 6, weight: 90, muscleGroup: 'Back' },
-      { name: 'Lat Pulldown', sets: 4, reps: 10, weight: 50, muscleGroup: 'Back' },
-      { name: 'Seated Cable Rows', sets: 3, reps: 12, weight: 45, muscleGroup: 'Back' },
-      { name: 'Hammer Curls', sets: 3, reps: 12, weight: 14, muscleGroup: 'Arms' },
-    ]
-  },
-  {
-    name: 'Glutes & Hamstrings',
-    category: 'Legs',
-    exercises: [
-      { name: 'Hip Thrusts', sets: 4, reps: 10, weight: 80, muscleGroup: 'Legs' },
-      { name: 'Stiff-Leg Deadlifts', sets: 4, reps: 10, weight: 60, muscleGroup: 'Legs' },
-      { name: 'Walking Lunges', sets: 3, reps: 20, weight: 20, muscleGroup: 'Legs' },
-      { name: 'Leg Curls', sets: 3, reps: 12, weight: 35, muscleGroup: 'Legs' },
+    "name": "Move · Low Impact",
+    "category": "Cardio",
+    "description": "A short, low-impact conditioning session. Keep the pace steady and rest between sets.",
+    "restSeconds": 60,
+    "exercises": [
+      {
+        "name": "Step Jack",
+        "sets": 3,
+        "reps": 20,
+        "weight": 0,
+        "muscleGroup": "Cardio"
+      },
+      {
+        "name": "Bodyweight Squat",
+        "sets": 3,
+        "reps": 12,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      },
+      {
+        "name": "Standing Knee Drive",
+        "sets": 3,
+        "reps": 15,
+        "weight": 0,
+        "muscleGroup": "Cardio"
+      },
+      {
+        "name": "Alternating Step-Back Lunge",
+        "sets": 2,
+        "reps": 10,
+        "weight": 0,
+        "muscleGroup": "Legs"
+      }
     ]
   }
 ];
@@ -467,7 +736,7 @@ const OFFICIAL_PLANS: OfficialPlan[] = [
   },
 ];
 
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'app-start-workout',
@@ -484,7 +753,7 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
     NzProgressModule,
     NzTagModule,
     NzDrawerModule,
-    NzPopconfirmModule,
+    NzModalModule,
     WorkoutModalComponent,
     AppMenuComponent,
   ],
@@ -610,6 +879,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private message: NzMessageService,
     private route: ActivatedRoute,
+    private modalService: NzModalService,
   ) {}
 
   ngOnInit() {
@@ -637,6 +907,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   selectRoutine(routine: Routine, key: string) {
     this.selectedRoutineKey.set(key);
+    this.restTimeTarget.set(routine.restSeconds ?? 60);
     this.currentRoutine.set({
       ...routine,
       exercises: routine.exercises.map(exercise => ({
@@ -686,6 +957,29 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         this.message.success('Workout saved successfully.');
       },
       error: () => this.message.error('Failed to save workout.')
+    });
+  }
+
+  confirmDeleteWorkout(id?: string): void {
+    if (!id) return;
+    this.modalService.confirm({
+      nzTitle: 'Delete workout?',
+      nzContent: 'This workout will be removed from your library and history.',
+      nzOkText: 'Delete', nzCancelText: 'Keep workout', nzOkDanger: true,
+      nzCentered: true, nzWidth: 'min(400px, calc(100vw - 32px))',
+      nzClassName: 'solid-modal workout-confirm',
+      nzOnOk: () => this.deleteWorkout(id),
+    });
+  }
+
+  confirmStopWorkout(): void {
+    this.modalService.confirm({
+      nzTitle: 'Stop this workout?',
+      nzContent: 'Your unsaved sets will be lost. You can keep training or finish and save the session.',
+      nzOkText: 'Stop workout', nzCancelText: 'Keep training', nzOkDanger: true,
+      nzCentered: true, nzWidth: 'min(400px, calc(100vw - 32px))',
+      nzClassName: 'solid-modal workout-confirm',
+      nzOnOk: () => this.cancelWorkout(),
     });
   }
 
