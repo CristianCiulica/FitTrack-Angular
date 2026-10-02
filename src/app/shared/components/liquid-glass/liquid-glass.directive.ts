@@ -1,3 +1,4 @@
+import { supportsGlassRefraction } from '../../../core/utils/glass-support';
 import { afterNextRender, DestroyRef, Directive, ElementRef, inject, NgZone } from '@angular/core';
 import { glassLensPixels } from '../../../core/utils/glass-lens';
 
@@ -16,8 +17,7 @@ export class LiquidGlassDirective {
 
   private connect(): void {
     const defs = document.querySelector('app-liquid-glass svg defs');
-    if (!defs || !/Chrome|Chromium|Edg\//.test(navigator.userAgent)
-      || !CSS.supports('backdrop-filter', 'url("#ft-dock-lens")')) return;
+    if (!defs || !supportsGlassRefraction()) return;
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     if (!context) return;

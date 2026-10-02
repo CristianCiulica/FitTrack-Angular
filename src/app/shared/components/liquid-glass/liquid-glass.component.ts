@@ -1,3 +1,4 @@
+import { supportsGlassRefraction } from '../../../core/utils/glass-support';
 import { afterNextRender, Component, DestroyRef, ElementRef, inject, NgZone } from '@angular/core';
 import { glassLensPixels } from '../../../core/utils/glass-lens';
 
@@ -30,8 +31,7 @@ export class LiquidGlassComponent {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     // WebKit/Firefox do not render SVG displacement in backdrop-filter reliably.
     // They keep the CSS optical material, including blur and specular edges.
-    const supportsLens = /Chrome|Chromium|Edg\//.test(navigator.userAgent)
-      && CSS.supports('backdrop-filter', 'url("#ft-dock-lens")');
+    const supportsLens = supportsGlassRefraction();
     const filterImage = this.element.nativeElement.querySelector('feImage');
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');

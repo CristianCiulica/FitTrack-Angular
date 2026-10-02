@@ -934,11 +934,12 @@ a:hover {
     pointer-events: none;
     border-radius: inherit;
     background: linear-gradient(150deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.28) 48%, rgba(255, 255, 255, 0.46));
-    backdrop-filter: blur(16px) saturate(165%);
-    -webkit-backdrop-filter: blur(16px) saturate(165%);
+    backdrop-filter: blur(3px) saturate(145%);
+    -webkit-backdrop-filter: blur(3px) saturate(145%);
   }
 
   body .app-layout > .sidebar.has-glass-lens::before {
+    -webkit-backdrop-filter: url('#ft-dock-lens') blur(2px) saturate(145%);
     backdrop-filter: url('#ft-dock-lens') blur(2px) saturate(145%);
     background: linear-gradient(150deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.42) 48%, rgba(255, 255, 255, 0.6));
   }
@@ -1291,10 +1292,13 @@ body .run-layout .liquid-panel.ant-card {
 .liquid-panel::before {
   z-index: 0;
   background: linear-gradient(150deg, #ffffffb3, #ffffff60 48%, #ffffff99);
-  backdrop-filter: blur(16px) saturate(165%);
-  -webkit-backdrop-filter: blur(16px) saturate(165%);
+  backdrop-filter: blur(3px) saturate(145%);
+  -webkit-backdrop-filter: blur(3px) saturate(145%);
 }
-.liquid-panel.has-panel-lens::before { backdrop-filter: var(--panel-lens) blur(2px) saturate(145%); }
+.liquid-panel.has-panel-lens::before {
+  -webkit-backdrop-filter: var(--panel-lens) blur(2px) saturate(145%);
+  backdrop-filter: var(--panel-lens) blur(2px) saturate(145%);
+}
 .liquid-panel::after {
   z-index: 2; padding: 1px;
   background: radial-gradient(80% 140% at 24% 0%, white, #ffffffbf 25%, transparent 62%), linear-gradient(145deg, #ffffffe6, transparent 40%, #5c6f8d33 65%, #ffffffd9);
