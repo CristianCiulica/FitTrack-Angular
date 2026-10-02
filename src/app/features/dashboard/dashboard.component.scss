@@ -1263,12 +1263,44 @@
 
 @media (max-width: 600px) {
   .activity-head {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
+    gap: 8px;
   }
 
-  .activity-title h1 {
-    font-size: 27px;
+  .activity-title {
+    min-width: 0;
+
+    h1 {
+      font-size: clamp(18px, 5.5vw, 27px);
+      white-space: nowrap;
+    }
+
+    p {
+      font-size: clamp(11px, 3vw, 14px);
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .month-nav {
+    gap: 6px;
+    justify-self: end;
+
+    .month-label {
+      // Reserve the same space for every full month name, including September.
+      width: 9em;
+      text-align: right;
+      font-size: clamp(11.5px, 3.2vw, 14.5px);
+    }
+
+    .month-arrows {
+      gap: 0;
+
+      button {
+        width: clamp(28px, 8vw, 34px);
+      }
+    }
   }
 
   .week-strip {
