@@ -41,8 +41,8 @@ filters GPS noise — accuracy thresholds, implausible speed jumps, a short cali
 doesn't add 200 m to your distance. Routes are saved and displayed on geographic OpenStreetMap tiles in History with start/finish markers,
 pace per kilometre and expandable details.
 
-**Profile.** Avatar upload (resized client-side to 256 px, stored as a data URL so there's no object storage to
-provision), with a direct link to personal account details.
+**Account.** Avatar upload (resized client-side to 256 px, stored as a data URL so there's no object storage to
+provision), alongside personal account details and body metrics.
 
 
 **Nutrition.** BMI, BMR and a daily calorie target derived from the profile you set at onboarding, plus a

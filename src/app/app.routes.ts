@@ -45,8 +45,8 @@ export const routes: Routes = [
   },
   {
     path: 'profile',
-    canActivate: [authGuard, onboardingGuard],
-    loadChildren: () => import('./features/profile/profile.routes').then((m) => m.profileRoutes),
+    redirectTo: 'account',
+    pathMatch: 'full',
   },
   {
     path: 'account',

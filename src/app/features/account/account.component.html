@@ -31,11 +31,6 @@
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/profile" aria-label="Profile">
-          <span nz-icon nzType="idcard"></span><span>Profile</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
         <a routerLink="/account" aria-label="Account">
           <span nz-icon nzType="user"></span><span>Account</span>
         </a>
@@ -73,6 +68,24 @@
             <h1>Account</h1>
             <p>These details power your BMI, calorie targets and nutrition suggestions across the app.</p>
           </div>
+
+          <section class="account-identity" aria-label="Profile photo and email">
+            <div class="avatar-wrap">
+              <span class="profile-avatar">
+                <img *ngIf="avatar()" [src]="avatar()" alt="Profile photo" />
+                <ng-container *ngIf="!avatar()">{{ initials(displayName() || email()) }}</ng-container>
+              </span>
+              <label class="avatar-edit" [class.busy]="uploading()">
+                <span nz-icon [nzType]="uploading() ? 'loading' : 'camera'"></span>
+                <input type="file" accept="image/*" aria-label="Change profile photo" [disabled]="uploading()" (change)="onAvatarSelected($event)" />
+              </label>
+            </div>
+            <div class="identity-details">
+              <strong>{{ displayName() || 'Athlete' }}</strong>
+              <p>{{ email() }}</p>
+              <button type="button" class="avatar-remove" *ngIf="avatar()" [disabled]="uploading()" (click)="removeAvatar()">Remove photo</button>
+            </div>
+          </section>
 
           <div class="account-grid">
             <label class="field field-full">
