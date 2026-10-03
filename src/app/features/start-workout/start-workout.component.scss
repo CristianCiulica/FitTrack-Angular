@@ -146,3 +146,34 @@ button:disabled { cursor: default; opacity: .45; }
 @media (max-width: 480px) { .session-summary { padding: 24px 18px; margin-top: 6px; }.previous-performance { gap: 8px; flex-wrap: wrap; } }
 
 .summary-share-image { display: block; width: 100%; max-height: 65dvh; object-fit: contain; border-radius: 16px; }.summary-download { display: block; margin-top: 16px; padding: 12px; border-radius: 24px; text-align: center; background: #007aff; color: #fff; font-weight: 600; }
+
+.hold-timer { display: flex; flex-direction: column; align-items: center; }
+.hold-countdown { position: relative; width: clamp(120px, 20dvh, 160px); aspect-ratio: 1; }
+.hold-countdown svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.hold-countdown circle { fill: none; stroke-width: 5; }
+.hold-track { stroke: var(--hairline); }
+.hold-progress { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset .25s linear; }
+.hold-countdown > div { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.hold-countdown strong { font-size: clamp(34px, 8vw, 46px); line-height: 1; letter-spacing: -.04em; font-weight: 550; font-variant-numeric: tabular-nums; color: var(--ink); }
+.hold-countdown span { color: var(--ink-secondary); font-size: 11px; }
+.hold-status { color: var(--ink-secondary); font-size: 12px; margin: 12px 0 4px; text-align: center; }
+.hold-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 20px; }
+.hold-controls button { display: flex; align-items: center; gap: 5px; min-height: 44px; background: none; border: 0; color: var(--accent); font: inherit; font-size: 12px; cursor: pointer; }
+.hold-controls button:disabled { color: var(--ink-tertiary); cursor: default; }
+.hold-controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 8px; }
+.hold-action-icon { width: 17px; height: 17px; vertical-align: -3px; margin-right: 6px; }
+.timed-exercise .live-weight { padding: 18px; }
+.timed-exercise .live-exercise-head h1 { margin-bottom: 16px; }
+.timed-exercise .live-stats { margin-bottom: 16px; }
+.timed-exercise .previous-performance { margin-top: 8px; padding-top: 12px; justify-content: center; text-align: center; flex-wrap: wrap; }
+.timed-exercise .up-next { margin-top: 16px; }
+@media (max-height: 680px) {
+  .timed-exercise { padding: 12px 0; }
+  .timed-exercise .live-weight { padding: 12px; }
+  .timed-exercise .live-exercise-head h1 { font-size: 27px; margin: 8px 0 12px; }
+  .timed-exercise .live-stats { margin-bottom: 12px; }
+  .hold-countdown { width: 104px; }
+  .hold-countdown strong { font-size: 30px; }
+  .hold-status { margin-top: 8px; font-size: 11px; }
+  .timed-exercise .previous-performance p { font-size: 10px; }
+}

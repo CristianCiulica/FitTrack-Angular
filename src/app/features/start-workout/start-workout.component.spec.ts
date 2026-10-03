@@ -40,8 +40,9 @@ describe('Workout session recovery', () => {
     for (let i = 0; i < 6; i++) component.skipSet();
     expect(component.currentExercise()?.name).toBe('Wide Squat Hold');
     expect(component.currentExercise()?.repUnit).toBe('seconds');
-    expect(component.currentReps()).toBe(30);
-    component.onRepsInput('25');
+    expect(component.currentReps()).toBe(0);
+    component.toggleHoldTimer();
+    vi.advanceTimersByTime(25000);
     component.finishSet(); component.skipRest();
     expect(component.currentExercise()?.name).toBe('Kickback (per leg)');
     expect(component.currentReps()).toBe(20);
@@ -65,6 +66,70 @@ describe('Workout session recovery', () => {
     expect(component.currentSetIndex()).toBe(2);
     component.previousSet();
     expect(component.currentSetIndex()).toBe(1);
+    expect(component.completedSets()).toBe(0);
+  });
+
+  function startHold(sets = 2) {
+    component.selectRoutine({ name: 'Timed holds', exercises: [{ name: 'Squat Hold', sets, reps: 30, repUnit: 'seconds', weight: 0, muscleGroup: 'Legs' }] }, 'hold');
+    component.startWorkout();
+  }
+
+  it('excludes paused time and completes a timed set automatically exactly once', () => {
+    startHold();
+    component.toggleHoldTimer(); vi.advanceTimersByTime(10000);
+    component.toggleHoldTimer();
+    expect(component.holdRemainingSeconds()).toBe(20);
+    vi.advanceTimersByTime(60000);
+    expect(component.holdRemainingSeconds()).toBe(20);
+    component.toggleHoldTimer(); vi.advanceTimersByTime(20000);
+    expect(component.state()).toBe('rest');
+    expect(component.holdRunning()).toBe(false);
+    expect(component.completedSets()).toBe(1);
+    component.updateHoldTimer();
+    expect(component.completedSets()).toBe(1);
+    component.skipRest();
+    expect(component.holdRemainingSeconds()).toBe(30);
+    expect(component.currentReps()).toBe(0);
+  });
+
+  it('resets without recording a phantom set and saves only the measured early finish', () => {
+    startHold(1);
+    component.finishSet();
+    expect(component.completedSets()).toBe(0);
+    component.toggleHoldTimer(); vi.advanceTimersByTime(7500);
+    component.resetHoldTimer();
+    expect(component.holdRunning()).toBe(false);
+    expect(component.holdRemainingSeconds()).toBe(30);
+    expect(component.currentReps()).toBe(0);
+    component.toggleHoldTimer(); vi.advanceTimersByTime(12500);
+    component.finishSet(); component.skipRest(); component.finishWorkout();
+    expect(save.mock.calls[0][0].exercises[0].setReps).toEqual([12]);
+  });
+
+  it('catches up a suspended hold and rest without starting the next hold', () => {
+    startHold(); component.toggleHoldTimer();
+    vi.setSystemTime(Date.now() + 100000);
+    component.updateRestTime();
+    expect(component.state()).toBe('active');
+    expect(component.currentSetIndex()).toBe(2);
+    expect(component.completedSets()).toBe(1);
+    expect(component.holdRunning()).toBe(false);
+    expect(component.holdRemainingSeconds()).toBe(30);
+    vi.advanceTimersByTime(40000);
+    expect(component.completedSets()).toBe(1);
+  });
+
+  it('cancels a running timer when skipping or returning to an earlier set', () => {
+    startHold(); component.toggleHoldTimer(); vi.advanceTimersByTime(5000);
+    component.skipSet(); component.toggleHoldTimer(); vi.advanceTimersByTime(1000);
+    component.previousSet();
+    expect(component.currentSetIndex()).toBe(1);
+    expect(component.holdRunning()).toBe(false);
+    vi.advanceTimersByTime(60000);
+    expect(component.state()).toBe('active');
+    expect(component.completedSets()).toBe(0);
+    component.toggleHoldTimer(); component.cancelWorkout(); vi.advanceTimersByTime(60000);
+    expect(component.state()).toBe('setup');
     expect(component.completedSets()).toBe(0);
   });
 

@@ -804,6 +804,18 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   // progressive overload: greutatea si repetarile setului curent + ce ai logat
   currentWeight = signal(0);
   currentReps = signal(0);
+  readonly holdElapsedMs = signal(0);
+  readonly holdRunning = signal(false);
+  private holdAccumulatedMs = 0;
+  private holdStartedAt = 0;
+  private holdInterval: ReturnType<typeof setInterval> | null = null;
+  readonly holdTargetSeconds = computed(() => Math.max(1, Math.min(500, this.currentExercise()?.reps ?? 1)));
+  readonly holdRemainingSeconds = computed(() => Math.max(0, Math.ceil(this.holdTargetSeconds() - this.holdElapsedMs() / 1000)));
+  readonly holdClock = computed(() => {
+    const seconds = this.holdRemainingSeconds();
+    return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toString().padStart(2, '0')}`;
+  });
+  readonly holdProgress = computed(() => Math.min(100, this.holdElapsedMs() / (this.holdTargetSeconds() * 10)));
   private loggedWeights: (number | null)[][] = [];
   private loggedReps: (number | null)[][] = [];
   private previousByExercise = signal(new Map<string, PreviousExercise>());
@@ -1154,6 +1166,10 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   // repetarile propuse pentru setul curent:
   // ultimul set logat in aceasta sesiune > cate ai facut data trecuta > planul
   private syncCurrentReps() {
+    if (this.currentExercise()?.repUnit === 'seconds') {
+      this.resetHoldTimer();
+      return;
+    }
     const exIdx = this.currentExerciseIndex();
     const logged = this.loggedReps[exIdx];
     const saved = logged?.[this.currentSetIndex() - 1];
@@ -1183,8 +1199,59 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   readonly totalSets = computed(() => this.currentRoutine().exercises.reduce((total, ex) => total + ex.sets, 0));
   readonly canGoBack = computed(() => this.state() === 'rest' || this.state() === 'review' || this.currentExerciseIndex() > 0 || this.currentSetIndex() > 1);
 
+  toggleHoldTimer() {
+    if (this.state() !== 'active' || this.currentExercise()?.repUnit !== 'seconds') return;
+    this.inputsTouched = true;
+    if (this.holdRunning()) {
+      this.stopHoldTimer();
+      if (this.holdRemainingSeconds() === 0) this.finishSet();
+      return;
+    }
+    this.holdStartedAt = Date.now();
+    this.holdRunning.set(true);
+    this.holdInterval = setInterval(() => this.updateHoldTimer(), 250);
+  }
+
+  resetHoldTimer() {
+    this.stopHoldTimer();
+    this.holdAccumulatedMs = 0;
+    this.holdElapsedMs.set(0);
+    if (this.currentExercise()?.repUnit === 'seconds') this.currentReps.set(0);
+  }
+
+  private sampleHoldTimer() {
+    const elapsed = this.holdAccumulatedMs + (this.holdRunning() ? Math.max(0, Date.now() - this.holdStartedAt) : 0);
+    const bounded = Math.min(this.holdTargetSeconds() * 1000, elapsed);
+    this.holdElapsedMs.set(bounded);
+    this.currentReps.set(Math.floor(bounded / 1000));
+  }
+
+  private stopHoldTimer() {
+    if (this.holdRunning()) this.sampleHoldTimer();
+    if (this.holdInterval !== null) clearInterval(this.holdInterval);
+    this.holdInterval = null;
+    this.holdAccumulatedMs = this.holdElapsedMs();
+    this.holdRunning.set(false);
+  }
+
+  updateHoldTimer() {
+    if (this.state() !== 'active' || !this.holdRunning()) return;
+    this.sampleHoldTimer();
+    if (this.holdRemainingSeconds() === 0) {
+      const completedAt = this.holdStartedAt + this.holdTargetSeconds() * 1000 - this.holdAccumulatedMs;
+      this.finishSet();
+      // Preserve elapsed rest if the browser suspended timer callbacks.
+      this.restDeadline = completedAt + this.restTimeTarget() * 1000;
+      this.updateRestTime();
+    }
+  }
+
   finishSet() {
     if (this.state() !== 'active') return;
+    if (this.currentExercise()?.repUnit === 'seconds') {
+      this.stopHoldTimer();
+      if (this.currentReps() < 1) return;
+    }
     this.stopTimer();
     const exIdx = this.currentExerciseIndex();
     const setIdx = this.currentSetIndex() - 1;
@@ -1199,6 +1266,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   @HostListener('document:visibilitychange')
   updateRestTime() {
+    this.updateHoldTimer();
     if (this.state() !== 'rest') return;
     const remaining = Math.max(0, Math.ceil((this.restDeadline - Date.now()) / 1000));
     this.restTimeRemaining.set(remaining);
@@ -1270,6 +1338,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   private stopTimer() {
+    this.stopHoldTimer();
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
