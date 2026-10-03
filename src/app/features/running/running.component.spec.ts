@@ -16,6 +16,7 @@ function fix(accuracy = 8): GeolocationPosition {
 
 describe('Running GPS lifecycle', () => {
   let component: RunningComponent;
+  let persistence: { checkpointRun: ReturnType<typeof vi.fn>; recoverRun: ReturnType<typeof vi.fn>; clearRunDraft: ReturnType<typeof vi.fn>; setTrackingActive: ReturnType<typeof vi.fn>; saveSession: ReturnType<typeof vi.fn> };
   const geo = { getCurrentPosition: vi.fn(), watchPosition: vi.fn((_success: PositionCallback, _error?: PositionErrorCallback | null, _options?: PositionOptions) => 7), clearWatch: vi.fn() };
 
   beforeEach(() => {
@@ -24,10 +25,11 @@ describe('Running GPS lifecycle', () => {
     vi.stubGlobal('requestAnimationFrame', vi.fn(() => 1));
     vi.stubGlobal('cancelAnimationFrame', vi.fn());
     Object.defineProperty(navigator, 'geolocation', { value: geo, configurable: true });
+    persistence = { checkpointRun: vi.fn(), recoverRun: vi.fn(() => null), clearRunDraft: vi.fn(), setTrackingActive: vi.fn(), saveSession: vi.fn(() => of({})) };
     component = new RunningComponent(
       { currentUserId: 'runner' } as AuthService,
       { error: vi.fn(), success: vi.fn(), warning: vi.fn() } as unknown as NzMessageService,
-      { setTrackingActive: vi.fn(), saveSession: vi.fn(() => of({})) } as unknown as RunningSessionService,
+      persistence as unknown as RunningSessionService,
       {} as WeatherService,
       {} as NzModalService,
     );
@@ -81,4 +83,49 @@ describe('Running GPS lifecycle', () => {
     expect(component.gpsAccuracy).toBe(8);
     expect(geo.clearWatch).toHaveBeenCalledWith(7);
   });
+  it('checkpoints the elapsed run periodically and before component teardown', () => {
+    component.startTracking();
+    geo.getCurrentPosition.mock.calls[0][0](fix());
+    vi.advanceTimersByTime(8000);
+    expect(component.isCalibrating).toBe(false);
+    vi.advanceTimersByTime(12000);
+    expect(persistence.checkpointRun.mock.calls.at(-1)![0].durationSeconds).toBeGreaterThanOrEqual(10);
+    component.ngOnDestroy();
+    expect(persistence.checkpointRun.mock.calls.at(-1)![0].route).toEqual([[44.4268, 26.1025]]);
+    expect(persistence.clearRunDraft).not.toHaveBeenCalled();
+    expect(persistence.saveSession).not.toHaveBeenCalled();
+  });
+
+  const recovered = { version: 1, updatedAt: Date.now(), session: { userId: 'runner', mode: 'running', startedAt: '2026-10-03T09:00:00Z', endedAt: '2026-10-03T09:10:00Z', durationSeconds: 600, distanceMeters: 1000, steps: 833, averageSpeedKmh: 6, calories: 60, route: [[44.4268, 26.1025]] } };
+
+  it('saves a recovered run without counting the time the browser was closed', () => {
+    persistence.recoverRun.mockReturnValue(recovered);
+    component.restoreRun();
+    expect(component.recoveredRun).toBe(true);
+    expect(component.isTracking).toBe(false);
+    vi.advanceTimersByTime(3600000);
+    component.saveRecoveredRun();
+    component.saveRecoveredRun();
+    expect(persistence.saveSession).toHaveBeenCalledTimes(1);
+    expect(persistence.saveSession.mock.calls[0][0]).toMatchObject({ durationSeconds: 600, distanceMeters: 1000, endedAt: new Date(recovered.session.endedAt).toISOString() });
+    expect(persistence.saveSession.mock.calls[0][1]).toBe(true);
+  });
+
+  it('resumes with the recorded duration and a fresh GPS anchor instead of adding the missing gap', () => {
+    persistence.recoverRun.mockReturnValue(recovered);
+    component.restoreRun();
+    vi.advanceTimersByTime(3600000);
+    component.quickStartRun();
+    expect(geo.getCurrentPosition).not.toHaveBeenCalled();
+    component.resumeRecoveredRun();
+    vi.advanceTimersByTime(5000);
+    const callback = geo.watchPosition.mock.calls[0][0] as unknown as PositionCallback;
+    callback({ ...fix(), coords: { ...fix().coords, latitude: 45 } });
+    expect(component.elapsedSeconds).toBe(605);
+    expect(component.distanceMeters).toBe(1000);
+    expect(persistence.checkpointRun.mock.calls.at(-1)![0].route).toEqual(recovered.session.route);
+    component.stopTracking();
+    expect(persistence.saveSession.mock.calls[0][0].durationSeconds).toBe(605);
+  });
+
 });

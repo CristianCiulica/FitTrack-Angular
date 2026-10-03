@@ -134,7 +134,8 @@
                 <span class="gps-badge">GPS active</span>
               </div>
             </div>
-            <button
+            <div class="run-recovery" *ngIf="recoveredRun"><strong>Run recovered</strong><p>{{ elapsedDisplay }} · {{ distanceKm }} km recorded</p><div><button nz-button nzType="primary" (click)="resumeRecoveredRun()">Resume run</button><button nz-button (click)="saveRecoveredRun()">Save to History</button></div></div>
+            <button *ngIf="!recoveredRun"
               nz-button
               type="button"
               class="quick-run-button"

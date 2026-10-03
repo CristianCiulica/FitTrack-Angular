@@ -149,6 +149,7 @@ export class DashboardComponent implements OnInit {
   /* ---------------- Activity calendar + daily metrics ---------------- */
 
   private readonly runningSessionService = inject(RunningSessionService);
+  readonly recoveredRunAvailable = signal(false);
   private readonly runningSessions = this.runningSessionService.sessions;
 
   readonly selectedDate = signal<Date>(new Date());
@@ -340,6 +341,7 @@ export class DashboardComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.recoveredRunAvailable.set(!!this.runningSessionService.recoverRun());
     this.workoutService.getWorkouts().pipe(takeUntilDestroyed(this.destroy)).subscribe({
       next: (data) => {
         this.workouts.set(data);

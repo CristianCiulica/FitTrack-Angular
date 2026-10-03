@@ -1,0 +1,38 @@
+/* Keep the session within the visual viewport, including mobile browser bars. */
+.workout-live { height: 100dvh; box-sizing: border-box; overflow: hidden; overscroll-behavior: none; padding: max(12px, env(safe-area-inset-top)) max(16px, calc((100vw - 780px)/2)) max(10px, env(safe-area-inset-bottom)); }
+.live-top, .set-navigation { flex-shrink: 0; }
+.live-routine { min-width: 0; }.live-routine h2 { overflow-wrap: anywhere; }
+.live-progress-track { margin: 12px 0 0; }
+.live-body, .live-body.timed-exercise { min-height: 0; margin: 0; padding: clamp(6px, 2dvh, 20px) 0; gap: clamp(6px, 1.5dvh, 16px); }
+.live-exercise-head h1, .timed-exercise .live-exercise-head h1 { font-size: clamp(24px, 4.4dvh, 40px); margin: 7px 0 0; overflow-wrap: anywhere; }
+.live-stats, .timed-exercise .live-stats { margin-bottom: 0; }
+.live-stat label, .live-adjust label { margin-bottom: 3px; line-height: 1.3; }
+.live-stat .value { line-height: 1.2; }
+.live-weight, .timed-exercise .live-weight { padding: clamp(10px, 2dvh, 22px) 16px; }
+.live-adjust-stack { gap: clamp(6px, 1.5dvh, 16px); }
+.live-adjust + .live-adjust { padding-top: clamp(6px, 1.5dvh, 16px); }
+.stepper-btn { width: 44px; height: 44px; }
+.weight-input { height: 48px; padding: 0; font-size: clamp(28px, 4.5dvh, 38px); }
+.previous-performance, .timed-exercise .previous-performance { margin-top: 10px; padding-top: 10px; gap: 8px; }
+.previous-performance p { font-size: 11px; line-height: 1.35; }
+.previous-performance strong { margin-top: 2px; font-size: 14px; }
+.up-next, .timed-exercise .up-next { margin-top: 0; }
+.set-navigation { padding: 0 0 6px; gap: 0 8px; }
+.set-navigation button { min-height: 44px; }
+.set-navigation > span { line-height: 14px; }
+.live-actions { position: relative; bottom: auto; padding: 7px; gap: 8px; }
+.live-actions button { height: 46px; }.live-stop { width: 90px; }
+.hold-countdown { width: clamp(104px, 20dvh, 160px); }
+.hold-status { margin: 6px 0 0; }.hold-controls { margin-top: 0; }
+@media (max-height: 620px) {
+  .live-eyebrow { font-size: 8px; }.live-routine h2 { margin-top: 2px; font-size: 12px; }
+  .live-progress-ring strong { font-size: 20px; }.live-progress-track { margin-top: 6px; }
+  .live-body, .live-body.timed-exercise { gap: 6px; padding: 6px 0; }
+  .live-exercise-head h1, .timed-exercise .live-exercise-head h1 { font-size: 22px; margin-top: 4px; }
+  .live-exercise-head .ant-tag { padding: 1px 9px; font-size: 10px; }
+  .live-weight, .timed-exercise .live-weight { padding: 10px 12px; }
+  .live-adjust-stack { gap: 6px; }.live-adjust + .live-adjust { padding-top: 6px; }
+  .weight-input { height: 44px; }
+  .previous-performance, .timed-exercise .previous-performance { margin-top: 6px; padding-top: 6px; }
+  .review-symbol { margin-bottom: 8px; }.review h1 { margin: 8px 0; }.review p { margin-bottom: 6px; }
+}

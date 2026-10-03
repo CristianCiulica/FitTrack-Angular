@@ -103,6 +103,10 @@
         </button>
       </div>
 
+      @if (recoveredRunAvailable()) {
+        <a class="run-recovery-notice" routerLink="/running"><span>Run recovered</span><strong>Resume or save <span aria-hidden="true">›</span></strong></a>
+      }
+
       <section class="activity-summary" aria-labelledby="activity-summary-title">
         <div class="activity-summary-heading">
           <h2 id="activity-summary-title">Activity</h2>
@@ -135,9 +139,9 @@
               </defs>
               @for (ring of activityRings(); track ring.name) {
                 <circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-track" [attr.stroke]="ring.color"/>
-                <circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-progress" [class.goal-closed]="ring.progress >= 100"
+                <g transform="rotate(-90 80 80)"><circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-progress"
                   pathLength="100" [attr.stroke]="ring.paint" [attr.stroke-dasharray]="ring.progress + ' 100'"
-                  [attr.opacity]="ring.progress > 0 ? 1 : 0" transform="rotate(-90 80 80)"/>
+                  [attr.opacity]="ring.progress > 0 ? 1 : 0"/></g>
                 @if (ring.progress > 0) {
                   <text x="80" [attr.y]="80 - ring.radius + 4" class="activity-ring-arrow">{{ ring.arrow }}</text>
                 }

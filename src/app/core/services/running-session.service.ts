@@ -7,6 +7,12 @@ import { ApiService } from './api.service';
 import { routeForStorage } from '../utils/route';
 import { Auth } from '@angular/fire/auth';
 
+export interface ActiveRunDraft {
+  version: 1;
+  updatedAt: number;
+  session: Omit<RunningSession, 'id'>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class RunningSessionService {
   readonly trackingActive = signal(false);
@@ -53,6 +59,47 @@ export class RunningSessionService {
       this.volatileOwners.add(uid);
       console.warn('[running] browser cache unavailable', error);
     }
+  }
+
+  private volatileDraftOwners = new Set<string>();
+  private draftMemory = new Map<string, ActiveRunDraft>();
+
+  checkpointRun(session: Omit<RunningSession, 'id'>): void {
+    const uid = this.owner();
+    if (session.userId !== uid) return;
+    const draft: ActiveRunDraft = { version: 1, updatedAt: Date.now(), session: { ...session, route: routeForStorage(session.route) } };
+    this.draftMemory.set(uid, draft);
+    try { localStorage.setItem(`fittrack_active_run:${uid}`, JSON.stringify(draft)); this.volatileDraftOwners.delete(uid); }
+    catch { this.volatileDraftOwners.add(uid); }
+  }
+
+  recoverRun(): ActiveRunDraft | null {
+    const uid = this.owner();
+    if (this.volatileDraftOwners.has(uid)) return this.draftMemory.get(uid) ?? null;
+    try {
+      const raw = localStorage.getItem(`fittrack_active_run:${uid}`);
+      if (!raw) { this.draftMemory.delete(uid); return null; }
+      const draft = JSON.parse(raw) as ActiveRunDraft;
+      const session = draft?.session;
+      if (draft.version !== 1 || session?.userId !== uid || session.mode !== 'running' ||
+          !Number.isFinite(draft.updatedAt) || !Number.isFinite(Date.parse(session.startedAt)) ||
+          !Number.isFinite(session.durationSeconds) || session.durationSeconds < 0 ||
+          !Number.isFinite(session.distanceMeters) || session.distanceMeters < 0 ||
+          !Number.isFinite(Date.parse(session.endedAt)) ||
+          ![session.steps, session.averageSpeedKmh, session.calories].every(value => Number.isFinite(value) && value >= 0) ||
+          !Array.isArray(session.route) || !session.route.every(point => Array.isArray(point) && point.length === 2 &&
+            Number.isFinite(point[0]) && Math.abs(point[0]) <= 90 && Number.isFinite(point[1]) && Math.abs(point[1]) <= 180)) return null;
+      if (!this.volatileOwners.has(uid) && this.loadLocal(uid).some(record => record.startedAt === session.startedAt && Date.parse(record.endedAt) >= Date.parse(session.endedAt))) {
+        this.clearRunDraft();
+        return null;
+      }
+      return draft;
+    } catch { return this.draftMemory.get(uid) ?? null; }
+  }
+
+  clearRunDraft(uid = this.owner()): void {
+    this.draftMemory.delete(uid);
+    try { localStorage.removeItem(`fittrack_active_run:${uid}`); this.volatileDraftOwners.delete(uid); } catch { this.volatileDraftOwners.add(uid); }
   }
 
   setTrackingActive(active: boolean): void {
@@ -105,15 +152,18 @@ export class RunningSessionService {
     return upload;
   }
 
-  saveSession(session: Omit<RunningSession, 'id'>): Observable<RunningSession> {
+  saveSession(session: Omit<RunningSession, 'id'>, finishActiveRun = false): Observable<RunningSession> {
+    const uid = this.owner();
     session = { ...session, route: routeForStorage(session.route) };
     const tempId = 'r_' + crypto.randomUUID();
     const newSession = { ...session, id: tempId } as RunningSession;
     
     const current = this.loadLocal();
     this.saveLocal([newSession, ...current]);
+    if (finishActiveRun && !this.volatileOwners.has(uid)) this.clearRunDraft(uid);
 
     return this.upload(newSession).pipe(
+      tap(() => { if (finishActiveRun) this.clearRunDraft(uid); }),
       catchError((err) => {
         console.warn('API save running session failed, using local storage', err);
         return of(newSession);

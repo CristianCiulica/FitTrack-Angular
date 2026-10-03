@@ -16,7 +16,7 @@ import { RunningSessionService } from '../../core/services/running-session.servi
 import { WeatherService, WeatherSummary } from '../../core/services/weather.service';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { routeForStorage } from '../../core/utils/route';
+import { RunningSession } from '../../core/models/running-session.model';
 
 const GPS_CALIBRATION_MS = 5000;
 const GPS_CALIBRATION_TIMEOUT_MS = 8000;
@@ -94,6 +94,10 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private destroyed = false;
   private readonly weatherReads = new Subscription();
   private initialPosition?: L.LatLng;
+  recoveredRun = false;
+  private checkpointAt = 0;
+  private recoveredEndedAt: number | null = null;
+  private pageHideHandler = () => this.checkpointRun();
   private previousBodyOverflow = '';
 
   private resizeMap = () => {
@@ -106,7 +110,13 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     if (document.visibilityState === 'visible') {
       this.resizeMap();
       this.updateElapsedTime();
-    }
+      if (this.isTracking && !this.isCalibrating) {
+        const generation = this.trackingGeneration;
+        navigator.geolocation.getCurrentPosition(position => {
+          if (generation === this.trackingGeneration) this.handlePosition(position);
+        }, () => {}, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 });
+      }
+    } else this.checkpointRun();
   };
 
   private resizeHandler = () => this.resizeMap();
@@ -126,6 +136,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     document.documentElement.scrollTop = 0;
     this.previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+    this.restoreRun();
     this.loadWeather();
   }
 
@@ -138,6 +149,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.initMap();
     window.addEventListener('resize', this.resizeHandler);
     document.addEventListener('visibilitychange', this.visibilityHandler);
+    window.addEventListener('pagehide', this.pageHideHandler);
     if (typeof ResizeObserver !== 'undefined' && this.mapContainer) {
       this.resizeObserver = new ResizeObserver(this.resizeMap);
       this.resizeObserver.observe(this.mapContainer.nativeElement);
@@ -146,12 +158,14 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
+    this.checkpointRun();
     this.destroyed = true;
     this.weatherReads.unsubscribe();
     document.body.style.overflow = this.previousBodyOverflow;
     this.resizeObserver?.disconnect();
     if (this.resizeFrame !== undefined) cancelAnimationFrame(this.resizeFrame);
     document.removeEventListener('visibilitychange', this.visibilityHandler);
+    window.removeEventListener('pagehide', this.pageHideHandler);
     this.stopTracking(false);
     this.stopElapsedTimer();
     window.removeEventListener('resize', this.resizeHandler);
@@ -168,13 +182,13 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   quickStartRun() {
-    if (this.isTracking) return;
+    if (this.isTracking || this.recoveredRun) return;
     this.startTracking();
   }
 
   // GPS tracking logic
   startTracking() {
-    if (this.isTracking || this.destroyed) return;
+    if (this.isTracking || this.destroyed || this.recoveredRun) return;
     if (!navigator.geolocation) {
       this.message.error('Geolocation is not supported on this device.');
       return;
@@ -323,6 +337,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const update = () => {
       this.elapsedSeconds = Math.floor((Date.now() - this.startTime!) / 1000);
       this.updateMetrics();
+      if (Date.now() - this.checkpointAt >= 5000) this.checkpointRun();
     };
     if (this.zone) this.zone.run(update); else update();
   }
@@ -351,8 +366,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     L.tileLayer(MAP_TILE_URL, MAP_TILE_OPTIONS).addTo(this.map);
 
     // route with white casing, Strava style
-    this.polylineCasing = L.polyline([], { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(this.map);
-    this.polyline = L.polyline([], { color: '#0a84ff', weight: 5 }).addTo(this.map);
+    this.polylineCasing = L.polyline(this.routePoints, { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(this.map);
+    this.polyline = L.polyline(this.routePoints, { color: '#0a84ff', weight: 5 }).addTo(this.map);
     this.resizeMap();
   }
 
@@ -479,26 +494,78 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       return;
     }
 
-    const endedAt = Date.now();
-    const startedAt = this.sessionStartedAt;
-    this.runningSessionService
-      .saveSession({
-        userId,
-        mode: 'running',
-        startedAt: new Date(startedAt).toISOString(),
-        endedAt: new Date(endedAt).toISOString(),
-        durationSeconds: Math.max(1, Math.round((endedAt - startedAt) / 1000)),
-        distanceMeters: Math.round(this.distanceMeters),
-        steps: this.steps,
-        averageSpeedKmh: Number(this.avgSpeedKmh.toFixed(1)),
-        calories: Math.round(this.calories),
-        route: routeForStorage(this.routePoints),
-      })
-      .subscribe({
-        next: () => this.message.success('Workout saved in History.'),
-        error: () => this.message.error('Could not save your session. Please try again.'),
-      });
+    const session = this.sessionSnapshot(this.recoveredEndedAt ?? Date.now());
+    // saveSession writes the finished record locally before starting its upload.
+    const saved = this.runningSessionService.saveSession(session, true);
+    this.recoveredRun = false;
+    this.recoveredEndedAt = null;
     this.sessionStartedAt = null;
+    saved.subscribe({
+      next: () => this.message.success('Workout saved in History.'),
+      error: () => this.message.error('Could not upload your session. It is saved on this device.'),
+    });
+  }
+
+  private sessionSnapshot(endedAt = Date.now()): Omit<RunningSession, 'id'> {
+    return {
+      userId: this.authService.currentUserId!, mode: 'running',
+      startedAt: new Date(this.sessionStartedAt!).toISOString(), endedAt: new Date(endedAt).toISOString(),
+      durationSeconds: Math.max(1, this.elapsedSeconds), distanceMeters: Math.round(this.distanceMeters),
+      steps: this.steps, averageSpeedKmh: Number(this.avgSpeedKmh.toFixed(1)),
+      calories: Math.round(this.calories), route: this.routePoints,
+    };
+  }
+
+  private checkpointRun(): void {
+    if (!this.isTracking || this.isCalibrating || !this.startTime || !this.sessionStartedAt) return;
+    this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+    this.updateMetrics();
+    this.runningSessionService.checkpointRun(this.sessionSnapshot());
+    this.checkpointAt = Date.now();
+  }
+
+  restoreRun(): void {
+    const draft = this.runningSessionService.recoverRun();
+    if (!draft) return;
+    const session = draft.session;
+    this.sessionStartedAt = Date.parse(session.startedAt);
+    this.recoveredEndedAt = Date.parse(session.endedAt);
+    this.elapsedSeconds = session.durationSeconds;
+    this.distanceMeters = session.distanceMeters;
+    this.steps = session.steps;
+    this.avgSpeedKmh = session.averageSpeedKmh;
+    this.calories = session.calories;
+    this.routePoints = session.route ?? [];
+    const last = this.routePoints.at(-1);
+    if (last) this.initialPosition = L.latLng(last[0], last[1]);
+    this.recoveredRun = true;
+    this.statusText = 'Your recorded run is safe. Resume or save it.';
+  }
+
+  resumeRecoveredRun(): void {
+    if (!this.recoveredRun || !navigator.geolocation || this.destroyed) return;
+    this.recoveredRun = false;
+    this.recoveredEndedAt = null;
+    this.isTracking = true;
+    this.startTime = Date.now() - this.elapsedSeconds * 1000;
+    // A fresh GPS anchor excludes the unrecorded gap from distance.
+    this.lastAcceptedPosition = null;
+    this.lastDisplayedPosition = null;
+    this.runningSessionService.setTrackingActive(true);
+    this.startElapsedTimer();
+    this.resizeMap();
+    this.statusText = 'Run resumed. Waiting for GPS…';
+    const generation = ++this.trackingGeneration;
+    this.watchId = navigator.geolocation.watchPosition(position => {
+      if (generation === this.trackingGeneration) this.handlePosition(position);
+    }, error => {
+      if (generation === this.trackingGeneration) this.handleError(error, true);
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 });
+    this.checkpointRun();
+  }
+
+  saveRecoveredRun(): void {
+    if (this.recoveredRun) this.saveCompletedSession();
   }
 
   private handleCalibrationFix(point: L.LatLng, timestamp: number, accuracy: number) {
@@ -539,6 +606,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.polyline?.setLatLngs([position.point]);
     this.polylineCasing?.setLatLngs([position.point]);
     this.routePoints = [[position.point.lat, position.point.lng]];
+    this.checkpointRun();
     this.statusText =
       position.accuracy <= GPS_CALIBRATION_MAX_ACCURACY_METERS
         ? `GPS ready. Accuracy ~${Math.round(position.accuracy)}m.`
@@ -558,11 +626,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       this.polyline?.addLatLng(point);
       this.polylineCasing?.addLatLng(point);
       this.routePoints.push([point.lat, point.lng]);
-    } else {
+    } else if (!this.routePoints.length) {
       this.polyline?.setLatLngs([point]);
       this.polylineCasing?.setLatLngs([point]);
       this.routePoints = [[point.lat, point.lng]];
     }
+    this.checkpointRun();
   }
 
   private updateLivePosition(point: L.LatLng, timestamp: number, accuracy: number) {

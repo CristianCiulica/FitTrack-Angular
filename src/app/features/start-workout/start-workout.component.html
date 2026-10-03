@@ -384,7 +384,7 @@
   <!-- REST -->
   <div class="live-body rest" *ngIf="state() === 'rest'">
     <span class="rest-label">Rest</span>
-    <div class="timer-display">{{ restTimeRemaining() }}s</div>
+    <div class="timer-display">{{ restClock() }}</div>
     <div class="timer-adjust">
       <button nz-button (click)="addTime(-10)">-10s</button>
       <button nz-button (click)="addTime(10)">+10s</button>

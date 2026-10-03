@@ -108,7 +108,7 @@ describe('Workout session recovery', () => {
 
   it('catches up a suspended hold and rest without starting the next hold', () => {
     startHold(); component.toggleHoldTimer();
-    vi.setSystemTime(Date.now() + 100000);
+    vi.setSystemTime(Date.now() + 130000);
     component.updateRestTime();
     expect(component.state()).toBe('active');
     expect(component.currentSetIndex()).toBe(2);
@@ -154,7 +154,7 @@ describe('Workout session recovery', () => {
   it('returns from rest to the same set and cancels the rest timer', () => {
     component.finishSet(); component.previousSet();
     expect(component.currentSetIndex()).toBe(1);
-    vi.advanceTimersByTime(65000);
+    vi.advanceTimersByTime(95000);
     expect(component.state()).toBe('active');
     expect(component.currentSetIndex()).toBe(1);
   });
@@ -174,11 +174,11 @@ describe('Workout session recovery', () => {
     component.finishSet();
     component.addTime(10);
     vi.advanceTimersByTime(1000);
-    expect(component.restTimeRemaining()).toBe(69);
+    expect(component.restTimeRemaining()).toBe(99);
     component.addTime(-10);
     vi.setSystemTime(Date.now() + 30000);
     component.updateRestTime();
-    expect(component.restTimeRemaining()).toBe(29);
+    expect(component.restTimeRemaining()).toBe(59);
   });
 
   it('lets the final skipped set be recovered before saving', () => {

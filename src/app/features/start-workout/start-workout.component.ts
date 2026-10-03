@@ -218,7 +218,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
     name: 'Lower Home',
     category: 'Legs',
     description: 'Bodyweight legs and core at home. Kickbacks are 20 reps per leg; hold the wide squat for 30 seconds.',
-    restSeconds: 60,
+    restSeconds: 90,
     exercises: [
       { name: 'Bodyweight Squats', sets: 2, reps: 20, weight: 0, muscleGroup: 'Legs' },
       { name: 'Wide Squats', sets: 2, reps: 20, weight: 0, muscleGroup: 'Legs' },
@@ -361,7 +361,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
     "name": "Core · Control & Stability",
     "category": "Core",
     "description": "Train trunk control without racing the clock. Pause briefly at the end of each rep.",
-    "restSeconds": 60,
+    "restSeconds": 90,
     "exercises": [
       {
         "name": "Dead Bug",
@@ -397,7 +397,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
     "name": "Move · Low Impact",
     "category": "Cardio",
     "description": "A short, low-impact conditioning session. Keep the pace steady and rest between sets.",
-    "restSeconds": 60,
+    "restSeconds": 90,
     "exercises": [
       {
         "name": "Step Jack",
@@ -777,7 +777,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
     AppMenuComponent,
   ],
   templateUrl: './start-workout.component.html',
-  styleUrls: ['./start-workout.component.scss']
+  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss']
 })
 export class StartWorkoutComponent implements OnInit, OnDestroy {
   targetDate = signal<string>(localDateKey());
@@ -846,8 +846,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   summaryImage = signal<string | null>(null);
   readonly durationLabel = durationLabel;
 
-  restTimeTarget = signal(60);
-  restTimeRemaining = signal(60);
+  restTimeTarget = signal(90);
+  restTimeRemaining = signal(90);
+  restClock = computed(() => `${Math.floor(this.restTimeRemaining() / 60)}:${String(this.restTimeRemaining() % 60).padStart(2, '0')}`);
   private timerInterval: ReturnType<typeof setInterval> | null = null;
   private restDeadline = 0;
 
@@ -926,7 +927,16 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.loadPersonalRoutines();
   }
 
+  private previousBodyOverflow: string | null = null;
+
+  private unlockPageScroll(): void {
+    if (this.previousBodyOverflow === null) return;
+    document.body.style.overflow = this.previousBodyOverflow;
+    this.previousBodyOverflow = null;
+  }
+
   ngOnDestroy() {
+    this.unlockPageScroll();
     this.reads.unsubscribe();
     this.stopTimer();
     this.sessionGeneration++;
@@ -942,7 +952,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   selectRoutine(routine: Routine, key: string) {
     this.selectedRoutineKey.set(key);
-    this.restTimeTarget.set(routine.restSeconds ?? 60);
+    this.restTimeTarget.set(routine.restSeconds ?? 90);
     this.currentRoutine.set({
       ...routine,
       exercises: routine.exercises.map(exercise => ({
@@ -1098,6 +1108,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   startWorkout() {
     if (this.currentRoutine().exercises.length === 0) return;
+    this.previousBodyOverflow ??= document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     this.currentExerciseIndex.set(0);
     this.currentSetIndex.set(1);
     this.stopTimer();
@@ -1376,6 +1388,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   cancelWorkout() {
     this.stopTimer();
     this.sessionGeneration++;
+    this.unlockPageScroll();
     this.state.set('setup');
   }
 
@@ -1411,6 +1424,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       next: saved => {
         this.savedLocally.set(!!saved.id?.startsWith('w_'));
         this.saving.set(false);
+        this.unlockPageScroll();
         this.state.set('finished');
         this.message.success(this.savedLocally() ? 'Saved on this device. Syncs when you reconnect.' : 'Workout saved.');
       },
@@ -1434,6 +1448,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   reset() {
     this.stopTimer();
     this.sessionGeneration++;
+    this.unlockPageScroll();
     this.state.set('setup');
   }
 }

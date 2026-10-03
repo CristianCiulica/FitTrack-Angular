@@ -718,3 +718,5 @@
 :host ::ng-deep .live-map.active .leaflet-bottom {
   bottom: calc(188px + env(safe-area-inset-bottom));
 }
+
+.run-recovery { margin-top: 12px; }.run-recovery > strong { font-size: 14px; color: var(--ink); }.run-recovery p { margin: 4px 0 12px; font-size: 12px; color: var(--ink-secondary); }.run-recovery > div { display: flex; gap: 8px; flex-wrap: wrap; }.run-recovery button { flex: 1; min-height: 44px; border-radius: 22px; font-size: 12px; }
