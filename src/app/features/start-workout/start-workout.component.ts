@@ -43,6 +43,33 @@ interface Routine {
 // General-purpose templates; users choose loads appropriate to their experience.
 const PREDEFINED_ROUTINES: Routine[] = [
   {
+    name: 'PUSH',
+    category: 'Push',
+    description: 'Your main push session. Chest, triceps and shoulders.',
+    restSeconds: 90,
+    exercises: [
+      { name: 'Incline Dumbbell Press', sets: 4, reps: 10, weight: 0, muscleGroup: 'Chest' },
+      { name: 'Triceps Pushdown', sets: 3, reps: 12, weight: 0, muscleGroup: 'Arms' },
+      { name: 'Overhead Triceps Extension', sets: 3, reps: 12, weight: 0, muscleGroup: 'Arms' },
+      { name: 'Chest Dip', sets: 3, reps: 10, weight: 0, muscleGroup: 'Chest' },
+      { name: 'Lateral Raise (Dumbbell)', sets: 6, reps: 15, weight: 0, muscleGroup: 'Shoulders' },
+    ],
+  },
+  {
+    name: 'PULL',
+    category: 'Pull',
+    description: 'Your main pull session. Back, biceps and rear delts.',
+    restSeconds: 90,
+    exercises: [
+      { name: 'Pull Up', sets: 4, reps: 8, weight: 0, muscleGroup: 'Back' },
+      { name: 'Bicep Curl (Cable)', sets: 3, reps: 12, weight: 0, muscleGroup: 'Arms' },
+      { name: 'Hammer Curl', sets: 3, reps: 12, weight: 0, muscleGroup: 'Arms' },
+      { name: 'Bent Over Row (Machine)', sets: 3, reps: 10, weight: 0, muscleGroup: 'Back' },
+      { name: 'Shrug (Barbell)', sets: 3, reps: 12, weight: 0, muscleGroup: 'Back' },
+      { name: 'Rear Delt Work', sets: 3, reps: 15, weight: 0, muscleGroup: 'Shoulders' },
+    ],
+  },
+  {
     "name": "Foundation · A",
     "category": "Full body",
     "description": "Your first strength session. Squat, push, pull and hinge. Alternate with Foundation B.",
@@ -125,92 +152,6 @@ const PREDEFINED_ROUTINES: Routine[] = [
         "reps": 10,
         "weight": 0,
         "muscleGroup": "Core"
-      }
-    ]
-  },
-  {
-    "name": "Push · Strength & Shape",
-    "category": "Push",
-    "description": "Press first, then shoulders and triceps. Controlled reps through a comfortable full range.",
-    "restSeconds": 120,
-    "exercises": [
-      {
-        "name": "Barbell Bench Press",
-        "sets": 3,
-        "reps": 6,
-        "weight": 0,
-        "muscleGroup": "Chest"
-      },
-      {
-        "name": "Incline Dumbbell Press",
-        "sets": 3,
-        "reps": 10,
-        "weight": 0,
-        "muscleGroup": "Chest"
-      },
-      {
-        "name": "Seated Dumbbell Shoulder Press",
-        "sets": 2,
-        "reps": 10,
-        "weight": 0,
-        "muscleGroup": "Shoulders"
-      },
-      {
-        "name": "Cable Lateral Raise",
-        "sets": 3,
-        "reps": 12,
-        "weight": 0,
-        "muscleGroup": "Shoulders"
-      },
-      {
-        "name": "Overhead Cable Triceps Extension",
-        "sets": 2,
-        "reps": 12,
-        "weight": 0,
-        "muscleGroup": "Arms"
-      }
-    ]
-  },
-  {
-    "name": "Pull · Back & Arms",
-    "category": "Pull",
-    "description": "Balanced vertical and horizontal pulling, with supported rows to keep your lower back fresh.",
-    "restSeconds": 120,
-    "exercises": [
-      {
-        "name": "Lat Pulldown",
-        "sets": 3,
-        "reps": 8,
-        "weight": 0,
-        "muscleGroup": "Back"
-      },
-      {
-        "name": "Chest-Supported Row",
-        "sets": 3,
-        "reps": 10,
-        "weight": 0,
-        "muscleGroup": "Back"
-      },
-      {
-        "name": "Single-Arm Cable Row",
-        "sets": 2,
-        "reps": 12,
-        "weight": 0,
-        "muscleGroup": "Back"
-      },
-      {
-        "name": "Reverse Pec Deck",
-        "sets": 2,
-        "reps": 15,
-        "weight": 0,
-        "muscleGroup": "Shoulders"
-      },
-      {
-        "name": "Incline Dumbbell Curl",
-        "sets": 3,
-        "reps": 10,
-        "weight": 0,
-        "muscleGroup": "Arms"
       }
     ]
   },
