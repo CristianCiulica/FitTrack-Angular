@@ -44,32 +44,32 @@ interface MealTemplate extends MealRecommendation {
 
 export const ASSISTANT_OPTIONS: Record<Exclude<AssistantStep, 'result'>, AssistantOption[]> = {
   goal: [
-    { value: 'lose', label: 'Fat loss', description: 'High volume, filling meals and controlled calories.', icon: '📉' },
-    { value: 'maintain', label: 'Maintain', description: 'Balanced portions for energy and recovery.', icon: '⚖️' },
-    { value: 'gain', label: 'Build muscle', description: 'More calories, protein and training fuel.', icon: '💪' },
+    { value: 'lose', label: 'Fat loss', description: 'High volume, filling meals and controlled calories.', icon: 'M4 6l6 6 4-4 6 10m-5 0h5v-5' },
+    { value: 'maintain', label: 'Maintain', description: 'Balanced portions for energy and recovery.', icon: 'M12 3v17m-5 0h10M4 7h16M6 7l-3 7h6L6 7m12 0-3 7h6l-3-7' },
+    { value: 'gain', label: 'Build muscle', description: 'More calories, protein and training fuel.', icon: 'M3 9v6m3-8v10m0-5h12m0-5v10m3-8v6' },
   ],
   meal: [
-    { value: 'breakfast', label: 'Breakfast', description: 'Start the day with steady energy.', icon: '🍳' },
-    { value: 'lunch', label: 'Lunch', description: 'A complete meal for the middle of the day.', icon: '🥗' },
-    { value: 'dinner', label: 'Dinner', description: 'Recovery-focused and easy to digest.', icon: '🍽️' },
-    { value: 'snack', label: 'Snack', description: 'Small, practical and protein-aware.', icon: '🍎' },
-    { value: 'post-workout', label: 'Post-workout', description: 'Protein and carbohydrates for recovery.', icon: '🥤' },
+    { value: 'breakfast', label: 'Breakfast', description: 'Start the day with steady energy.', icon: 'M3 17h18M5 17a7 7 0 0 1 14 0M12 10V7m-2 0h4M7 4V2m10 2V2' },
+    { value: 'lunch', label: 'Lunch', description: 'A complete meal for the middle of the day.', icon: 'M3 11h18c0 5-4 8-9 8s-9-3-9-8ZM8 8c-3 0-4-2-4-4 3 0 5 1 5 4m3 0V3m4 5c3 0 4-2 4-4-3 0-5 1-5 4' },
+    { value: 'dinner', label: 'Dinner', description: 'Recovery-focused and easy to digest.', icon: 'M4 3v6m3-6v6M2 6h7M5.5 9v12M19 3c-4 4-4 8 0 8V3m0 8v10' },
+    { value: 'snack', label: 'Snack', description: 'Small, practical and protein-aware.', icon: 'M12 7c-3-3-9-1-9 4 0 6 4 10 7 9h4c3 1 7-3 7-9 0-5-6-7-9-4Zm0 0V3m0 1c2-3 5-3 6-2-1 3-3 4-6 2' },
+    { value: 'post-workout', label: 'Post-workout', description: 'Protein and carbohydrates for recovery.', icon: 'M7 7h10l-1 14H8L7 7Zm-2 0h14M12 7V3l5-1' },
   ],
   diet: [
-    { value: 'balanced', label: 'No restrictions', description: 'Uses a wide range of foods.', icon: '🥑' },
-    { value: 'vegetarian', label: 'Vegetarian', description: 'No meat or fish.', icon: '🥦' },
-    { value: 'vegan', label: 'Vegan', description: 'Only plant-based ingredients.', icon: '🌱' },
-    { value: 'lactose-free', label: 'Lactose-free', description: 'No regular dairy products.', icon: '🥥' },
+    { value: 'balanced', label: 'No restrictions', description: 'Uses a wide range of foods.', icon: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm-3 8 2 2 4-4' },
+    { value: 'vegetarian', label: 'Vegetarian', description: 'No meat or fish.', icon: 'M4 4c9-1 16 3 16 12-9 3-16-2-16-12Zm3 3 10 10M9 9v5m4-1h5' },
+    { value: 'vegan', label: 'Vegan', description: 'Only plant-based ingredients.', icon: 'M12 21V10M12 14C5 14 3 10 3 6c6 0 9 3 9 8Zm0-4c0-5 3-8 9-8 0 5-3 8-9 8Z' },
+    { value: 'lactose-free', label: 'Lactose-free', description: 'No regular dairy products.', icon: 'M9 3h6v4l3 4v10H6V11l3-4V3Zm-3 10h12M9 3h6' },
   ],
   time: [
-    { value: 'quick', label: 'Under 10 min', description: 'Minimal cooking and cleanup.', icon: '⚡' },
-    { value: 'standard', label: '10–30 min', description: 'A normal freshly cooked meal.', icon: '⏱️' },
-    { value: 'meal-prep', label: 'Meal prep', description: 'Cook several portions at once.', icon: '🍱' },
+    { value: 'quick', label: '10 min or less', description: 'Quick active prep. Minimal cleanup.', icon: 'm13 2-9 12h7l-1 8 10-13h-7l1-7Z' },
+    { value: 'standard', label: 'Up to 30 min', description: 'Time for a freshly cooked meal.', icon: 'M9 2h6M12 5a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm0 4v4l3 2m4-10 2 2' },
+    { value: 'meal-prep', label: 'Meal prep', description: 'Cook several portions at once.', icon: 'M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Zm-2 6h18m-11 0v10m0-5h11' },
   ],
   budget: [
-    { value: 'low', label: 'Budget friendly', description: 'Simple and affordable staples.', icon: '🪙' },
-    { value: 'medium', label: 'Balanced budget', description: 'Good variety without overspending.', icon: '💵' },
-    { value: 'flexible', label: 'Flexible', description: 'Prioritizes taste and nutrition.', icon: '💰' },
+    { value: 'low', label: 'Budget friendly', description: 'Simple and affordable staples.', icon: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm2 5h-3a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-3m2-9v10' },
+    { value: 'medium', label: 'Balanced budget', description: 'Good variety without overspending.', icon: 'M3 6h18v12H3V6Zm9 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM6 9v6m12-6v6' },
+    { value: 'flexible', label: 'Flexible', description: 'Prioritizes taste and nutrition.', icon: 'M3 7h18v14H3V7Zm0 0V4h15v3m-2 5h5v5h-5v-5Z' },
   ],
 };
 
@@ -213,7 +213,7 @@ const MEALS: MealTemplate[] = [
     fats: 16,
     prepMinutes: 22,
     cost: 'Medium',
-    ingredients: ['100 g dry pasta', '180 g cottage cheese', 'Tomato sauce', 'Spinach', '15 g parmesan', 'Garlic and basil'],
+    ingredients: ['100 g dry pasta', '180 g cottage cheese', 'Tomato sauce', 'Spinach', '15 g vegetarian hard cheese', 'Garlic and basil'],
     steps: ['Cook the pasta and reserve a little water.', 'Blend cottage cheese with tomato sauce.', 'Warm the sauce, add spinach and combine with pasta.'],
     swaps: ['Use lentil pasta for more protein.', 'Use lactose-free cottage cheese if needed.'],
     coachTip: 'This is a strong post-workout choice when you need both protein and a larger carbohydrate serving.',
@@ -285,7 +285,7 @@ const MEALS: MealTemplate[] = [
     fats: 14,
     prepMinutes: 4,
     cost: 'Low',
-    ingredients: ['1 banana', '300 ml soy milk', '30 g protein powder', '20 g peanut butter', '30 g oats', 'Ice and cinnamon'],
+    ingredients: ['1 banana', '300 ml soy milk', '30 g plant protein powder', '20 g peanut butter', '30 g oats', 'Ice and cinnamon'],
     steps: ['Add all ingredients to a blender.', 'Blend until smooth.', 'Drink immediately after training or alongside a lighter meal.'],
     swaps: ['Use berries for fewer carbohydrates.', 'Add another banana for muscle gain.'],
     coachTip: 'Choose a plant or whey protein that provides around 20–25 g protein per serving.',
@@ -321,7 +321,7 @@ const MEALS: MealTemplate[] = [
     fats: 12,
     prepMinutes: 10,
     cost: 'Low',
-    ingredients: ['1 banana', '2 eggs', '40 g oats', '25 g protein powder', 'Cinnamon', '100 g berries'],
+    ingredients: ['1 banana', '2 eggs', '40 g oats', '25 g plant protein powder', 'Cinnamon', '100 g berries'],
     steps: ['Blend banana, eggs, oats and protein powder.', 'Cook small pancakes in a non-stick pan.', 'Serve with berries and cinnamon.'],
     swaps: ['Use soy protein and a flax egg for a plant-based version.', 'Add yogurt for an extra creamy topping.'],
     coachTip: 'Small pancakes flip more easily and cook evenly without much oil.',
@@ -375,7 +375,7 @@ const MEALS: MealTemplate[] = [
     fats: 16,
     prepMinutes: 5,
     cost: 'Low',
-    ingredients: ['30 g chia seeds', '250 ml soy milk', '25 g protein powder', '1 tsp cocoa', '½ banana', 'Vanilla'],
+    ingredients: ['30 g chia seeds', '250 ml soy milk', '25 g plant protein powder', '1 tsp cocoa', '½ banana', 'Vanilla'],
     steps: ['Whisk chia, milk, protein powder and cocoa.', 'Refrigerate for at least 2 hours.', 'Top with sliced banana.'],
     swaps: ['Use berries for fewer carbohydrates.', 'Add oats for a larger post-workout portion.'],
     coachTip: 'Stir again after ten minutes to prevent the chia seeds from clumping.',
@@ -735,7 +735,7 @@ const MEALS: MealTemplate[] = [
     fats: 8,
     prepMinutes: 4,
     cost: 'Medium',
-    ingredients: ['250 ml lactose-free milk', '30 g protein powder', '150 g frozen cherries', '1 banana', '1 tsp cocoa', 'Ice'],
+    ingredients: ['250 ml lactose-free milk', '30 g plant protein powder', '150 g frozen cherries', '1 banana', '1 tsp cocoa', 'Ice'],
     steps: ['Add all ingredients to a blender.', 'Blend until smooth.', 'Adjust thickness with water or ice.'],
     swaps: ['Use soy milk for a plant-based version.', 'Add oats for a higher-calorie recovery shake.'],
     coachTip: 'Frozen cherries provide flavor and carbohydrates without needing added sugar.',
@@ -753,7 +753,7 @@ const MEALS: MealTemplate[] = [
     fats: 12,
     prepMinutes: 10,
     cost: 'Low',
-    ingredients: ['50 g oats', '20 g protein powder', '20 g peanut butter', '20 g dates', 'Cinnamon', 'A little water'],
+    ingredients: ['50 g oats', '20 g plant protein powder', '20 g peanut butter', '20 g dates', 'Cinnamon', 'A little water'],
     steps: ['Blend or finely chop the dates.', 'Mix all ingredients into a firm dough.', 'Roll into bites and refrigerate.'],
     swaps: ['Use sunflower seed butter.', 'Add cocoa or coconut for a different flavor.'],
     coachTip: 'Keep portions measured because energy bites are compact and easy to overeat.',
@@ -861,7 +861,7 @@ const MEALS: MealTemplate[] = [
     fats: 9,
     prepMinutes: 5,
     cost: 'Medium',
-    ingredients: ['1 tsp matcha powder', '150 g frozen mango', '250 ml almond milk', '20 g protein powder', 'Chia seeds'],
+    ingredients: ['1 tsp matcha powder', '150 g frozen mango', '250 ml almond milk', '20 g plant protein powder', '10 g chia seeds'],
     steps: ['Sift the matcha powder to avoid clumps.', 'Add all ingredients into the blender.', 'Blend until creamy.'],
     swaps: ['Swap mango for pineapple or peach.', 'Use soy milk for more protein.'],
     coachTip: 'Matcha is great before a morning workout because it provides steady energy without the crash.',
@@ -901,72 +901,153 @@ const MEALS: MealTemplate[] = [
     steps: ['Mix turkey with herbs, roll into balls, and bake.', 'Prepare couscous with hot water.', 'Serve meatballs over couscous with salad and a dollop of tzatziki.'],
     swaps: ['Use chicken mince.', 'Replace couscous with a flatbread.'],
     coachTip: 'Tzatziki acts as both a dip and a dressing for the salad to keep meals flavorful.',
+  },
+  {
+    title: 'Lemon white bean toast',
+    subtitle: 'Crisp sourdough, creamy beans and a bright lemon finish.',
+    meals: ['breakfast', 'lunch', 'snack'], diets: ['vegetarian', 'vegan', 'lactose-free'],
+    times: ['quick'], budgets: ['low', 'medium'],
+    calories: 445, protein: 22, carbs: 69, fats: 9, prepMinutes: 8, cost: 'Low',
+    ingredients: ['180 g drained white beans', '2 slices sourdough bread (80 g)', '50 g baby spinach', '1 tsp olive oil', '½ lemon', 'Garlic and black pepper'],
+    steps: ['Toast the bread. Drain and rinse the beans.', 'Warm the beans with oil, garlic and spinach, then mash lightly.', 'Spoon onto the toast and finish with lemon zest, juice and pepper.'],
+    swaps: ['Use whole-grain bread for a firmer bite.', 'Replace spinach with rocket added just before serving.'],
+    coachTip: 'Mash only half the beans so the topping stays creamy with a little texture.',
+  },
+  {
+    title: 'Smoky chickpea couscous',
+    subtitle: 'A warm pantry bowl with sweet peppers, parsley and smoked paprika.',
+    meals: ['lunch', 'dinner', 'post-workout'], diets: ['vegetarian', 'vegan', 'lactose-free'],
+    times: ['quick', 'meal-prep'], budgets: ['low', 'medium'],
+    calories: 560, protein: 23, carbs: 89, fats: 12, prepMinutes: 8, cost: 'Low',
+    ingredients: ['60 g dry couscous', '180 g drained chickpeas', '100 g jarred roasted peppers', '1 tsp olive oil', '½ lemon', 'Parsley and smoked paprika'],
+    steps: ['Cover the couscous with boiling water according to the packet and leave for 5 minutes.', 'Warm the rinsed chickpeas with oil and smoked paprika.', 'Fluff the couscous and fold in chickpeas, sliced peppers, parsley and lemon juice.'],
+    swaps: ['Use cooked quinoa instead of couscous.', 'Add chopped cucumber after cooling for a packed lunch.'],
+    coachTip: 'Keep a jar of roasted peppers in the fridge for meals that need almost no chopping.',
+  },
+  {
+    title: 'Ginger edamame soba',
+    subtitle: 'Sesame noodles with edamame, crisp cucumber and a ginger-lime dressing.',
+    meals: ['lunch', 'dinner', 'post-workout'], diets: ['vegetarian', 'vegan', 'lactose-free'],
+    times: ['quick'], budgets: ['low', 'medium'],
+    calories: 555, protein: 29, carbs: 76, fats: 15, prepMinutes: 10, cost: 'Low',
+    ingredients: ['75 g dry soba noodles', '150 g shelled edamame', '100 g cucumber', '1 tsp sesame oil', '1 tsp sesame seeds', 'Soy sauce, grated ginger and lime'],
+    steps: ['Boil the noodles following the packet, adding edamame for the final 3 minutes.', 'Drain and rinse briefly, then mix sesame oil, soy sauce, ginger and lime.', 'Toss with the dressing, sliced cucumber and sesame seeds.'],
+    swaps: ['Use rice noodles if you prefer.', 'Replace cucumber with finely sliced carrots or cabbage.'],
+    coachTip: 'Rinsing soba after cooking removes excess starch and keeps the noodles separate.',
+  },
+  {
+    title: 'Miso tofu & broccoli tray',
+    subtitle: 'Golden tofu and roasted broccoli with a savory miso glaze.',
+    meals: ['lunch', 'dinner', 'post-workout'], diets: ['vegetarian', 'vegan', 'lactose-free'],
+    times: ['standard', 'meal-prep'], budgets: ['medium', 'flexible'],
+    calories: 635, protein: 35, carbs: 70, fats: 24, prepMinutes: 25, cost: 'Medium',
+    ingredients: ['200 g firm tofu', '180 g cooked rice', '200 g broccoli', '1 tbsp miso paste', '1 tsp sesame oil', 'Lime, ginger and a little water'],
+    steps: ['Heat the oven to 220°C. Pat the tofu dry and cut into cubes.', 'Mix miso, sesame oil, ginger and water. Coat the tofu and broccoli.', 'Roast on a lined tray for 20 minutes, turning halfway. Serve with hot rice and lime.'],
+    swaps: ['Use green beans instead of broccoli.', 'Serve with cooked quinoa instead of rice.'],
+    coachTip: 'Leave space between the tofu cubes on the tray so the edges turn golden.',
+  },
+  {
+    title: 'Pear & cinnamon yogurt bowl',
+    subtitle: 'Cool, creamy skyr with sweet pear, toasted oats and walnuts.',
+    meals: ['breakfast', 'snack', 'post-workout'], diets: ['balanced', 'vegetarian'],
+    times: ['quick'], budgets: ['low', 'medium'],
+    calories: 420, protein: 32, carbs: 52, fats: 10, prepMinutes: 5, cost: 'Low',
+    ingredients: ['250 g plain skyr', '1 pear', '35 g oats', '10 g walnuts', 'Cinnamon', 'Lemon zest'],
+    steps: ['Spoon skyr into a bowl and slice the pear.', 'Toast the oats in a dry pan for 2 minutes, stirring.', 'Top with pear, oats, chopped walnuts, cinnamon and lemon zest.'],
+    swaps: ['Use apple or fresh berries instead of pear.', 'Use lactose-free skyr when needed.'],
+    coachTip: 'Let the toasted oats cool for a minute before adding them to keep the yogurt chilled.',
+  },
+  {
+    title: 'Lemon ricotta & pea pasta',
+    subtitle: 'A silky lemon sauce, sweet peas and plenty of fresh black pepper.',
+    meals: ['lunch', 'dinner', 'post-workout'], diets: ['balanced', 'vegetarian'],
+    times: ['standard'], budgets: ['low', 'medium'],
+    calories: 645, protein: 30, carbs: 87, fats: 20, prepMinutes: 18, cost: 'Low',
+    ingredients: ['90 g dry whole-wheat pasta', '100 g ricotta', '120 g frozen peas', '50 g spinach', '½ lemon', 'Black pepper and fresh basil'],
+    steps: ['Cook the pasta, adding peas for the final 3 minutes. Reserve a mug of pasta water.', 'Stir ricotta with lemon zest, juice, pepper and a splash of pasta water.', 'Fold in pasta, peas and spinach over low heat. Finish with basil.'],
+    swaps: ['Use cottage cheese blended smooth instead of ricotta.', 'Try broccoli florets instead of peas.'],
+    coachTip: 'Add pasta water a spoonful at a time until the sauce lightly coats every piece.',
+  },
+  {
+    title: 'Paprika chicken & bulgur',
+    subtitle: 'Smoky chicken, fluffy bulgur and a crisp cucumber-tomato salad.',
+    meals: ['lunch', 'dinner', 'post-workout'], diets: ['balanced', 'lactose-free'],
+    times: ['standard', 'meal-prep'], budgets: ['low', 'medium'],
+    calories: 590, protein: 48, carbs: 68, fats: 14, prepMinutes: 20, cost: 'Low',
+    ingredients: ['170 g chicken breast', '75 g dry bulgur', '100 g cucumber', '100 g tomato', '2 tsp olive oil', 'Smoked paprika, lemon and parsley'],
+    steps: ['Cook bulgur according to the packet. Dice the salad vegetables.', 'Slice chicken into strips, season with paprika and cook in the oil until fully cooked.', 'Serve chicken over bulgur with the salad, parsley and lemon juice.'],
+    swaps: ['Use turkey breast instead of chicken.', 'Replace bulgur with cooked brown rice.'],
+    coachTip: 'Store the salad separately when prepping portions to keep the vegetables crisp.',
+  },
+  {
+    title: 'Turkey & lentil lettuce cups',
+    subtitle: 'Fresh, crunchy cups with lentils, cooked turkey and a mustard dressing.',
+    meals: ['lunch', 'dinner', 'snack', 'post-workout'], diets: ['balanced', 'lactose-free'],
+    times: ['quick'], budgets: ['low', 'medium'],
+    calories: 470, protein: 43, carbs: 46, fats: 12, prepMinutes: 10, cost: 'Low',
+    ingredients: ['120 g cooked turkey breast', '150 g cooked lentils', '1 small whole-wheat pita (40 g)', '4 large lettuce leaves', '100 g carrot and cucumber', '1 tsp olive oil, mustard and lemon'],
+    steps: ['Rinse and dry the lettuce. Shred the cooked turkey and dice the vegetables.', 'Whisk oil, mustard and lemon, then toss with the turkey, lentils and vegetables.', 'Spoon into lettuce leaves and serve with warm pita.'],
+    swaps: ['Use cooked chicken leftovers.', 'Use chopped firm tofu instead of turkey for a plant-based variation.'],
+    coachTip: 'Choose the sturdy outer lettuce leaves and fill them just before eating.',
   }
+
 ];
 
-const GOAL_ADJUSTMENTS: Record<NutritionGoal, { calories: number; protein: number; carbs: number; fats: number; tip: string }> = {
-  lose: {
-    calories: -110,
-    protein: 5,
-    carbs: -18,
-    fats: -4,
-    tip: 'The portion is adjusted for fat loss: protein stays high while energy-dense extras are reduced.',
-  },
-  maintain: {
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fats: 0,
-    tip: 'The portion is balanced for maintenance, daily energy and training recovery.',
-  },
-  gain: {
-    calories: 180,
-    protein: 7,
-    carbs: 28,
-    fats: 5,
-    tip: 'The portion is adjusted for muscle gain with extra protein and training carbohydrates.',
-  },
+// Goal preferences rank complete recipes; nutrition stays tied to the listed serving.
+const GOAL_TIPS: Record<NutritionGoal, string> = {
+  lose: 'For a lighter meal, keep the protein serving and add extra vegetables.',
+  maintain: 'The listed ingredients make one serving.',
+  gain: 'For a larger meal, add a side of rice, bread or fruit to suit your appetite.',
 };
 
 export function createMealRecommendation(answers: AssistantAnswers): MealRecommendation {
-  const compatibleMeals = MEALS.filter(
-    (meal) => meal.meals.includes(answers.meal) && meal.diets.includes(answers.diet),
+  const compatibleMeals = MEALS.filter(meal =>
+    meal.meals.includes(answers.meal) && isDietCompatible(meal, answers.diet),
   );
-  const candidateMeals = compatibleMeals.length
-    ? compatibleMeals
-    : MEALS.filter((meal) => meal.diets.includes(answers.diet));
-  const scoredMeals = candidateMeals.map((meal) => {
+  const timeMatches = compatibleMeals.filter(meal =>
+    answers.time === 'meal-prep' ? meal.times.includes('meal-prep') :
+      meal.prepMinutes <= (answers.time === 'quick' ? 10 : 30),
+  );
+  const budgetMatches = timeMatches.filter(meal =>
+    answers.budget === 'flexible' || meal.cost === 'Low' ||
+      (answers.budget === 'medium' && meal.cost === 'Medium'),
+  );
+  // All current preference combinations have a match. Keep a diet-safe fallback
+  // for future catalog additions, with the actual time and cost still displayed.
+  const candidates = budgetMatches.length ? budgetMatches : timeMatches.length ? timeMatches : compatibleMeals;
+  const scoredMeals = candidates.map(meal => {
     let score = 0;
-    if (meal.times.includes(answers.time)) score += 4;
-    if (meal.budgets.includes(answers.budget)) score += 3;
-    if (answers.goal === 'gain' && meal.protein >= 35) score += 3;
-    if (answers.goal === 'lose' && meal.calories <= 520) score += 3;
+    if (answers.goal === 'gain' && meal.protein >= 30) score += 2;
+    if (answers.goal === 'gain' && meal.calories >= 500) score += 1;
+    if (answers.goal === 'lose' && meal.calories <= 520) score += 2;
+    if (answers.goal === 'lose' && meal.protein >= 25) score += 1;
     return { meal, score };
   }).sort((first, second) => second.score - first.score);
 
   const topScore = scoredMeals[0].score;
-  const closeMatches = scoredMeals
-    .filter((candidate) => candidate.score >= topScore - 2)
-    .slice(0, 8);
+  const closeMatches = scoredMeals.filter(candidate => candidate.score >= topScore - 2);
   const answerKey = `${answers.goal}-${answers.meal}-${answers.diet}-${answers.time}-${answers.budget}`;
-  const selectedIndex = getNextRecommendationIndex(answerKey, closeMatches.length);
-  const selected = closeMatches[selectedIndex].meal;
-  const adjustment = GOAL_ADJUSTMENTS[answers.goal];
+  const selected = closeMatches[getNextRecommendationIndex(answerKey, closeMatches.length)].meal;
 
   return {
     title: selected.title,
     subtitle: selected.subtitle,
-    calories: Math.max(220, selected.calories + adjustment.calories),
-    protein: Math.max(15, selected.protein + adjustment.protein),
-    carbs: Math.max(15, selected.carbs + adjustment.carbs),
-    fats: Math.max(5, selected.fats + adjustment.fats),
+    calories: selected.calories,
+    protein: selected.protein,
+    carbs: selected.carbs,
+    fats: selected.fats,
     prepMinutes: selected.prepMinutes,
     cost: selected.cost,
     ingredients: [...selected.ingredients],
     steps: [...selected.steps],
     swaps: [...selected.swaps],
-    coachTip: `${adjustment.tip} ${selected.coachTip}`,
+    coachTip: `${GOAL_TIPS[answers.goal]} ${selected.coachTip}`,
   };
+}
+
+function isDietCompatible(meal: MealTemplate, diet: DietType): boolean {
+  return diet === 'balanced' || meal.diets.includes(diet) ||
+    (diet === 'vegetarian' && meal.diets.includes('vegan'));
 }
 
 const recommendationIndexes = new Map<string, number>();

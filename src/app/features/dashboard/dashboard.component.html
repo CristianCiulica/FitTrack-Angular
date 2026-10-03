@@ -76,7 +76,8 @@
       <!-- Activity head: title + month navigation -->
       <div class="activity-head">
         <div class="activity-title">
-          <h1>{{ selectedDate() | date: 'MMMM y' }}</h1>
+          <h1>Ready for a workout?</h1>
+          <p>{{ selectedDate() | date: 'MMMM y' }}</p>
         </div>
         <div class="month-nav">
           <div class="month-arrows">
@@ -233,11 +234,11 @@
         nzTitle=""
         (nzOnCancel)="toggleChat()"
         [nzFooter]="null"
-        [nzWidth]="680"
+        [nzWidth]="640"
         nzCentered
         [nzStyle]="{ padding: '0' }"
         [nzBodyStyle]="{ padding: '0' }"
-        nzWrapClassName="blurred-modal-wrap no-padding-modal"
+        nzWrapClassName="nutrition-modal"
         [nzCloseIcon]="customCloseIcon"
       >
         <ng-template #customCloseIcon>
@@ -245,12 +246,12 @@
         </ng-template>
 
         <ng-container *nzModalContent>
-          <div class="chat-container modern-chat">
+          <div class="chat-container modern-chat" role="region" aria-label="Nutrition Assistant">
             <div class="chat-header-modern">
+              <span class="assistant-mark" nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
               <div class="chat-title-info">
-                <span class="chat-brand">FitTrack<span>.</span></span>
+                <span class="chat-brand">MEAL PLANNER</span>
                 <h3>Nutrition Assistant</h3>
-                <p>Guided meal planner</p>
               </div>
             </div>
 
@@ -258,20 +259,20 @@
               <div class="assistant-progress">
                 <div class="progress-copy">
                   <span>{{ assistantQuestion().eyebrow }}</span>
-                  <strong>{{ assistantProgress() }}%</strong>
+                  <strong>{{ assistantStep() === 'result' ? 'Ready' : 'Personalize your meal' }}</strong>
                 </div>
-                <div class="progress-track" aria-hidden="true">
-                  <span [style.width.%]="assistantProgress()"></span>
+                <div class="assistant-step-track" role="progressbar" aria-label="Meal preferences" [attr.aria-valuenow]="assistantProgress()" aria-valuemin="0" aria-valuemax="100">
+                  <span *ngFor="let step of assistantStepOrder; let index = index" [class.completed]="(index + 1) * 20 <= assistantProgress()"></span>
                 </div>
               </div>
 
-              <div class="answer-summary" *ngIf="selectedAnswerLabels().length">
+              <div class="answer-summary" *ngIf="assistantStep() === 'result'">
                 <span *ngFor="let item of selectedAnswerLabels()">{{ item.label }}</span>
               </div>
 
               <ng-container *ngIf="assistantStep() !== 'result'; else assistantResultTemplate">
                 <section class="assistant-question">
-                  <h4>{{ assistantQuestion().title }}</h4>
+                  <h4 #assistantHeading tabindex="-1">{{ assistantQuestion().title }}</h4>
                   <p>{{ assistantQuestion().description }}</p>
                 </section>
 
@@ -280,9 +281,12 @@
                     *ngFor="let option of assistantOptions()"
                     type="button"
                     [class.selected]="isAssistantOptionSelected(option.value)"
+                    [attr.aria-pressed]="isAssistantOptionSelected(option.value)"
                     (click)="chooseAssistantOption(option.value)"
                   >
-                    <span class="option-icon" aria-hidden="true">{{ option.icon }}</span>
+                    <span class="option-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path [attr.d]="option.icon" /></svg>
+                    </span>
                     <span class="option-copy">
                       <strong>{{ option.label }}</strong>
                       <small>{{ option.description }}</small>
@@ -295,19 +299,19 @@
               <ng-template #assistantResultTemplate>
                 <div class="assistant-result" *ngIf="assistantResult() as result">
                   <div class="result-hero">
+                    <span class="result-kicker">Your next meal</span>
+                    <h4 #assistantHeading tabindex="-1">{{ result.title }}</h4>
+                    <p>{{ result.subtitle }}</p>
+                    <div class="result-meta">
+                      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ result.prepMinutes }} min active prep</span>
+                      <span>{{ result.cost }} cost</span>
+                    </div>
                     <div class="result-kcal">
                       <strong>{{ result.calories }}</strong>
                       <div class="result-kcal-copy">
                         <span>kcal</span>
-                        <small>per serving</small>
+                        <small>estimated per serving</small>
                       </div>
-                    </div>
-                    <span class="result-kicker">Recommended for you</span>
-                    <h4>{{ result.title }}</h4>
-                    <p>{{ result.subtitle }}</p>
-                    <div class="result-meta">
-                      <span>{{ result.prepMinutes }} min prep</span>
-                      <span>{{ result.cost }} cost</span>
                     </div>
                   </div>
 
@@ -348,10 +352,10 @@
                     <p *ngFor="let swap of result.swaps">{{ swap }}</p>
                   </section>
 
-                  <div class="coach-tip">
-                    <span aria-hidden="true">💡</span>
+                  <div class="kitchen-note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M9 18h6m-5 3h4M8 14a6 6 0 1 1 8 0c-1 1-1 2-1 2H9s0-1-1-2Z"/></svg>
                     <div>
-                      <strong>Coach tip</strong>
+                      <strong>Kitchen note</strong>
                       <p>{{ result.coachTip }}</p>
                     </div>
                   </div>
@@ -359,16 +363,15 @@
               </ng-template>
             </div>
 
-            <div class="assistant-footer" [class.result-visible]="assistantStep() === 'result'">
+            <div class="assistant-footer" *ngIf="assistantStep() !== 'goal'" [class.result-visible]="assistantStep() === 'result'">
               <button
                 type="button"
                 class="assistant-back"
-                *ngIf="assistantStep() !== 'goal'"
+                aria-label="Back to previous preference"
                 (click)="goBackAssistant()"
               >
-                ‹ Back
+                <span aria-hidden="true">‹</span><span class="back-label">Back</span>
               </button>
-              <p>Meal ideas are educational and do not replace medical advice.</p>
               <div class="assistant-result-actions" *ngIf="assistantStep() === 'result'">
                 <button type="button" class="assistant-another" (click)="showAnotherRecipe()">
                   Another recipe

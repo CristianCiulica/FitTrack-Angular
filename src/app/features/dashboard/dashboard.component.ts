@@ -49,10 +49,11 @@ import {
     AppMenuComponent,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss', './nutrition-assistant.scss']
 })
 export class DashboardComponent implements OnInit {
   @ViewChild('chatBody') private chatBody?: ElementRef<HTMLElement>;
+  @ViewChild('assistantHeading') private assistantHeading?: ElementRef<HTMLElement>;
 
   private readonly destroy = inject(DestroyRef);
   private readonly profileService = inject(ProfileService);
@@ -80,12 +81,12 @@ export class DashboardComponent implements OnInit {
 
   assistantQuestion = computed(() => {
     switch (this.assistantStep()) {
-      case 'goal': return { eyebrow: 'Step 1 of 5', title: 'What is your main goal?', description: 'This changes the suggested portions and macro balance.' };
+      case 'goal': return { eyebrow: 'Step 1 of 5', title: 'Eat well. Your way.', description: 'Start with your goal. We’ll find a meal that fits your day.' };
       case 'meal': return { eyebrow: 'Step 2 of 5', title: 'What do you want to plan?', description: 'Choose the moment when you want to eat this meal.' };
       case 'diet': return { eyebrow: 'Step 3 of 5', title: 'Any dietary preference?', description: 'The assistant will only use compatible meal ideas.' };
       case 'time': return { eyebrow: 'Step 4 of 5', title: 'How much time do you have?', description: 'We will match the preparation style to your schedule.' };
       case 'budget': return { eyebrow: 'Step 5 of 5', title: 'Choose your budget', description: 'One last choice before building your recommendation.' };
-      case 'result': return { eyebrow: 'Your plan', title: 'Meal recommendation', description: 'Built locally from your selected preferences.' };
+      case 'result': return { eyebrow: 'Your meal', title: 'Meal recommendation', description: 'Chosen for your preferences.' };
     }
   });
 
@@ -328,6 +329,7 @@ export class DashboardComponent implements OnInit {
       const chatBody = this.chatBody?.nativeElement;
       if (!chatBody) return;
       chatBody.scrollTop = 0;
+      this.assistantHeading?.nativeElement.focus({ preventScroll: true });
     });
   }
 
