@@ -85,8 +85,8 @@ export class BmiComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.patchTimer) clearTimeout(this.patchTimer);
-    if (this.goalTimer) clearTimeout(this.goalTimer);
+    if (this.patchTimer) { clearTimeout(this.patchTimer); this.patchTimer = null; this.syncProfile(); }
+    if (this.goalTimer) { clearTimeout(this.goalTimer); this.goalTimer = null; this.syncGoal(); }
   }
 
   // use computed for auto calculated values
@@ -164,15 +164,15 @@ export class BmiComponent implements OnDestroy {
   private queueGoalSync() {
     if (!this.profileService.profile()) return;
     if (this.goalTimer) clearTimeout(this.goalTimer);
-    this.goalTimer = setTimeout(() => {
-      this.profileService
-        .patch({
-          goal: this.goal(),
-          goalRate: Math.round(this.goalRate() * 10) / 10,
-          weeklyWorkoutGoal: Math.max(1, Math.round(this.strengthTrainingDays())),
-        })
-        .subscribe({ error: (err) => console.warn('[bmi] Failed to sync goal', err) });
-    }, 600);
+    this.goalTimer = setTimeout(() => { this.goalTimer = null; this.syncGoal(); }, 600);
+  }
+
+  private syncGoal() {
+    this.profileService.patch({
+      goal: this.goal(),
+      goalRate: Math.round(this.goalRate() * 10) / 10,
+      weeklyWorkoutGoal: Math.max(1, Math.round(this.strengthTrainingDays())),
+    }).subscribe({ error: (err) => console.warn('[bmi] Failed to sync goal', err) });
   }
 
   // physical data changes propagate to the rest of the app via profile
@@ -209,16 +209,16 @@ export class BmiComponent implements OnDestroy {
   private queueProfileSync() {
     if (!this.profileService.profile()) return;
     if (this.patchTimer) clearTimeout(this.patchTimer);
-    this.patchTimer = setTimeout(() => {
-      this.profileService
-        .patch({
-          heightCm: Math.round(this.height()),
-          weightKg: Math.round(this.weight() * 10) / 10,
-          age: this.age(),
-          sex: this.sex(),
-        })
-        .subscribe({ error: (err) => console.warn('[bmi] Failed to sync profile', err) });
-    }, 600);
+    this.patchTimer = setTimeout(() => { this.patchTimer = null; this.syncProfile(); }, 600);
+  }
+
+  private syncProfile() {
+    this.profileService.patch({
+      heightCm: Math.round(this.height()),
+      weightKg: Math.round(this.weight() * 10) / 10,
+      age: this.age(),
+      sex: this.sex(),
+    }).subscribe({ error: (err) => console.warn('[bmi] Failed to sync profile', err) });
   }
 
   logout() {

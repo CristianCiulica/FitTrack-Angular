@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
+import { catchError, filter, forkJoin, map, Observable, of, switchMap, timeout } from 'rxjs';
+import { ReadCache } from '../utils/read-cache';
 
 interface GeoResponse {
   results?: Array<{
@@ -64,10 +65,15 @@ interface ReverseGeoResponse {
 
 @Injectable({ providedIn: 'root' })
 export class WeatherService {
+  private readonly reads = new ReadCache<WeatherSummary | null>(5 * 60_000);
   constructor(private http: HttpClient) {}
 
   // integrare Open Meteo
   getCityWeather(city: string) {
+    return this.cached(`city:${city.trim().toLowerCase()}`, () => this.fetchCityWeather(city));
+  }
+
+  private fetchCityWeather(city: string) {
     const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
     return this.http.get<GeoResponse>(geoUrl).pipe(
       map((geo) => {
@@ -86,9 +92,18 @@ export class WeatherService {
 
   // foloseste GPS-ul telefonului: ia vremea pentru locatia curenta, oriunde ar fi
   getWeatherByCoords(latitude: number, longitude: number) {
+    return this.cached(`gps:${latitude.toFixed(3)}:${longitude.toFixed(3)}`, () => this.fetchGpsWeather(latitude, longitude));
+  }
+
+  private cached(key: string, load: () => Observable<WeatherSummary>) {
+    return this.reads.read(key, () => null, load, () => {}).pipe(filter((value): value is WeatherSummary => value !== null));
+  }
+
+  private fetchGpsWeather(latitude: number, longitude: number) {
     const reverseUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
 
-    return this.http.get<ReverseGeoResponse>(reverseUrl).pipe(
+    const label = this.http.get<ReverseGeoResponse>(reverseUrl).pipe(
+      timeout(5000),
       map((geo) => {
         const place = geo.city || geo.locality;
         if (place && geo.principalSubdivision) return `${place}, ${geo.principalSubdivision}`;
@@ -96,7 +111,10 @@ export class WeatherService {
         return 'Your location';
       }),
       catchError(() => of('Your location')),
-      switchMap((cityLabel) => this.fetchByCoordinates(latitude, longitude, cityLabel)),
+    );
+    // The location label and forecast load together, rather than in a waterfall.
+    return forkJoin({ label, summary: this.fetchByCoordinates(latitude, longitude, 'Your location') }).pipe(
+      map(({ label, summary }) => ({ ...summary, cityLabel: label })),
     );
   }
 
@@ -106,7 +124,7 @@ export class WeatherService {
 
     return forkJoin({
       forecast: this.http.get<ForecastResponse>(forecastUrl),
-      air: this.http.get<AirQualityResponse>(airUrl),
+      air: this.http.get<AirQualityResponse>(airUrl).pipe(timeout(5000), catchError(() => of({} as AirQualityResponse))),
     }).pipe(map(({ forecast, air }) => this.buildSummary(cityLabel, forecast, air)));
   }
 

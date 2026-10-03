@@ -1,12 +1,12 @@
 import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, withPreloading } from '@angular/router';
+import { IdlePreloadingService } from './core/services/idle-preloading.service';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { firebaseAuthInterceptor } from './core/interceptors/auth.interceptor';
 import { provideServiceWorker } from '@angular/service-worker';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
-import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import {
   LineChartOutline,
@@ -61,7 +61,7 @@ registerLocaleData(en);
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }), withPreloading(IdlePreloadingService)),
     provideAnimationsAsync(),
     provideHttpClient(withInterceptors([firebaseAuthInterceptor])),
     // PWA service worker
@@ -72,7 +72,6 @@ export const appConfig: ApplicationConfig = {
     // Firebase/Auth
     provideFirebaseApp(() => initializeApp(getFirebaseConfig())),
     provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore()),
 
     provideNzIcons([
       LineChartOutline,

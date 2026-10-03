@@ -1,3 +1,4 @@
+import { Subscription } from 'rxjs';
 import { previousExercises, PreviousExercise, exerciseKey, workoutVolume, durationLabel } from '../../core/utils/workout-history';
 import { createWorkoutSummaryImage } from '../../core/utils/workout-share';
 import { localDateKey } from '../../core/utils/weight-progress';
@@ -795,6 +796,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   private sessionStartedAt = 0;
   private sessionEndedAt: number | null = null;
   private sessionGeneration = 0;
+  private readonly reads = new Subscription();
   private inputsTouched = false;
   readonly historyLoading = signal(false);
   readonly historyUnavailable = signal(false);
@@ -820,6 +822,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   restTimeTarget = signal(60);
   restTimeRemaining = signal(60);
   private timerInterval: ReturnType<typeof setInterval> | null = null;
+  private restDeadline = 0;
 
   workoutInProgress = computed(() =>
     this.state() === 'active' || this.state() === 'rest' || this.state() === 'review',
@@ -882,18 +885,22 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     private modalService: NzModalService,
   ) {}
 
+  trackPersonalRoutine(_index: number, routine: { id?: string }) { return routine.id ?? routine; }
+  trackPredefined(_index: number, item: { index: number }) { return item.index; }
+
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.reads.add(this.route.queryParams.subscribe(params => {
       if (params['date']) {
         this.targetDate.set(params['date']);
       }
-    });
+    }));
 
     this.selectRoutine(this.routines[0], 'predefined-0');
     this.loadPersonalRoutines();
   }
 
   ngOnDestroy() {
+    this.reads.unsubscribe();
     this.stopTimer();
     this.sessionGeneration++;
   }
@@ -1042,7 +1049,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   private loadPersonalRoutines() {
-    this.workoutService.getWorkouts().subscribe((workouts) => {
+    this.reads.add(this.workoutService.getWorkouts().subscribe((workouts) => {
       this.personalRoutines.set(
         workouts
           .filter((workout) => !workout.isPredefined)
@@ -1058,7 +1065,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
             })),
           })),
       );
-    });
+    }));
   }
 
   startWorkout() {
@@ -1083,7 +1090,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     const generation = ++this.sessionGeneration;
     this.previousByExercise.set(new Map()); this.historyWorkouts = [];
     this.historyLoading.set(true); this.historyUnavailable.set(false);
-    this.workoutService.getWorkouts().subscribe({
+    this.reads.add(this.workoutService.getWorkouts().subscribe({
       next: workouts => {
         if (generation !== this.sessionGeneration) return;
         this.historyLoading.set(false);
@@ -1094,7 +1101,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         if (this.workoutInProgress() && !this.inputsTouched) { this.syncCurrentWeight(); this.syncCurrentReps(); }
       },
       error: () => { if (generation === this.sessionGeneration) { this.historyLoading.set(false); this.historyUnavailable.set(true); } },
-    });
+    }));
   }
 
   // greutatea propusa pentru setul curent:
@@ -1169,11 +1176,16 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.updateCompletedSets();
     this.state.set('rest');
     this.restTimeRemaining.set(this.restTimeTarget());
-    this.timerInterval = setInterval(() => {
-      const remaining = this.restTimeRemaining() - 1;
-      this.restTimeRemaining.set(Math.max(0, remaining));
-      if (remaining <= 0) this.skipRest();
-    }, 1000);
+    this.restDeadline = Date.now() + this.restTimeTarget() * 1000;
+    this.timerInterval = setInterval(() => this.updateRestTime(), 1000);
+  }
+
+  @HostListener('document:visibilitychange')
+  updateRestTime() {
+    if (this.state() !== 'rest') return;
+    const remaining = Math.max(0, Math.ceil((this.restDeadline - Date.now()) / 1000));
+    this.restTimeRemaining.set(remaining);
+    if (remaining === 0) this.skipRest();
   }
 
   previousSet() {
@@ -1235,8 +1247,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   addTime(seconds: number) {
-    this.restTimeRemaining.set(Math.max(0, this.restTimeRemaining() + seconds));
-    if (this.restTimeRemaining() === 0) this.skipRest();
+    if (this.state() !== 'rest') return;
+    this.restDeadline += seconds * 1000;
+    this.updateRestTime();
   }
 
   private stopTimer() {

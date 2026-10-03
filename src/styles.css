@@ -1317,3 +1317,24 @@ body .run-layout .liquid-panel.ant-card {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   body .run-layout .liquid-panel.ant-card { background: #f8fafc !important; }
 }
+
+/* Animate content only: fixed navigation and optical layers stay in place. */
+.route-shell > router-outlet + * .app-content {
+  animation: route-content-in 160ms var(--ease-out);
+}
+@keyframes route-content-in { from { opacity: .7; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+button, a, input, select, textarea { touch-action: manipulation; }
+/* nz-sider's default "all" transition interpolates desktop geometry into the dock. */
+.app-layout > .sidebar {
+  transition-property: background-color, border-color !important;
+}

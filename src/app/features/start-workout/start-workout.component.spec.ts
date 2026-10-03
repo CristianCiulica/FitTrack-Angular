@@ -70,6 +70,28 @@ describe('Workout session recovery', () => {
     expect(component.currentSetIndex()).toBe(1);
   });
 
+  it('catches up an expired rest after the browser suspends timers, advancing only one set', () => {
+    component.finishSet();
+    vi.setSystemTime(Date.now() + 120000);
+    component.updateRestTime();
+    expect(component.state()).toBe('active');
+    expect(component.currentSetIndex()).toBe(2);
+    expect(component.completedSets()).toBe(1);
+    component.updateRestTime();
+    expect(component.currentSetIndex()).toBe(2);
+  });
+
+  it('keeps rest adjustments after the next tick and when resuming', () => {
+    component.finishSet();
+    component.addTime(10);
+    vi.advanceTimersByTime(1000);
+    expect(component.restTimeRemaining()).toBe(69);
+    component.addTime(-10);
+    vi.setSystemTime(Date.now() + 30000);
+    component.updateRestTime();
+    expect(component.restTimeRemaining()).toBe(29);
+  });
+
   it('lets the final skipped set be recovered before saving', () => {
     component.skipSet(); component.skipSet(); component.skipSet();
     expect(component.state()).toBe('review');

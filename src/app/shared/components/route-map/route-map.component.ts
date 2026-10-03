@@ -1,5 +1,5 @@
 import { MAP_TILE_URL, MAP_TILE_OPTIONS } from '../../../core/config/map-tiles';
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, ViewChild, inject, NgZone } from '@angular/core';
 import * as L from 'leaflet';
 import { validRoute } from '../../../core/utils/route';
 
@@ -35,9 +35,14 @@ export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private frame?: number;
   private destroyed = false;
   private viewReady = false;
+  private readonly zone = inject(NgZone);
 
   ngAfterViewInit(): void {
     this.viewReady = true;
+    this.zone.runOutsideAngular(() => this.observeVisibility());
+  }
+
+  private observeVisibility(): void {
     // Do not request tiles for every history item before it comes into view.
     if (typeof IntersectionObserver !== 'undefined') {
       this.intersectionObserver = new IntersectionObserver(entries => {
@@ -46,7 +51,7 @@ export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
           this.intersectionObserver?.disconnect();
           this.intersectionObserver = undefined;
         }
-      }, { rootMargin: '0px' });
+      }, { rootMargin: '180px' });
       this.intersectionObserver.observe(this.canvas.nativeElement);
     } else {
       this.initMap();

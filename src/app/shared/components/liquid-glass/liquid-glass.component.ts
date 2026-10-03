@@ -38,6 +38,8 @@ export class LiquidGlassComponent {
     let dock: HTMLElement | null = null;
     let frame = 0;
     let previousSize = '';
+    let pointerFrame = 0;
+    let pointerX = 0;
 
     const update = () => {
       frame = 0;
@@ -62,10 +64,15 @@ export class LiquidGlassComponent {
     };
     const move = (event: PointerEvent) => {
       if (!dock || reduced.matches) return;
-      const rect = dock.getBoundingClientRect();
-      dock.style.setProperty('--glass-light-x', `${Math.round((event.clientX - rect.left) / rect.width * 100)}%`);
+      pointerX = event.clientX;
+      if (!pointerFrame) pointerFrame = requestAnimationFrame(() => {
+        pointerFrame = 0;
+        if (!dock) return;
+        const rect = dock.getBoundingClientRect();
+        dock.style.setProperty('--glass-light-x', `${Math.round((pointerX - rect.left) / rect.width * 100)}%`);
+      });
     };
-    const reset = () => dock?.style.removeProperty('--glass-light-x');
+    const reset = () => { cancelAnimationFrame(pointerFrame); pointerFrame = 0; dock?.style.removeProperty('--glass-light-x'); };
     const resize = new ResizeObserver(schedule);
     const discover = () => {
       const next = document.querySelector<HTMLElement>('.app-layout > .sidebar');
@@ -84,13 +91,14 @@ export class LiquidGlassComponent {
       }
     };
     const observer = new MutationObserver(discover);
-    observer.observe(document.querySelector('.route-shell') ?? document.body, { childList: true, subtree: true });
+    observer.observe(document.querySelector('.route-shell') ?? document.body, { childList: true });
     mobile.addEventListener('change', schedule);
     discover();
     this.destroyRef.onDestroy(() => {
       observer.disconnect();
       resize.disconnect();
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(pointerFrame);
       mobile.removeEventListener('change', schedule);
       dock?.removeEventListener('pointermove', move);
       dock?.removeEventListener('pointerleave', reset);

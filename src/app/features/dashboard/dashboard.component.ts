@@ -1,5 +1,6 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivityGoalsComponent } from '../../shared/components/activity-goals/activity-goals.component';
-import { Component, ElementRef, OnInit, ViewChild, signal, computed, inject } from '@angular/core';
+import { DestroyRef, Component, ElementRef, OnInit, ViewChild, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
@@ -53,6 +54,7 @@ import {
 export class DashboardComponent implements OnInit {
   @ViewChild('chatBody') private chatBody?: ElementRef<HTMLElement>;
 
+  private readonly destroy = inject(DestroyRef);
   private readonly profileService = inject(ProfileService);
   readonly firstName = computed(() => {
     const name = this.profileService.displayName().trim();
@@ -186,6 +188,9 @@ export class DashboardComponent implements OnInit {
       };
     });
   });
+
+  trackDay(_index: number, day: { key: string }) { return day.key; }
+  trackWorkout(_index: number, workout: Workout) { return workout.id ?? workout; }
 
   selectDay(date: Date) {
     this.selectedDate.set(new Date(date));
@@ -337,7 +342,7 @@ export class DashboardComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.workoutService.getWorkouts().subscribe({
+    this.workoutService.getWorkouts().pipe(takeUntilDestroyed(this.destroy)).subscribe({
       next: (data) => {
         this.workouts.set(data);
         this.workoutService.workouts.set(data);
@@ -345,7 +350,7 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => console.warn('[dashboard] Failed to load workouts', err)
     });
-    this.runningSessionService.getSessions().subscribe({
+    this.runningSessionService.getSessions().pipe(takeUntilDestroyed(this.destroy)).subscribe({
       error: (err) => console.warn('[dashboard] Failed to load running sessions', err)
     });
   }

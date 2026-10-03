@@ -212,7 +212,7 @@
     border-radius: 10px;
     cursor: pointer;
     text-align: center;
-    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: background-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), color 0.25s var(--ease-out);
     -webkit-tap-highlight-color: transparent;
 
     &.selected {

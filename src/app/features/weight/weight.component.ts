@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -6,7 +7,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { ApiService } from '../../core/services/api.service';
+import { WeightService } from '../../core/services/weight.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UserProfile } from '../../core/models/user-profile.model';
@@ -20,7 +21,8 @@ import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.comp
   templateUrl: './weight.component.html', styleUrl: './weight.component.scss',
 })
 export class WeightComponent implements OnInit {
-  private readonly api = inject(ApiService);
+  private readonly weights = inject(WeightService);
+  private readonly destroy = inject(DestroyRef);
   private readonly profile = inject(ProfileService);
   private readonly auth = inject(AuthService);
   private readonly modal = inject(NzModalService);
@@ -48,8 +50,13 @@ export class WeightComponent implements OnInit {
   ngOnInit() { this.load(); }
   load() {
     this.loading.set(true); this.error.set('');
-    this.api.get<{entries:WeightEntry[]}>('/me/weight-entries').subscribe({
-      next: response => { this.entries.set(response.entries); this.loaded.set(true); this.loading.set(false); this.selectFormDate(); },
+    this.weights.getEntries().pipe(takeUntilDestroyed(this.destroy)).subscribe({
+      next: entries => {
+        const initial = !this.loaded();
+        this.entries.set(entries); this.loaded.set(true); this.loading.set(false);
+        // A background refresh must not replace a weight the user is typing.
+        if (initial) this.selectFormDate();
+      },
       error: () => { this.loading.set(false); this.error.set('Could not load your weight history. Please try again.'); },
     });
   }
@@ -73,7 +80,7 @@ export class WeightComponent implements OnInit {
     this.busy.set(true); this.error.set(''); this.notice.set('');
     const date = this.date;
     const weightKg = Math.round(Number(this.weight) / (this.imperial() ? POUNDS_PER_KG : 1) * 10000) / 10000;
-    this.api.put<{entries:WeightEntry[];profile:UserProfile}>(`/me/weight-entries/${date}`, {weightKg}).subscribe({
+    this.weights.save(date, weightKg).subscribe({
       next: response => { this.accept(response); this.selectedDate.set(date); this.notice.set('Weight saved.'); },
       error: () => { this.busy.set(false); this.error.set('Your entry was not saved. Check your connection and try again.'); },
     });
@@ -85,7 +92,7 @@ export class WeightComponent implements OnInit {
   remove(entry: WeightEntry) {
     if (this.busy()) return;
     this.modal.confirm({nzTitle:'Delete this weigh-in?',nzContent:`Remove the entry for ${entry.date}?`,nzOkText:'Delete',nzCancelText:'Keep entry',nzOkDanger:true,nzCentered:true,nzWidth:'min(400px, calc(100vw - 32px))',nzClassName:'solid-modal',
-      nzOnOk: () => { this.busy.set(true); this.error.set(''); this.api.delete<{entries:WeightEntry[];profile:UserProfile}>(`/me/weight-entries/${entry.date}`).subscribe({
+      nzOnOk: () => { this.busy.set(true); this.error.set(''); this.weights.remove(entry.date).subscribe({
         next: response => { this.accept(response); this.selectFormDate(); this.notice.set('Entry deleted.'); },
         error: () => { this.busy.set(false); this.error.set('Could not delete this entry. Please try again.'); },
       }); },

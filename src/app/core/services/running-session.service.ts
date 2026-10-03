@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { RunningSession } from '../models/running-session.model';
 import { Observable, of } from 'rxjs';
+import { ReadCache } from '../utils/read-cache';
 import { map, tap, catchError, finalize, shareReplay, switchMap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { routeForStorage } from '../utils/route';
@@ -15,31 +16,41 @@ export class RunningSessionService {
   private readonly uploads = new Map<string, Observable<RunningSession>>();
   private readonly uploadedIds = new Map<string, string>();
 
-  private getStorageKey(): string {
-    const uid = this.auth.currentUser?.uid || 'local';
+  private readonly volatileOwners = new Set<string>();
+  private readonly memory = new Map<string, RunningSession[]>();
+  private readonly reads = new ReadCache<RunningSession[]>();
+
+  private owner(): string { return this.auth.currentUser?.uid || 'local'; }
+
+  private getStorageKey(uid = this.owner()): string {
     // IMPORTANT: prefix diferit de `fittrack_running_sessions:` — acela e citit de
     // MigrationService ca "date vechi de migrat"; cache-ul nu trebuie sa ajunga acolo.
     return `fittrack_cache_sessions:${uid}`;
   }
 
-  private loadLocal(): RunningSession[] {
+  private loadLocal(uid = this.owner()): RunningSession[] {
+    if (this.volatileOwners.has(uid)) return this.memory.get(uid) ?? [];
     if (typeof window === 'undefined') return [];
     try {
-      const raw = localStorage.getItem(this.getStorageKey());
+      const raw = localStorage.getItem(this.getStorageKey(uid));
       const parsed: unknown = raw ? JSON.parse(raw) : [];
       return Array.isArray(parsed) ? parsed : [];
     } catch {
-      return [];
+      return this.memory.get(uid) ?? [];
     }
   }
 
-  private saveLocal(sessions: RunningSession[]): void {
-    this.sessions.set(sessions);
+  private saveLocal(sessions: RunningSession[], uid = this.owner(), changed = true): void {
+    if (uid === this.owner()) this.sessions.set(sessions);
+    this.memory.set(uid, sessions);
+    if (changed) this.reads.replace(uid, sessions);
     if (typeof window === 'undefined') return;
     // A full/blocked browser cache must not prevent uploading a recorded route.
     try {
-      localStorage.setItem(this.getStorageKey(), JSON.stringify(sessions));
+      localStorage.setItem(this.getStorageKey(uid), JSON.stringify(sessions));
+      this.volatileOwners.delete(uid);
     } catch (error) {
+      this.volatileOwners.add(uid);
       console.warn('[running] browser cache unavailable', error);
     }
   }
@@ -53,24 +64,17 @@ export class RunningSessionService {
     return !!id && id.startsWith('r_');
   }
 
-  getSessions(): Observable<RunningSession[]> {
-    return this.api.get<{ sessions: RunningSession[] }>('/running-sessions').pipe(
-      map((res) => res.sessions),
-      map((serverSessions) => {
-        // nu pierdem sesiunile salvate offline: le pastram si le re-trimitem
-        const pending = this.loadLocal().filter((s) => this.isTempId(s.id));
-        const merged = [...pending, ...serverSessions];
-        this.saveLocal(merged);
-        this.resyncPending(pending);
-        return merged;
-      }),
-      catchError((err) => {
-        console.warn('API get running sessions failed, using local storage', err);
-        const local = this.loadLocal();
-        this.sessions.set(local);
-        return of(local);
-      })
-    );
+  getSessions(force = false): Observable<RunningSession[]> {
+    const uid = this.owner();
+    return this.reads.read(uid, () => this.loadLocal(uid), () =>
+      this.api.get<{ sessions: RunningSession[] }>('/running-sessions').pipe(
+        map(res => [...this.loadLocal(uid).filter(item => this.isTempId(item.id)), ...res.sessions]),
+        catchError(() => of(this.loadLocal(uid))),
+      ), value => {
+        if (uid !== this.owner()) return;
+        this.saveLocal(value, uid, false);
+        this.resyncPending(value.filter(item => this.isTempId(item.id)));
+      }, force).pipe(tap(value => { if (uid === this.owner()) { this.sessions.set(value); } }));
   }
 
   private resyncPending(pending: RunningSession[]): void {
@@ -83,6 +87,7 @@ export class RunningSessionService {
   }
 
   private upload(item: RunningSession): Observable<RunningSession> {
+    const uid = this.owner();
     const tempId = item.id!;
     const existing = this.uploads.get(tempId);
     if (existing) return existing;
@@ -90,7 +95,7 @@ export class RunningSessionService {
       map(response => response.session),
       tap(saved => {
         if (saved.id) this.uploadedIds.set(tempId, saved.id);
-        this.saveLocal(this.loadLocal().map(record => record.id === tempId ? saved : record));
+        this.saveLocal(this.loadLocal(uid).map(record => record.id === tempId ? saved : record), uid);
       }),
       finalize(() => this.uploads.delete(tempId)),
       // A delete waits for the same POST instead of starting another upload.
@@ -124,7 +129,8 @@ export class RunningSessionService {
       return upload.pipe(switchMap(saved => this.deleteSession(saved.id!)));
     }
     id = this.uploadedIds.get(id) ?? id;
-    const removeLocal = () => this.saveLocal(this.loadLocal().filter(item => item.id !== id));
+    const uid = this.owner();
+    const removeLocal = () => this.saveLocal(this.loadLocal(uid).filter(item => item.id !== id), uid);
     if (this.isTempId(id)) {
       removeLocal();
       return of(void 0);

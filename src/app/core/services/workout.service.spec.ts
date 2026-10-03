@@ -35,6 +35,14 @@ describe('Workout persistence', () => {
     expect(service.workouts()[0].name).toBe('Push');
   });
 
+  it('still confirms the uploaded workout when browser storage is blocked', () => {
+    const storage = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('Quota'); });
+    api.post.mockReturnValue(of({ workout: { ...record, id: 'uploaded-id' } }));
+    service.addWorkout(record).subscribe();
+    expect(service.workouts().some(item => item.id === 'uploaded-id')).toBe(true);
+    storage.mockRestore();
+  });
+
   it('waits for an in-flight upload before deleting its server record', () => {
     const upload = new Subject<{ workout: typeof record }>();
     api.post.mockReturnValue(upload);
@@ -59,8 +67,8 @@ describe('Workout persistence', () => {
     api.post.mockReturnValue(upload);
     api.get.mockReturnValue(of({ workouts: [] }));
     api.delete.mockReturnValue(of({ deleted: true }));
-    service.getWorkouts().subscribe();
-    service.getWorkouts().subscribe();
+    service.getWorkouts(true).subscribe();
+    service.getWorkouts(true).subscribe();
     service.deleteWorkout(pending.id).subscribe();
     upload.next({ workout: { ...record, id: 'uploaded-id' } });
     upload.complete();

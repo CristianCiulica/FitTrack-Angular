@@ -97,7 +97,7 @@
           >
             <article
               class="cardio-session-card"
-              *ngFor="let session of runningSessions()"
+              *ngFor="let session of runningSessions(); trackBy: trackRecord"
               [class.expanded]="expandedRuns().has(session.id!)"
             >
               <div class="cardio-session-header">
@@ -266,7 +266,7 @@
                 </tr>
               </thead>
               <tbody>
-                <ng-container *ngFor="let w of workoutTable.data">
+                <ng-container *ngFor="let w of workoutTable.data; trackBy: trackRecord">
                   <tr class="workout-row">
                     <td class="workout-name-cell">
                       <strong>{{ w.name }}</strong>
@@ -355,7 +355,7 @@
           </div>
 
           <div class="mobile-workout-list">
-            <article class="mobile-workout-card" *ngFor="let w of filteredWorkouts()">
+            <article class="mobile-workout-card" *ngFor="let w of filteredWorkouts(); trackBy: trackRecord">
               <div class="mobile-workout-header">
                 <div>
                   <h3>{{ w.name }}</h3>

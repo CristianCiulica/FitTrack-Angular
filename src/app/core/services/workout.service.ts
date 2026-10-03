@@ -1,6 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Workout } from '../models/workout.model';
 import { Observable, of } from 'rxjs';
+import { ReadCache } from '../utils/read-cache';
 import { map, tap, catchError, finalize, shareReplay, switchMap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { Auth } from '@angular/fire/auth';
@@ -21,29 +22,43 @@ export class WorkoutService {
     }, 0),
   );
 
-  private getStorageKey(): string {
-    const uid = this.auth.currentUser?.uid || 'local';
+  private readonly volatileOwners = new Set<string>();
+  private readonly memory = new Map<string, Workout[]>();
+  private readonly reads = new ReadCache<Workout[]>();
+
+  private owner(): string { return this.auth.currentUser?.uid || 'local'; }
+
+  private getStorageKey(uid = this.owner()): string {
     // IMPORTANT: prefix diferit de `fittrack_workouts:` — acela e citit de MigrationService
     // ca "date vechi de migrat"; daca am scrie acolo, cache-ul ar fi re-trimis la /api/migrate
     // si ar duplica toate datele in Mongo.
     return `fittrack_cache_workouts:${uid}`;
   }
 
-  private loadLocal(): Workout[] {
+  private loadLocal(uid = this.owner()): Workout[] {
+    if (this.volatileOwners.has(uid)) return this.memory.get(uid) ?? [];
     if (typeof window === 'undefined') return [];
     try {
-      const raw = localStorage.getItem(this.getStorageKey());
-      return raw ? JSON.parse(raw) : [];
+      const raw = localStorage.getItem(this.getStorageKey(uid));
+      const parsed: unknown = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
-      return [];
+      return this.memory.get(uid) ?? [];
     }
   }
 
-  private saveLocal(workouts: Workout[]): void {
+  private saveLocal(workouts: Workout[], uid = this.owner(), changed = true): void {
+    if (uid === this.owner()) {
+      this.workouts.set(workouts);
+      this.totalWorkouts.set(workouts.length);
+    }
+    this.memory.set(uid, workouts);
+    if (changed) this.reads.replace(uid, workouts);
     if (typeof window === 'undefined') return;
-    localStorage.setItem(this.getStorageKey(), JSON.stringify(workouts));
-    this.workouts.set(workouts);
-    this.totalWorkouts.set(workouts.length);
+    try {
+      localStorage.setItem(this.getStorageKey(uid), JSON.stringify(workouts));
+      this.volatileOwners.delete(uid);
+    } catch { this.volatileOwners.add(uid); /* Keep the latest snapshot in memory. */ }
   }
 
   // itemele create offline primesc id temporar pana ajung pe server
@@ -51,28 +66,19 @@ export class WorkoutService {
     return !!id && id.startsWith('w_');
   }
 
-  getWorkouts(): Observable<Workout[]> {
-    return this.api.get<{ workouts: Workout[] }>('/workouts').pipe(
-      map((res) => res.workouts),
-      map((serverWorkouts) => {
-        // nu pierdem itemele create offline: le pastram in fata listei si le re-trimitem
-        const pending = this.loadLocal().filter((w) => this.isTempId(w.id));
-        const merged = [...pending, ...serverWorkouts];
-        this.saveLocal(merged);
-        this.resyncPending(pending);
-        return merged;
-      }),
-      catchError((err) => {
-        console.warn('API get workouts failed, using local storage', err);
-        const local = this.loadLocal();
-        this.workouts.set(local);
-        this.totalWorkouts.set(local.length);
-        return of(local);
-      })
-    );
+  getWorkouts(force = false): Observable<Workout[]> {
+    const uid = this.owner();
+    return this.reads.read(uid, () => this.loadLocal(uid), () =>
+      this.api.get<{ workouts: Workout[] }>('/workouts').pipe(
+        map(res => [...this.loadLocal(uid).filter(item => this.isTempId(item.id)), ...res.workouts]),
+        catchError(() => of(this.loadLocal(uid))),
+      ), value => {
+        if (uid !== this.owner()) return;
+        this.saveLocal(value, uid, false);
+        this.resyncPending(value.filter(item => this.isTempId(item.id)));
+      }, force).pipe(tap(value => { if (uid === this.owner()) { this.workouts.set(value); this.totalWorkouts.set(value.length); } }));
   }
 
-  // re-trimite pe server workout-urile salvate doar local cat timp API-ul era picat
   private resyncPending(pending: Workout[]): void {
     for (const item of pending) {
       if (item.id && this.uploads.has(item.id)) continue;
@@ -83,6 +89,7 @@ export class WorkoutService {
   }
 
   private upload(item: Workout): Observable<Workout> {
+    const uid = this.owner();
     const tempId = item.id!;
     const existing = this.uploads.get(tempId);
     if (existing) return existing;
@@ -90,7 +97,7 @@ export class WorkoutService {
       map(response => response.workout),
       tap(saved => {
         if (saved.id) this.uploadedIds.set(tempId, saved.id);
-        this.saveLocal(this.loadLocal().map(record => record.id === tempId ? saved : record));
+        this.saveLocal(this.loadLocal(uid).map(record => record.id === tempId ? saved : record), uid);
       }),
       finalize(() => this.uploads.delete(tempId)),
       // A delete waits for the same POST instead of starting another upload.
@@ -118,7 +125,8 @@ export class WorkoutService {
 
   updateWorkout(id: string, workout: Partial<Workout>): Observable<Workout> {
     id = this.uploadedIds.get(id) ?? id;
-    const current = this.loadLocal();
+    const uid = this.owner();
+    const current = this.loadLocal(uid);
     const updated = current.map(item => item.id === id ? { ...item, ...workout } : item) as Workout[];
     const local = updated.find(item => item.id === id) ?? ({ ...workout, id } as Workout);
     if (this.isTempId(id)) {
@@ -127,7 +135,7 @@ export class WorkoutService {
     }
     return this.api.put<{ workout: Workout }>(`/workouts/${id}`, workout).pipe(
       map(res => res.workout),
-      tap(saved => this.saveLocal(this.loadLocal().map(item => item.id === id ? saved : item))),
+      tap(saved => this.saveLocal(this.loadLocal(uid).map(item => item.id === id ? saved : item), uid)),
     );
   }
 
@@ -139,7 +147,8 @@ export class WorkoutService {
       return upload.pipe(switchMap(saved => this.deleteWorkout(saved.id!)));
     }
     id = this.uploadedIds.get(id) ?? id;
-    const removeLocal = () => this.saveLocal(this.loadLocal().filter(item => item.id !== id));
+    const uid = this.owner();
+    const removeLocal = () => this.saveLocal(this.loadLocal(uid).filter(item => item.id !== id), uid);
     if (this.isTempId(id)) {
       removeLocal();
       return of(void 0);

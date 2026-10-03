@@ -53,8 +53,8 @@ describe('Running session persistence', () => {
     api.post.mockReturnValue(upload);
     api.get.mockReturnValue(of({ sessions: [] }));
     api.delete.mockReturnValue(of({ deleted: true }));
-    service.getSessions().subscribe();
-    service.getSessions().subscribe();
+    service.getSessions(true).subscribe();
+    service.getSessions(true).subscribe();
     service.deleteSession(pending.id).subscribe();
     upload.next({ session: { ...record, id: 'uploaded-id' } });
     upload.complete();

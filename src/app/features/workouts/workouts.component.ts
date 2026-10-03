@@ -1,5 +1,6 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { durationLabel } from '../../core/utils/workout-history';
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
@@ -47,6 +48,7 @@ type SortDirection = 'ascend' | 'descend' | null;
   styleUrls: ['./workouts.component.scss']
 })
 export class WorkoutsComponent implements OnInit {
+  private readonly destroy = inject(DestroyRef);
   readonly durationLabel = durationLabel;
   workouts = signal<Workout[]>([]);
   runningSessions = signal<RunningSession[]>([]);
@@ -78,6 +80,8 @@ export class WorkoutsComponent implements OnInit {
 
     return data;
   });
+
+  trackRecord(_index: number, record: { id?: string }) { return record.id ?? record; }
 
   //sortare pe fiecare coloana
   onSortOrderChange(column: WorkoutSortColumn, direction: string | null) {
@@ -207,7 +211,7 @@ export class WorkoutsComponent implements OnInit {
 
   ngOnInit() {
     this.refreshWorkouts();
-    this.runningSessionService.getSessions().subscribe((sessions) => {
+    this.runningSessionService.getSessions().pipe(takeUntilDestroyed(this.destroy)).subscribe((sessions) => {
       this.runningSessions.set(sessions);
     });
   }
@@ -227,7 +231,7 @@ export class WorkoutsComponent implements OnInit {
   }
 
   private refreshWorkouts() {
-    this.workoutService.getWorkouts().subscribe((data) => this.workouts.set(data));
+    this.workoutService.getWorkouts().pipe(takeUntilDestroyed(this.destroy)).subscribe((data) => this.workouts.set(data));
   }
 
   openEdit(workout: Workout) {
@@ -280,7 +284,7 @@ export class WorkoutsComponent implements OnInit {
     this.runningSessionService.deleteSession(id).subscribe({
       next: () => {
         this.message.success('Running session deleted!');
-        this.runningSessionService.getSessions().subscribe((sessions) => {
+        this.runningSessionService.getSessions().pipe(takeUntilDestroyed(this.destroy)).subscribe((sessions) => {
           this.runningSessions.set(sessions);
         });
       },

@@ -93,7 +93,7 @@
         <button
           type="button"
           class="day-cell"
-          *ngFor="let day of weekDays()"
+          *ngFor="let day of weekDays(); trackBy: trackDay"
           [class.selected]="day.selected"
           [class.today]="day.isToday"
           (click)="selectDay(day.date)"
@@ -204,7 +204,7 @@
 
         <div class="recent-list" *ngIf="recentWorkouts().length > 0; else noRecent">
           <a
-            *ngFor="let w of recentWorkouts()"
+            *ngFor="let w of recentWorkouts(); trackBy: trackWorkout"
             class="recent-item"
             routerLink="/workouts"
           >

@@ -1,6 +1,7 @@
+import { Subscription } from 'rxjs';
 import { LiquidGlassDirective } from '../../shared/components/liquid-glass/liquid-glass.directive';
 import { MAP_TILE_URL, MAP_TILE_OPTIONS } from '../../core/config/map-tiles';
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ElementRef, NgZone, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import * as L from 'leaflet';
@@ -91,6 +92,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private resizeFrame?: number;
   private trackingGeneration = 0;
   private destroyed = false;
+  private readonly weatherReads = new Subscription();
   private initialPosition?: L.LatLng;
   private previousBodyOverflow = '';
 
@@ -101,7 +103,10 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     });
   };
   private visibilityHandler = () => {
-    if (document.visibilityState === 'visible') this.resizeMap();
+    if (document.visibilityState === 'visible') {
+      this.resizeMap();
+      this.updateElapsedTime();
+    }
   };
 
   private resizeHandler = () => this.resizeMap();
@@ -112,6 +117,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     private runningSessionService: RunningSessionService,
     private weatherService: WeatherService,
     private modal: NzModalService,
+    @Optional() private zone: NgZone | null = null,
   ) {}
 
   ngOnInit(): void {
@@ -124,6 +130,11 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngAfterViewInit(): void {
+    if (this.zone) this.zone.runOutsideAngular(() => this.connectMap());
+    else this.connectMap();
+  }
+
+  private connectMap(): void {
     this.initMap();
     window.addEventListener('resize', this.resizeHandler);
     document.addEventListener('visibilitychange', this.visibilityHandler);
@@ -136,6 +147,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   ngOnDestroy(): void {
     this.destroyed = true;
+    this.weatherReads.unsubscribe();
     document.body.style.overflow = this.previousBodyOverflow;
     this.resizeObserver?.disconnect();
     if (this.resizeFrame !== undefined) cancelAnimationFrame(this.resizeFrame);
@@ -303,12 +315,16 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private startElapsedTimer() {
     this.stopElapsedTimer();
-    this.elapsedTimer = setInterval(() => {
-      if (this.startTime) {
-        this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
-        this.updateMetrics();
-      }
-    }, 1000);
+    this.elapsedTimer = setInterval(() => this.updateElapsedTime(), 1000);
+  }
+
+  private updateElapsedTime() {
+    if (!this.startTime || !this.isTracking || this.destroyed) return;
+    const update = () => {
+      this.elapsedSeconds = Math.floor((Date.now() - this.startTime!) / 1000);
+      this.updateMetrics();
+    };
+    if (this.zone) this.zone.run(update); else update();
   }
 
   private stopElapsedTimer() {
@@ -660,7 +676,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         if (this.map && !this.isTracking) {
           this.map.setView([latitude, longitude], 17);
         }
-        this.weatherService.getWeatherByCoords(latitude, longitude).subscribe({
+        this.weatherReads.add(this.weatherService.getWeatherByCoords(latitude, longitude).subscribe({
           next: (summary) => {
             this.weather = summary;
             this.weatherLoading = false;
@@ -669,7 +685,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
             this.weatherError = 'Unable to load weather right now.';
             this.weatherLoading = false;
           },
-        });
+        }));
       },
       () => { if (!this.destroyed) this.loadWeatherForFallbackCity(); },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
@@ -677,7 +693,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private loadWeatherForFallbackCity() {
-    this.weatherService.getCityWeather(WEATHER_FALLBACK_CITY).subscribe({
+    this.weatherReads.add(this.weatherService.getCityWeather(WEATHER_FALLBACK_CITY).subscribe({
       next: (summary) => {
         this.weather = summary;
         this.weatherLoading = false;
@@ -686,7 +702,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         this.weatherError = 'Unable to load weather right now.';
         this.weatherLoading = false;
       },
-    });
+    }));
   }
 
   uvLabel(uv: number): string {
