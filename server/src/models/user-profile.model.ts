@@ -15,6 +15,8 @@ const userProfileSchema = new Schema(
     theme: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
     goal: { type: String, enum: ['lose', 'maintain', 'gain'], default: 'maintain' },
     goalRate: { type: Number, default: 0.5 },
+    moveGoal: { type: Number, default: 500 },
+    exerciseGoal: { type: Number, default: 30 },
     weeklyWorkoutGoal: { type: Number, default: 4 },
     migratedFromLocalStorage: { type: Boolean, default: false },
   },

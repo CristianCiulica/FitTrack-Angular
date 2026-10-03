@@ -39,6 +39,7 @@ export class AppMenuComponent {
   });
 
   readonly links: MenuLink[] = [
+    { label: 'Weight', description: 'Daily weigh-ins & your progress', icon: 'line-chart', path: '/weight' },
     { label: 'Account', description: 'Your details & body metrics', icon: 'user', path: '/account' },
     { label: 'Settings', description: 'Units, reminders & more', icon: 'setting', path: '/settings' },
   ];

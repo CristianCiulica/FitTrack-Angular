@@ -1,16 +1,18 @@
 import { vi } from 'vitest';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Subject } from 'rxjs';
 import { StartWorkoutComponent } from './start-workout.component';
 
 describe('Workout session recovery', () => {
   let component: StartWorkoutComponent;
   let save: ReturnType<typeof vi.fn>;
+  let history: ReturnType<typeof vi.fn>;
   beforeEach(() => {
     vi.useFakeTimers();
     save = vi.fn(() => of({ id: 'saved' }));
+    history = vi.fn(() => of([]));
     component = new StartWorkoutComponent(
       { currentUserId: 'test' } as any,
-      { getWorkouts: () => of([]), addWorkout: save } as any,
+      { getWorkouts: history, addWorkout: save } as any,
       { weightKg: () => 75 } as any,
       { success: vi.fn(), error: vi.fn(), warning: vi.fn() } as any,
       { queryParams: of({}) } as any,
@@ -95,4 +97,34 @@ describe('Workout session recovery', () => {
     expect(component.saving()).toBe(false);
     expect(component.canLeaveWorkout()).toBe(false);
   });
+  it('prefills the corresponding previous set as a real pair and keeps edited completed sets', () => {
+    history.mockReturnValue(of([{date:component.targetDate(),name:'Two exercises',userId:'test',exercises:[{exerciseName:'Press',muscleGroup:'Chest',sets:2,reps:12,weight:60,setWeights:[50,60],setReps:[12,8]}]}]));
+    component.startWorkout();
+    expect(component.currentWeight()).toBe(50); expect(component.currentReps()).toBe(12);
+    component.finishSet(); component.skipRest();
+    expect(component.currentWeight()).toBe(60); expect(component.currentReps()).toBe(8);
+    component.onWeightInput('65'); component.finishSet(); component.previousSet();
+    expect(component.currentWeight()).toBe(65);
+  });
+
+  it('does not overwrite typing when history arrives late', () => {
+    const response = new Subject<any[]>(); history.mockReturnValue(response);
+    component.startWorkout(); component.onWeightInput('72.5');
+    response.next([{date:component.targetDate(),name:'Past',userId:'test',exercises:[{exerciseName:'Press',muscleGroup:'Chest',sets:1,reps:8,weight:40}]}]);
+    expect(component.currentWeight()).toBe(72.5);
+    expect(component.previousSetData()?.weight).toBe(40);
+  });
+
+  it('saves actual elapsed time, excluding save retries, and marks local-only saves honestly', () => {
+    vi.advanceTimersByTime(90000);
+    component.finishSet(); component.skipRest(); component.skipSet(); component.skipSet();
+    save.mockReturnValueOnce(throwError(() => new Error('Offline')));
+    component.finishWorkout();
+    vi.advanceTimersByTime(10000);
+    save.mockReturnValueOnce(of({id:'w_local'})); component.finishWorkout();
+    expect(save.mock.calls[1][0].durationSeconds).toBe(90);
+    expect(component.finishedDuration()).toBe(90);
+    expect(component.savedLocally()).toBe(true);
+  });
+
 });

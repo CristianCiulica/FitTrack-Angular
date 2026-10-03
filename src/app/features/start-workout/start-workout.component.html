@@ -59,6 +59,7 @@
           </a>
         </li>
 
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item"><a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a></li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
           <a
             [routerLink]="workoutInProgress() ? null : '/account'"
@@ -150,35 +151,24 @@
 
         <!-- FINISHED STATE -->
         <ng-container *ngIf="state() === 'finished'">
-          <nz-card class="finish-card">
-            <span nz-icon nzType="check-circle" style="font-size: 64px; color: #52c41a;"></span>
-            <h2>Workout complete!</h2>
-            <p>Great job! You burned ~{{ finishedCalories() }} kcal. Your workout was saved to your history.</p>
-
-            <!-- totalul ridicat + progres fata de ultima sesiune identica -->
-            <div class="finish-volume">
-              <span class="fv-label">Total lifted</span>
-              <strong class="fv-value">{{ finishedVolume() | number: '1.0-0' }} kg</strong>
-              <span
-                class="fv-delta"
-                *ngIf="finishedDelta() !== null"
-                [class.up]="finishedDelta()! > 0"
-                [class.down]="finishedDelta()! < 0"
-              >
-                <ng-container *ngIf="finishedDelta()! > 0">
-                  +{{ finishedDelta() | number: '1.0-0' }} kg vs last time · progressive overload! 🔥
-                </ng-container>
-                <ng-container *ngIf="finishedDelta()! < 0">
-                  {{ finishedDelta() | number: '1.0-0' }} kg vs last time · lighter session
-                </ng-container>
-                <ng-container *ngIf="finishedDelta() === 0">
-                  Same as last time · consistency counts
-                </ng-container>
-              </span>
+          <section class="session-summary" aria-labelledby="summary-title">
+            <div class="summary-check" aria-hidden="true">✓</div>
+            <span class="summary-eyebrow">SESSION COMPLETE</span>
+            <h1 id="summary-title">{{ currentRoutine().name }}</h1>
+            <p class="summary-date">{{ targetDate() | date:'EEEE, MMMM d' }}</p>
+            <div class="summary-metrics">
+              <div><span>Duration</span><strong>{{ durationLabel(finishedDuration()) }}</strong><small>including rests</small></div>
+              <div><span>Sets completed</span><strong>{{ completedSets() }}<small> / {{ totalSets() }}</small></strong><small>{{ totalSets() - completedSets() }} skipped</small></div>
+              <div><span>Total volume</span><strong>{{ finishedVolume() | number:'1.0-0' }}<small> kg</small></strong><small>reps × weight</small></div>
+              <div><span>Estimated energy</span><strong>{{ finishedCalories() }}<small> kcal</small></strong><small>from completed sets</small></div>
             </div>
-
-            <button nz-button nzType="primary" (click)="reset()" routerLink="/dashboard">Go to dashboard</button>
-          </nz-card>
+            @if (finishedPrevious(); as previous) {
+              <div class="summary-comparison"><span>Compared with {{ previous.date | date:'MMM d' }}</span><strong>{{ finishedDelta()! > 0 ? '+' : '' }}{{ finishedDelta() | number:'1.0-0' }} kg <small>volume</small></strong>@if (previous.durationSeconds != null) { <small>Previous duration · {{ durationLabel(previous.durationSeconds) }}</small> }</div>
+            }
+            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><strong>{{ exercise.name }}</strong><span>{{ exercise.sets }} {{ exercise.sets === 1 ? 'set' : 'sets' }} · {{ exercise.volume | number:'1.0-0' }} kg</span></div> }</div>
+            <p class="summary-saved" role="status">{{ savedLocally() ? 'Saved on this device. It will sync when you reconnect and open your history.' : 'Saved to your workout history.' }}</p>
+            <div class="summary-actions"><button type="button" (click)="exportSummary()" [disabled]="exporting()">{{ exporting() ? 'Preparing image…' : 'Save as image' }}</button><a routerLink="/dashboard" class="summary-primary" (click)="reset()">Back to Home</a></div>
+          </section>
         </ng-container>
 
       </div>
@@ -360,19 +350,11 @@
           </div>
         </div>
       </div>
-      <div class="overload-hint" *ngIf="lastTimeWeight() as last">
-        <span class="hint-label">
-          Last time:
-          <strong>{{ last }} kg<ng-container *ngIf="lastTimeReps() as lr"> × {{ lr }} reps</ng-container></strong>
-        </span>
-        <span
-          class="hint-delta"
-          *ngIf="overloadDelta() as delta"
-          [class.up]="delta > 0"
-          [class.down]="delta < 0"
-        >
-          {{ delta > 0 ? '+' + delta : delta }} kg {{ delta > 0 ? '· progressive overload!' : '' }}
-        </span>
+      <div class="previous-performance">
+        @if (previousSetData(); as previous) {
+          <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} reps <i>·</i> {{ previous.weight }} kg</strong></div>
+          <button type="button" (click)="currentWeight.set(previous.weight); currentReps.set(previous.reps)">Use these values</button>
+        } @else { <p>{{ historyLoading() ? 'Loading your previous session…' : historyUnavailable() ? 'Previous session unavailable. You can enter your values.' : 'First time logging this exercise. Start with your own values.' }}</p> }
       </div>
     </div>
 
@@ -431,3 +413,11 @@
     <button *ngIf="state() === 'review'" nz-button nzType="primary" nzSize="large" class="live-primary" [disabled]="completedSets() === 0" [nzLoading]="saving()" (click)="finishWorkout()"><span nz-icon nzType="check"></span> Save workout</button>
   </div>
 </div>
+
+<nz-modal [nzVisible]="!!summaryImage()" nzTitle="Your session" [nzFooter]="null" nzCentered
+  [nzWidth]="'min(430px, calc(100vw - 32px))'" nzClassName="solid-modal" (nzOnCancel)="summaryImage.set(null)">
+  <ng-container *nzModalContent>
+    <img class="summary-share-image" [src]="summaryImage()" alt="Your workout summary image" />
+    <a class="summary-download" [href]="summaryImage()" [attr.download]="'fittrack-workout-' + targetDate() + '.png'">Download image</a>
+  </ng-container>
+</nz-modal>

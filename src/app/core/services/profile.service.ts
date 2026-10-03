@@ -24,6 +24,8 @@ export class ProfileService {
   readonly units = computed(() => this.profile()?.units ?? 'metric');
   readonly goal = computed(() => this.profile()?.goal ?? 'maintain');
   readonly goalRate = computed(() => this.profile()?.goalRate ?? 0.5);
+  readonly moveGoal = computed(() => this.profile()?.moveGoal ?? 500);
+  readonly exerciseGoal = computed(() => this.profile()?.exerciseGoal ?? 30);
   readonly weeklyWorkoutGoal = computed(() => this.profile()?.weeklyWorkoutGoal ?? 4);
 
   // onboarding-ul e complet cand avem datele de baza pentru BMI
@@ -102,6 +104,19 @@ export class ProfileService {
         console.warn('[ProfileService] API patch failed, falling back to optimistic UI state', err);
         return of(newProfile);
       })
+    );
+  }
+
+  // New measurements and goals are confirmed by the server before updating UI.
+  acceptServerProfile(profile: UserProfile): void {
+    this.profile.set(profile);
+    try { this.saveLocal(profile); } catch { /* Cache is optional. */ }
+  }
+
+  saveActivityGoals(update: Pick<UserProfile, 'moveGoal' | 'exerciseGoal' | 'weeklyWorkoutGoal'>): Observable<UserProfile> {
+    return this.api.patch<{ profile: UserProfile }>('/me', update).pipe(
+      map(response => response.profile),
+      tap(profile => this.acceptServerProfile(profile)),
     );
   }
 

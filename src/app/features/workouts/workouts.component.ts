@@ -1,3 +1,4 @@
+import { durationLabel } from '../../core/utils/workout-history';
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -46,6 +47,7 @@ type SortDirection = 'ascend' | 'descend' | null;
   styleUrls: ['./workouts.component.scss']
 })
 export class WorkoutsComponent implements OnInit {
+  readonly durationLabel = durationLabel;
   workouts = signal<Workout[]>([]);
   runningSessions = signal<RunningSession[]>([]);
   sortColumn = signal<WorkoutSortColumn>('date');

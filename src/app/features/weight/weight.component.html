@@ -1,0 +1,101 @@
+<nz-layout class="app-layout">
+  <nz-sider [nzWidth]="208" class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
+    </div>
+    <ul nz-menu nzMode="inline" class="sidebar-menu">
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/dashboard" aria-label="Dashboard">
+          <span nz-icon nzType="ft:home"></span><span>Home</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/workouts" aria-label="Workouts">
+          <span nz-icon nzType="ft:history"></span><span>History</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/start-workout" aria-label="Start workout">
+          <span nz-icon nzType="ft:workout"></span><span>Workout</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/running" aria-label="Running">
+          <span nz-icon nzType="ft:run"></span><span>Run</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
+        <a routerLink="/bmi" aria-label="Nutrition calculator">
+          <span nz-icon nzType="ft:nutrition"></span><span>Nutrition</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/account" aria-label="Account">
+          <span nz-icon nzType="user"></span><span>Account</span>
+        </a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/settings" aria-label="Settings">
+          <span nz-icon nzType="setting"></span><span>Settings</span>
+        </a>
+      </li>
+      <li nz-menu-item class="sidebar-logout-item" (click)="logout()">
+        <a aria-label="Logout">
+          <span>Logout</span>
+        </a>
+      </li>
+    </ul>
+  </nz-sider>
+
+  <nz-layout class="main-layout">
+    <nz-header class="app-header">
+      <div class="header-left">
+        <app-menu></app-menu>
+        <h2>
+          <span class="desktop-page-title">Weight</span>
+          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+        </h2>
+      </div>
+
+    </nz-header>
+
+    <nz-content class="app-content">
+      <div class="weight-page">
+        <header class="weight-heading"><span class="eyebrow">YOUR PROGRESS</span><h1>Every day adds up.</h1><p>A simple place to follow your weight over time.</p></header>
+        @if (error()) { <div class="weight-error" role="alert">{{ error() }} @if (!loaded()) { <button type="button" (click)="load()" [disabled]="loading()">Try again</button> }</div> }
+        <section class="weight-card" aria-labelledby="weight-chart-title" [attr.aria-busy]="loading()">
+          <div class="weight-chart-head"><div><h2 id="weight-chart-title">Weight</h2>@if (latest(); as entry) { <strong class="current-weight">{{ displayWeight(entry.weightKg) | number:'1.1-1' }} <small>{{ unit() }}</small></strong><span class="weight-asof">Latest · {{ entry.date | date:'MMM d, y' }}</span> } @else { <strong class="current-weight">— <small>{{ unit() }}</small></strong> }</div><div class="weight-change">@if (chart().change !== null) { <strong>{{ chart().change! > 0 ? '+' : '' }}{{ chart().change | number:'1.1-1' }} {{ unit() }}</strong><span>in selected period</span> }</div></div>
+          <div class="weight-ranges" role="group" aria-label="Chart period">@for (range of ranges; track range.label) { <button type="button" [attr.aria-pressed]="period() === range.days" [class.selected]="period() === range.days" (click)="period.set(range.days)">{{ range.label }}</button> }</div>
+          @if (loading()) { <div class="weight-empty" role="status">Loading your progress…</div> }
+          @else if (chart().points.length) {
+            <div class="weight-plot">
+              <div class="weight-axis"><span>{{ chart().max | number:'1.1-1' }}</span><span>{{ chart().mid | number:'1.1-1' }}</span><span>{{ chart().min | number:'1.1-1' }}</span></div>
+              <svg viewBox="0 0 360 180" role="img" aria-label="Weight trend for the selected period. Exact measurements are listed below.">
+                <defs><linearGradient id="weight-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#007aff" stop-opacity=".16"/><stop offset="100%" stop-color="#007aff" stop-opacity="0"/></linearGradient></defs>
+                <path d="M0,12 H360 M0,90 H360 M0,168 H360" class="chart-grid"/>
+                @if (chart().points.length > 1) { <path [attr.d]="chart().path + ' L' + chart().points[chart().points.length - 1].x + ',178 L' + chart().points[0].x + ',178 Z'" fill="url(#weight-fill)"/> }
+                <path [attr.d]="chart().path" class="chart-line"/>
+                @for (point of chart().points; track point.date) { <g (click)="selectedDate.set(point.date)" class="chart-point"><circle [attr.cx]="point.x" [attr.cy]="point.y" r="12" fill="transparent"/><circle [attr.cx]="point.x" [attr.cy]="point.y" [attr.r]="selected()?.date === point.date ? 5 : 3"/><title>{{ point.date }}: {{ point.value | number:'1.1-1' }} {{ unit() }}</title></g> }
+              </svg>
+            </div>
+            <div class="weight-date-axis"><span>{{ chart().points[0].date | date:'MMM d' }}</span><span>{{ chart().points[chart().points.length-1].date | date:'MMM d' }}</span></div>
+            <label class="inspect-weight">Explore <select aria-label="Inspect a weight measurement" [ngModel]="selected()?.date" (ngModelChange)="selectedDate.set($event)">@for (point of chart().points; track point.date) { <option [value]="point.date">{{ point.date | date:'MMM d, y' }} · {{ point.value | number:'1.1-1' }} {{ unit() }}</option> }</select></label>
+          } @else { <div class="weight-empty"><span class="empty-weight-mark" aria-hidden="true">↗</span><strong>{{ entries().length ? 'No entries in this period' : 'Your progress starts here' }}</strong><p>{{ entries().length ? 'Choose a wider range to see your earlier measurements.' : 'Log your first weigh-in to start your chart.' }}</p></div> }
+        </section>
+        <section class="weight-card" aria-labelledby="weight-log-title"><div class="weight-section-head"><h2 id="weight-log-title">Log your weight</h2><span>One entry per day</span></div>
+          <form class="weight-form" (ngSubmit)="save()">
+            <label>Date<input type="date" name="date" [max]="today" min="1900-01-01" required [(ngModel)]="date" (ngModelChange)="selectFormDate()" [disabled]="busy()"/></label>
+            <label>Weight ({{ unit() }})<input id="weight-input" type="number" name="weight" inputmode="decimal" step="0.1" [min]="imperial() ? 2.3 : 1" [max]="imperial() ? 1102.3 : 500" required [(ngModel)]="weight" [disabled]="busy()" placeholder="0.0"/></label>
+            <button class="weight-primary" type="submit" [disabled]="!valid() || busy()">{{ busy() ? 'Saving…' : editing() ? 'Update entry' : 'Save weight' }}</button>
+          </form>
+          <p class="weight-note">Your latest weigh-in updates your Account weight.</p>
+          @if (notice()) { <p class="weight-notice" role="status">{{ notice() }}</p> }
+        </section>
+        @if (recent().length) { <section class="weight-card weight-history" aria-labelledby="weight-history-title"><div class="weight-section-head"><h2 id="weight-history-title">Your entries</h2><span>{{ entries().length }} weigh-ins</span></div><div class="weight-entry-list">@for (entry of recent(); track entry.date) { <div class="weight-entry"><div><strong>{{ displayWeight(entry.weightKg) | number:'1.1-1' }} <small>{{ unit() }}</small></strong><span>{{ entry.date | date:'MMM d, y' }}</span></div><div class="weight-entry-actions"><button type="button" [disabled]="busy()" [attr.aria-label]="'Edit weight for ' + entry.date" (click)="edit(entry)">Edit</button><button type="button" [disabled]="busy()" [attr.aria-label]="'Delete weight for ' + entry.date" (click)="remove(entry)">Delete</button></div></div> }</div></section> }
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

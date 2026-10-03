@@ -9,6 +9,7 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
 import {
+  LineChartOutline,
   CalendarOutline,
   DashboardOutline,
   DeleteOutline,
@@ -74,7 +75,8 @@ export const appConfig: ApplicationConfig = {
     provideFirestore(() => getFirestore()),
 
     provideNzIcons([
-      CalendarOutline,
+      LineChartOutline,
+  CalendarOutline,
       DashboardOutline,
       DeleteOutline,
       EditOutline,

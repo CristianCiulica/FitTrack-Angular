@@ -29,6 +29,7 @@ const workoutSchema = new Schema(
     userId: { type: String, required: true, index: true },
     name: { type: String, required: true },
     date: { type: String, required: true },
+    durationSeconds: { type: Number, min: 0, max: 604800, default: undefined },
     notes: { type: String, default: '' },
     isPredefined: { type: Boolean, default: false },
     exercises: { type: [exerciseLogSchema], default: [] },

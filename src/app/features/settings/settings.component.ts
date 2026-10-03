@@ -1,3 +1,4 @@
+import { ActivityGoalsComponent } from '../../shared/components/activity-goals/activity-goals.component';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +22,7 @@ import { ThemeService } from '../../core/services/theme.service';
   standalone: true,
   imports: [
     CommonModule,
+    ActivityGoalsComponent,
     FormsModule,
     RouterLink,
     RouterLinkActive,

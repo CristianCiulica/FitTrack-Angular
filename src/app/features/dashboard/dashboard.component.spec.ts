@@ -17,7 +17,7 @@ describe('Dashboard Activity data', () => {
     sessions.set([]);
     units.set('metric');
     TestBed.configureTestingModule({ providers: [
-      { provide: ProfileService, useValue: { weightKg: signal(75), weeklyWorkoutGoal: signal(4), units } },
+      { provide: ProfileService, useValue: { moveGoal: signal(500), exerciseGoal: signal(30), weightKg: signal(75), weeklyWorkoutGoal: signal(4), units } },
       { provide: RunningSessionService, useValue: { sessions } },
     ] });
     component = TestBed.runInInjectionContext(() => new DashboardComponent(

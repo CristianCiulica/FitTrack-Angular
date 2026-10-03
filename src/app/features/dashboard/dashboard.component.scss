@@ -1266,3 +1266,9 @@
     }
   }
 }
+
+.activity-heading-actions { display: flex; align-items: center; color: var(--ink-secondary); font-size: 12px; }
+.ring-done { display: inline-block; margin-left: 3px; color: inherit; font-size: 11px; }
+.activity-ring-progress.goal-closed { animation: ring-complete .8s ease-out; transform-origin: 80px 80px; }
+@keyframes ring-complete { 0%, 100% { stroke-width: 15; } 45% { stroke-width: 18; } }
+@media (prefers-reduced-motion: reduce) { .activity-ring-progress.goal-closed { animation: none; } }

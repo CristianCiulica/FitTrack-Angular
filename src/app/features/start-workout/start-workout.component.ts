@@ -1,3 +1,6 @@
+import { previousExercises, PreviousExercise, exerciseKey, workoutVolume, durationLabel } from '../../core/utils/workout-history';
+import { createWorkoutSummaryImage } from '../../core/utils/workout-share';
+import { localDateKey } from '../../core/utils/weight-progress';
 import { Component, HostListener, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, ActivatedRoute } from '@angular/router';
@@ -761,7 +764,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
   styleUrls: ['./start-workout.component.scss']
 })
 export class StartWorkoutComponent implements OnInit, OnDestroy {
-  targetDate = signal<string>(new Date().toISOString().split('T')[0]);
+  targetDate = signal<string>(localDateKey());
 
   state = signal<'setup' | 'active' | 'rest' | 'review' | 'finished'>('setup');
 
@@ -787,35 +790,32 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   currentReps = signal(0);
   private loggedWeights: (number | null)[][] = [];
   private loggedReps: (number | null)[][] = [];
-  // ultima greutate si ultimele repetari pe fiecare exercitiu, din istoric
-  private lastWeights = signal(new Map<string, number>());
-  private lastReps = signal(new Map<string, number>());
-  // istoricul complet, pentru comparatia de volum de la finalul antrenamentului
+  private previousByExercise = signal(new Map<string, PreviousExercise>());
   private historyWorkouts: Workout[] = [];
-
-  // rezumatul de final: cat ai ridicat in total + diferenta fata de data trecuta
+  private sessionStartedAt = 0;
+  private sessionEndedAt: number | null = null;
+  private sessionGeneration = 0;
+  private inputsTouched = false;
+  readonly historyLoading = signal(false);
+  readonly historyUnavailable = signal(false);
+  readonly previousSetData = computed(() => {
+    const exercise = this.currentExercise();
+    const previous = exercise ? this.previousByExercise().get(exerciseKey(exercise.name)) : undefined;
+    if (!previous) return null;
+    const index = Math.min(this.currentSetIndex() - 1, previous.pairs.length - 1);
+    return {...previous.pairs[index], date: previous.date, set: index + 1};
+  });
+  readonly lastTimeWeight = computed(() => this.previousSetData()?.weight ?? null);
+  readonly lastTimeReps = computed(() => this.previousSetData()?.reps ?? null);
   finishedVolume = signal(0);
   finishedDelta = signal<number | null>(null);
-
-  // greutatea si repetarile folosite data trecuta la exercitiul curent
-  lastTimeWeight = computed(() => {
-    const ex = this.currentExercise();
-    if (!ex) return null;
-    return this.lastWeights().get(ex.name.toLowerCase()) ?? null;
-  });
-
-  lastTimeReps = computed(() => {
-    const ex = this.currentExercise();
-    if (!ex) return null;
-    return this.lastReps().get(ex.name.toLowerCase()) ?? null;
-  });
-
-  // diferenta fata de data trecuta (pozitiv = progres)
-  overloadDelta = computed(() => {
-    const last = this.lastTimeWeight();
-    if (last === null || last === 0) return null;
-    return Math.round((this.currentWeight() - last) * 10) / 10;
-  });
+  finishedDuration = signal(0);
+  finishedPrevious = signal<Workout | null>(null);
+  finishedExercises = signal<{name:string;sets:number;volume:number}[]>([]);
+  savedLocally = signal(false);
+  exporting = signal(false);
+  summaryImage = signal<string | null>(null);
+  readonly durationLabel = durationLabel;
 
   restTimeTarget = signal(60);
   restTimeRemaining = signal(60);
@@ -895,6 +895,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.stopTimer();
+    this.sessionGeneration++;
   }
 
   logout() {
@@ -1068,42 +1069,31 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.completedSets.set(0);
     this.loggedWeights = this.currentRoutine().exercises.map(ex => Array(ex.sets).fill(null));
     this.loggedReps = this.currentRoutine().exercises.map(ex => Array(ex.sets).fill(null));
+    this.sessionStartedAt = Date.now();
+    this.sessionEndedAt = null;
+    this.inputsTouched = false;
+    this.savedLocally.set(false);
+    this.state.set('active');
     this.loadLastWeights();
     this.syncCurrentWeight();
     this.syncCurrentReps();
-    this.state.set('active');
   }
 
-  // cauta in istoricul salvat ultima greutate si ultimele repetari per exercitiu
   private loadLastWeights() {
-    this.lastWeights.set(new Map());
-    this.lastReps.set(new Map());
-    this.workoutService.getWorkouts().subscribe((workouts) => {
-      const weights = new Map<string, number>();
-      const reps = new Map<string, number>();
-      const sorted = [...workouts].sort((a, b) => b.date.localeCompare(a.date));
-      this.historyWorkouts = sorted;
-      for (const w of sorted) {
-        for (const ex of w.exercises) {
-          const key = ex.exerciseName.toLowerCase();
-          if (!weights.has(key)) {
-            const logged = ex.setWeights?.length ? Math.max(...ex.setWeights) : ex.weight;
-            if (logged > 0) weights.set(key, logged);
-          }
-          // doar repetarile logate efectiv conteaza (reps oficial poate fi planul)
-          if (!reps.has(key) && ex.setReps?.length) {
-            reps.set(key, Math.max(...ex.setReps));
-          }
-        }
-      }
-      this.lastWeights.set(weights);
-      this.lastReps.set(reps);
-      // istoricul soseste asincron; reasezam valorile propuse acum ca stim
-      // cat s-a lucrat data trecuta (doar daca userul nu a logat inca un set)
-      if (this.workoutInProgress() && !this.completedSets()) {
-        this.syncCurrentWeight();
-        this.syncCurrentReps();
-      }
+    const generation = ++this.sessionGeneration;
+    this.previousByExercise.set(new Map()); this.historyWorkouts = [];
+    this.historyLoading.set(true); this.historyUnavailable.set(false);
+    this.workoutService.getWorkouts().subscribe({
+      next: workouts => {
+        if (generation !== this.sessionGeneration) return;
+        this.historyLoading.set(false);
+        const sorted = [...workouts].filter(w => !w.isPredefined && w.date.slice(0,10) <= this.targetDate())
+          .sort((a,b) => b.date.localeCompare(a.date) || new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
+        this.historyWorkouts = sorted;
+        this.previousByExercise.set(previousExercises(sorted, this.targetDate()));
+        if (this.workoutInProgress() && !this.inputsTouched) { this.syncCurrentWeight(); this.syncCurrentReps(); }
+      },
+      error: () => { if (generation === this.sessionGeneration) { this.historyLoading.set(false); this.historyUnavailable.set(true); } },
     });
   }
 
@@ -1114,21 +1104,23 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     const logged = this.loggedWeights[exIdx];
     const saved = logged?.[this.currentSetIndex() - 1];
     const previous = logged?.slice(0, this.currentSetIndex() - 1).filter((value): value is number => value !== null).at(-1);
-    if (saved != null || previous != null) {
-      this.currentWeight.set(saved ?? previous!);
+    if (saved != null) {
+      this.currentWeight.set(saved);
       return;
     }
     const ex = this.currentExercise();
-    const lastTime = ex ? this.lastWeights().get(ex.name.toLowerCase()) : undefined;
+    const lastTime = this.previousSetData()?.weight;
     const planned = ex?.weight ?? 0;
-    this.currentWeight.set(lastTime && lastTime > 0 ? lastTime : planned);
+    this.currentWeight.set(lastTime ?? previous ?? planned);
   }
 
   adjustWeight(delta: number) {
+    this.inputsTouched = true;
     this.currentWeight.set(Math.min(1000, Math.max(0, Math.round((this.currentWeight() + delta) * 10) / 10)));
   }
 
   onWeightInput(value: string) {
+    this.inputsTouched = true;
     const parsed = parseFloat(value);
     if (!isNaN(parsed) && parsed >= 0 && parsed <= 1000) {
       this.currentWeight.set(Math.round(parsed * 10) / 10);
@@ -1142,20 +1134,22 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     const logged = this.loggedReps[exIdx];
     const saved = logged?.[this.currentSetIndex() - 1];
     const previous = logged?.slice(0, this.currentSetIndex() - 1).filter((value): value is number => value !== null).at(-1);
-    if (saved != null || previous != null) {
-      this.currentReps.set(saved ?? previous!);
+    if (saved != null) {
+      this.currentReps.set(saved);
       return;
     }
     const ex = this.currentExercise();
-    const lastTime = ex ? this.lastReps().get(ex.name.toLowerCase()) : undefined;
-    this.currentReps.set(lastTime && lastTime > 0 ? lastTime : ex?.reps ?? 0);
+    const lastTime = this.previousSetData()?.reps;
+    this.currentReps.set(lastTime ?? previous ?? ex?.reps ?? 0);
   }
 
   adjustReps(delta: number) {
+    this.inputsTouched = true;
     this.currentReps.set(Math.min(500, Math.max(0, Math.round(this.currentReps() + delta))));
   }
 
   onRepsInput(value: string) {
+    this.inputsTouched = true;
     const parsed = parseInt(value, 10);
     if (!isNaN(parsed) && parsed >= 0 && parsed <= 500) {
       this.currentReps.set(parsed);
@@ -1194,6 +1188,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         this.currentSetIndex.set(this.currentExercise()!.sets);
       }
     }
+    this.inputsTouched = false;
+    this.sessionEndedAt = null;
     this.syncCurrentWeight();
     this.syncCurrentReps();
     this.state.set('active');
@@ -1227,6 +1223,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       this.state.set('review');
       return;
     }
+    this.inputsTouched = false;
+    this.sessionEndedAt = null;
     this.syncCurrentWeight();
     this.syncCurrentReps();
     this.state.set('active');
@@ -1257,21 +1255,6 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     );
   }
 
-  // volumul unui antrenament salvat, cu aceleasi reguli ca in History
-  private workoutVolume(w: Workout): number {
-    return w.exercises.reduce((total, ex) => {
-      const weights = ex.setWeights;
-      const reps = ex.setReps;
-      if (weights?.length && reps?.length === weights.length) {
-        return total + weights.reduce((s, wt, i) => s + wt * reps[i], 0);
-      }
-      if (weights?.length) {
-        return total + ex.reps * weights.reduce((s, wt) => s + wt, 0);
-      }
-      return total + ex.sets * ex.reps * ex.weight;
-    }, 0);
-  }
-
   finishWorkout() {
     if (this.state() !== 'review' || this.saving() || this.completedSets() === 0) return;
     this.stopTimer();
@@ -1280,14 +1263,20 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     const volume = this.sessionVolume();
     this.finishedVolume.set(Math.round(volume));
     const name = this.currentRoutine().name.trim().toLowerCase();
-    const previous = this.historyWorkouts.find((w) => w.name.trim().toLowerCase() === name);
-    this.finishedDelta.set(previous ? Math.round(volume - this.workoutVolume(previous)) : null);
+    const exerciseNames = this.currentRoutine().exercises.map(ex => exerciseKey(ex.name)).sort().join('|');
+    const previous = this.historyWorkouts.find(w => w.name.trim().toLowerCase() === name && w.exercises.map(ex => exerciseKey(ex.exerciseName)).sort().join('|') === exerciseNames);
+    this.finishedPrevious.set(previous ?? null);
+    this.sessionEndedAt ??= Date.now();
+    this.finishedDuration.set(Math.min(604800, Math.max(0, Math.floor((this.sessionEndedAt - this.sessionStartedAt) / 1000))));
+    this.finishedExercises.set(this.currentRoutine().exercises.map((ex,i) => ({name:ex.name, sets:this.loggedWeights[i].filter(v => v !== null).length, volume:Math.round(this.loggedWeights[i].reduce<number>((sum,w,j) => sum + (w ?? 0) * (this.loggedReps[i][j] ?? 0),0))})).filter(ex => ex.sets > 0));
+    this.finishedDelta.set(previous ? Math.round(volume - workoutVolume(previous)) : null);
 
     this.saveWorkout();
   }
 
   cancelWorkout() {
     this.stopTimer();
+    this.sessionGeneration++;
     this.state.set('setup');
   }
 
@@ -1302,6 +1291,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       name: workout.name,
       date: dateStr,
       notes: 'Auto-finished workout',
+      durationSeconds: this.finishedDuration(),
       isPredefined: false,
       exercises: workout.exercises.map((ex, i) => {
         const logged = (this.loggedWeights[i] ?? []).filter((value): value is number => value !== null);
@@ -1318,10 +1308,11 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         };
       }).filter(exercise => exercise.sets > 0)
     }).subscribe({
-      next: () => {
+      next: saved => {
+        this.savedLocally.set(!!saved.id?.startsWith('w_'));
         this.saving.set(false);
         this.state.set('finished');
-        this.message.success('Workout saved.');
+        this.message.success(this.savedLocally() ? 'Saved on this device. Syncs when you reconnect.' : 'Workout saved.');
       },
       error: (err) => {
         this.saving.set(false);
@@ -1331,8 +1322,18 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     });
   }
 
+  async exportSummary() {
+    if (this.state() !== 'finished' || this.exporting()) return;
+    this.exporting.set(true);
+    try {
+      this.summaryImage.set(createWorkoutSummaryImage({name:this.currentRoutine().name,date:this.targetDate(),durationSeconds:this.finishedDuration(),sets:this.completedSets(),plannedSets:this.totalSets(),volume:this.finishedVolume(),calories:this.finishedCalories(),delta:this.finishedDelta()}));
+    } catch { this.message.error('Could not save the image. Please try again.'); }
+    finally { this.exporting.set(false); }
+  }
+
   reset() {
     this.stopTimer();
+    this.sessionGeneration++;
     this.state.set('setup');
   }
 }

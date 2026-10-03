@@ -41,7 +41,7 @@ async function main() {
   app.use('/api/', apiLimiter);
 
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', uptime: process.uptime() });
+    res.json({ status: 'ok', uptime: process.uptime(), revision: process.env.RENDER_GIT_COMMIT ?? null });
   });
 
   app.use('/api/me', requireAuth, meRoutes);

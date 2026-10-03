@@ -36,6 +36,9 @@
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
         <a routerLink="/account" aria-label="Account">
           <span nz-icon nzType="user"></span>
           <span>Account</span>
@@ -374,6 +377,10 @@
                 <div class="stat-clean">
                   <span class="stat-label">Volume</span>
                   <span class="stat-value">{{ getWorkoutVolume(w) | number: '1.0-0' }} kg</span>
+                </div>
+                <div class="stat-clean" *ngIf="w.durationSeconds != null">
+                  <span class="stat-label">Duration</span>
+                  <span class="stat-value">{{ durationLabel(w.durationSeconds!) }}</span>
                 </div>
                 <div class="stat-clean">
                   <span class="stat-label">Calories</span>

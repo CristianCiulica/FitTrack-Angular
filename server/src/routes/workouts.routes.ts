@@ -17,6 +17,7 @@ const exerciseSchema = z.object({
 const workoutBodySchema = z.object({
   name: z.string().trim().min(1).max(120),
   date: z.string().min(1),
+  durationSeconds: z.number().int().min(0).max(604800).optional(),
   notes: z.string().max(2000).optional().default(''),
   isPredefined: z.boolean().optional().default(false),
   exercises: z.array(exerciseSchema).max(50).default([]),
@@ -31,6 +32,7 @@ function serialize(doc: any) {
     name: obj.name,
     date: obj.date,
     notes: obj.notes,
+    durationSeconds: obj.durationSeconds,
     isPredefined: obj.isPredefined,
     exercises: obj.exercises,
     createdAt: obj.createdAt,

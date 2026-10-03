@@ -4,6 +4,9 @@ import { UserProfile } from '../models/user-profile.model';
 import { getAuth } from '../config/firebase-admin';
 import { strictLimiter } from '../middleware/rate-limit';
 
+import { WeightEntry } from '../models/weight-entry.model';
+import { weightDateSchema, weightBodySchema } from '../validation/weight-entry';
+
 const router = Router();
 
 const updateProfileSchema = z.object({
@@ -22,6 +25,8 @@ const updateProfileSchema = z.object({
   goal: z.enum(['lose', 'maintain', 'gain']).optional(),
   goalRate: z.number().min(0).max(2).optional(),
   weeklyWorkoutGoal: z.number().int().min(1).max(14).optional(),
+  moveGoal: z.number().int().min(50).max(5000).optional(),
+  exerciseGoal: z.number().int().min(5).max(300).optional(),
 });
 
 router.get('/', async (req, res, next) => {
@@ -56,14 +61,56 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// Each account has one weigh-in per calendar day. PUT updates that day's entry.
+router.get('/weight-entries', async (req, res, next) => {
+  try {
+    const entries = await WeightEntry.find({ userId: req.user!.uid }).sort({ date: 1 }).select('date weightKg -_id').lean();
+    res.json({ entries });
+  } catch (err) { next(err); }
+});
+
+async function weightResponse(uid: string) {
+  const entries = await WeightEntry.find({ userId: uid }).sort({ date: 1 }).select('date weightKg -_id').lean();
+  const latest = entries.at(-1);
+  // Backdated entries never replace the more recent measurement in the profile.
+  const profile = latest
+    ? await UserProfile.findOneAndUpdate({ uid }, { $set: { weightKg: latest.weightKg } }, { new: true }).select('-following')
+    : await UserProfile.findOne({ uid }).select('-following');
+  return { entries, profile };
+}
+
+router.put('/weight-entries/:date', async (req, res, next) => {
+  try {
+    const date = weightDateSchema.parse(req.params.date);
+    const { weightKg } = weightBodySchema.parse(req.body);
+    const filter = { userId: req.user!.uid, date };
+    try {
+      await WeightEntry.findOneAndUpdate(filter, { $set: { weightKg } }, { upsert: true, runValidators: true });
+    } catch (err: any) {
+      if (err.code !== 11000) throw err;
+      await WeightEntry.updateOne(filter, { $set: { weightKg } }, { runValidators: true });
+    }
+    res.json(await weightResponse(req.user!.uid));
+  } catch (err) { next(err); }
+});
+
+router.delete('/weight-entries/:date', async (req, res, next) => {
+  try {
+    const date = weightDateSchema.parse(req.params.date);
+    await WeightEntry.deleteOne({ userId: req.user!.uid, date });
+    res.json(await weightResponse(req.user!.uid));
+  } catch (err) { next(err); }
+});
+
 router.get('/export', strictLimiter, async (req, res, next) => {
   try {
     const user = req.user!;
     
-    const [profile, workouts, runningSessions] = await Promise.all([
+    const [profile, workouts, runningSessions, weightEntries] = await Promise.all([
       UserProfile.findOne({ uid: user.uid }).select('-following').lean(),
       (await import('../models/workout.model')).Workout.find({ userId: user.uid }).lean(),
-      (await import('../models/running-session.model')).RunningSession.find({ userId: user.uid }).lean()
+      (await import('../models/running-session.model')).RunningSession.find({ userId: user.uid }).lean(),
+      WeightEntry.find({ userId: user.uid }).sort({ date: 1 }).select('date weightKg -_id').lean()
     ]);
 
     res.json({
@@ -75,7 +122,8 @@ router.get('/export', strictLimiter, async (req, res, next) => {
       },
       profile,
       workouts,
-      runningSessions
+      runningSessions,
+      weightEntries
     });
   } catch (error) {
     next(error);
@@ -119,6 +167,7 @@ router.delete('/', strictLimiter, async (req, res, next) => {
     // stergerea contului din Firebase Auth se face cu Admin SDK mai jos.
     await Promise.all([
       UserProfile.deleteOne({ uid: user.uid }),
+      WeightEntry.deleteMany({ userId: user.uid }),
       (await import('../models/workout.model')).Workout.deleteMany({ userId: user.uid }),
       (await import('../models/running-session.model')).RunningSession.deleteMany({
         userId: user.uid,

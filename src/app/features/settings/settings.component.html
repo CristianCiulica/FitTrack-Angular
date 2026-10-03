@@ -30,6 +30,9 @@
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
         <a routerLink="/account" aria-label="Account">
           <span nz-icon nzType="user"></span><span>Account</span>
         </a>
@@ -90,6 +93,11 @@
             </div>
             <p class="appearance-note">{{ appearance.preference() === 'system' ? 'Auto follows your device’s appearance.' : 'Saved on this device.' }}</p>
           </section>
+
+          <div class="setting-row">
+            <div class="setting-copy"><strong>Activity goals</strong><small>Your daily movement and weekly training targets.</small></div>
+            <app-activity-goals />
+          </div>
 
           <div class="setting-row">
             <div class="setting-copy">

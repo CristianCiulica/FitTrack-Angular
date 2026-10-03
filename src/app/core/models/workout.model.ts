@@ -16,6 +16,7 @@ export interface Workout {
   name: string;
   date: string;
   exercises: ExerciseLog[];
+  durationSeconds?: number;
   notes?: string;
   createdAt?: Date;
   isPredefined?: boolean;

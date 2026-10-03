@@ -37,6 +37,9 @@
           </a>
         </li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
           <a routerLink="/account" aria-label="Account">
             <span nz-icon nzType="user"></span>
             <span>Account</span>
@@ -104,14 +107,14 @@
       <section class="activity-summary" aria-labelledby="activity-summary-title">
         <div class="activity-summary-heading">
           <h2 id="activity-summary-title">Activity</h2>
-          <span>{{ selectedDate() | date: 'MMM d' }}</span>
+          <div class="activity-heading-actions"><span>{{ selectedDate() | date: 'MMM d' }}</span><app-activity-goals /></div>
         </div>
         <div class="activity-card">
           <div class="activity-card-main">
             <div class="activity-values">
               @for (ring of activityRings(); track ring.name) {
                 <div class="activity-measure" [style.--ring-color]="ring.color">
-                  <span class="activity-label">{{ ring.name }}</span>
+                  <span class="activity-label">{{ ring.name }} @if (ring.progress >= 100) { <span class="ring-done" aria-label="Goal complete">✓</span> }</span>
                   <div class="activity-reading">
                     <strong>{{ ring.value | number: '1.0-0' }}/{{ ring.goal }}</strong>
                     <span>{{ ring.unit }}</span>
@@ -133,7 +136,7 @@
               </defs>
               @for (ring of activityRings(); track ring.name) {
                 <circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-track" [attr.stroke]="ring.color"/>
-                <circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-progress"
+                <circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-progress" [class.goal-closed]="ring.progress >= 100"
                   pathLength="100" [attr.stroke]="ring.paint" [attr.stroke-dasharray]="ring.progress + ' 100'"
                   [attr.opacity]="ring.progress > 0 ? 1 : 0" transform="rotate(-90 80 80)"/>
                 @if (ring.progress > 0) {
@@ -147,7 +150,7 @@
             <div><span>Distance</span><strong>{{ activityDistance() | number: '1.2-2' }}<small>{{ activityDistanceUnit() }}</small></strong></div>
           </div>
         </div>
-        <p class="activity-source">From logged activity. Calories &amp; workout minutes are estimates.</p>
+        <p class="activity-source">From logged activity. Calories &amp; untimed workout minutes are estimates.</p>
       </section>
 
       <!-- Daily metric cards -->

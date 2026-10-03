@@ -1,3 +1,4 @@
+import { ActivityGoalsComponent } from '../../shared/components/activity-goals/activity-goals.component';
 import { Component, ElementRef, OnInit, ViewChild, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -32,6 +33,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    ActivityGoalsComponent,
     RouterLink,
     RouterLinkActive,
     NzLayoutModule,
@@ -228,11 +230,11 @@ export class DashboardComponent implements OnInit {
   });
 
   // Activity goals are distinct from the nutritional calorie target.
-  readonly moveGoal = 500;
-  readonly exerciseGoal = 30;
+  readonly moveGoal = this.profileService.moveGoal;
+  readonly exerciseGoal = this.profileService.exerciseGoal;
   readonly exerciseMinutes = computed(() => Math.round(
     this.sessionsForDay().reduce((sum, session) => sum + session.durationSeconds / 60, 0)
-    + this.workoutsForDay().reduce((sum, workout) => sum + estimateSessionMinutes(workout.exercises), 0),
+    + this.workoutsForDay().reduce((sum, workout) => sum + (workout.durationSeconds != null ? workout.durationSeconds / 60 : estimateSessionMinutes(workout.exercises)), 0),
   ));
   readonly activityWeekWorkouts = computed(() => {
     const start = new Date(this.selectedDate());
@@ -251,8 +253,8 @@ export class DashboardComponent implements OnInit {
   });
   readonly activityDistanceUnit = computed(() => this.profileService.units() === 'imperial' ? 'MI' : 'KM');
   readonly activityRings = computed(() => [
-    { name: 'Move', value: this.burnedKcal(), goal: this.moveGoal, unit: 'KCAL', radius: 65, color: '#ff2d55', paint: 'url(#activity-move)', arrow: '→' },
-    { name: 'Exercise', value: this.exerciseMinutes(), goal: this.exerciseGoal, unit: 'MIN', radius: 48, color: '#a4f000', paint: 'url(#activity-exercise)', arrow: '→' },
+    { name: 'Move', value: this.burnedKcal(), goal: this.moveGoal(), unit: 'KCAL', radius: 65, color: '#ff2d55', paint: 'url(#activity-move)', arrow: '→' },
+    { name: 'Exercise', value: this.exerciseMinutes(), goal: this.exerciseGoal(), unit: 'MIN', radius: 48, color: '#a4f000', paint: 'url(#activity-exercise)', arrow: '→' },
     { name: 'Workouts', value: this.activityWeekWorkouts(), goal: this.weeklyGoal(), unit: 'THIS WEEK', radius: 31, color: '#00d9ed', paint: 'url(#activity-workouts)', arrow: '→' },
   ].map(ring => ({ ...ring, progress: Math.min(100, Math.max(0, ring.value / Math.max(1, ring.goal) * 100)) })));
 

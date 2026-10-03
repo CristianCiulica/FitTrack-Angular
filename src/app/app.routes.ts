@@ -53,6 +53,7 @@ export const routes: Routes = [
     canActivate: [authGuard, onboardingGuard],
     loadChildren: () => import('./features/account/account.routes').then((m) => m.accountRoutes),
   },
+  { path: 'weight', canActivate: [authGuard, onboardingGuard], loadComponent: () => import('./features/weight/weight.component').then(m => m.WeightComponent) },
   {
     path: 'settings',
     canActivate: [authGuard, onboardingGuard],
