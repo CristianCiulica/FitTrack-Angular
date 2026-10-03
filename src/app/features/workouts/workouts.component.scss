@@ -452,8 +452,9 @@
 }
 
 .desktop-exercise-row {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  align-items: start;
   justify-content: space-between;
   gap: 16px;
   padding: 11px 16px;
@@ -464,11 +465,13 @@
 
 .desktop-exercise-info {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 10px;
   min-width: 0;
 
   strong {
+    overflow-wrap: anywhere;
     font-size: 14.5px;
     font-weight: 620;
     letter-spacing: -0.012em;
@@ -484,10 +487,14 @@
 .desktop-exercise-stats {
   display: flex;
   gap: 8px;
-  flex: 0 0 auto;
+  flex-wrap: wrap;
+  min-width: 0;
 
   span {
     padding: 4px 12px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
     font-size: 12.5px;
     font-weight: 590;
     color: #515154;
@@ -624,7 +631,8 @@
 
 .mobile-exercise-row-clean {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   justify-content: space-between;
   gap: 10px;
   padding: 14px 0;
@@ -640,6 +648,7 @@
     min-width: 0;
 
     strong {
+      overflow-wrap: anywhere;
       font-size: 14.5px;
       font-weight: 600;
       color: #1d1d1f;
@@ -655,18 +664,18 @@
   .ex-stats {
     display: flex;
     gap: 4px;
-    flex: 0 0 auto;
+    flex-direction: column;
+    min-width: 0;
 
     span {
       font-size: 13px;
       font-weight: 500;
       color: #86868b;
-      white-space: nowrap;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.5;
       font-variant-numeric: tabular-nums;
-      
-      &:not(:last-child)::after {
-        content: ', ';
-      }
+
     }
   }
 }
