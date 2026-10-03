@@ -101,37 +101,6 @@
         </button>
       </div>
 
-      <!-- Daily metric cards -->
-      <div class="metric-grid">
-        <div class="metric-card steps-card">
-          <div class="metric-head">
-            <span class="metric-title">Steps</span>
-            <span class="metric-icon" nz-icon nzType="rise"></span>
-          </div>
-          <strong class="metric-value">{{ stepsForDay() | number }}</strong>
-          <span class="metric-caption">steps today</span>
-          <span class="metric-caption" *ngIf="workoutsOnDay() > 0">
-            {{ workoutsOnDay() }}{{ workoutsOnDay() === 1 ? ' workout logged' : ' workouts logged' }}
-          </span>
-        </div>
-
-        <div class="metric-card goals-card" [class.goal-complete]="goalReached()">
-          <div class="metric-head">
-            <span class="metric-title">Goals</span>
-          </div>
-          <strong class="metric-value">{{ thisWeekWorkouts() }}/{{ weeklyGoal() }}</strong>
-          <span class="metric-caption">workouts this week</span>
-
-          <div class="goal-done" *ngIf="goalReached()">
-            <span class="goal-done-check" nz-icon nzType="check-circle" nzTheme="fill"></span>
-            <span class="goal-done-text">Well done</span>
-          </div>
-          <span class="goal-remaining" *ngIf="!goalReached()">
-            {{ weeklyGoal() - thisWeekWorkouts() }} to go
-          </span>
-        </div>
-      </div>
-
       <section class="activity-summary" aria-labelledby="activity-summary-title">
         <div class="activity-summary-heading">
           <h2 id="activity-summary-title">Activity</h2>
@@ -180,6 +149,37 @@
         </div>
         <p class="activity-source">From logged activity. Calories &amp; workout minutes are estimates.</p>
       </section>
+
+      <!-- Daily metric cards -->
+      <div class="metric-grid">
+        <div class="metric-card steps-card">
+          <div class="metric-head">
+            <span class="metric-title">Steps</span>
+            <span class="metric-icon" nz-icon nzType="rise"></span>
+          </div>
+          <strong class="metric-value">{{ stepsForDay() | number }}</strong>
+          <span class="metric-caption">steps today</span>
+          <span class="metric-caption" *ngIf="workoutsOnDay() > 0">
+            {{ workoutsOnDay() }}{{ workoutsOnDay() === 1 ? ' workout logged' : ' workouts logged' }}
+          </span>
+        </div>
+
+        <div class="metric-card goals-card" [class.goal-complete]="goalReached()">
+          <div class="metric-head">
+            <span class="metric-title">Goals</span>
+          </div>
+          <strong class="metric-value">{{ thisWeekWorkouts() }}/{{ weeklyGoal() }}</strong>
+          <span class="metric-caption">workouts this week</span>
+
+          <div class="goal-done" *ngIf="goalReached()">
+            <span class="goal-done-check" nz-icon nzType="check-circle" nzTheme="fill"></span>
+            <span class="goal-done-text">Well done</span>
+          </div>
+          <span class="goal-remaining" *ngIf="!goalReached()">
+            {{ weeklyGoal() - thisWeekWorkouts() }} to go
+          </span>
+        </div>
+      </div>
 
       <a [routerLink]="['/start-workout']" [queryParams]="{ date: toKey(selectedDate()) }" class="hero-cta start-cta">
         <span nz-icon nzType="play-circle" nzTheme="fill"></span>
