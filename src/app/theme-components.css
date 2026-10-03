@@ -18,7 +18,7 @@ html[data-theme='dark'] app-start-workout {
 /* Explicit text roles avoid recoloring photos, colored hero cards or buttons. */
 html[data-theme='dark'] body :is(
   .activity-title h1, .month-label, .month-arrows button, .day-num,
-  .metric-title, .metric-value, .legend-row strong, .donut-hole strong,
+  .metric-title, .metric-value,
   .recent-heading h3, .recent-name, .recent-empty strong,
   .section-heading h3, .history-table-heading h3, .collapse-toggle strong,
   .cardio-session-header h4, .cardio-session-stats strong, .detail-row strong,
@@ -41,7 +41,7 @@ html[data-theme='dark'] body :is(
 
 html[data-theme='dark'] body :is(
   .activity-title p, .day-label, .metric-caption, .goal-remaining,
-  .legend-row small, .donut-hole small, .recent-eyebrow, .recent-meta, .recent-date,
+  .recent-eyebrow, .recent-meta, .recent-date,
   .empty-state, .history-intro > span, .history-intro p, .collapse-toggle,
   .cardio-session-header > div > span, .cardio-session-stats div > span,
   .detail-row span, .workout-date-cell, .workout-count-cell, .workout-volume-cell,
@@ -79,7 +79,7 @@ html[data-theme='dark'] body :is(
 
 /* Glass surfaces keep subtle rims instead of the light appearance's white edges. */
 html[data-theme='dark'] body :is(
-  .month-arrows, .week-strip, .metric-card, .kcal-card, .recent-item,
+  .month-arrows, .week-strip, .metric-card, .recent-item,
   .collapse-toggle, .auth-card, .onboarding-card
 ) {
   border-color: var(--glass-border) !important;
@@ -92,7 +92,6 @@ html[data-theme='dark'] body .goals-card.goal-complete {
 html[data-theme='dark'] body :is(.day-cell:hover, .month-arrows button:hover) { background: rgba(255, 255, 255, .07) !important; }
 html[data-theme='dark'] body .day-cell.selected .day-num { color: #fff !important; }
 html[data-theme='dark'] body .legend-dot.target { background: #e5e5ea !important; }
-html[data-theme='dark'] body .donut-hole { background: #232328 !important; box-shadow: none !important; }
 html[data-theme='dark'] body .ai-coach-trigger {
   color: var(--theme-blue) !important;
   background: rgba(10, 132, 255, .1) !important;

@@ -132,43 +132,54 @@
         </div>
       </div>
 
-      <!-- Calories donut -->
-      <div class="kcal-card">
-        <div class="kcal-legend">
-          <div class="legend-row">
-            <span class="legend-dot target"></span>
-            <div>
-              <strong>{{ targetKcal() | number }} Kcal</strong>
-              <small>Target</small>
+      <section class="activity-summary" aria-labelledby="activity-summary-title">
+        <div class="activity-summary-heading">
+          <h2 id="activity-summary-title">Activity</h2>
+          <span>{{ selectedDate() | date: 'MMM d' }}</span>
+        </div>
+        <div class="activity-card">
+          <div class="activity-card-main">
+            <div class="activity-values">
+              @for (ring of activityRings(); track ring.name) {
+                <div class="activity-measure" [style.--ring-color]="ring.color">
+                  <span class="activity-label">{{ ring.name }}</span>
+                  <div class="activity-reading">
+                    <strong>{{ ring.value | number: '1.0-0' }}/{{ ring.goal }}</strong>
+                    <span>{{ ring.unit }}</span>
+                  </div>
+                </div>
+              }
             </div>
+            <svg class="activity-rings" viewBox="0 0 160 160" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="activity-move" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ff163c"/><stop offset="100%" stop-color="#ff367c"/>
+                </linearGradient>
+                <linearGradient id="activity-exercise" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#8ce900"/><stop offset="100%" stop-color="#c5ff00"/>
+                </linearGradient>
+                <linearGradient id="activity-workouts" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#00c3dc"/><stop offset="100%" stop-color="#00e5ef"/>
+                </linearGradient>
+              </defs>
+              @for (ring of activityRings(); track ring.name) {
+                <circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-track" [attr.stroke]="ring.color"/>
+                <circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-progress"
+                  pathLength="100" [attr.stroke]="ring.paint" [attr.stroke-dasharray]="ring.progress + ' 100'"
+                  [attr.opacity]="ring.progress > 0 ? 1 : 0" transform="rotate(-90 80 80)"/>
+                @if (ring.progress > 0) {
+                  <text x="80" [attr.y]="80 - ring.radius + 4" class="activity-ring-arrow">{{ ring.arrow }}</text>
+                }
+              }
+            </svg>
           </div>
-          <div class="legend-row">
-            <span class="legend-dot burned"></span>
-            <div>
-              <strong>{{ burnedKcal() | number }} Kcal</strong>
-              <small>Burned</small>
-            </div>
-          </div>
-          <div class="legend-row">
-            <span class="legend-dot remaining"></span>
-            <div>
-              <strong>{{ remainingKcal() | number }} Kcal</strong>
-              <small>Remaining</small>
-            </div>
+          <div class="activity-card-footer">
+            <div><span>Steps</span><strong>{{ stepsForDay() | number }}<small> logged</small></strong></div>
+            <div><span>Distance</span><strong>{{ activityDistance() | number: '1.2-2' }}<small>{{ activityDistanceUnit() }}</small></strong></div>
           </div>
         </div>
-        <div
-          class="kcal-donut"
-          role="img"
-          [attr.aria-label]="'Burned ' + burnedPercent() + '% of daily calorie target'"
-          [style.--burned.%]="burnedPercent()"
-        >
-          <div class="donut-hole">
-            <strong>{{ burnedPercent() }}%</strong>
-            <small>burned</small>
-          </div>
-        </div>
-      </div>
+        <p class="activity-source">From logged activity. Calories &amp; workout minutes are estimates.</p>
+      </section>
 
       <a [routerLink]="['/start-workout']" [queryParams]="{ date: toKey(selectedDate()) }" class="hero-cta start-cta">
         <span nz-icon nzType="play-circle" nzTheme="fill"></span>

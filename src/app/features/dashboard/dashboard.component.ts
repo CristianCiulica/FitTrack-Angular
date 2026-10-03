@@ -16,7 +16,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Workout } from '../../core/models/workout.model';
-import { estimateSessionCalories } from '../../core/utils/workout-calories';
+import { estimateSessionCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import {
   ASSISTANT_OPTIONS,
@@ -216,14 +216,6 @@ export class DashboardComponent implements OnInit {
     return estimateSessionCalories(workout.exercises, this.profileService.weightKg());
   }
 
-  // tinta zilnica de calorii din profil (Mifflin-St Jeor, activitate usoara)
-  readonly targetKcal = computed(() => {
-    const p = this.profileService.profile();
-    if (!p?.weightKg || !p?.heightCm || !p?.age) return 2200;
-    const base = 10 * p.weightKg + 6.25 * p.heightCm - 5 * p.age + (p.sex === 'female' ? -161 : 5);
-    return Math.round(base * 1.375);
-  });
-
   // arse = alergari + antrenamentele de forta din ziua selectata
   readonly burnedKcal = computed(() => {
     const runs = this.sessionsForDay().reduce((acc, s) => acc + (s.calories ?? 0), 0);
@@ -235,13 +227,34 @@ export class DashboardComponent implements OnInit {
     return Math.round(runs + workouts);
   });
 
-  readonly remainingKcal = computed(() => Math.max(0, this.targetKcal() - this.burnedKcal()));
-
-  readonly burnedPercent = computed(() => {
-    const target = this.targetKcal();
-    if (target <= 0) return 0;
-    return Math.min(100, Math.round((this.burnedKcal() / target) * 100));
+  // Activity goals are distinct from the nutritional calorie target.
+  readonly moveGoal = 500;
+  readonly exerciseGoal = 30;
+  readonly exerciseMinutes = computed(() => Math.round(
+    this.sessionsForDay().reduce((sum, session) => sum + session.durationSeconds / 60, 0)
+    + this.workoutsForDay().reduce((sum, workout) => sum + estimateSessionMinutes(workout.exercises), 0),
+  ));
+  readonly activityWeekWorkouts = computed(() => {
+    const start = new Date(this.selectedDate());
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    return this.workouts().filter(workout => {
+      const key = (workout.date ?? '').slice(0, 10);
+      return key >= this.toKey(start) && key < this.toKey(end);
+    }).length;
   });
+  readonly activityDistance = computed(() => {
+    const meters = this.sessionsForDay().reduce((sum, session) => sum + session.distanceMeters, 0);
+    return meters / (this.profileService.units() === 'imperial' ? 1609.344 : 1000);
+  });
+  readonly activityDistanceUnit = computed(() => this.profileService.units() === 'imperial' ? 'MI' : 'KM');
+  readonly activityRings = computed(() => [
+    { name: 'Move', value: this.burnedKcal(), goal: this.moveGoal, unit: 'KCAL', radius: 65, color: '#ff2d55', paint: 'url(#activity-move)', arrow: '→' },
+    { name: 'Exercise', value: this.exerciseMinutes(), goal: this.exerciseGoal, unit: 'MIN', radius: 48, color: '#a4f000', paint: 'url(#activity-exercise)', arrow: '→' },
+    { name: 'Workouts', value: this.activityWeekWorkouts(), goal: this.weeklyGoal(), unit: 'THIS WEEK', radius: 31, color: '#00d9ed', paint: 'url(#activity-workouts)', arrow: '→' },
+  ].map(ring => ({ ...ring, progress: Math.min(100, Math.max(0, ring.value / Math.max(1, ring.goal) * 100)) })));
 
   // tinta de antrenamente/saptamana aleasa la onboarding
   readonly weeklyGoal = computed(() => this.profileService.weeklyWorkoutGoal());

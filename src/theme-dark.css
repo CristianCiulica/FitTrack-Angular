@@ -104,11 +104,6 @@ html[data-theme='dark'] body .ant-tag.ant-tag-green { color: #70e792 !important;
 html[data-theme='dark'] body .ant-tag.ant-tag-red { color: #ff928b !important; background: #ff453a1a !important; }
 html[data-theme='dark'] body .ant-tag.ant-tag-blue { color: #8ac8ff !important; background: #0a84ff22 !important; }
 /* Opaque content surfaces avoid overlapping backdrop sampling around the CTA. */
-html[data-theme='dark'] body .kcal-card {
-  background: linear-gradient(135deg, #23272e, #1c1c20 60%) !important;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
 html[data-theme='dark'] body .ai-coach-trigger {
   background: #132032 !important;
   -webkit-backdrop-filter: none;
