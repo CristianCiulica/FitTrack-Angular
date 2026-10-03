@@ -78,6 +78,7 @@ html[data-theme='dark'] .loading-text { color: var(--ink); }
 html[data-theme='dark'] .spinner { border-color: #ffffff1a; border-top-color: var(--accent); }
 /* Darken only geographic raster tiles; route lines and markers retain their colors. */
 html[data-theme='dark'] .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(.6) brightness(.75); }
+html[data-theme='dark'] app-running .leaflet-tile-pane { filter: none; }
 html[data-theme='dark'] .leaflet-container { background: #171b20; }
 html[data-theme='dark'] .leaflet-control-attribution { background: #1c1c1eeb; color: #c7c7cc; }
 html[data-theme='dark'] .leaflet-control-attribution a { color: #8ac8ff; }
