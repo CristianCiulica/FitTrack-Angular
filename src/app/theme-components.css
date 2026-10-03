@@ -79,14 +79,13 @@ html[data-theme='dark'] body :is(
 
 /* Glass surfaces keep subtle rims instead of the light appearance's white edges. */
 html[data-theme='dark'] body :is(
-  .month-arrows, .week-strip, .metric-card, .recent-item,
+  .month-arrows, .week-strip, .recent-item,
   .collapse-toggle, .auth-card, .onboarding-card
 ) {
   border-color: var(--glass-border) !important;
   box-shadow: var(--glass-shadow), var(--glass-edge) !important;
 }
 html[data-theme='dark'] body .goals-card.goal-complete {
-  background: radial-gradient(80% 120% at 90% 0%, rgba(48, 209, 88, .12), transparent 65%), var(--glass-bg) !important;
   border-color: rgba(48, 209, 88, .25) !important;
 }
 html[data-theme='dark'] body :is(.day-cell:hover, .month-arrows button:hover) { background: rgba(255, 255, 255, .07) !important; }
@@ -226,3 +225,7 @@ html[data-theme='dark'] body .gps-calibration-overlay { background: rgba(20,20,2
 
 html[data-theme='dark'] body app-route-map { background: #202328 !important; }
 html[data-theme='dark'] body :is(.route-empty, .route-key) { color: #c7c7cc !important; background: #29292d !important; }
+
+html[data-theme='dark'] app-dashboard { --dashboard-card-bg: #1c1c1e; }
+/* Activity values retain the brighter ring palette on dark neutral surfaces. */
+html[data-theme='dark'] app-dashboard .activity-reading { color: var(--ring-color) !important; }
