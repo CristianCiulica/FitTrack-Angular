@@ -1,0 +1,6 @@
+.create-workout-action { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 0 15px; border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent); border-radius: 999px; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--accent); box-shadow: none; font-size: 13px; font-weight: 550; line-height: 1; white-space: nowrap; transition: background .15s ease, border-color .15s ease; }
+.create-workout-action:hover { background: color-mix(in srgb, var(--accent) 16%, transparent); border-color: color-mix(in srgb, var(--accent) 25%, transparent); }
+.create-workout-action:active { background: color-mix(in srgb, var(--accent) 21%, transparent); }
+.create-workout-action [nz-icon] { font-size: 14px; }
+.compact-button-label { display: none; }
+@media (max-width: 360px) { .create-workout-action { padding-inline: 12px; gap: 5px; font-size: 12px; }.create-workout-action .button-label { display: none; }.compact-button-label { display: inline; } }

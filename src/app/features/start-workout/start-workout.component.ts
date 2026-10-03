@@ -732,7 +732,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
     AppMenuComponent,
   ],
   templateUrl: './start-workout.component.html',
-  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss', './gym-plan.scss']
+  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss', './gym-plan.scss', './create-workout-action.scss']
 })
 export class StartWorkoutComponent implements OnInit, OnDestroy {
   targetDate = signal<string>(localDateKey());

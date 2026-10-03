@@ -100,8 +100,9 @@
         </h2>
       </div>
       <div class="header-actions"  *ngIf="!workoutInProgress()">
-        <button nz-button nzType="primary" (click)="openAddWorkout()">
-          <span class="button-label">+ Create workout</span>
+        <button type="button" class="create-workout-action" aria-label="Create workout" (click)="openAddWorkout()">
+          <span nz-icon nzType="plus" aria-hidden="true"></span>
+          <span class="button-label">Create workout</span><span class="compact-button-label" aria-hidden="true">Create</span>
         </button>
       </div>
     </nz-header>
