@@ -70,6 +70,20 @@ const PREDEFINED_ROUTINES: Routine[] = [
     ],
   },
   {
+    name: 'LEGS',
+    category: 'Legs',
+    description: 'Your main gym leg session. Legs, calves and abs.',
+    restSeconds: 90,
+    exercises: [
+      { name: 'Leg Press', sets: 4, reps: 10, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Calf Raises', sets: 4, reps: 15, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Leg Extension', sets: 4, reps: 12, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Hamstring Curl', sets: 3, reps: 12, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Abdominal Crunches', sets: 3, reps: 15, weight: 0, muscleGroup: 'Core' },
+      { name: 'Leg Raises', sets: 3, reps: 15, weight: 0, muscleGroup: 'Core' },
+    ],
+  },
+  {
     "name": "Foundation · A",
     "category": "Full body",
     "description": "Your first strength session. Squat, push, pull and hinge. Alternate with Foundation B.",
@@ -718,7 +732,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
     AppMenuComponent,
   ],
   templateUrl: './start-workout.component.html',
-  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss']
+  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss', './gym-plan.scss']
 })
 export class StartWorkoutComponent implements OnInit, OnDestroy {
   targetDate = signal<string>(localDateKey());
@@ -727,6 +741,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   routines = PREDEFINED_ROUTINES;
   officialPlans = OFFICIAL_PLANS;
+  readonly gymRoutines = PREDEFINED_ROUTINES.filter(routine => ['PUSH', 'PULL', 'LEGS'].includes(routine.name));
+  readonly gymTotalSets = this.gymRoutines.reduce((total, routine) => total + routine.exercises.reduce((sets, exercise) => sets + exercise.sets, 0), 0);
+  gymPlanOpen = signal(false);
   personalRoutines = signal<Routine[]>([]);
   selectedRoutineKey = signal('predefined-0');
   modalVisible = signal(false);
@@ -992,6 +1009,21 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   onModalCancel() {
     this.modalVisible.set(false);
+  }
+
+  openGymPlan(): void {
+    if (!this.workoutInProgress()) this.gymPlanOpen.set(true);
+  }
+
+  startFromGymPlan(routine: Routine): void {
+    if (this.workoutInProgress() || !this.gymRoutines.includes(routine)) return;
+    this.gymPlanOpen.set(false);
+    this.selectRoutine(routine, `gym-ppl-${routine.name.toLowerCase()}`);
+    this.startWorkout();
+  }
+
+  routineSets(routine: Routine): number {
+    return routine.exercises.reduce((total, exercise) => total + exercise.sets, 0);
   }
 
   openLegends() {

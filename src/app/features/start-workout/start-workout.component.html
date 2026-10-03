@@ -113,11 +113,18 @@
         <ng-container *ngIf="state() === 'setup'">
           <section class="workout-intro">
             <div><span class="section-eyebrow">WORKOUTS</span><h1>A good day<br>to get stronger.</h1><p>Choose a routine and pick up where you left off.</p></div>
-            <button type="button" class="plan-promo" (click)="openLegends()">
-              <span class="promo-symbol" nz-icon nzType="trophy"></span>
-              <span class="promo-copy"><small>THE COLLECTION</small><strong>Legends’ plans</strong><span>Explore iconic training splits</span></span>
-              <span nz-icon nzType="arrow-right"></span>
-            </button>
+            <div class="plan-promos">
+              <button type="button" class="plan-promo" (click)="openLegends()">
+                <span class="promo-symbol" nz-icon nzType="trophy"></span>
+                <span class="promo-copy"><small>THE COLLECTION</small><strong>Legends’ plans</strong><span>Explore iconic training splits</span></span>
+                <span nz-icon nzType="arrow-right"></span>
+              </button>
+              <button type="button" class="plan-promo gym-promo" (click)="openGymPlan()">
+                <span class="promo-symbol" nz-icon nzType="ft:workout"></span>
+                <span class="promo-copy"><small>GYM</small><strong>Push Pull Legs</strong><span>Push Pull Legs plan</span></span>
+                <span nz-icon nzType="arrow-right"></span>
+              </button>
+            </div>
           </section>
 
           <section class="personal-section">
@@ -273,6 +280,42 @@
             Start workout
           </button>
         </div>
+      </div>
+    </div>
+  </ng-container>
+</nz-drawer>
+
+<nz-drawer
+  [nzVisible]="gymPlanOpen()"
+  [nzWidth]="'100%'"
+  [nzBodyStyle]="{ padding: '0', background: 'var(--bg)' }"
+  nzPlacement="right"
+  nzTitle="Push Pull Legs Gym"
+  (nzOnClose)="gymPlanOpen.set(false)"
+>
+  <ng-container *nzDrawerContent>
+    <div class="plan-drawer gym-plan-drawer">
+      <div class="gym-plan-intro">
+        <span class="section-eyebrow">YOUR GYM PLAN</span>
+        <h2>Push. Pull. Legs.</h2>
+        <p>Your three gym sessions, all in one place. Choose a workout to start.</p>
+        <div class="gym-plan-facts"><span>3 workouts</span><span>{{ gymTotalSets }} sets</span><span>1:30 rest</span></div>
+      </div>
+      <div class="plan-list gym-plan-list">
+        @for (routine of gymRoutines; track routine.name; let i = $index) {
+          <article class="plan-card">
+            <div class="card-topline"><span class="plan-chip">SESSION {{ i + 1 }}</span><span class="gym-set-count">{{ routineSets(routine) }} sets</span></div>
+            <h3>{{ routine.name }}</h3>
+            <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
+            <div class="routine-facts"><span><strong>{{ routineMinutes(routine) }}</strong> min</span><span><strong>{{ routine.exercises.length }}</strong> exercises</span></div>
+            <ul class="plan-exercise-list gym-exercise-list">
+              @for (exercise of routine.exercises; track exercise.name) {
+                <li><span>{{ exercise.name }}</span><span class="ex-detail">{{ exercise.sets }} × {{ exercise.reps }}</span></li>
+              }
+            </ul>
+            <button type="button" class="plan-start" (click)="startFromGymPlan(routine)"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start {{ routine.name }}</button>
+          </article>
+        }
       </div>
     </div>
   </ng-container>

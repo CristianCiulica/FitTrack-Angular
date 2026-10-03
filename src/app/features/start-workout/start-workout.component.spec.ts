@@ -26,6 +26,25 @@ describe('Workout session recovery', () => {
   });
   afterEach(() => { component.ngOnDestroy(); vi.useRealTimers(); });
 
+  it('opens the gym collection and closes it when starting the selected leg session', () => {
+    component.cancelWorkout();
+    component.openGymPlan();
+    expect(component.gymPlanOpen()).toBe(true);
+    const legs = component.gymRoutines.find(routine => routine.name === 'LEGS')!;
+    component.startFromGymPlan(legs);
+    expect(component.gymPlanOpen()).toBe(false);
+    expect(component.state()).toBe('active');
+    expect(component.currentExercise()?.name).toBe('Leg Press');
+    expect(component.totalSets()).toBe(21);
+    component.finishSet();
+    expect(component.restClock()).toBe('1:30');
+    component.skipRest();
+    expect(component.currentSetIndex()).toBe(2);
+    expect(component.currentExercise()?.name).toBe('Leg Press');
+    component.openGymPlan();
+    expect(component.gymPlanOpen()).toBe(false);
+  });
+
   it('normalizes legacy fractional set counts before allocating session slots', () => {
     component.selectRoutine({ name: 'Legacy', exercises: [{ name: 'Press', sets: 2.5, reps: 10, weight: 50, muscleGroup: 'Chest' }] }, 'legacy');
     expect(() => component.startWorkout()).not.toThrow();
