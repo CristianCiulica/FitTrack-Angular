@@ -15,4 +15,9 @@ describe('Previous exercise matching', () => {
     ],'2026-10-03');
     expect(entries.get('bench press')?.pairs).toEqual([{weight:0,reps:8}]);
   });
+  it('keeps timed holds out of repetition-based lifting volume', () => {
+    const session = workout('2026-10-03');
+    session.exercises.push({ exerciseName: 'Wide Squat Hold', muscleGroup: 'Legs', sets: 1, reps: 30, repUnit: 'seconds', weight: 10 });
+    expect(workoutVolume(session)).toBe(1020);
+  });
 });

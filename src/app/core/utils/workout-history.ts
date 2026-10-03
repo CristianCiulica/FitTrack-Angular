@@ -18,7 +18,7 @@ export function previousExercises(workouts: Workout[], onDate: string): Map<stri
   return result;
 }
 export function workoutVolume(workout: Workout): number {
-  return workout.exercises.reduce((sum, ex) => sum + Array.from({length: ex.sets}, (_,i) =>
+  return workout.exercises.reduce((sum, ex) => sum + Array.from({length: ex.repUnit === 'seconds' ? 0 : ex.sets}, (_,i) =>
     (ex.setWeights?.[i] ?? ex.weight) * (ex.setReps?.[i] ?? ex.reps)).reduce((a,b) => a+b,0),0);
 }
 export function durationLabel(seconds: number): string {

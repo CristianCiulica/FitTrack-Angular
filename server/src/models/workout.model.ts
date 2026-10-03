@@ -17,6 +17,7 @@ const exerciseLogSchema = new Schema(
     muscleGroup: { type: String, enum: MUSCLE_GROUPS, required: true },
     sets: { type: Number, required: true, min: 0 },
     reps: { type: Number, required: true, min: 0 },
+    repUnit: { type: String, enum: ['seconds'], default: undefined },
     weight: { type: Number, required: true, min: 0 },
     setWeights: { type: [Number], default: undefined },
     setReps: { type: [Number], default: undefined },

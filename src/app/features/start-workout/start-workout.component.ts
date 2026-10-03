@@ -26,6 +26,7 @@ interface PlannedExercise {
   name: string;
   sets: number;
   reps: number;
+  repUnit?: 'seconds';
   weight: number;
   muscleGroup: MuscleGroup;
 }
@@ -212,6 +213,20 @@ const PREDEFINED_ROUTINES: Routine[] = [
         "muscleGroup": "Arms"
       }
     ]
+  },
+  {
+    name: 'Lower Home',
+    category: 'Legs',
+    description: 'Bodyweight legs and core at home. Kickbacks are 20 reps per leg; hold the wide squat for 30 seconds.',
+    restSeconds: 60,
+    exercises: [
+      { name: 'Bodyweight Squats', sets: 2, reps: 20, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Wide Squats', sets: 2, reps: 20, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Calf Raises', sets: 2, reps: 20, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Wide Squat Hold', sets: 1, reps: 30, repUnit: 'seconds', weight: 0, muscleGroup: 'Legs' },
+      { name: 'Kickback (per leg)', sets: 3, reps: 20, weight: 0, muscleGroup: 'Legs' },
+      { name: 'Lying Leg Raises', sets: 2, reps: 15, weight: 0, muscleGroup: 'Core' },
+    ],
   },
   {
     "name": "Lower · Squat Focus",
@@ -1061,6 +1076,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
               muscleGroup: exercise.muscleGroup,
               sets: exercise.sets,
               reps: exercise.reps,
+              repUnit: exercise.repUnit,
               weight: exercise.weight,
             })),
           })),
@@ -1117,6 +1133,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     }
     const ex = this.currentExercise();
     const lastTime = this.previousSetData()?.weight;
+    if (ex?.repUnit === 'seconds') { this.currentWeight.set(0); return; }
     const planned = ex?.weight ?? 0;
     this.currentWeight.set(lastTime ?? previous ?? planned);
   }
@@ -1315,6 +1332,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
           sets: logged.length,
           // valorile "oficiale" devin maximul lucrat efectiv
           reps: reps.length ? Math.max(...reps) : ex.reps,
+          ...(ex.repUnit ? { repUnit: ex.repUnit } : {}),
           weight: logged.length ? Math.max(...logged) : ex.weight,
           ...(logged.length ? { setWeights: logged } : {}),
           ...(reps.length ? { setReps: reps } : {}),

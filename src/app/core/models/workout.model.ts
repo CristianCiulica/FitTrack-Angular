@@ -3,6 +3,8 @@ export interface ExerciseLog {
   muscleGroup: MuscleGroup;
   sets: number;
   reps: number;
+  /** Timed holds store seconds in reps/setReps; omitted for repetition counts. */
+  repUnit?: 'seconds';
   weight: number;
   /** Greutatea folosita efectiv la fiecare set (progressive overload). */
   setWeights?: number[];

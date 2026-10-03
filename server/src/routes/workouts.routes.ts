@@ -9,6 +9,7 @@ const exerciseSchema = z.object({
   muscleGroup: z.enum(MUSCLE_GROUPS),
   sets: z.number().min(0).max(50),
   reps: z.number().min(0).max(500),
+  repUnit: z.literal('seconds').optional(),
   weight: z.number().min(0).max(1000),
   setWeights: z.array(z.number().min(0).max(1000)).max(50).optional(),
   setReps: z.array(z.number().min(0).max(500)).max(50).optional(),

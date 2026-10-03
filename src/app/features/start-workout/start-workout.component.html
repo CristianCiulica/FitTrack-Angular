@@ -142,7 +142,7 @@
                 <div class="card-topline"><span class="routine-symbol" nz-icon nzType="ft:workout"></span><span class="plan-chip">{{ item.routine.category }}</span></div>
                 <h3>{{ item.routine.name }}</h3><p class="plan-muscles">{{ item.routine.description }}</p>
                 <div class="routine-facts"><span><strong>{{ routineMinutes(item.routine) }}</strong> min</span><span><strong>{{ item.routine.exercises.length }}</strong> exercises</span><span>~{{ routineKcal(item.routine) }} kcal</span></div>
-                <div class="exercise-preview"><span *ngFor="let exercise of item.routine.exercises | slice:0:3">{{ exercise.name }}<small>{{ exercise.sets }} × {{ exercise.reps }}</small></span></div>
+                <div class="exercise-preview"><span *ngFor="let exercise of item.routine.exercises | slice:0:3">{{ exercise.name }}<small>{{ exercise.sets }} × {{ exercise.reps }}{{ exercise.repUnit === 'seconds' ? ' s' : '' }}</small></span></div>
                 <button type="button" class="plan-start" (click)="selectRoutine(item.routine, 'predefined-' + item.index); startWorkout()"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start workout</button>
               </article>
             </div>
@@ -261,7 +261,7 @@
           <ul class="plan-exercise-list">
             <li *ngFor="let ex of routine.exercises">
               <span>{{ ex.name }}</span>
-              <span class="ex-detail">{{ ex.sets }}×{{ ex.reps }}<ng-container *ngIf="ex.weight > 0"> · {{ ex.weight }} kg</ng-container></span>
+              <span class="ex-detail">{{ ex.sets }}×{{ ex.reps }}{{ ex.repUnit === 'seconds' ? ' s' : '' }}<ng-container *ngIf="ex.weight > 0"> · {{ ex.weight }} kg</ng-container></span>
             </li>
           </ul>
           <button
@@ -306,7 +306,7 @@
       </div>
       <div class="live-stat">
         <label>Target</label>
-        <div class="value">{{ ex.reps }} reps</div>
+        <div class="value">{{ ex.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}</div>
       </div>
     </div>
 
@@ -314,24 +314,24 @@
     <div class="live-weight">
       <div class="live-adjust-stack">
         <div class="live-adjust">
-          <label>Reps done</label>
+          <label>{{ ex.repUnit === 'seconds' ? 'Seconds held' : 'Reps done' }}</label>
           <div class="weight-stepper">
-            <button type="button" class="stepper-btn" aria-label="Decrease reps" (click)="adjustReps(-1)">−</button>
+            <button type="button" class="stepper-btn" [attr.aria-label]="ex.repUnit === 'seconds' ? 'Decrease seconds' : 'Decrease reps'" (click)="adjustReps(-1)">−</button>
             <input
               class="weight-input"
               type="number"
               inputmode="numeric"
-              aria-label="Repetitions completed"
+              [attr.aria-label]="ex.repUnit === 'seconds' ? 'Seconds held' : 'Repetitions completed'"
               min="0"
               max="500"
               step="1"
               [value]="currentReps()"
               (change)="onRepsInput($any($event.target).value)"
             />
-            <button type="button" class="stepper-btn" aria-label="Increase reps" (click)="adjustReps(1)">+</button>
+            <button type="button" class="stepper-btn" [attr.aria-label]="ex.repUnit === 'seconds' ? 'Increase seconds' : 'Increase reps'" (click)="adjustReps(1)">+</button>
           </div>
         </div>
-        <div class="live-adjust">
+        <div class="live-adjust" *ngIf="ex.repUnit !== 'seconds'">
           <label>Weight (kg)</label>
           <div class="weight-stepper">
             <button type="button" class="stepper-btn" aria-label="Decrease weight" (click)="adjustWeight(-2.5)">−</button>
@@ -352,7 +352,7 @@
       </div>
       <div class="previous-performance">
         @if (previousSetData(); as previous) {
-          <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} reps <i>·</i> {{ previous.weight }} kg</strong></div>
+          <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }} <i>·</i> {{ previous.weight }} kg</strong></div>
           <button type="button" (click)="currentWeight.set(previous.weight); currentReps.set(previous.reps)">Use these values</button>
         } @else { <p>{{ historyLoading() ? 'Loading your previous session…' : historyUnavailable() ? 'Previous session unavailable. You can enter your values.' : 'First time logging this exercise. Start with your own values.' }}</p> }
       </div>

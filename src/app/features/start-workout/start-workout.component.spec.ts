@@ -32,6 +32,30 @@ describe('Workout session recovery', () => {
     expect(component.totalSets()).toBe(2);
   });
 
+  it('logs the Lower Home hold in seconds and restores its unit in the library', () => {
+    const routine = component.routines.find(routine => routine.name === 'Lower Home')!;
+    component.selectRoutine(routine, 'lower-home');
+    component.startWorkout();
+    expect(component.totalSets()).toBe(12);
+    for (let i = 0; i < 6; i++) component.skipSet();
+    expect(component.currentExercise()?.name).toBe('Wide Squat Hold');
+    expect(component.currentExercise()?.repUnit).toBe('seconds');
+    expect(component.currentReps()).toBe(30);
+    component.onRepsInput('25');
+    component.finishSet(); component.skipRest();
+    expect(component.currentExercise()?.name).toBe('Kickback (per leg)');
+    expect(component.currentReps()).toBe(20);
+    for (let i = 0; i < 5; i++) component.skipSet();
+    component.finishWorkout();
+    const saved = save.mock.calls[0][0];
+    expect(saved.exercises).toEqual([expect.objectContaining({
+      exerciseName: 'Wide Squat Hold', sets: 1, reps: 25, repUnit: 'seconds', setReps: [25], weight: 0,
+    })]);
+    history.mockReturnValue(of([saved]));
+    component.ngOnInit();
+    expect(component.personalRoutines()[0].exercises[0].repUnit).toBe('seconds');
+  });
+
   it('returns to a skipped set and crosses exercise boundaries', () => {
     component.skipSet();
     component.skipSet();

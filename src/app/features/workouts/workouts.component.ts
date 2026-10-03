@@ -121,12 +121,13 @@ export class WorkoutsComponent implements OnInit {
   }
 
   // repetarile reale pe seturi, ex. "10 / 9 / 8 reps"
-  formatSetReps(setReps: number[]): string {
-    return setReps.join(' / ') + ' reps';
+  formatSetReps(setReps: number[], repUnit?: 'seconds'): string {
+    return setReps.join(' / ') + (repUnit === 'seconds' ? ' sec' : ' reps');
   }
 
   getWorkoutVolume(workout: Workout): number {
     return workout.exercises?.reduce((total, exercise) => {
+      if (exercise.repUnit === 'seconds') return total;
       const weights = exercise.setWeights;
       const reps = exercise.setReps;
       // perechi reale reps×kg pe set, cand au fost logate amandoua

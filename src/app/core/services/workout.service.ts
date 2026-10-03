@@ -17,7 +17,7 @@ export class WorkoutService {
 
   totalVolume = computed(() =>
     this.workouts().reduce((acc, w) => {
-      const wVol = w.exercises?.reduce((eAcc, e) => eAcc + e.sets * e.reps * e.weight, 0) || 0;
+      const wVol = w.exercises?.reduce((eAcc, e) => eAcc + (e.repUnit === 'seconds' ? 0 : e.sets * e.reps * e.weight), 0) || 0;
       return acc + wVol;
     }, 0),
   );
