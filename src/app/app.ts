@@ -1,3 +1,4 @@
+import { ThemeService } from './core/services/theme.service';
 import { Component, OnInit, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
@@ -55,6 +56,7 @@ const FT_ICONS: Record<string, string> = {
   ],
 })
 export class App implements OnInit {
+  private readonly themeService = inject(ThemeService);
   private readonly profileService = inject(ProfileService);
 
   constructor(

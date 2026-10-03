@@ -1,0 +1,229 @@
+/* Dark appearance for feature surfaces. Navigation and shared Ant controls use
+   the global theme tokens; photographs and primary actions retain their color. */
+html[data-theme='dark'] {
+  --theme-ink: #f5f5f7;
+  --theme-muted: #a1a1aa;
+  --theme-surface: #1c1c1e;
+  --theme-raised: #2c2c2e;
+  --theme-line: rgba(255, 255, 255, .1);
+  --theme-blue: #64b5ff;
+}
+
+html[data-theme='dark'] app-start-workout {
+  --ink: var(--theme-ink);
+  --muted: var(--theme-muted);
+  --blue: var(--theme-blue);
+}
+
+/* Explicit text roles avoid recoloring photos, colored hero cards or buttons. */
+html[data-theme='dark'] body :is(
+  .activity-title h1, .month-label, .month-arrows button, .day-num,
+  .metric-title, .metric-value, .legend-row strong, .donut-hole strong,
+  .recent-heading h3, .recent-name, .recent-empty strong,
+  .section-heading h3, .history-table-heading h3, .collapse-toggle strong,
+  .cardio-session-header h4, .cardio-session-stats strong, .detail-row strong,
+  .workout-name-cell strong, .desktop-exercise-info strong, .mobile-workout-header h3,
+  .stat-value, .ex-info strong, .weather-summary, .weather-detail strong,
+  .run-card-summary, .live-map .live-stats strong, .gps-calibration-overlay strong,
+  .account-heading h1, .identity-details strong, .field > span,
+  .calorie-target + .result-grid strong, .result-grid .metric strong, .calc-row > span,
+  .goal-segment, .menu-brand .brand, .menu-hero .hero-name, .link-copy strong,
+  .wm-title-copy strong, .wm-section-head h3, .wm-summary strong,
+  .auth-brand .brand-logo, .mobile-brand .brand-logo, .auth-hero h1, .card-header h2,
+  .onboarding .brand, .step h1, .workout-count-caption strong,
+  .goal-options strong, .projection-headline, .projection-grid strong,
+  .chat-title-info h3, .assistant-question h4, .option-copy strong,
+  .result-hero h4, .macro-card strong, .result-section h5,
+  .plan-heading h2, .plan-card h3, .legend-copy strong, .plan-hero h2,
+  .live-routine h2, .live-exercise-head h1, .review h1, .finish-card h2,
+  .weight-input, .live-progress-ring strong, .timer-display, .fv-value
+) { color: var(--theme-ink) !important; }
+
+html[data-theme='dark'] body :is(
+  .activity-title p, .day-label, .metric-caption, .goal-remaining,
+  .legend-row small, .donut-hole small, .recent-eyebrow, .recent-meta, .recent-date,
+  .empty-state, .history-intro > span, .history-intro p, .collapse-toggle,
+  .cardio-session-header > div > span, .cardio-session-stats div > span,
+  .detail-row span, .workout-date-cell, .workout-count-cell, .workout-volume-cell,
+  .desktop-exercise-info span, .desktop-exercise-stats span, .stat-label,
+  .ex-info span, .ex-stats span, .empty-cardio-history, .mobile-empty-state,
+  .weather-loading, .weather-error, .weather-location,
+  .weather-summary-main > span:last-child, .weather-summary-score span,
+  .weather-detail span, .run-card-eyebrow, .mode-picker > span, .status-text,
+  .live-status-text, .live-map .live-stats span, .gps-calibration-overlay > span,
+  .account-heading p, .identity-details p, .avatar-remove,
+  .calorie-target span, .calorie-target small, .result-grid .metric span,
+  .result-grid .metric small, .settings-header, .settings-footer,
+  .menu-hero .hero-email, .link-copy small, .menu-section-label,
+  .wm-title-copy small, .wm-field-label, .wm-subfield-label, .wm-summary span,
+  .wm-weight-hint, .auth-hero p, .card-header p, .form-group label,
+  .remember-row, .auth-footer, .mobile-brand > small, .input-wrapper .eye-btn,
+  .onboarding .lead, .field-suffix, .dual-field label span, .workout-count-caption,
+  .goal-options small, .pace-head > span, .projection-grid span,
+  .chat-title-info p, .chat-brand, .progress-copy span, .assistant-question p,
+  .option-copy small, .result-hero p, .result-kcal-copy small, .macro-card > span,
+  .result-section li, .result-section p, .assistant-footer p,
+  .legend-title, .legend-tagline, .plan-hero p, .exercise-preview > span,
+  .exercise-preview small, .review p, .up-next strong
+) { color: var(--theme-muted) !important; }
+
+html[data-theme='dark'] body :is(
+  .metric-icon, .day-cell.selected .day-label, .recent-see-all, .recent-empty > span,
+  .cardio-header-right > strong, .run-expand-btn, .stat-icon-inline,
+  .account-heading > span, .avatar-edit, .calorie-target > strong, .pace-header strong,
+  .link-icon, .wm-count, .wm-add, .weather-summary-score strong, .weather-alert,
+  .auth-footer a, .brand-dot, .onboarding .eyebrow, .pace-head strong,
+  .progress-copy strong, .answer-summary span, .result-kcal > strong,
+  .result-kcal-copy > span, .result-kicker, .result-meta span
+) { color: var(--theme-blue) !important; }
+
+/* Glass surfaces keep subtle rims instead of the light appearance's white edges. */
+html[data-theme='dark'] body :is(
+  .month-arrows, .week-strip, .metric-card, .kcal-card, .recent-item,
+  .collapse-toggle, .auth-card, .onboarding-card
+) {
+  border-color: var(--glass-border) !important;
+  box-shadow: var(--glass-shadow), var(--glass-edge) !important;
+}
+html[data-theme='dark'] body .goals-card.goal-complete {
+  background: radial-gradient(80% 120% at 90% 0%, rgba(48, 209, 88, .12), transparent 65%), var(--glass-bg) !important;
+  border-color: rgba(48, 209, 88, .25) !important;
+}
+html[data-theme='dark'] body :is(.day-cell:hover, .month-arrows button:hover) { background: rgba(255, 255, 255, .07) !important; }
+html[data-theme='dark'] body .day-cell.selected .day-num { color: #fff !important; }
+html[data-theme='dark'] body .legend-dot.target { background: #e5e5ea !important; }
+html[data-theme='dark'] body .donut-hole { background: #232328 !important; box-shadow: none !important; }
+html[data-theme='dark'] body .ai-coach-trigger {
+  color: var(--theme-blue) !important;
+  background: rgba(10, 132, 255, .1) !important;
+  border-color: rgba(100, 181, 255, .25) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05) !important;
+}
+
+/* Content cards are opaque enough for comfortable extended reading. */
+html[data-theme='dark'] body :is(
+  .plan-promo, .plan-card, .legend-card, .plan-hero, .live-weight,
+  .cardio-session-card, .table-card, .mobile-workout-card, .wm-exercise,
+  .settings-card, .projection, .assistant-options button, .macro-card,
+  .menu-link, .recent-empty, .empty-cardio-history, .mobile-empty-state,
+  .empty-personal-routines, .goal-options button
+) {
+  color: var(--theme-ink) !important;
+  background: var(--theme-surface) !important;
+  border-color: var(--theme-line) !important;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, .12) !important;
+}
+html[data-theme='dark'] body :is(.plan-card:hover, .plan-promo:hover, .menu-link:hover, .assistant-options button:hover) {
+  border-color: rgba(100, 181, 255, .35) !important;
+}
+html[data-theme='dark'] body :is(.heading-count, .plan-chip, .filter-pills button, .stepper-btn,
+  .segmented, .goal-segmented-large, .modern-close-icon, .menu-brand .close-btn,
+  .desktop-exercise-stats span, .cardio-details, .wm-summary,
+  .projection-grid > div, .result-section.compact p, .option-icon) {
+  background: var(--theme-raised) !important;
+  color: var(--theme-muted) !important;
+  border-color: var(--theme-line) !important;
+}
+html[data-theme='dark'] body .filter-pills button.selected {
+  background: #f5f5f7 !important;
+  color: #1c1c1e !important;
+}
+html[data-theme='dark'] body :is(.segmented button, .goal-segment) { color: #c7c7cc !important; }
+html[data-theme='dark'] body :is(.segmented button.selected, .goal-segment.selected) {
+  background: #48484a !important;
+  color: var(--theme-ink) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .25) !important;
+}
+html[data-theme='dark'] body :is(.routine-symbol, .empty-plus, .plan-start) { background: rgba(10, 132, 255, .14) !important; color: var(--theme-blue) !important; }
+html[data-theme='dark'] body .plan-start:hover { background: #087bea !important; color: #fff !important; }
+html[data-theme='dark'] body :is(.exercise-preview, .plan-exercise-list li, .live-adjust + .live-adjust,
+  .account-identity, .cardio-session-stats, .mobile-exercise-list-clean, .mobile-exercise-row-clean,
+  .mobile-workout-actions-clean, .mobile-workout-actions-clean .action-btn, .run-controls,
+  .chat-header-modern, .assistant-footer) { border-color: var(--theme-line) !important; }
+html[data-theme='dark'] body :is(.progress-track, .live-progress-track, app-bmi .divider) { background: rgba(255, 255, 255, .12) !important; }
+html[data-theme='dark'] body .workout-live { background: #111113 !important; }
+html[data-theme='dark'] body .live-primary { background: #087bea !important; border-color: #087bea !important; color: #fff !important; }
+html[data-theme='dark'] body .live-exercise-head .ant-tag { background: rgba(10,132,255,.14) !important; }
+html[data-theme='dark'] body :is(.mobile-workout-actions-clean, .desktop-exercise-list) { background: rgba(255,255,255,.025) !important; }
+html[data-theme='dark'] body .desktop-exercise-row { background: var(--theme-raised) !important; border-color: var(--theme-line) !important; }
+html[data-theme='dark'] body .desktop-workout-table .ant-table { color: var(--theme-ink) !important; }
+html[data-theme='dark'] body .desktop-workout-table .ant-table-thead > tr > th {
+  color: var(--theme-muted) !important; border-color: var(--theme-line) !important;
+}
+html[data-theme='dark'] body :is(.desktop-workout-table .ant-table-tbody > tr > td, .workout-details-row > td) { border-color: var(--theme-line) !important; }
+html[data-theme='dark'] body .desktop-workout-table .ant-table-tbody > tr.ant-table-row:hover > td { background: rgba(255,255,255,.04) !important; }
+html[data-theme='dark'] body .mobile-workout-actions-clean .action-btn:not(.danger) { color: var(--theme-blue) !important; }
+
+/* Form controls and sheets, including overlays rendered outside feature hosts. */
+html[data-theme='dark'] body :is(.text-input, .glass-input, .wm-input, .wm-select-native,
+  .apple-input, .mode-select-shell select, .wm-metrics nz-input-number) {
+  color: var(--theme-ink) !important;
+  background-color: var(--theme-raised) !important;
+  border-color: rgba(255,255,255,.14) !important;
+}
+html[data-theme='dark'] body :is(.text-input:focus, .glass-input:focus, .wm-input:focus,
+  .wm-select-native:focus, .apple-input:focus, .mode-select-shell select:focus) {
+  border-color: #64b5ff !important;
+  box-shadow: 0 0 0 3px rgba(100,181,255,.18) !important;
+}
+html[data-theme='dark'] body :is(.text-input, .glass-input, .wm-input, .apple-input)::placeholder { color: #98989f !important; }
+html[data-theme='dark'] body :is(.wm-btn-ghost, .ghost-btn, .google-btn, .assistant-back,
+  .assistant-reset, .avatar-edit, .hamburger) {
+  color: var(--theme-ink) !important;
+  background: var(--theme-raised) !important;
+  border-color: var(--theme-line) !important;
+  box-shadow: none !important;
+}
+html[data-theme='dark'] body .hamburger span { background: var(--theme-ink) !important; }
+html[data-theme='dark'] body .calc-row :is(select, .ant-input-number-input) { color: #c7c7cc !important; }
+html[data-theme='dark'] body .calc-row nz-input-number { background: transparent !important; }
+html[data-theme='dark'] body .wm-input.is-invalid { border-color: #ff6961 !important; }
+html[data-theme='dark'] body .wm-select-native.is-invalid { border-color: #ff6961 !important; }
+html[data-theme='dark'] body .wm-weight-hint { background: rgba(10,132,255,.12) !important; }
+html[data-theme='dark'] body .app-menu-drawer .ant-drawer-body { background: #19191c !important; }
+html[data-theme='dark'] body .menu-hero {
+  background: radial-gradient(90% 130% at 50% 0%, rgba(10,132,255,.14), transparent 65%), #232326 !important;
+  border-color: var(--theme-line) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+html[data-theme='dark'] body :is(.auth-wrapper, .onboarding)::before {
+  background: radial-gradient(70% 65% at 10% 8%, rgba(10,132,255,.12), transparent 70%),
+    radial-gradient(60% 60% at 95% 90%, rgba(94,92,230,.09), transparent 70%), #101014 !important;
+}
+html[data-theme='dark'] body :is(.auth-wrapper, .onboarding)::after { opacity: .45; }
+html[data-theme='dark'] body .auth-card .divider::before,
+html[data-theme='dark'] body .auth-card .divider::after { background: var(--theme-line) !important; }
+html[data-theme='dark'] body .workout-count-picker button:not(.selected) {
+  color: var(--theme-ink) !important; background: var(--theme-raised) !important; border-color: var(--theme-line) !important;
+}
+html[data-theme='dark'] body :is(.goal-options button.selected, .assistant-options button.selected) {
+  background: rgba(10,132,255,.14) !important;
+  border-color: #64b5ff !important;
+  box-shadow: 0 0 0 2px rgba(100,181,255,.1) !important;
+}
+html[data-theme='dark'] body .result-meta span { background: rgba(255,255,255,.06) !important; }
+html[data-theme='dark'] body .coach-tip strong { color: #75dc8e !important; }
+html[data-theme='dark'] body .coach-tip p { color: #b8d6bd !important; }
+
+/* Semantic accents retain their meaning with luminance suitable for charcoal. */
+html[data-theme='dark'] body :is(.plan-delete, .wm-remove, .wm-error, .logout-link,
+  .weather-summary-score.poor strong) { color: #ff6961 !important; }
+html[data-theme='dark'] body :is(.goal-done-text, .review-symbol, .hint-delta.up,
+  .fv-delta.up, .gps-badge, .weather-summary-score.great strong) { color: #65d985 !important; }
+html[data-theme='dark'] body .hint-delta.down { color: #e5b66b !important; }
+html[data-theme='dark'] body :is(.recent-icon, .recent-chip, .muscle-chip)[data-tone='blue'] { color: #64b5ff !important; }
+html[data-theme='dark'] body :is(.recent-icon, .recent-chip, .muscle-chip)[data-tone='green'] { color: #65d985 !important; }
+html[data-theme='dark'] body :is(.recent-icon, .recent-chip, .muscle-chip)[data-tone='purple'] { color: #d6a2f5 !important; }
+html[data-theme='dark'] body :is(.recent-icon, .recent-chip, .muscle-chip)[data-tone='cyan'] { color: #70d7df !important; }
+html[data-theme='dark'] body :is(.recent-icon, .recent-chip, .muscle-chip)[data-tone='indigo'] { color: #b1afff !important; }
+html[data-theme='dark'] body :is(.recent-icon, .recent-chip, .muscle-chip)[data-tone='pink'] { color: #ff8aac !important; }
+html[data-theme='dark'] body :is(.recent-icon, .recent-chip, .muscle-chip)[data-tone='red'] { color: #ff8a80 !important; }
+html[data-theme='dark'] body :is(.recent-icon, .recent-chip, .muscle-chip)[data-tone='graphite'] { color: #c7c7cc !important; background: rgba(255,255,255,.08) !important; }
+html[data-theme='dark'] body .recent-icon { box-shadow: inset 0 1px 0 rgba(255,255,255,.06) !important; }
+
+html[data-theme='dark'] body :is(.live-map, .leaflet-container) { background: #202328 !important; }
+html[data-theme='dark'] body .weather-detail { background: rgba(255,255,255,.06) !important; border-color: var(--theme-line) !important; }
+html[data-theme='dark'] body .gps-calibration-overlay { background: rgba(20,20,23,.65) !important; }
+
+html[data-theme='dark'] body app-route-map { background: #202328 !important; }
+html[data-theme='dark'] body :is(.route-empty, .route-key) { color: #c7c7cc !important; background: #29292d !important; }

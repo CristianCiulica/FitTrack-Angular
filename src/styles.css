@@ -1,5 +1,7 @@
 @import 'ng-zorro-antd/ng-zorro-antd.min.css';
 @import 'leaflet/dist/leaflet.css';
+@import './app/theme-components.css';
+@import './theme-dark.css';
 
 /* ============================================================
    FitTrack Design System — "Liquid Glass"

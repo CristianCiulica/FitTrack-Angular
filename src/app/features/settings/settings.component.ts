@@ -14,6 +14,7 @@ import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.comp
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { Units } from '../../core/models/user-profile.model';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-settings',
@@ -35,6 +36,8 @@ import { Units } from '../../core/models/user-profile.model';
   styleUrls: ['./settings.component.scss'],
 })
 export class SettingsComponent implements OnInit {
+  readonly appearance = inject(ThemeService);
+  readonly appearanceOptions = ['light', 'dark', 'system'] as const;
   private readonly profileService = inject(ProfileService);
   private readonly auth = inject(AuthService);
   private readonly firebaseAuth = inject(Auth);

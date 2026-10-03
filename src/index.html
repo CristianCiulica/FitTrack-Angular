@@ -6,6 +6,18 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ffffff">
+  <script>
+    // Apply before styles and Angular load so a saved dark appearance never flashes white.
+    (function () {
+      var choice = 'system';
+      try { choice = localStorage.getItem('fittrack_theme') || 'system'; } catch (_) {}
+      var dark = choice === 'dark' || (choice !== 'light' && choice !== 'dark' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      document.documentElement.style.backgroundColor = dark ? '#0b0c0f' : '#ffffff';
+      document.querySelector('meta[name="theme-color"]').content = dark ? '#0b0c0f' : '#ffffff';
+    })();
+  </script>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">

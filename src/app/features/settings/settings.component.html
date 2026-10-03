@@ -67,6 +67,30 @@
             <h1>Settings</h1>
           </div>
 
+          <section class="appearance-section" aria-labelledby="appearance-title">
+            <div class="setting-copy">
+              <strong id="appearance-title">Appearance</strong>
+              <small>Make FitTrack feel at home on your device.</small>
+            </div>
+            <div class="appearance-options" role="group" aria-label="Appearance">
+              @for (option of appearanceOptions; track option) {
+                <button type="button" class="appearance-option"
+                  [class.selected]="appearance.preference() === option"
+                  [attr.aria-pressed]="appearance.preference() === option"
+                  (click)="appearance.setPreference(option)">
+                  <span class="appearance-preview" [class]="'appearance-preview preview-' + option" aria-hidden="true">
+                    <span class="preview-header"></span>
+                    <span class="preview-card"><i></i><i></i></span>
+                    <span class="preview-dock"><i></i><i></i><i></i></span>
+                  </span>
+                  <span class="appearance-label">{{ option === 'system' ? 'Auto' : (option | titlecase) }}</span>
+                  <span class="appearance-check" aria-hidden="true">{{ appearance.preference() === option ? '✓' : '' }}</span>
+                </button>
+              }
+            </div>
+            <p class="appearance-note">{{ appearance.preference() === 'system' ? 'Auto follows your device’s appearance.' : 'Saved on this device.' }}</p>
+          </section>
+
           <div class="setting-row">
             <div class="setting-copy">
               <strong>Units</strong>
