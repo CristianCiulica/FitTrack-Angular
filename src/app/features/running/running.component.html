@@ -102,7 +102,7 @@
             <div class="weather-details" *ngIf="weatherExpanded">
               <div class="weather-detail">
                 <span>Wind</span>
-                <strong>{{ weather.windSpeed | number: '1.0-0' }} km/h</strong>
+                <strong>{{ speedValue(weather.windSpeed) | number: '1.0-0' }} {{ distanceUnit }}/h</strong>
               </div>
               <div class="weather-detail">
                 <span>Rain</span>
@@ -134,7 +134,7 @@
                 <span class="gps-badge">GPS active</span>
               </div>
             </div>
-            <div class="run-recovery" *ngIf="recoveredRun"><strong>Run recovered</strong><p>{{ elapsedDisplay }} · {{ distanceKm }} km recorded</p><div><button nz-button nzType="primary" (click)="resumeRecoveredRun()">Resume run</button><button nz-button (click)="saveRecoveredRun()">Save to History</button></div></div>
+            <div class="run-recovery" *ngIf="recoveredRun"><strong>Run recovered</strong><p>{{ elapsedDisplay }} · {{ distanceKm }} {{ distanceUnit }} recorded</p><div><button nz-button nzType="primary" (click)="resumeRecoveredRun()">Resume run</button><button nz-button (click)="saveRecoveredRun()">Save to History</button></div></div>
             <button *ngIf="!recoveredRun"
               nz-button
               type="button"
@@ -179,7 +179,7 @@
             </div>
             <div>
               <span>Distance</span>
-              <strong>{{ distanceKm }} km</strong>
+              <strong>{{ distanceKm }} {{ distanceUnit }}</strong>
             </div>
             <div>
               <span>Speed</span>

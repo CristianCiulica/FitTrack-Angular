@@ -35,7 +35,7 @@ button:disabled { cursor: default; opacity: .45; }
 .routine-facts strong { color: var(--ink); font-size: 14px; font-weight: 600; }
 .exercise-preview { display: flex; flex-direction: column; gap: 10px; padding: 16px 0 20px; margin-top: 17px; border-top: 1px solid #f0f0f2; }
 .exercise-preview > span { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #626269; font-size: 11px; }
-.exercise-preview small { flex-shrink: 0; color: #8e8e93; font-variant-numeric: tabular-nums; }
+.exercise-preview small { flex-shrink: 0; color: var(--ink-tertiary); font-variant-numeric: tabular-nums; }
 .plan-start { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 42px; margin-top: auto; padding: 10px 16px; border: 0; border-radius: 22px; background: #edf4fd; color: var(--blue); font-size: 12px; font-weight: 600; transition: background .2s, color .2s; }
 .plan-start:hover { background: var(--blue); color: white; }
 .personal-list .plan-start { margin-top: 22px; }

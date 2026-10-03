@@ -1,4 +1,5 @@
 import type { FirebaseOptions } from 'firebase/app';
+import { Capacitor } from '@capacitor/core';
 
 interface FitTrackRuntimeConfig {
   firebase?: FirebaseOptions;
@@ -36,7 +37,8 @@ export function getApiBaseUrl(): string {
 
   // altfel alegem la runtime: pe localhost -> backend-ul local, pe web -> Render.
   // asa acelasi build merge si in dev si in productie, fara variabile de mediu.
-  const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const isLocalhost =
+    !Capacitor.isNativePlatform() && ['localhost', '127.0.0.1'].includes(window.location.hostname);
   const url = isLocalhost
     ? config?.localApiBaseUrl || 'http://localhost:4000/api'
     : config?.prodApiBaseUrl || 'https://fittrack-angular.onrender.com/api';

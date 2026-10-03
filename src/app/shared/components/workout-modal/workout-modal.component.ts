@@ -29,6 +29,7 @@ import { Workout, ExerciseLog, MUSCLE_GROUPS } from '../../../core/models/workou
 })
 export class WorkoutModalComponent implements OnChanges {
   @Input() visible = false;
+  @Input() saving = false;
   @Input() workout: Workout | null = null;
   @Output() save = new EventEmitter<Partial<Workout>>();
   @Output() cancel = new EventEmitter<void>();
@@ -96,7 +97,7 @@ export class WorkoutModalComponent implements OnChanges {
 
   createExerciseGroup(ex?: Partial<ExerciseLog>): FormGroup {
     const group = this.fb.group({
-      exerciseName: [ex?.exerciseName || '', [Validators.required, Validators.minLength(2)]],
+      exerciseName: [ex?.exerciseName || '', [Validators.required, Validators.minLength(2), Validators.maxLength(120)]],
       muscleGroup: [ex?.muscleGroup || null, Validators.required],
       sets: [ex?.sets ?? 3, [Validators.required, Validators.min(1), Validators.max(50), Validators.pattern(/^\d+$/)]],
       reps: [ex?.reps ?? 10, [Validators.required, Validators.min(0), Validators.max(500), Validators.pattern(/^\d+$/)]],
@@ -118,6 +119,7 @@ export class WorkoutModalComponent implements OnChanges {
   }
 
   submit() {
+    if (this.saving) return;
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -132,6 +134,7 @@ export class WorkoutModalComponent implements OnChanges {
         const sameCount = original?.sets === value.sets;
         return {
           ...value, exerciseName: value.exerciseName.trim(),
+          ...(original?.repUnit ? { repUnit: original.repUnit } : {}),
           ...(sameCount && original?.setWeights ? { setWeights: [...original.setWeights] } : {}),
           ...(sameCount && original?.setReps ? {
             setReps: original.reps === value.reps ? [...original.setReps] : Array(value.sets).fill(value.reps),
@@ -142,6 +145,7 @@ export class WorkoutModalComponent implements OnChanges {
   }
 
   onCancel() {
+    if (this.saving) return;
     this.cancel.emit();
   }
 }

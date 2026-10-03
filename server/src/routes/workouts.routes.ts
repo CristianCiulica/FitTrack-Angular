@@ -1,34 +1,17 @@
 import { Router } from 'express';
-import { z } from 'zod';
-import { Workout, MUSCLE_GROUPS } from '../models/workout.model';
+import { Workout } from '../models/workout.model';
+import { workoutBodySchema } from '../validation/activity';
+import { createOnce } from '../utils/idempotent-create';
 
 const router = Router();
-
-const exerciseSchema = z.object({
-  exerciseName: z.string().trim().min(1),
-  muscleGroup: z.enum(MUSCLE_GROUPS),
-  sets: z.number().min(0).max(50),
-  reps: z.number().min(0).max(500),
-  repUnit: z.literal('seconds').optional(),
-  weight: z.number().min(0).max(1000),
-  setWeights: z.array(z.number().min(0).max(1000)).max(50).optional(),
-  setReps: z.array(z.number().min(0).max(500)).max(50).optional(),
-});
-
-const workoutBodySchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  date: z.string().min(1),
-  durationSeconds: z.number().int().min(0).max(604800).optional(),
-  notes: z.string().max(2000).optional().default(''),
-  isPredefined: z.boolean().optional().default(false),
-  exercises: z.array(exerciseSchema).max(50).default([]),
-});
 
 function serialize(doc: any) {
   if (!doc) return doc;
   const obj = doc.toObject ? doc.toObject() : doc;
   return {
     id: String(obj._id),
+    clientId: obj.clientId,
+    kind: obj.kind,
     userId: obj.userId,
     name: obj.name,
     date: obj.date,
@@ -52,7 +35,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const body = workoutBodySchema.parse(req.body);
-    const created = await Workout.create({ ...body, userId: req.user!.uid });
+    const created = await createOnce(Workout, req.user!.uid, body);
     res.status(201).json({ workout: serialize(created) });
   } catch (err) {
     next(err);
@@ -62,6 +45,7 @@ router.post('/', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
   try {
     const body = workoutBodySchema.partial().parse(req.body);
+    delete body.clientId;
     const updated = await Workout.findOneAndUpdate(
       { _id: req.params.id, userId: req.user!.uid },
       { $set: body },

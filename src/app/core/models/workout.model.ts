@@ -14,6 +14,11 @@ export interface ExerciseLog {
 
 export interface Workout {
   id?: string;
+  clientId?: string;
+  /** Older records without kind remain historical sessions. */
+  kind?: 'routine' | 'session';
+  /** Local outbox metadata, never persisted by the API. */
+  pendingUpdate?: boolean;
   userId: string;
   name: string;
   date: string;

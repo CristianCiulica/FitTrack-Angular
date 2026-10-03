@@ -18,6 +18,7 @@ const userProfileSchema = new Schema(
     moveGoal: { type: Number, default: 500 },
     exerciseGoal: { type: Number, default: 30 },
     weeklyWorkoutGoal: { type: Number, default: 4 },
+    strengthTrainingDays: { type: Number, min: 0, max: 7, default: undefined },
     migratedFromLocalStorage: { type: Boolean, default: false },
   },
   { timestamps: true },

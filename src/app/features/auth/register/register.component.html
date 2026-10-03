@@ -23,40 +23,40 @@
       <form nz-form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
         <div class="form-row">
           <div class="form-group">
-            <label>First name</label>
+            <label for="register-firstName">First name</label>
             <nz-form-item>
               <nz-form-control nzErrorTip="Required.">
-                <input nz-input formControlName="firstName" placeholder="John" class="apple-input" />
+                <input nz-input formControlName="firstName" id="register-firstName" autocomplete="given-name" placeholder="John" class="apple-input" />
               </nz-form-control>
             </nz-form-item>
           </div>
           <div class="form-group">
-            <label>Last name</label>
+            <label for="register-lastName">Last name</label>
             <nz-form-item>
               <nz-form-control nzErrorTip="Required.">
-                <input nz-input formControlName="lastName" placeholder="Doe" class="apple-input" />
+                <input nz-input formControlName="lastName" id="register-lastName" autocomplete="family-name" placeholder="Doe" class="apple-input" />
               </nz-form-control>
             </nz-form-item>
           </div>
         </div>
 
         <div class="form-group">
-          <label>Email</label>
+          <label for="register-email">Email</label>
           <nz-form-item>
             <nz-form-control nzErrorTip="Enter a valid email.">
-              <input nz-input formControlName="email" placeholder="you@example.com" type="email" class="apple-input" />
+              <input nz-input formControlName="email" id="register-email" autocomplete="email" placeholder="you@example.com" type="email" class="apple-input" />
             </nz-form-control>
           </nz-form-item>
         </div>
 
         <div class="form-group">
-          <label>Password</label>
+          <label for="register-password">Password</label>
           <nz-form-item>
             <nz-form-control nzErrorTip="Min. 6 chars: upper, lower, number, special.">
               <div class="input-wrapper">
-                <input nz-input formControlName="password" placeholder="••••••••"
+                <input nz-input formControlName="password" id="register-password" autocomplete="new-password" placeholder="••••••••"
                   [type]="passwordVisible ? 'text' : 'password'" class="apple-input" />
-                <button type="button" class="eye-btn" (click)="passwordVisible = !passwordVisible">
+                <button type="button" class="eye-btn" [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'" [attr.aria-pressed]="passwordVisible" (click)="passwordVisible = !passwordVisible">
                   <span nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"></span>
                 </button>
               </div>
@@ -65,13 +65,13 @@
         </div>
 
         <div class="form-group">
-          <label>Confirm password</label>
+          <label for="register-confirmPassword">Confirm password</label>
           <nz-form-item>
             <nz-form-control [nzErrorTip]="form.hasError('passwordMismatch') ? 'Passwords do not match.' : 'Required.'">
               <div class="input-wrapper">
                 <input
                   nz-input
-                  formControlName="confirmPassword"
+                  formControlName="confirmPassword" id="register-confirmPassword" autocomplete="new-password"
                   placeholder="••••••••"
                   [type]="confirmPasswordVisible ? 'text' : 'password'"
                   class="apple-input"

@@ -20,6 +20,7 @@ export interface UserProfile {
   goalRate: number;
   // cate antrenamente pe saptamana isi propune userul
   weeklyWorkoutGoal: number;
+  strengthTrainingDays?: number;
   moveGoal?: number;
   exerciseGoal?: number;
   migratedFromLocalStorage?: boolean;
@@ -40,6 +41,7 @@ export type ProfileUpdate = Partial<
     | 'goal'
     | 'goalRate'
     | 'weeklyWorkoutGoal'
+    | 'strengthTrainingDays'
     | 'moveGoal'
     | 'exerciseGoal'
   >

@@ -9,6 +9,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
@@ -43,6 +44,9 @@ import {
 export class BmiComponent implements OnDestroy {
   private readonly profileService = inject(ProfileService);
   private readonly authService = inject(AuthService);
+  private readonly message = inject(NzMessageService);
+  private profileRevision = 0;
+  private goalRevision = 0;
 
   // canonical metric — seeded from profile, synced back to profile (single source of truth)
   height = signal<number>(170); // cm
@@ -56,6 +60,7 @@ export class BmiComponent implements OnDestroy {
   goalRate = signal<number>(0.5);
 
   readonly units = this.profileService.units;
+  readonly goalRateDisplay = computed(() => displayWeight(this.goalRate(), this.profileService.units()));
   readonly isImperial = computed(() => this.units() === 'imperial');
   readonly weightUnit = computed(() => weightUnitLabel(this.units()));
   readonly weightInput = computed(() => displayWeight(this.weight(), this.units()));
@@ -78,8 +83,8 @@ export class BmiComponent implements OnDestroy {
       if (p.age) this.age.set(p.age);
       if (p.sex === 'male' || p.sex === 'female') this.sex.set(p.sex);
       if (p.goal) this.goal.set(p.goal);
-      if (p.goalRate) this.goalRate.set(p.goalRate);
-      if (p.weeklyWorkoutGoal) this.strengthTrainingDays.set(p.weeklyWorkoutGoal);
+      if (p.goalRate != null) this.goalRate.set(p.goalRate);
+      this.strengthTrainingDays.set(p.strengthTrainingDays ?? Math.min(7, p.weeklyWorkoutGoal ?? 4));
       this.hydrated = true;
     });
   }
@@ -155,6 +160,7 @@ export class BmiComponent implements OnDestroy {
   }
 
   onStrengthDays(value: number) {
+    if (!Number.isInteger(value) || value < 0 || value > 7) return;
     this.strengthTrainingDays.set(value);
     this.queueGoalSync();
   }
@@ -162,17 +168,24 @@ export class BmiComponent implements OnDestroy {
   // obiectivul, ritmul si antrenamentele/saptamana sunt persistate in profil,
   // ca sa ramana sincronizate cu onboarding-ul si dashboard-ul
   private queueGoalSync() {
+    this.goalRevision++;
     if (!this.profileService.profile()) return;
     if (this.goalTimer) clearTimeout(this.goalTimer);
     this.goalTimer = setTimeout(() => { this.goalTimer = null; this.syncGoal(); }, 600);
   }
 
   private syncGoal() {
+    const revision = this.goalRevision;
     this.profileService.patch({
       goal: this.goal(),
       goalRate: Math.round(this.goalRate() * 10) / 10,
-      weeklyWorkoutGoal: Math.max(1, Math.round(this.strengthTrainingDays())),
-    }).subscribe({ error: (err) => console.warn('[bmi] Failed to sync goal', err) });
+      strengthTrainingDays: Math.round(this.strengthTrainingDays()),
+    }).subscribe({ error: () => {
+      if (revision !== this.goalRevision) return;
+      const saved = this.profileService.profile();
+      if (saved) { this.goal.set(saved.goal ?? 'maintain'); this.goalRate.set(saved.goalRate ?? 0.5); this.strengthTrainingDays.set(saved.strengthTrainingDays ?? Math.min(7, saved.weeklyWorkoutGoal ?? 4)); }
+      this.message.error('Your nutrition preferences could not be saved. Check your connection and try again.');
+    } });
   }
 
   // physical data changes propagate to the rest of the app via profile
@@ -207,18 +220,25 @@ export class BmiComponent implements OnDestroy {
   }
 
   private queueProfileSync() {
+    this.profileRevision++;
     if (!this.profileService.profile()) return;
     if (this.patchTimer) clearTimeout(this.patchTimer);
     this.patchTimer = setTimeout(() => { this.patchTimer = null; this.syncProfile(); }, 600);
   }
 
   private syncProfile() {
+    const revision = this.profileRevision;
     this.profileService.patch({
       heightCm: Math.round(this.height()),
       weightKg: Math.round(this.weight() * 10) / 10,
       age: this.age(),
       sex: this.sex(),
-    }).subscribe({ error: (err) => console.warn('[bmi] Failed to sync profile', err) });
+    }).subscribe({ error: () => {
+      if (revision !== this.profileRevision) return;
+      const saved = this.profileService.profile();
+      if (saved) { this.height.set(saved.heightCm ?? 170); this.weight.set(saved.weightKg ?? 70); this.age.set(saved.age ?? 30); if (saved.sex) this.sex.set(saved.sex); }
+      this.message.error('Your measurements could not be saved. Check your connection and try again.');
+    } });
   }
 
   logout() {

@@ -1,5 +1,6 @@
 export interface RunningSession {
   id: string;
+  clientId?: string;
   userId: string;
   mode: 'running' | 'walking';
   startedAt: string;

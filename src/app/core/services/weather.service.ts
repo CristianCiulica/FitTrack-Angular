@@ -92,11 +92,20 @@ export class WeatherService {
 
   // foloseste GPS-ul telefonului: ia vremea pentru locatia curenta, oriunde ar fi
   getWeatherByCoords(latitude: number, longitude: number) {
-    return this.cached(`gps:${latitude.toFixed(3)}:${longitude.toFixed(3)}`, () => this.fetchGpsWeather(latitude, longitude));
+    return this.cached(`gps:${latitude.toFixed(3)}:${longitude.toFixed(3)}`, () =>
+      this.fetchGpsWeather(latitude, longitude),
+    );
   }
 
   private cached(key: string, load: () => Observable<WeatherSummary>) {
-    return this.reads.read(key, () => null, load, () => {}).pipe(filter((value): value is WeatherSummary => value !== null));
+    return this.reads
+      .read(
+        key,
+        () => null,
+        load,
+        () => {},
+      )
+      .pipe(filter((value): value is WeatherSummary => value !== null));
   }
 
   private fetchGpsWeather(latitude: number, longitude: number) {
@@ -113,9 +122,10 @@ export class WeatherService {
       catchError(() => of('Your location')),
     );
     // The location label and forecast load together, rather than in a waterfall.
-    return forkJoin({ label, summary: this.fetchByCoordinates(latitude, longitude, 'Your location') }).pipe(
-      map(({ label, summary }) => ({ ...summary, cityLabel: label })),
-    );
+    return forkJoin({
+      label,
+      summary: this.fetchByCoordinates(latitude, longitude, 'Your location'),
+    }).pipe(map(({ label, summary }) => ({ ...summary, cityLabel: label })));
   }
 
   private fetchByCoordinates(latitude: number, longitude: number, cityLabel: string) {
@@ -124,7 +134,10 @@ export class WeatherService {
 
     return forkJoin({
       forecast: this.http.get<ForecastResponse>(forecastUrl),
-      air: this.http.get<AirQualityResponse>(airUrl).pipe(timeout(5000), catchError(() => of({} as AirQualityResponse))),
+      air: this.http.get<AirQualityResponse>(airUrl).pipe(
+        timeout(5000),
+        catchError(() => of({} as AirQualityResponse)),
+      ),
     }).pipe(map(({ forecast, air }) => this.buildSummary(cityLabel, forecast, air)));
   }
 
@@ -138,7 +151,9 @@ export class WeatherService {
     }
 
     const currentTime = forecast.current.time;
-    const currentIndex = Math.max(0, forecast.hourly.time.indexOf(currentTime));
+    const currentIndex = this.hourIndex(forecast.hourly.time, currentTime);
+    const airIndex = this.hourIndex(air.hourly?.time ?? [], currentTime);
+    const aqi = air.hourly?.us_aqi?.[airIndex];
 
     const rainInfo = this.findRainWindow(forecast.hourly, currentIndex);
     const conditionLabel = this.weatherCodeToLabel(forecast.current.weathercode);
@@ -148,7 +163,7 @@ export class WeatherService {
       wind: forecast.current.wind_speed_10m,
       code: forecast.current.weathercode,
       willRain: rainInfo.willRain,
-      aqi: this.pickLatestValue(air.hourly?.us_aqi),
+      aqi,
     });
 
     return {
@@ -162,8 +177,8 @@ export class WeatherService {
       rainWindow: rainInfo.window,
       score,
       scoreLabel,
-      aqi: this.pickLatestValue(air.hourly?.us_aqi),
-      pm25: this.pickLatestValue(air.hourly?.pm2_5),
+      aqi,
+      pm25: air.hourly?.pm2_5?.[airIndex],
       uvIndex: forecast.hourly.uv_index?.[currentIndex],
     };
   }
@@ -250,9 +265,14 @@ export class WeatherService {
     return map[code] ?? 'Mixed conditions';
   }
 
-  private pickLatestValue(values?: number[]) {
-    if (!values || values.length === 0) return undefined;
-    return values[values.length - 1];
+  private hourIndex(times: string[], current: string): number {
+    const target = Date.parse(current);
+    let index = -1;
+    for (let i = 0; i < times.length; i++) {
+      if (Date.parse(times[i]) <= target) index = i;
+      else break;
+    }
+    return index < 0 && times.length ? 0 : index;
   }
 
   private formatHour(time: string) {

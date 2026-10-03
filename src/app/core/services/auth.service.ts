@@ -22,10 +22,12 @@ import { distinctUntilChanged, filter, map } from 'rxjs/operators';
 import { inject } from '@angular/core';
 import { MigrationService } from './migration.service';
 import { ProfileService } from './profile.service';
+import { NativeRunService } from './native-run.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private auth = inject(Auth);
+  private nativeRun = inject(NativeRunService);
   private router = inject(Router);
   private migration = inject(MigrationService);
   private profileService = inject(ProfileService);
@@ -52,17 +54,21 @@ export class AuthService {
     )
     .subscribe((uid) => {
       this.migration.migrateIfNeeded(uid);
-      this.profileService.load(true).subscribe({ error: (err) => console.warn('[auth] Failed to load profile', err) });
+      this.profileService
+        .load(true)
+        .subscribe({ error: (err) => console.warn('[auth] Failed to load profile', err) });
     });
 
   // Handle redirect result when returning from Google sign-in (PWA standalone mode)
-  private readonly redirectSub = getRedirectResult(this.auth).then((result) => {
-    if (result?.user) {
-      this.router.navigate(['/dashboard']);
-    }
-  }).catch((err) => {
-    console.warn('[auth] redirect result error', err);
-  });
+  private readonly redirectSub = getRedirectResult(this.auth)
+    .then((result) => {
+      if (result?.user) {
+        this.router.navigate(['/dashboard']);
+      }
+    })
+    .catch((err) => {
+      console.warn('[auth] redirect result error', err);
+    });
 
   // set persistence for remember me
   login(email: string, password: string, remember: boolean) {
@@ -83,7 +89,14 @@ export class AuthService {
   }
 
   logout() {
-    return from(signOut(this.auth)).pipe(map(() => this.router.navigate(['/auth/login'])));
+    const uid = this.currentUserId;
+    return from(
+      (async () => {
+        // Preserve the native checkpoint for this owner while stopping GPS after logout.
+        if (this.nativeRun.available) await this.nativeRun.stop(uid);
+        await signOut(this.auth);
+      })(),
+    ).pipe(map(() => this.router.navigate(['/auth/login'])));
   }
 
   resetPassword(email: string) {

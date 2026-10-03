@@ -1,27 +1,17 @@
 import { Router } from 'express';
 import { Document } from 'mongoose';
-import { z } from 'zod';
 import { RunningSession } from '../models/running-session.model';
+import { sessionBodySchema } from '../validation/activity';
+import { createOnce } from '../utils/idempotent-create';
 
 const router = Router();
-
-const sessionBodySchema = z.object({
-  mode: z.enum(['running', 'walking']),
-  startedAt: z.string().min(1),
-  endedAt: z.string().min(1),
-  durationSeconds: z.number().min(0).max(604800),
-  distanceMeters: z.number().min(0).max(500000),
-  steps: z.number().min(0).max(200000),
-  averageSpeedKmh: z.number().min(0),
-  calories: z.number().min(0).max(20000),
-  route: z.array(z.tuple([z.number().finite().min(-90).max(90), z.number().finite().min(-180).max(180)])).max(5000).optional().default([]),
-});
 
 function serialize(doc: Document | any) {
   if (!doc) return doc;
   const obj = typeof doc.toObject === 'function' ? doc.toObject() : doc;
   return {
     id: String(obj._id),
+    clientId: obj.clientId,
     userId: obj.userId,
     mode: obj.mode,
     startedAt: obj.startedAt,
@@ -47,7 +37,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const body = sessionBodySchema.parse(req.body);
-    const created = await RunningSession.create({ ...body, userId: req.user!.uid });
+    const created = await createOnce(RunningSession, req.user!.uid, body);
     res.status(201).json({ session: serialize(created) });
   } catch (err) {
     next(err);

@@ -1,5 +1,7 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { durationLabel } from '../../core/utils/workout-history';
+import { isWorkoutSession } from '../../core/utils/workout-kind';
+import { displayWeight, displayDistance, displaySpeed, distanceUnitLabel, weightUnitLabel } from '../../core/utils/units';
 import { Component, DestroyRef, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -48,6 +50,11 @@ type SortDirection = 'ascend' | 'descend' | null;
   styleUrls: ['./workouts.component.scss']
 })
 export class WorkoutsComponent implements OnInit {
+  get distanceUnit() { return distanceUnitLabel(this.profileService.units()); }
+  get weightUnit() { return weightUnitLabel(this.profileService.units()); }
+  displayLoad(kg: number) { return displayWeight(kg, this.profileService.units()); }
+  distanceValue(meters: number) { return displayDistance(meters, this.profileService.units()); }
+  speedValue(kmh: number) { return displaySpeed(kmh, this.profileService.units()); }
   private readonly destroy = inject(DestroyRef);
   readonly durationLabel = durationLabel;
   workouts = signal<Workout[]>([]);
@@ -55,6 +62,7 @@ export class WorkoutsComponent implements OnInit {
   sortColumn = signal<WorkoutSortColumn>('date');
   sortDirection = signal<SortDirection>('descend');
   modalVisible = signal(false);
+  modalSaving = signal(false);
   editingWorkout = signal<Workout | null>(null);
   cardioHistoryOpen = signal(true);
   workoutHistoryOpen = signal(true);
@@ -62,7 +70,7 @@ export class WorkoutsComponent implements OnInit {
   expandSet = new Set<string>();
 
   filteredWorkouts = computed(() => {
-    let data = [...this.workouts()];
+    let data = this.workouts().filter(isWorkoutSession);
 
     const sc = this.sortColumn();
     const sd = this.sortDirection();
@@ -117,7 +125,7 @@ export class WorkoutsComponent implements OnInit {
 
   // greutatile reale pe seturi, ex. "60 / 62.5 / 65 kg"
   formatSetWeights(setWeights: number[]): string {
-    return setWeights.join(' / ') + ' kg';
+    return setWeights.map(weight => this.displayLoad(weight)).join(' / ') + ' ' + this.weightUnit;
   }
 
   // repetarile reale pe seturi, ex. "10 / 9 / 8 reps"
@@ -148,12 +156,13 @@ export class WorkoutsComponent implements OnInit {
 
   // ritmul mediu, in stil alergare: min/km (ex. 5'32")
   formatPace(session: RunningSession): string {
-    const km = session.distanceMeters / 1000;
+    const km = this.distanceValue(session.distanceMeters);
     if (km <= 0) return '–';
     const secPerKm = session.durationSeconds / km;
     if (!Number.isFinite(secPerKm) || secPerKm <= 0) return '–';
-    const mins = Math.floor(secPerKm / 60);
-    const secs = Math.round(secPerKm % 60);
+    const rounded = Math.round(secPerKm);
+    const mins = Math.floor(rounded / 60);
+    const secs = rounded % 60;
     return `${mins}'${secs.toString().padStart(2, '0')}"`;
   }
 
@@ -232,7 +241,7 @@ export class WorkoutsComponent implements OnInit {
   }
 
   private refreshWorkouts() {
-    this.workoutService.getWorkouts().pipe(takeUntilDestroyed(this.destroy)).subscribe((data) => this.workouts.set(data));
+    this.workoutService.getWorkouts().pipe(takeUntilDestroyed(this.destroy)).subscribe((data) => this.workouts.set(data.filter(isWorkoutSession)));
   }
 
   openEdit(workout: Workout) {
@@ -241,15 +250,18 @@ export class WorkoutsComponent implements OnInit {
   }
 
   onModalSave(workout: Partial<Workout>) {
+    if (this.modalSaving()) return;
     const editing = this.editingWorkout();
     if (!editing?.id) return;
+    this.modalSaving.set(true);
     this.workoutService.updateWorkout(editing.id, workout).subscribe({
       next: () => {
+        this.modalSaving.set(false);
         this.modalVisible.set(false);
         this.message.success('Workout updated!');
         this.refreshWorkouts();
       },
-      error: () => this.message.error('Update failed.')
+      error: () => { this.modalSaving.set(false); this.message.error('Update failed.'); }
     });
   }
 

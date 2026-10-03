@@ -22,10 +22,10 @@
 
       <form nz-form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
         <div class="form-group">
-          <label>Email</label>
+          <label for="login-email">Email</label>
           <nz-form-item>
             <nz-form-control [nzErrorTip]="emailError">
-              <input nz-input formControlName="email" placeholder="you@example.com" type="email" class="apple-input" />
+              <input nz-input formControlName="email" id="login-email" autocomplete="email" placeholder="you@example.com" type="email" class="apple-input" />
               <ng-template #emailError>Enter a valid email.</ng-template>
             </nz-form-control>
           </nz-form-item>
@@ -33,13 +33,13 @@
 
         <div class="form-group">
           <div class="label-row" style="display: flex; justify-content: space-between; align-items: center;">
-            <label>Password</label>
-            <a (click)="forgotPassword()" class="forgot-link" style="font-size: 0.875rem; cursor: pointer; color: var(--accent);">Forgot password?</a>
+            <label for="login-password">Password</label>
+            <a role="button" tabindex="0" (keydown.enter)="forgotPassword()" (keydown.space)="$event.preventDefault(); forgotPassword()" (click)="forgotPassword()" class="forgot-link" style="font-size: 0.875rem; cursor: pointer; color: var(--accent);">Forgot password?</a>
           </div>
           <nz-form-item>
             <nz-form-control [nzErrorTip]="passError">
               <div class="input-wrapper">
-                <input nz-input formControlName="password" placeholder="••••••••"
+                <input nz-input formControlName="password" id="login-password" autocomplete="current-password" placeholder="••••••••"
                   [type]="passwordVisible ? 'text' : 'password'" class="apple-input" />
                 <button
                   type="button"

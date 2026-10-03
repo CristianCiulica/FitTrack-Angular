@@ -53,3 +53,18 @@ describe('Dashboard Activity data', () => {
     expect(component.activityDistance()).toBe(0);
   });
 });
+
+describe('Unperformed routines', () => {
+  it('never counts a saved plan as movement, exercise or a completed workout', () => {
+    TestBed.configureTestingModule({ providers: [
+      { provide: ProfileService, useValue: { moveGoal: signal(500), exerciseGoal: signal(30), weightKg: signal(75), weeklyWorkoutGoal: signal(4), units: signal('metric') } },
+      { provide: RunningSessionService, useValue: { sessions: signal([]) } },
+    ] });
+    const component = TestBed.runInInjectionContext(() => new DashboardComponent({} as any, {} as any, {} as any));
+    component.selectedDate.set(new Date(2026, 9, 3));
+    component.workouts.set([{ kind: 'routine', userId: 'test', name: 'New plan', date: '2026-10-03', exercises: [{ exerciseName: 'Squat', muscleGroup: 'Legs', sets: 3, reps: 20, weight: 0 }] }]);
+    expect(component.activityWeekWorkouts()).toBe(0);
+    expect(component.burnedKcal()).toBe(0);
+    expect(component.exerciseMinutes()).toBe(0);
+  });
+});

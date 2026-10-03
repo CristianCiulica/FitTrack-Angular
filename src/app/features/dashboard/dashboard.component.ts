@@ -18,6 +18,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Workout } from '../../core/models/workout.model';
+import { isWorkoutSession } from '../../core/utils/workout-kind';
 import { estimateSessionCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import {
@@ -122,7 +123,8 @@ export class DashboardComponent implements OnInit {
   }
   thisWeekWorkouts = computed(() => {
     const monday = this.startOfWeek();
-    return this.workouts().filter(w => new Date(w.date) >= monday).length;
+    const end = new Date(monday); end.setDate(end.getDate() + 7);
+    return this.workouts().filter(w => isWorkoutSession(w) && w.date.slice(0, 10) >= this.toKey(monday) && w.date.slice(0, 10) < this.toKey(end)).length;
   });
   recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
 
@@ -211,7 +213,7 @@ export class DashboardComponent implements OnInit {
 
   private readonly workoutsForDay = computed(() => {
     const key = this.toKey(this.selectedDate());
-    return this.workouts().filter((w) => (w.date ?? '').slice(0, 10) === key);
+    return this.workouts().filter((w) => isWorkoutSession(w) && (w.date ?? '').slice(0, 10) === key);
   });
 
   readonly workoutsOnDay = computed(() => this.workoutsForDay().length);
@@ -246,6 +248,7 @@ export class DashboardComponent implements OnInit {
     const end = new Date(start);
     end.setDate(end.getDate() + 7);
     return this.workouts().filter(workout => {
+      if (!isWorkoutSession(workout)) return false;
       const key = (workout.date ?? '').slice(0, 10);
       return key >= this.toKey(start) && key < this.toKey(end);
     }).length;
@@ -344,7 +347,7 @@ export class DashboardComponent implements OnInit {
     this.recoveredRunAvailable.set(!!this.runningSessionService.recoverRun());
     this.workoutService.getWorkouts().pipe(takeUntilDestroyed(this.destroy)).subscribe({
       next: (data) => {
-        this.workouts.set(data);
+        this.workouts.set(data.filter(isWorkoutSession));
         this.workoutService.workouts.set(data);
         this.workoutService.totalWorkouts.set(data.length);
       },

@@ -6,13 +6,34 @@ import { ApiService } from './api.service';
 import { WorkoutService } from './workout.service';
 
 describe('Workout persistence', () => {
-  const record = { id: 'server-id', name: 'Push', exercises: [], date: '2026-10-01', userId: 'test' };
+  const record = {
+    id: 'server-id',
+    name: 'Push',
+    exercises: [],
+    date: '2026-10-01',
+    userId: 'test',
+  };
   let service: WorkoutService;
-  let api: { get: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn>; put: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn> };
+  let api: {
+    get: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
+    put: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+  };
   beforeEach(() => {
     localStorage.clear();
-    api = { get: vi.fn(() => of({ workouts: [record] })), delete: vi.fn(), put: vi.fn(), post: vi.fn() };
-    TestBed.configureTestingModule({ providers: [{ provide: ApiService, useValue: api }, { provide: Auth, useValue: { currentUser: { uid: 'test' } } }] });
+    api = {
+      get: vi.fn(() => of({ workouts: [record] })),
+      delete: vi.fn(),
+      put: vi.fn(),
+      post: vi.fn(),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ApiService, useValue: api },
+        { provide: Auth, useValue: { currentUser: { uid: 'test' } } },
+      ],
+    });
     service = TestBed.inject(WorkoutService);
     service.getWorkouts().subscribe();
   });
@@ -36,10 +57,12 @@ describe('Workout persistence', () => {
   });
 
   it('still confirms the uploaded workout when browser storage is blocked', () => {
-    const storage = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('Quota'); });
+    const storage = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('Quota');
+    });
     api.post.mockReturnValue(of({ workout: { ...record, id: 'uploaded-id' } }));
     service.addWorkout(record).subscribe();
-    expect(service.workouts().some(item => item.id === 'uploaded-id')).toBe(true);
+    expect(service.workouts().some((item) => item.id === 'uploaded-id')).toBe(true);
     storage.mockRestore();
   });
 
@@ -48,7 +71,7 @@ describe('Workout persistence', () => {
     api.post.mockReturnValue(upload);
     api.delete.mockReturnValue(of({ deleted: true }));
     service.addWorkout(record).subscribe();
-    const tempId = service.workouts().find(item => item.id?.startsWith('w_'))!.id!;
+    const tempId = service.workouts().find((item) => item.id?.startsWith('w_'))!.id!;
     const deleted = vi.fn();
     service.deleteWorkout(tempId).subscribe({ next: deleted });
     expect(api.delete).not.toHaveBeenCalled();
@@ -81,7 +104,7 @@ describe('Workout persistence', () => {
     const upload = new Subject<{ workout: typeof record }>();
     api.post.mockReturnValue(upload);
     service.addWorkout(record).subscribe();
-    const pending = service.workouts().find(item => item.id?.startsWith('w_'))!;
+    const pending = service.workouts().find((item) => item.id?.startsWith('w_'))!;
     const failure = vi.fn();
     service.deleteWorkout(pending.id!).subscribe({ error: failure });
     upload.error(new Error('Offline'));
@@ -94,7 +117,7 @@ describe('Workout persistence', () => {
     const upload = new Subject<{ workout: typeof record }>();
     api.post.mockReturnValue(upload);
     service.addWorkout(record).subscribe();
-    const tempId = service.workouts().find(item => item.id?.startsWith('w_'))!.id!;
+    const tempId = service.workouts().find((item) => item.id?.startsWith('w_'))!.id!;
     const saved = { ...record, id: 'uploaded-id' };
     upload.next({ workout: saved });
     upload.complete();
@@ -104,5 +127,120 @@ describe('Workout persistence', () => {
     expect(api.delete).toHaveBeenCalledWith('/workouts/uploaded-id');
     expect(failure).toHaveBeenCalledOnce();
     expect(service.workouts()).toContainEqual(saved);
+  });
+});
+
+describe('Workout upload consistency', () => {
+  let service: WorkoutService;
+  let api: any;
+  const record = { userId: 'test', name: 'Original', date: '2026-10-03', exercises: [] };
+  beforeEach(() => {
+    localStorage.clear();
+    api = { get: vi.fn(() => of({ workouts: [] })), post: vi.fn(), put: vi.fn(), delete: vi.fn() };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ApiService, useValue: api },
+        { provide: Auth, useValue: { currentUser: { uid: 'test' } } },
+      ],
+    });
+    service = TestBed.inject(WorkoutService);
+  });
+  it('saves an edit made while the original POST is pending', () => {
+    const pending = new Subject<any>();
+    api.post.mockReturnValue(pending);
+    api.put.mockImplementation((_path: string, body: any) =>
+      of({ workout: { ...body, id: 'saved', pendingUpdate: undefined } }),
+    );
+    service.addWorkout(record).subscribe();
+    const id = service.workouts()[0].id!;
+    service.updateWorkout(id, { name: 'Edited' }).subscribe();
+    pending.next({ workout: { ...record, id: 'saved' } });
+    pending.complete();
+    expect(api.post).toHaveBeenCalledTimes(1);
+    expect(api.put).toHaveBeenCalledWith(
+      '/workouts/saved',
+      expect.objectContaining({ name: 'Edited' }),
+    );
+    expect(service.workouts()[0].name).toBe('Edited');
+  });
+  it('keeps an unconfirmed edit in the outbox and retries it after reconnecting', () => {
+    const pending = new Subject<any>();
+    api.post.mockReturnValue(pending);
+    api.put.mockReturnValue(throwError(() => new Error('Offline')));
+    service.addWorkout(record).subscribe();
+    service.updateWorkout(service.workouts()[0].id!, { name: 'Edited' }).subscribe();
+    pending.next({ workout: { ...record, id: 'saved' } });
+    pending.complete();
+    expect(service.workouts()[0]).toMatchObject({ name: 'Edited', pendingUpdate: true });
+    api.get.mockReturnValue(of({ workouts: [{ ...record, id: 'saved' }] }));
+    api.put.mockReturnValue(of({ workout: { ...record, name: 'Edited', id: 'saved' } }));
+    service.getWorkouts(true).subscribe();
+    expect(service.workouts()[0].name).toBe('Edited');
+    expect(service.workouts()[0].pendingUpdate).toBeUndefined();
+  });
+  it('keeps the same client id across reloads and retries', () => {
+    api.post.mockReturnValue(throwError(() => new Error('Lost response')));
+    service.addWorkout({ ...record, clientId: 'w_session' }).subscribe();
+    const clientId = api.post.mock.calls[0][1].clientId;
+    service.getWorkouts(true).subscribe();
+    expect(api.post.mock.calls.at(-1)[1].clientId).toBe(clientId);
+    service.addWorkout({ ...record, clientId: 'w_session' }).subscribe();
+    expect(service.workouts()).toHaveLength(1);
+  });
+  it('never restores erased account data from an old in-flight response', () => {
+    const pending = new Subject<any>();
+    api.post.mockReturnValue(pending);
+    service.addWorkout(record).subscribe();
+    service.eraseCache('test');
+    pending.next({ workout: { ...record, id: 'saved' } });
+    pending.complete();
+    expect(service.workouts()).toEqual([]);
+  });
+});
+
+describe('Lost workout response reconciliation', () => {
+  it('shows one workout when GET already contains the unacknowledged POST', () => {
+    localStorage.clear();
+    const pending = {
+      id: 'w_pending',
+      clientId: 'w_stable',
+      name: 'Push',
+      exercises: [],
+      date: '2026-10-04',
+      userId: 'test',
+      kind: 'session',
+    };
+    localStorage.setItem('fittrack_cache_workouts:test', JSON.stringify([pending]));
+    const api = {
+      get: vi.fn(() => of({ workouts: [{ ...pending, id: 'canonical' }] })),
+      post: vi.fn(() => of({ workout: { ...pending, id: 'canonical' } })),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ApiService, useValue: api },
+        { provide: Auth, useValue: { currentUser: { uid: 'test' } } },
+      ],
+    });
+    const service = TestBed.inject(WorkoutService);
+    service.getWorkouts(true).subscribe();
+    expect(service.workouts()).toHaveLength(1);
+    expect(service.workouts()[0].id).toBe('canonical');
+  });
+  it('reports memory-only data as unsafe when both storage and upload fail', () => {
+    localStorage.clear();
+    const blocked = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('Quota');
+    });
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ApiService, useValue: { post: () => throwError(() => new Error('Offline')) } },
+        { provide: Auth, useValue: { currentUser: { uid: 'test' } } },
+      ],
+    });
+    const service = TestBed.inject(WorkoutService);
+    service
+      .addWorkout({ name: 'Push', exercises: [], date: '2026-10-04', userId: 'test' })
+      .subscribe((saved) => expect(service.isDurablySaved(saved)).toBe(false));
+    blocked.mockRestore();
   });
 });

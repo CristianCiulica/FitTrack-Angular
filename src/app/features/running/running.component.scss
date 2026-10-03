@@ -107,7 +107,7 @@
 .weather-error {
   padding: 18px 20px;
   font-size: 13.5px;
-  color: #86868b;
+  color: var(--ink-tertiary);
 }
 
 .weather-summary {
@@ -152,7 +152,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #86868b;
+    color: var(--ink-tertiary);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -197,7 +197,7 @@
     font-weight: 750;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #86868b;
+    color: var(--ink-tertiary);
   }
 
   &.great {
@@ -249,7 +249,7 @@
     font-weight: 650;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #86868b;
+    color: var(--ink-tertiary);
   }
 
   strong {
@@ -302,7 +302,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #86868b;
+    color: var(--ink-tertiary);
   }
 
   strong {
@@ -398,7 +398,7 @@
     font-weight: 650;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #86868b;
+    color: var(--ink-tertiary);
   }
 }
 
@@ -455,7 +455,7 @@
 .status-text {
   flex-basis: 100%;
   font-size: 13px;
-  color: #86868b;
+  color: var(--ink-tertiary);
 }
 
 /* ------------------------------------------------------------
@@ -618,7 +618,7 @@
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        color: #86868b;
+        color: var(--ink-tertiary);
       }
 
       strong {

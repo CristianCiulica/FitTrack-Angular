@@ -113,13 +113,13 @@
               ></nz-input-number>
             </label>
 
-            <label class="field">
+            <div class="field" role="group" aria-label="Sex">
               <span>Sex</span>
               <div class="segmented">
-                <button type="button" [class.selected]="sex() === 'male'" (click)="sex.set('male')">Male</button>
-                <button type="button" [class.selected]="sex() === 'female'" (click)="sex.set('female')">Female</button>
+                <button type="button" [class.selected]="sex() === 'male'" [attr.aria-pressed]="sex() === 'male'" (click)="sex.set('male')">Male</button>
+                <button type="button" [class.selected]="sex() === 'female'" [attr.aria-pressed]="sex() === 'female'" (click)="sex.set('female')">Female</button>
               </div>
-            </label>
+            </div>
 
             <label class="field" *ngIf="!isImperial()">
               <span>Height (cm)</span>
@@ -135,15 +135,17 @@
             <div class="field field-split" *ngIf="isImperial()">
               <span>Height (ft / in)</span>
               <div class="split-inputs">
+                <label class="sr-only" for="account-height-feet">Height in feet</label>
+                <label class="sr-only" for="account-height-inches">Height in inches</label>
                 <nz-input-number
-                  [ngModel]="feet()"
+                  nzId="account-height-feet" [ngModel]="feet()"
                   (ngModelChange)="onFeetInput($event)"
                   [nzMin]="3"
                   [nzMax]="8"
                   [nzStep]="1"
                 ></nz-input-number>
                 <nz-input-number
-                  [ngModel]="inches()"
+                  nzId="account-height-inches" [ngModel]="inches()"
                   (ngModelChange)="onInchesInput($event)"
                   [nzMin]="0"
                   [nzMax]="11"
@@ -155,11 +157,10 @@
             <label class="field">
               <span>Weight ({{ weightUnit() }})</span>
               <nz-input-number
-                [ngModel]="weightInput()"
+                [nzStep]="0.1" [ngModel]="weightInput()"
                 (ngModelChange)="onWeightInput($event)"
                 [nzMin]="isImperial() ? 66 : 30"
-                [nzMax]="isImperial() ? 660 : 300"
-                [nzStep]="1"
+                [nzMax]="isImperial() ? 661.4 : 300"
               ></nz-input-number>
             </label>
           </div>

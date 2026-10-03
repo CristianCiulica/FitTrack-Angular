@@ -6,13 +6,40 @@ import { ApiService } from './api.service';
 import { RunningSessionService } from './running-session.service';
 
 describe('Running session persistence', () => {
-  const record = { id: 'server-id', mode: 'running' as const, startedAt: '2026-10-01T12:00:00Z', endedAt: '2026-10-01T12:10:00Z', durationSeconds: 600, distanceMeters: 1000, steps: 900, averageSpeedKmh: 6, calories: 60, route: [[44.4, 26.1]] as [number, number][], userId: 'test' };
+  const record = {
+    id: 'server-id',
+    mode: 'running' as const,
+    startedAt: '2026-10-01T12:00:00Z',
+    endedAt: '2026-10-01T12:10:00Z',
+    durationSeconds: 600,
+    distanceMeters: 1000,
+    steps: 900,
+    averageSpeedKmh: 6,
+    calories: 60,
+    route: [[44.4, 26.1]] as [number, number][],
+    userId: 'test',
+  };
   let service: RunningSessionService;
-  let api: { get: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn>; put: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn> };
+  let api: {
+    get: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
+    put: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+  };
   beforeEach(() => {
     localStorage.clear();
-    api = { get: vi.fn(() => of({ sessions: [record] })), delete: vi.fn(), put: vi.fn(), post: vi.fn() };
-    TestBed.configureTestingModule({ providers: [{ provide: ApiService, useValue: api }, { provide: Auth, useValue: { currentUser: { uid: 'test' } } }] });
+    api = {
+      get: vi.fn(() => of({ sessions: [record] })),
+      delete: vi.fn(),
+      put: vi.fn(),
+      post: vi.fn(),
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ApiService, useValue: api },
+        { provide: Auth, useValue: { currentUser: { uid: 'test' } } },
+      ],
+    });
     service = TestBed.inject(RunningSessionService);
     service.getSessions().subscribe();
   });
@@ -34,7 +61,7 @@ describe('Running session persistence', () => {
     api.post.mockReturnValue(upload);
     api.delete.mockReturnValue(of({ deleted: true }));
     service.saveSession(record).subscribe();
-    const tempId = service.sessions().find(item => item.id?.startsWith('r_'))!.id!;
+    const tempId = service.sessions().find((item) => item.id?.startsWith('r_'))!.id!;
     const deleted = vi.fn();
     service.deleteSession(tempId).subscribe({ next: deleted });
     expect(api.delete).not.toHaveBeenCalled();
@@ -67,7 +94,7 @@ describe('Running session persistence', () => {
     const upload = new Subject<{ session: typeof record }>();
     api.post.mockReturnValue(upload);
     service.saveSession(record).subscribe();
-    const pending = service.sessions().find(item => item.id?.startsWith('r_'))!;
+    const pending = service.sessions().find((item) => item.id?.startsWith('r_'))!;
     const failure = vi.fn();
     service.deleteSession(pending.id!).subscribe({ error: failure });
     upload.error(new Error('Offline'));
@@ -80,7 +107,7 @@ describe('Running session persistence', () => {
     const upload = new Subject<{ session: typeof record }>();
     api.post.mockReturnValue(upload);
     service.saveSession(record).subscribe();
-    const tempId = service.sessions().find(item => item.id?.startsWith('r_'))!.id!;
+    const tempId = service.sessions().find((item) => item.id?.startsWith('r_'))!.id!;
     const saved = { ...record, id: 'uploaded-id' };
     upload.next({ session: saved });
     upload.complete();
@@ -92,19 +119,41 @@ describe('Running session persistence', () => {
     expect(service.sessions()).toContainEqual(saved);
   });
   it('recovers an active run after a fresh service instance is created', () => {
-    service.checkpointRun({ ...record, startedAt: '2026-10-03T09:00:00Z', endedAt: '2026-10-03T09:10:00Z' });
+    service.checkpointRun({
+      ...record,
+      startedAt: '2026-10-03T09:00:00Z',
+      endedAt: '2026-10-03T09:10:00Z',
+    });
     const fresh = TestBed.runInInjectionContext(() => new RunningSessionService());
-    expect(fresh.recoverRun()?.session).toMatchObject({ durationSeconds: 600, distanceMeters: 1000, route: record.route });
+    expect(fresh.recoverRun()?.session).toMatchObject({
+      durationSeconds: 600,
+      distanceMeters: 1000,
+      route: record.route,
+    });
     fresh.clearRunDraft();
     expect(service.recoverRun()).toBeNull();
   });
 
   it('does not expose another account’s run or accept corrupted checkpoints', () => {
-    localStorage.setItem('fittrack_active_run:test', JSON.stringify({ version: 1, updatedAt: Date.now(), session: { ...record, userId: 'other' } }));
+    localStorage.setItem(
+      'fittrack_active_run:test',
+      JSON.stringify({
+        version: 1,
+        updatedAt: Date.now(),
+        session: { ...record, userId: 'other' },
+      }),
+    );
     expect(service.recoverRun()).toBeNull();
     service.checkpointRun({ ...record, userId: 'other' });
     expect(service.recoverRun()).toBeNull();
-    localStorage.setItem('fittrack_active_run:test', JSON.stringify({ version: 1, updatedAt: Date.now(), session: { ...record, route: [[1000, 26]] } }));
+    localStorage.setItem(
+      'fittrack_active_run:test',
+      JSON.stringify({
+        version: 1,
+        updatedAt: Date.now(),
+        session: { ...record, route: [[1000, 26]] },
+      }),
+    );
     expect(service.recoverRun()).toBeNull();
     localStorage.setItem('fittrack_active_run:test', '{broken');
     expect(service.recoverRun()).toBeNull();
@@ -116,11 +165,18 @@ describe('Running session persistence', () => {
     api.post.mockReturnValue(throwError(() => new Error('Offline')));
     service.saveSession(run, true).subscribe();
     expect(service.recoverRun()).toBeNull();
-    expect(JSON.parse(localStorage.getItem('fittrack_cache_sessions:test')!).some((item: typeof record) => item.startedAt === run.startedAt)).toBe(true);
+    expect(
+      JSON.parse(localStorage.getItem('fittrack_cache_sessions:test')!).some(
+        (item: typeof record) => item.startedAt === run.startedAt,
+      ),
+    ).toBe(true);
   });
 
   it('does not recover a draft already saved before the browser closed', () => {
-    localStorage.setItem('fittrack_active_run:test', JSON.stringify({ version: 1, updatedAt: Date.now(), session: record }));
+    localStorage.setItem(
+      'fittrack_active_run:test',
+      JSON.stringify({ version: 1, updatedAt: Date.now(), session: record }),
+    );
     expect(service.recoverRun()).toBeNull();
     expect(localStorage.getItem('fittrack_active_run:test')).toBeNull();
   });
@@ -129,7 +185,11 @@ describe('Running session persistence', () => {
     const run = { ...record, startedAt: '2026-10-03T09:00:00Z', endedAt: '2026-10-03T09:10:00Z' };
     service.checkpointRun(run);
     const original = Storage.prototype.setItem;
-    const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function(this: Storage, key, value) {
+    const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (
+      this: Storage,
+      key,
+      value,
+    ) {
       if (key.startsWith('fittrack_cache_sessions:')) throw new Error('Quota exceeded');
       original.call(this, key, value);
     });
@@ -139,7 +199,9 @@ describe('Running session persistence', () => {
       expect(localStorage.getItem('fittrack_active_run:test')).not.toBeNull();
       const fresh = TestBed.runInInjectionContext(() => new RunningSessionService());
       expect(fresh.recoverRun()?.session.durationSeconds).toBe(600);
-    } finally { write.mockRestore(); }
+    } finally {
+      write.mockRestore();
+    }
   });
 
   it('does not clear another account’s draft when an earlier upload finishes', () => {
@@ -148,11 +210,49 @@ describe('Running session persistence', () => {
     api.post.mockReturnValue(upload);
     service.checkpointRun(run);
     service.saveSession(run, true).subscribe();
-    (TestBed.inject(Auth) as unknown as { currentUser: { uid: string } }).currentUser = { uid: 'other' };
+    (TestBed.inject(Auth) as unknown as { currentUser: { uid: string } }).currentUser = {
+      uid: 'other',
+    };
     service.checkpointRun({ ...run, userId: 'other' });
     upload.next({ session: { ...run, id: 'uploaded-id' } });
     upload.complete();
     expect(service.recoverRun()?.session.userId).toBe('other');
   });
+});
 
+describe('Lost running response reconciliation', () => {
+  it('shows one run when GET already contains the unacknowledged POST', () => {
+    localStorage.clear();
+    const pending = {
+      id: 'r_pending',
+      clientId: 'r_stable',
+      userId: 'test',
+      mode: 'running',
+      startedAt: '2026-10-04T12:00:00Z',
+      endedAt: '2026-10-04T12:10:00Z',
+      durationSeconds: 600,
+      distanceMeters: 1000,
+      steps: 900,
+      averageSpeedKmh: 6,
+      calories: 60,
+      route: [],
+    };
+    localStorage.setItem('fittrack_cache_sessions:test', JSON.stringify([pending]));
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: ApiService,
+          useValue: {
+            get: () => of({ sessions: [{ ...pending, id: 'canonical' }] }),
+            post: () => of({ session: { ...pending, id: 'canonical' } }),
+          },
+        },
+        { provide: Auth, useValue: { currentUser: { uid: 'test' } } },
+      ],
+    });
+    const service = TestBed.inject(RunningSessionService);
+    service.getSessions(true).subscribe();
+    expect(service.sessions()).toHaveLength(1);
+    expect(service.sessions()[0].id).toBe('canonical');
+  });
 });

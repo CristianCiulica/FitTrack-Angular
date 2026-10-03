@@ -34,7 +34,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    color: #86868b;
+    color: var(--ink-tertiary);
   }
 
   strong {
@@ -70,7 +70,7 @@
       font-weight: 650;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #86868b;
+      color: var(--ink-tertiary);
       margin-bottom: 4px;
     }
 
@@ -85,7 +85,7 @@
     small, ::ng-deep nz-tag {
       margin-top: 2px;
       font-size: 12px;
-      color: #86868b;
+      color: var(--ink-tertiary);
     }
   }
 }
@@ -103,13 +103,13 @@
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
-  color: #86868b;
+  color: var(--ink-tertiary);
 }
 
 .settings-footer {
   margin: 8px 16px 0;
   font-size: 13px;
-  color: #86868b;
+  color: var(--ink-tertiary);
   line-height: 1.4;
 }
 
@@ -151,7 +151,7 @@
     .ant-input-number-input {
       text-align: center;
       font-size: 16px;
-      color: #86868b;
+      color: var(--ink-tertiary);
       padding: 0;
       height: 36px;
     }
@@ -167,7 +167,7 @@
     background: transparent;
     border: none;
     font-size: 16px;
-    color: #86868b;
+    color: var(--ink-tertiary);
     text-align: center;
     text-align-last: center;
     padding-right: 14px;

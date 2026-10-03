@@ -24,7 +24,7 @@
 
     small {
       font-size: 12.5px;
-      color: #86868b;
+      color: var(--ink-tertiary);
     }
   }
 }
@@ -61,7 +61,7 @@
   transition: background 0.18s ease;
 
   &::placeholder {
-    color: #8e8e93;
+    color: var(--ink-tertiary);
   }
 
   &:focus {
@@ -187,7 +187,7 @@
     font-weight: 650;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #86868b;
+    color: var(--ink-tertiary);
   }
 }
 
@@ -339,7 +339,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      color: #86868b;
+      color: var(--ink-tertiary);
     }
   }
 }

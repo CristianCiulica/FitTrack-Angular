@@ -126,6 +126,7 @@
               nz-button
               nzType="default"
               (click)="exportData()"
+              [nzLoading]="exporting()"
             >
               <span nz-icon nzType="download"></span> Export
             </button>

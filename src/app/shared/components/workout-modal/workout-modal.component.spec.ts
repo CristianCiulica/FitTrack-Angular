@@ -20,3 +20,15 @@ describe('Editing recorded workouts', () => {
     expect(saved.exercises[0].setReps).toEqual([10,8]);
   });
 });
+
+describe('Workout save progress', () => {
+  it('blocks a second submit and cancellation while a save is pending', () => {
+    const component = new WorkoutModalComponent(new FormBuilder());
+    component.form.patchValue({ name: 'Push' });
+    component.exercises.at(0).patchValue({ exerciseName: 'Press', muscleGroup: 'Chest' });
+    let saves = 0, cancels = 0;
+    component.save.subscribe(() => saves++); component.cancel.subscribe(() => cancels++);
+    component.submit(); component.saving = true; component.submit(); component.onCancel();
+    expect(saves).toBe(1); expect(cancels).toBe(0);
+  });
+});

@@ -3,6 +3,7 @@ import { Schema, model, type InferSchemaType } from 'mongoose';
 const runningSessionSchema = new Schema(
   {
     userId: { type: String, required: true, index: true },
+    clientId: { type: String, default: undefined },
     mode: { type: String, enum: ['running', 'walking'], required: true },
     startedAt: { type: String, required: true },
     endedAt: { type: String, required: true },
@@ -18,6 +19,10 @@ const runningSessionSchema = new Schema(
 );
 
 runningSessionSchema.index({ userId: 1, startedAt: -1 });
+runningSessionSchema.index(
+  { userId: 1, clientId: 1 },
+  { unique: true, partialFilterExpression: { clientId: { $type: 'string' } } },
+);
 
 export type RunningSessionDoc = InferSchemaType<typeof runningSessionSchema>;
 export const RunningSession = model('RunningSession', runningSessionSchema);

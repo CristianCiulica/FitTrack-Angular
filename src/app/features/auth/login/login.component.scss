@@ -167,7 +167,7 @@
   p {
     margin: 0;
     font-size: 15px;
-    color: #86868b;
+    color: var(--ink-tertiary);
     letter-spacing: -0.01em;
   }
 }
@@ -218,7 +218,7 @@
   }
 
   &::placeholder {
-    color: #aeaeb2 !important;
+    color: var(--ink-quaternary) !important;
   }
 }
 
@@ -242,7 +242,7 @@
     border: none;
     border-radius: 12px;
     background: transparent;
-    color: #86868b;
+    color: var(--ink-tertiary);
     font-size: 16px;
     cursor: pointer;
     transition: background 0.16s, color 0.16s;
@@ -296,7 +296,7 @@
   align-items: center;
   gap: 14px;
   margin: 16px 0;
-  color: #86868b;
+  color: var(--ink-tertiary);
   font-size: 12px;
   font-weight: 590;
   text-transform: uppercase;
@@ -346,7 +346,7 @@
   margin-top: 22px;
   text-align: center;
   font-size: 14px;
-  color: #86868b;
+  color: var(--ink-tertiary);
 
   a {
     margin-left: 6px;
@@ -412,7 +412,7 @@
       font-weight: 620;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: #86868b;
+      color: var(--ink-tertiary);
     }
   }
 

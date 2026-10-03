@@ -167,13 +167,13 @@
             <div class="summary-metrics">
               <div><span>Duration</span><strong>{{ durationLabel(finishedDuration()) }}</strong><small>including rests</small></div>
               <div><span>Sets completed</span><strong>{{ completedSets() }}<small> / {{ totalSets() }}</small></strong><small>{{ totalSets() - completedSets() }} skipped</small></div>
-              <div><span>Total volume</span><strong>{{ finishedVolume() | number:'1.0-0' }}<small> kg</small></strong><small>reps × weight</small></div>
+              <div><span>Total volume</span><strong>{{ displayLoad(finishedVolume()) | number:'1.0-0' }}<small> {{ weightUnit() }}</small></strong><small>reps × weight</small></div>
               <div><span>Estimated energy</span><strong>{{ finishedCalories() }}<small> kcal</small></strong><small>from completed sets</small></div>
             </div>
             @if (finishedPrevious(); as previous) {
-              <div class="summary-comparison"><span>Compared with {{ previous.date | date:'MMM d' }}</span><strong>{{ finishedDelta()! > 0 ? '+' : '' }}{{ finishedDelta() | number:'1.0-0' }} kg <small>volume</small></strong>@if (previous.durationSeconds != null) { <small>Previous duration · {{ durationLabel(previous.durationSeconds) }}</small> }</div>
+              <div class="summary-comparison"><span>Compared with {{ previous.date | date:'MMM d' }}</span><strong>{{ finishedDelta()! > 0 ? '+' : '' }}{{ displayLoad(finishedDelta()!) | number:'1.0-0' }} {{ weightUnit() }} <small>volume</small></strong>@if (previous.durationSeconds != null) { <small>Previous duration · {{ durationLabel(previous.durationSeconds) }}</small> }</div>
             }
-            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><strong>{{ exercise.name }}</strong><span>{{ exercise.sets }} {{ exercise.sets === 1 ? 'set' : 'sets' }} · {{ exercise.volume | number:'1.0-0' }} kg</span></div> }</div>
+            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><strong>{{ exercise.name }}</strong><span>{{ exercise.sets }} {{ exercise.sets === 1 ? 'set' : 'sets' }} · {{ displayLoad(exercise.volume) | number:'1.0-0' }} {{ weightUnit() }}</span></div> }</div>
             <p class="summary-saved" role="status">{{ savedLocally() ? 'Saved on this device. It will sync when you reconnect and open your history.' : 'Saved to your workout history.' }}</p>
             <div class="summary-actions"><button type="button" (click)="exportSummary()" [disabled]="exporting()">{{ exporting() ? 'Preparing image…' : 'Save as image' }}</button><a routerLink="/dashboard" class="summary-primary" (click)="reset()">Back to Home</a></div>
           </section>
@@ -186,6 +186,7 @@
 
 <app-workout-modal
   [visible]="modalVisible()"
+  [saving]="modalSaving()"
   [workout]="null"
   (save)="onModalSave($event)"
   (cancel)="onModalCancel()"
@@ -269,7 +270,7 @@
           <ul class="plan-exercise-list">
             <li *ngFor="let ex of routine.exercises">
               <span>{{ ex.name }}</span>
-              <span class="ex-detail">{{ ex.sets }}×{{ ex.reps }}{{ ex.repUnit === 'seconds' ? ' s' : '' }}<ng-container *ngIf="ex.weight > 0"> · {{ ex.weight }} kg</ng-container></span>
+              <span class="ex-detail">{{ ex.sets }}×{{ ex.reps }}{{ ex.repUnit === 'seconds' ? ' s' : '' }}<ng-container *ngIf="ex.weight > 0"> · {{ displayLoad(ex.weight) }} {{ weightUnit() }}</ng-container></span>
             </li>
           </ul>
           <button
@@ -374,37 +375,37 @@
       } @else {
         <div class="live-adjust-stack">
           <div class="live-adjust">
-            <label>Reps done</label>
+            <label for="live-reps">Reps done</label>
             <div class="weight-stepper">
               <button type="button" class="stepper-btn" aria-label="Decrease reps" (click)="adjustReps(-1)">−</button>
               <input
                 class="weight-input"
                 type="number"
                 inputmode="numeric"
-                aria-label="Repetitions completed"
+                id="live-reps" aria-label="Repetitions completed" [attr.aria-invalid]="!repsInputValid()"
                 min="0"
                 max="500"
                 step="1"
                 [value]="currentReps()"
-                (change)="onRepsInput($any($event.target).value)"
+                (input)="onRepsInput($any($event.target).value)"
               />
               <button type="button" class="stepper-btn" aria-label="Increase reps" (click)="adjustReps(1)">+</button>
             </div>
           </div>
           <div class="live-adjust">
-            <label>Weight (kg)</label>
+            <label for="live-weight">Weight ({{ weightUnit() }})</label>
             <div class="weight-stepper">
               <button type="button" class="stepper-btn" aria-label="Decrease weight" (click)="adjustWeight(-2.5)">−</button>
               <input
                 class="weight-input"
                 type="number"
-                inputmode="decimal"
-                aria-label="Weight in kilograms"
+                id="live-weight" inputmode="decimal" [attr.aria-invalid]="!weightInputValid()"
+                [attr.aria-label]="'Weight in ' + weightUnit()"
                 min="0"
-                max="1000"
+                [max]="displayLoad(1000)"
                 step="0.5"
-                [value]="currentWeight()"
-                (change)="onWeightInput($any($event.target).value)"
+                [value]="weightInput()"
+                (input)="onWeightInput($any($event.target).value)"
               />
               <button type="button" class="stepper-btn" aria-label="Increase weight" (click)="adjustWeight(2.5)">+</button>
             </div>
@@ -412,9 +413,10 @@
         </div>
       }
       <div class="previous-performance">
+        <p *ngIf="!setInputsValid()" role="alert">Enter valid reps and weight before finishing this set.</p>
         @if (previousSetData(); as previous) {
-          <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}<ng-container *ngIf="ex.repUnit !== 'seconds'"> <i>·</i> {{ previous.weight }} kg</ng-container></strong></div>
-          <button type="button" *ngIf="ex.repUnit !== 'seconds'" (click)="currentWeight.set(previous.weight); currentReps.set(previous.reps)">Use these values</button>
+          <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}<ng-container *ngIf="ex.repUnit !== 'seconds'"> <i>·</i> {{ displayLoad(previous.weight) }} {{ weightUnit() }}</ng-container></strong></div>
+          <button type="button" *ngIf="ex.repUnit !== 'seconds'" (click)="usePreviousValues(previous.weight, previous.reps)">Use these values</button>
         } @else if (ex.repUnit !== 'seconds') { <p>{{ historyLoading() ? 'Loading your previous session…' : historyUnavailable() ? 'Previous session unavailable. You can enter your values.' : 'First time logging this exercise. Start with your own values.' }}</p> }
         @if (ex.repUnit === 'seconds') { <p>Rest starts automatically when the timer ends.</p> }
       </div>
@@ -463,6 +465,7 @@
       nzSize="large"
       class="live-primary"
       (click)="finishSet()"
+      [disabled]="!setInputsValid()"
     >
       <span nz-icon nzType="check"></span> Finish set
     </button>

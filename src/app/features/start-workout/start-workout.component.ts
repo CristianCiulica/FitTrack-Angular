@@ -1,4 +1,7 @@
 import { Subscription } from 'rxjs';
+import { isWorkoutSession, personalWorkoutPlans } from '../../core/utils/workout-kind';
+import { readWorkoutDraft, writeWorkoutDraft, clearWorkoutDraft } from '../../core/utils/workout-draft';
+import { displayWeight, toCanonicalWeight, weightUnitLabel } from '../../core/utils/units';
 import { previousExercises, PreviousExercise, exerciseKey, workoutVolume, durationLabel } from '../../core/utils/workout-history';
 import { createWorkoutSummaryImage } from '../../core/utils/workout-share';
 import { localDateKey } from '../../core/utils/weight-progress';
@@ -747,6 +750,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   personalRoutines = signal<Routine[]>([]);
   selectedRoutineKey = signal('predefined-0');
   modalVisible = signal(false);
+  modalSaving = signal(false);
   deletingIds = signal<Set<string>>(new Set());
   completedSets = signal(0);
   saving = signal(false);
@@ -761,6 +765,15 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   // progressive overload: greutatea si repetarile setului curent + ce ai logat
   currentWeight = signal(0);
+  readonly weightInputValid = signal(true);
+  readonly repsInputValid = signal(true);
+  readonly setInputsValid = computed(() => this.weightInputValid() && this.repsInputValid());
+  readonly weightUnit = computed(() => weightUnitLabel(this.profileService.units?.() ?? 'metric'));
+  readonly weightInput = computed(() => this.displayLoad(this.currentWeight()));
+  displayLoad(kg: number): number { return displayWeight(kg, this.profileService.units?.() ?? 'metric'); }
+  private sessionClientId = '';
+  private draftInterval: ReturnType<typeof setInterval> | null = null;
+  private warnedAboutStorage = false;
   currentReps = signal(0);
   readonly holdElapsedMs = signal(0);
   readonly holdRunning = signal(false);
@@ -883,6 +896,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
     this.selectRoutine(this.routines[0], 'predefined-0');
     this.loadPersonalRoutines();
+    this.restoreWorkout();
   }
 
   private previousBodyOverflow: string | null = null;
@@ -894,6 +908,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.checkpointWorkout();
+    if (this.draftInterval) clearInterval(this.draftInterval);
     this.unlockPageScroll();
     this.reads.unsubscribe();
     this.stopTimer();
@@ -946,6 +962,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   onModalSave(workout: Partial<Workout>) {
+    if (this.modalSaving()) return;
+    this.modalSaving.set(true);
     this.workoutService.addWorkout({
       userId: this.authService.currentUserId,
       name: workout.name || 'My workout',
@@ -953,13 +971,19 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       notes: workout.notes ?? '',
       exercises: workout.exercises || [],
       isPredefined: false,
+      kind: 'routine',
     }).subscribe({
-      next: () => {
+      next: saved => {
+        this.modalSaving.set(false);
+        if (!this.workoutService.isDurablySaved(saved)) {
+          this.message.error('Could not save the workout. Storage is unavailable; reconnect and retry.');
+          return;
+        }
         this.modalVisible.set(false);
         this.loadPersonalRoutines();
-        this.message.success('Workout saved successfully.');
+        this.message.success(saved.id?.startsWith('w_') ? 'Saved on this device. Syncs when you reconnect.' : 'Workout saved successfully.');
       },
-      error: () => this.message.error('Failed to save workout.')
+      error: () => { this.modalSaving.set(false); this.message.error('Failed to save workout.'); }
     });
   }
 
@@ -1061,8 +1085,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   private loadPersonalRoutines() {
     this.reads.add(this.workoutService.getWorkouts().subscribe((workouts) => {
       this.personalRoutines.set(
-        workouts
-          .filter((workout) => !workout.isPredefined)
+        personalWorkoutPlans(workouts)
           .map((workout) => ({
             id: workout.id,
             name: workout.name,
@@ -1090,6 +1113,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.loggedWeights = this.currentRoutine().exercises.map(ex => Array(ex.sets).fill(null));
     this.loggedReps = this.currentRoutine().exercises.map(ex => Array(ex.sets).fill(null));
     this.sessionStartedAt = Date.now();
+    this.sessionClientId = 'w_' + crypto.randomUUID();
     this.sessionEndedAt = null;
     this.inputsTouched = false;
     this.savedLocally.set(false);
@@ -1097,6 +1121,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.loadLastWeights();
     this.syncCurrentWeight();
     this.syncCurrentReps();
+    this.weightInputValid.set(true); this.repsInputValid.set(true);
+    this.startCheckpoints();
   }
 
   private loadLastWeights() {
@@ -1107,7 +1133,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       next: workouts => {
         if (generation !== this.sessionGeneration) return;
         this.historyLoading.set(false);
-        const sorted = [...workouts].filter(w => !w.isPredefined && w.date.slice(0,10) <= this.targetDate())
+        const sorted = [...workouts].filter(w => isWorkoutSession(w) && w.date.slice(0,10) <= this.targetDate())
           .sort((a,b) => b.date.localeCompare(a.date) || new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
         this.historyWorkouts = sorted;
         this.previousByExercise.set(previousExercises(sorted, this.targetDate()));
@@ -1135,16 +1161,27 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.currentWeight.set(lastTime ?? previous ?? planned);
   }
 
+  usePreviousValues(weight: number, reps: number): void {
+    this.currentWeight.set(weight); this.currentReps.set(reps);
+    this.weightInputValid.set(true); this.repsInputValid.set(true);
+    this.checkpointWorkout();
+  }
+
   adjustWeight(delta: number) {
+    this.weightInputValid.set(true);
     this.inputsTouched = true;
-    this.currentWeight.set(Math.min(1000, Math.max(0, Math.round((this.currentWeight() + delta) * 10) / 10)));
+    const step = this.profileService.units?.() === 'imperial' ? toCanonicalWeight(delta, 'imperial') : delta;
+    this.currentWeight.set(Math.min(1000, Math.max(0, Math.round((this.currentWeight() + step) * 10) / 10)));
+    this.checkpointWorkout();
   }
 
   onWeightInput(value: string) {
     this.inputsTouched = true;
-    const parsed = parseFloat(value);
+    const parsed = toCanonicalWeight(parseFloat(value), this.profileService.units?.() ?? 'metric');
+    this.weightInputValid.set(value.trim() !== '' && Number.isFinite(parsed) && parsed >= 0 && parsed <= 1000);
     if (!isNaN(parsed) && parsed >= 0 && parsed <= 1000) {
       this.currentWeight.set(Math.round(parsed * 10) / 10);
+      this.checkpointWorkout();
     }
   }
 
@@ -1169,15 +1206,19 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   adjustReps(delta: number) {
+    this.repsInputValid.set(true);
     this.inputsTouched = true;
     this.currentReps.set(Math.min(500, Math.max(0, Math.round(this.currentReps() + delta))));
+    this.checkpointWorkout();
   }
 
   onRepsInput(value: string) {
     this.inputsTouched = true;
-    const parsed = parseInt(value, 10);
-    if (!isNaN(parsed) && parsed >= 0 && parsed <= 500) {
+    const parsed = Number(value);
+    this.repsInputValid.set(value.trim() !== '' && Number.isInteger(parsed) && parsed >= 0 && parsed <= 500);
+    if (this.repsInputValid()) {
       this.currentReps.set(parsed);
+      this.checkpointWorkout();
     }
   }
 
@@ -1232,7 +1273,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   finishSet() {
-    if (this.state() !== 'active') return;
+    if (this.state() !== 'active' || !this.setInputsValid()) return;
     if (this.currentExercise()?.repUnit === 'seconds') {
       this.stopHoldTimer();
       if (this.currentReps() < 1) return;
@@ -1247,6 +1288,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.restTimeRemaining.set(this.restTimeTarget());
     this.restDeadline = Date.now() + this.restTimeTarget() * 1000;
     this.timerInterval = setInterval(() => this.updateRestTime(), 1000);
+    this.checkpointWorkout();
   }
 
   @HostListener('document:visibilitychange')
@@ -1259,6 +1301,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   previousSet() {
+    this.weightInputValid.set(true); this.repsInputValid.set(true);
     if (!this.canGoBack() || !this.workoutInProgress()) return;
     this.stopTimer();
     // During rest/review return to the set just completed or skipped.
@@ -1275,6 +1318,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.syncCurrentWeight();
     this.syncCurrentReps();
     this.state.set('active');
+    this.checkpointWorkout();
   }
 
   skipSet() {
@@ -1293,6 +1337,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   private advanceSet() {
+    this.weightInputValid.set(true); this.repsInputValid.set(true);
     this.stopTimer();
     const exercise = this.currentExercise();
     if (!exercise) return;
@@ -1303,6 +1348,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       this.currentSetIndex.set(1);
     } else {
       this.state.set('review');
+      this.checkpointWorkout();
       return;
     }
     this.inputsTouched = false;
@@ -1310,6 +1356,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.syncCurrentWeight();
     this.syncCurrentReps();
     this.state.set('active');
+    this.checkpointWorkout();
   }
 
   private updateCompletedSets() {
@@ -1359,7 +1406,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   cancelWorkout() {
+    clearWorkoutDraft(this.authService.currentUserId);
     this.stopTimer();
+    if (this.draftInterval) { clearInterval(this.draftInterval); this.draftInterval = null; }
     this.sessionGeneration++;
     this.unlockPageScroll();
     this.state.set('setup');
@@ -1373,11 +1422,13 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
     this.workoutService.addWorkout({
       userId: uid,
+      clientId: this.sessionClientId,
       name: workout.name,
       date: dateStr,
       notes: 'Auto-finished workout',
       durationSeconds: this.finishedDuration(),
       isPredefined: false,
+      kind: 'session',
       exercises: workout.exercises.map((ex, i) => {
         const logged = (this.loggedWeights[i] ?? []).filter((value): value is number => value !== null);
         const reps = (this.loggedReps[i] ?? []).filter((value): value is number => value !== null);
@@ -1395,10 +1446,17 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       }).filter(exercise => exercise.sets > 0)
     }).subscribe({
       next: saved => {
+        if (!this.workoutService.isDurablySaved(saved)) {
+          this.saving.set(false);
+          this.checkpointWorkout();
+          this.message.error('Storage is unavailable and the upload failed. Keep this screen open and retry saving.');
+          return;
+        }
         this.savedLocally.set(!!saved.id?.startsWith('w_'));
         this.saving.set(false);
         this.unlockPageScroll();
         this.state.set('finished');
+        clearWorkoutDraft(uid);
         this.message.success(this.savedLocally() ? 'Saved on this device. Syncs when you reconnect.' : 'Workout saved.');
       },
       error: (err) => {
@@ -1413,15 +1471,67 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.state() !== 'finished' || this.exporting()) return;
     this.exporting.set(true);
     try {
-      this.summaryImage.set(createWorkoutSummaryImage({name:this.currentRoutine().name,date:this.targetDate(),durationSeconds:this.finishedDuration(),sets:this.completedSets(),plannedSets:this.totalSets(),volume:this.finishedVolume(),calories:this.finishedCalories(),delta:this.finishedDelta()}));
+      this.summaryImage.set(createWorkoutSummaryImage({name:this.currentRoutine().name,date:this.targetDate(),durationSeconds:this.finishedDuration(),sets:this.completedSets(),plannedSets:this.totalSets(),volume:this.displayLoad(this.finishedVolume()),weightUnit:this.weightUnit(),calories:this.finishedCalories(),delta:this.finishedDelta() == null ? null : this.displayLoad(this.finishedDelta()!)}));
     } catch { this.message.error('Could not save the image. Please try again.'); }
     finally { this.exporting.set(false); }
   }
 
   reset() {
+    clearWorkoutDraft(this.authService.currentUserId);
     this.stopTimer();
+    if (this.draftInterval) { clearInterval(this.draftInterval); this.draftInterval = null; }
     this.sessionGeneration++;
     this.unlockPageScroll();
     this.state.set('setup');
+  }
+
+  private startCheckpoints(): void {
+    if (this.draftInterval) clearInterval(this.draftInterval);
+    this.draftInterval = setInterval(() => this.checkpointWorkout(), 5000);
+    this.checkpointWorkout();
+  }
+
+  @HostListener('window:pagehide')
+  @HostListener('document:visibilitychange')
+  checkpointWorkout(): void {
+    const state = this.state();
+    if (state !== 'active' && state !== 'rest' && state !== 'review') return;
+    const stored = writeWorkoutDraft({ version: 1, owner: this.authService.currentUserId, clientId: this.sessionClientId,
+      date: this.targetDate(), routine: this.currentRoutine(), state, exerciseIndex: this.currentExerciseIndex(), setIndex: this.currentSetIndex(),
+      weights: this.loggedWeights, reps: this.loggedReps, currentWeight: this.currentWeight(), currentReps: this.currentReps(),
+      startedAt: this.sessionStartedAt, endedAt: this.sessionEndedAt, restDeadline: this.restDeadline, restSeconds: this.restTimeTarget(),
+      holdElapsedMs: Math.min(this.holdTargetSeconds() * 1000, this.holdRunning() ? this.holdAccumulatedMs + Math.max(0, Date.now() - this.holdStartedAt) : this.holdElapsedMs()),
+    });
+    if (!stored && !this.warnedAboutStorage) {
+      this.warnedAboutStorage = true;
+      this.message.warning('Device storage is unavailable. Keep this workout open until you save it.');
+    }
+  }
+
+  private restoreWorkout(): void {
+    if (this.workoutInProgress()) return;
+    const draft = readWorkoutDraft(this.authService.currentUserId);
+    if (!draft) return;
+    if (this.workoutService.workouts?.().some(workout => workout.clientId === draft.clientId)) {
+      clearWorkoutDraft(this.authService.currentUserId); return;
+    }
+    this.selectRoutine(draft.routine, draft.routine.id ?? 'recovered');
+    this.previousBodyOverflow ??= document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    this.sessionClientId = draft.clientId;
+    this.targetDate.set(draft.date);
+    this.currentExerciseIndex.set(draft.exerciseIndex); this.currentSetIndex.set(draft.setIndex);
+    this.loggedWeights = draft.weights; this.loggedReps = draft.reps;
+    this.currentWeight.set(draft.currentWeight); this.currentReps.set(draft.currentReps);
+    this.sessionStartedAt = draft.startedAt; this.sessionEndedAt = draft.endedAt;
+    this.restDeadline = draft.restDeadline; this.restTimeTarget.set(draft.restSeconds);
+    this.holdAccumulatedMs = draft.holdElapsedMs; this.holdElapsedMs.set(draft.holdElapsedMs); this.holdRunning.set(false);
+    this.state.set(draft.state); this.inputsTouched = true; this.updateCompletedSets(); this.loadLastWeights();
+    if (draft.state === 'rest') {
+      this.updateRestTime();
+      if (this.state() === 'rest') this.timerInterval = setInterval(() => this.updateRestTime(), 1000);
+    }
+    this.startCheckpoints();
+    this.message.success('Your workout was restored. Continue where you left off.');
   }
 }

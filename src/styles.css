@@ -1,4 +1,28 @@
-@import 'ng-zorro-antd/ng-zorro-antd.min.css';
+@import '../node_modules/ng-zorro-antd/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/button/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/card/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/checkbox/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/drawer/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/dropdown/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/form/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/icon/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/input/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/input-number/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/layout/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/menu/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/message/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/modal/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/popover/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/popconfirm/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/progress/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/select/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/statistic/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/table/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/pagination/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/tag/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/empty/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/tooltip/style/index.min.css';
+@import '../node_modules/ng-zorro-antd/spin/style/index.min.css';
 @import 'leaflet/dist/leaflet.css';
 @import './app/theme-components.css';
 @import './theme-dark.css';
@@ -13,8 +37,8 @@
   /* Ink */
   --ink: #1d1d1f;
   --ink-secondary: #515154;
-  --ink-tertiary: #86868b;
-  --ink-quaternary: #aeaeb2;
+  --ink-tertiary: #68686d;
+  --ink-quaternary: #6a6a6f;
 
   /* Accent (Apple system palette) */
   --accent: #0071e3;
@@ -1338,3 +1362,5 @@ button, a, input, select, textarea { touch-action: manipulation; }
 .app-layout > .sidebar {
   transition-property: background-color, border-color !important;
 }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }

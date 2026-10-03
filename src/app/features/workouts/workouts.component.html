@@ -106,10 +106,11 @@
                   <span>{{ session.startedAt | date: 'd MMM y, HH:mm' }}</span>
                 </div>
                 <div class="cardio-header-right">
-                  <strong>{{ session.distanceMeters / 1000 | number: '1.2-2' }} km</strong>
+                  <strong>{{ distanceValue(session.distanceMeters) | number: '1.2-2' }} {{ distanceUnit }}</strong>
                   <button
                     type="button"
                     class="cardio-delete-btn"
+                    [attr.aria-label]="'Delete run from ' + (session.startedAt | date: 'd MMM y')"
                     nz-popconfirm
                     nzPopconfirmTitle="Delete session?"
                     nzPopconfirmPlacement="left"
@@ -133,7 +134,7 @@
                 </div>
                 <div>
                   <span><span nz-icon nzType="ft:run" class="stat-icon-inline"></span>Pace</span>
-                  <strong>{{ formatPace(session) }} /km</strong>
+                  <strong>{{ formatPace(session) }} /{{ distanceUnit }}</strong>
                 </div>
                 <div>
                   <span><span nz-icon nzType="fire" class="stat-icon-inline"></span>Calories</span>
@@ -145,7 +146,7 @@
               <div class="cardio-details" *ngIf="expandedRuns().has(session.id!)">
                 <div class="detail-row">
                   <span>Avg speed</span>
-                  <strong>{{ session.averageSpeedKmh | number: '1.1-1' }} km/h</strong>
+                  <strong>{{ speedValue(session.averageSpeedKmh) | number: '1.1-1' }} {{ distanceUnit }}/h</strong>
                 </div>
                 <div class="detail-row">
                   <span>Steps</span>
@@ -283,7 +284,7 @@
                       </span>
                     </td>
                     <td class="workout-volume-cell">
-                      {{ getWorkoutVolume(w) | number: '1.0-0' }} kg
+                      {{ displayLoad(getWorkoutVolume(w)) | number: '1.0-0' }} {{ weightUnit }}
                     </td>
                     <td class="workout-kcal-cell">
                       ~{{ getWorkoutCalories(w) }} kcal
@@ -332,7 +333,7 @@
                             <span>{{ ex.sets }} sets</span>
                             <span *ngIf="!ex.setReps?.length">{{ ex.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}</span>
                             <span class="set-weights" *ngIf="ex.setReps?.length">{{ formatSetReps(ex.setReps!, ex.repUnit) }}</span>
-                            <span *ngIf="!ex.setWeights?.length">{{ ex.weight }} kg</span>
+                            <span *ngIf="!ex.setWeights?.length">{{ displayLoad(ex.weight) }} {{ weightUnit }}</span>
                             <span class="set-weights" *ngIf="ex.setWeights?.length">{{ formatSetWeights(ex.setWeights!) }}</span>
                           </div>
                         </div>
@@ -376,7 +377,7 @@
                 </div>
                 <div class="stat-clean">
                   <span class="stat-label">Volume</span>
-                  <span class="stat-value">{{ getWorkoutVolume(w) | number: '1.0-0' }} kg</span>
+                  <span class="stat-value">{{ displayLoad(getWorkoutVolume(w)) | number: '1.0-0' }} {{ weightUnit }}</span>
                 </div>
                 <div class="stat-clean" *ngIf="w.durationSeconds != null">
                   <span class="stat-label">Duration</span>
@@ -398,7 +399,7 @@
                     <span>{{ ex.sets }} sets</span>
                     <span *ngIf="!ex.setReps?.length">{{ ex.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}</span>
                     <span class="set-weights" *ngIf="ex.setReps?.length">{{ formatSetReps(ex.setReps!, ex.repUnit) }}</span>
-                    <span *ngIf="!ex.setWeights?.length">{{ ex.weight }} kg</span>
+                    <span *ngIf="!ex.setWeights?.length">{{ displayLoad(ex.weight) }} {{ weightUnit }}</span>
                     <span class="set-weights" *ngIf="ex.setWeights?.length">{{ formatSetWeights(ex.setWeights!) }}</span>
                   </div>
                 </div>
@@ -428,6 +429,7 @@
 
 <app-workout-modal
   [visible]="modalVisible()"
+  [saving]="modalSaving()"
   [workout]="editingWorkout()"
   (save)="onModalSave($event)"
   (cancel)="onModalCancel()"

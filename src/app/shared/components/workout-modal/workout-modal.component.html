@@ -1,5 +1,8 @@
 <nz-modal
   [nzVisible]="visible"
+  [nzClosable]="!saving"
+  [nzMaskClosable]="!saving"
+  [nzKeyboard]="!saving"
   [nzTitle]="titleTpl"
   [nzFooter]="footerTpl"
   (nzOnCancel)="onCancel()"
@@ -113,9 +116,9 @@
         </div>
       </div>
       <div class="wm-actions">
-        <button type="button" class="wm-btn wm-btn-ghost" (click)="onCancel()">Cancel</button>
-        <button type="button" class="wm-btn wm-btn-primary" (click)="submit()">
-          {{ isEdit ? 'Save changes' : 'Create workout' }}
+        <button type="button" class="wm-btn wm-btn-ghost" [disabled]="saving" (click)="onCancel()">Cancel</button>
+        <button type="button" class="wm-btn wm-btn-primary" [disabled]="saving" [attr.aria-busy]="saving" (click)="submit()">
+          {{ saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create workout' }}
         </button>
       </div>
     </div>

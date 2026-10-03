@@ -16,7 +16,7 @@
         <input
           class="glass-input"
           type="text"
-          placeholder="Your name"
+          placeholder="Your name" aria-label="Your name"
           [ngModel]="name()"
           (ngModelChange)="name.set($event)"
           autocomplete="name"
@@ -26,11 +26,11 @@
       <!-- AGE -->
       <section class="step" *ngIf="step() === 'age'">
         <span class="eyebrow">About you</span>
-        <h1>How old are you, {{ firstName }}?</h1>
+        <h1><label for="onboarding-age">How old are you, {{ firstName }}?</label></h1>
         <p class="lead">We use this to estimate your energy needs.</p>
         <div class="big-number-field">
           <nz-input-number
-            [ngModel]="age()"
+            nzId="onboarding-age" [ngModel]="age()"
             (ngModelChange)="age.set($event)"
             [nzMin]="12"
             [nzMax]="100"

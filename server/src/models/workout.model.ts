@@ -28,6 +28,8 @@ const exerciseLogSchema = new Schema(
 const workoutSchema = new Schema(
   {
     userId: { type: String, required: true, index: true },
+    clientId: { type: String, default: undefined },
+    kind: { type: String, enum: ['routine', 'session'], default: undefined },
     name: { type: String, required: true },
     date: { type: String, required: true },
     durationSeconds: { type: Number, min: 0, max: 604800, default: undefined },
@@ -39,6 +41,10 @@ const workoutSchema = new Schema(
 );
 
 workoutSchema.index({ userId: 1, date: -1 });
+workoutSchema.index(
+  { userId: 1, clientId: 1 },
+  { unique: true, partialFilterExpression: { clientId: { $type: 'string' } } },
+);
 
 export type WorkoutDoc = InferSchemaType<typeof workoutSchema>;
 export const Workout = model('Workout', workoutSchema);

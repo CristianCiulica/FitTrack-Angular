@@ -9,13 +9,22 @@ import { UserProfile } from '../models/user-profile.model';
 describe('Profile responsiveness', () => {
   let service: ProfileService;
   let api: { get: ReturnType<typeof vi.fn>; patch: ReturnType<typeof vi.fn> };
-  const profile = { uid: 'a', displayName: 'Alex', heightCm: 180, weightKg: 75, age: 30 } as UserProfile;
+  const profile = {
+    uid: 'a',
+    displayName: 'Alex',
+    heightCm: 180,
+    weightKg: 75,
+    age: 30,
+  } as UserProfile;
   beforeEach(() => {
     localStorage.clear();
     api = { get: vi.fn(() => of({ profile })), patch: vi.fn() };
-    TestBed.configureTestingModule({ providers: [
-      { provide: ApiService, useValue: api }, { provide: Auth, useValue: { currentUser: { uid: 'a' } } },
-    ] });
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ApiService, useValue: api },
+        { provide: Auth, useValue: { currentUser: { uid: 'a' } } },
+      ],
+    });
     service = TestBed.inject(ProfileService);
   });
   it('uses the cached profile without waiting for a background refresh', () => {
@@ -31,7 +40,8 @@ describe('Profile responsiveness', () => {
   });
   it('shares concurrent profile reads', () => {
     api.get.mockReturnValue(new Subject());
-    service.load().subscribe(); service.load().subscribe();
+    service.load().subscribe();
+    service.load().subscribe();
     expect(api.get).toHaveBeenCalledOnce();
   });
   it('sends rapid edits in order and keeps the newest input visible', () => {
@@ -42,15 +52,19 @@ describe('Profile responsiveness', () => {
     service.patch({ weightKg: 76 }).subscribe();
     service.patch({ weightKg: 77 }).subscribe();
     expect(api.patch).toHaveBeenCalledTimes(1);
-    first.next({ profile: { ...profile, weightKg: 76 } }); first.complete();
+    first.next({ profile: { ...profile, weightKg: 76 } });
+    first.complete();
     expect(service.weightKg()).toBe(77);
     expect(api.patch).toHaveBeenCalledTimes(2);
-    second.next({ profile: { ...profile, weightKg: 77 } }); second.complete();
+    second.next({ profile: { ...profile, weightKg: 77 } });
+    second.complete();
     expect(service.weightKg()).toBe(77);
   });
   it('reports a failed save and continues processing subsequent edits', () => {
     service.load().subscribe();
-    api.patch.mockReturnValueOnce(throwError(() => new Error('Offline'))).mockReturnValueOnce(of({ profile: { ...profile, weightKg: 77 } }));
+    api.patch
+      .mockReturnValueOnce(throwError(() => new Error('Offline')))
+      .mockReturnValueOnce(of({ profile: { ...profile, weightKg: 77 } }));
     const error = vi.fn();
     service.patch({ weightKg: 76 }).subscribe({ error });
     expect(error).toHaveBeenCalledOnce();
@@ -65,7 +79,8 @@ describe('Profile responsiveness', () => {
     service.refresh().subscribe();
     api.patch.mockReturnValue(of({ profile: { ...profile, weightKg: 77 } }));
     service.patch({ weightKg: 77 }).subscribe();
-    response.next({ profile }); response.complete();
+    response.next({ profile });
+    response.complete();
     expect(service.weightKg()).toBe(77);
   });
   it('keeps a confirmed weigh-in when an older profile read arrives', () => {
@@ -74,7 +89,52 @@ describe('Profile responsiveness', () => {
     api.get.mockReturnValue(response);
     service.refresh().subscribe();
     service.acceptServerProfile({ ...profile, weightKg: 74 });
-    response.next({ profile }); response.complete();
+    response.next({ profile });
+    response.complete();
     expect(service.weightKg()).toBe(74);
+  });
+});
+
+describe('Deleted profile safety', () => {
+  it('never rewrites an erased cache when an older edit finishes late', () => {
+    localStorage.clear();
+    const oldEdit = new Subject<any>();
+    const profile = { uid: 'a', displayName: 'Alex' } as UserProfile;
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: ApiService,
+          useValue: {
+            get: () => of({ profile }),
+            patch: () => oldEdit,
+            delete: () => of({ deleted: true }),
+          },
+        },
+        { provide: Auth, useValue: { currentUser: { uid: 'a' } } },
+      ],
+    });
+    const service = TestBed.inject(ProfileService);
+    service.load().subscribe();
+    service.patch({ displayName: 'Changed' }).subscribe();
+    service.deleteAccount().subscribe();
+    oldEdit.next({ profile });
+    oldEdit.complete();
+    expect(service.profile()).toBeNull();
+    expect(localStorage.getItem('fittrack_profile:a')).toBeNull();
+  });
+  it('does not treat a rejected identity as an offline profile', () => {
+    localStorage.clear();
+    localStorage.setItem('fittrack_profile:a', JSON.stringify({ uid: 'a', displayName: 'Cached' }));
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ApiService, useValue: { get: () => throwError(() => ({ status: 403 })) } },
+        { provide: Auth, useValue: { currentUser: { uid: 'a' } } },
+      ],
+    });
+    const service = TestBed.inject(ProfileService);
+    const failure = vi.fn();
+    service.load(true).subscribe({ error: failure });
+    expect(failure).toHaveBeenCalledOnce();
+    expect(service.profile()).toBeNull();
   });
 });

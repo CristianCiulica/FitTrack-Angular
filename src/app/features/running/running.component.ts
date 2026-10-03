@@ -1,4 +1,7 @@
 import { Subscription } from 'rxjs';
+import { NativeRunService, NativeRunSnapshot } from '../../core/services/native-run.service';
+import { ProfileService } from '../../core/services/profile.service';
+import { displayDistance, displaySpeed, distanceUnitLabel } from '../../core/utils/units';
 import { LiquidGlassDirective } from '../../shared/components/liquid-glass/liquid-glass.directive';
 import { MAP_TILE_URL, MAP_TILE_OPTIONS } from '../../core/config/map-tiles';
 import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ElementRef, NgZone, Optional } from '@angular/core';
@@ -99,6 +102,11 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private recoveredEndedAt: number | null = null;
   private pageHideHandler = () => this.checkpointRun();
   private previousBodyOverflow = '';
+  private nativePoll: ReturnType<typeof setInterval> | null = null;
+  private nativeReading = false;
+  private nativeClientId = '';
+  get distanceUnit() { return distanceUnitLabel(this.profileService?.units() ?? 'metric'); }
+  speedValue(kmh: number) { return displaySpeed(kmh, this.profileService?.units() ?? 'metric'); }
 
   private resizeMap = () => {
     if (this.resizeFrame !== undefined) cancelAnimationFrame(this.resizeFrame);
@@ -110,6 +118,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     if (document.visibilityState === 'visible') {
       this.resizeMap();
       this.updateElapsedTime();
+      if (this.nativeRun?.available) { void this.readNativeRun(); return; }
       if (this.isTracking && !this.isCalibrating) {
         const generation = this.trackingGeneration;
         navigator.geolocation.getCurrentPosition(position => {
@@ -128,6 +137,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     private weatherService: WeatherService,
     private modal: NzModalService,
     @Optional() private zone: NgZone | null = null,
+    @Optional() private profileService: ProfileService | null = null,
+    @Optional() private nativeRun: NativeRunService | null = null,
   ) {}
 
   ngOnInit(): void {
@@ -137,6 +148,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.previousBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     this.restoreRun();
+    if (this.nativeRun?.available) void this.restoreNativeRun();
     this.loadWeather();
   }
 
@@ -158,6 +170,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
+    if (this.nativePoll) clearInterval(this.nativePoll);
     this.checkpointRun();
     this.destroyed = true;
     this.weatherReads.unsubscribe();
@@ -189,6 +202,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   // GPS tracking logic
   startTracking() {
     if (this.isTracking || this.destroyed || this.recoveredRun) return;
+    if (this.nativeRun?.available) { void this.startNativeRun(); return; }
     if (!navigator.geolocation) {
       this.message.error('Geolocation is not supported on this device.');
       return;
@@ -251,6 +265,10 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   stopTracking(saveSession = true) {
+    if (this.nativeRun?.available) {
+      if (!this.destroyed && this.isTracking) void this.stopNativeRun(saveSession);
+      return;
+    }
     const wasTracking = this.isTracking;
     this.trackingGeneration += 1;
     if (this.startTime) {
@@ -313,7 +331,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   get distanceKm(): string {
-    return (this.distanceMeters / 1000).toFixed(2);
+    return displayDistance(this.distanceMeters, this.profileService?.units() ?? 'metric').toFixed(2);
   }
 
   get elapsedDisplay(): string {
@@ -350,7 +368,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   get avgSpeedDisplay(): string {
-    return this.avgSpeedKmh.toFixed(1);
+    return this.speedValue(this.avgSpeedKmh).toFixed(1);
   }
 
   get caloriesDisplay(): string {
@@ -501,7 +519,10 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.recoveredEndedAt = null;
     this.sessionStartedAt = null;
     saved.subscribe({
-      next: () => this.message.success('Workout saved in History.'),
+      next: saved => {
+        this.message.success(saved.id?.startsWith('r_') ? 'Saved on this device. Syncs when you reconnect.' : 'Workout saved in History.');
+        if (this.nativeRun?.available && this.runningSessionService.isDurablySaved(saved)) void this.nativeRun.clear(userId);
+      },
       error: () => this.message.error('Could not upload your session. It is saved on this device.'),
     });
   }
@@ -509,6 +530,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private sessionSnapshot(endedAt = Date.now()): Omit<RunningSession, 'id'> {
     return {
       userId: this.authService.currentUserId!, mode: 'running',
+      ...(this.nativeClientId ? { clientId: this.nativeClientId } : {}),
       startedAt: new Date(this.sessionStartedAt!).toISOString(), endedAt: new Date(endedAt).toISOString(),
       durationSeconds: Math.max(1, this.elapsedSeconds), distanceMeters: Math.round(this.distanceMeters),
       steps: this.steps, averageSpeedKmh: Number(this.avgSpeedKmh.toFixed(1)),
@@ -543,6 +565,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   resumeRecoveredRun(): void {
+    if (this.nativeRun?.available && this.recoveredRun) { void this.startNativeRun(true); return; }
     if (!this.recoveredRun || !navigator.geolocation || this.destroyed) return;
     this.recoveredRun = false;
     this.recoveredEndedAt = null;
@@ -566,6 +589,109 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   saveRecoveredRun(): void {
     if (this.recoveredRun) this.saveCompletedSession();
+  }
+
+  private async restoreNativeRun(): Promise<void> {
+    const generation = this.trackingGeneration;
+    const owner = this.authService.currentUserId;
+    try {
+      const snapshot = await this.nativeRun!.snapshot(owner);
+      if (this.destroyed || generation !== this.trackingGeneration || snapshot.session?.userId !== owner) return;
+      // Never resurrect a checkpoint already acknowledged in local history.
+      if (this.runningSessionService.hasSavedRun(snapshot.session)) {
+        await this.nativeRun!.clear(owner);
+        this.runningSessionService.clearRunDraft();
+        this.resetTracking(false);
+        this.recoveredRun = false;
+        this.recoveredEndedAt = null;
+        return;
+      }
+      this.applyNativeRun(snapshot);
+      if (snapshot.active) this.startNativePolling();
+    } catch { this.message.warning('Could not read the native run. Your browser checkpoint is still available.'); }
+  }
+
+  private async startNativeRun(resume = false): Promise<void> {
+    if (!resume) this.resetTracking(false);
+    const generation = ++this.trackingGeneration;
+    const owner = this.authService.currentUserId;
+    this.isTracking = true; this.isCalibrating = !resume; this.recoveredRun = false;
+    this.runningSessionService.setTrackingActive(true);
+    this.statusText = 'Allow precise location access to record your route.';
+    this.resizeMap();
+    if (!resume) {
+      this.sessionStartedAt = Date.now(); this.nativeClientId = 'r_' + crypto.randomUUID();
+    }
+    const seed = this.sessionSnapshot(); seed.durationSeconds = resume ? this.elapsedSeconds : 0;
+    try {
+      await this.nativeRun!.start(seed);
+      if (this.destroyed || generation !== this.trackingGeneration) return;
+      this.startNativePolling();
+      await this.readNativeRun();
+    } catch (error) {
+      if (this.destroyed || generation !== this.trackingGeneration) return;
+      this.isTracking = false; this.isCalibrating = false; this.recoveredRun = resume;
+      this.runningSessionService.setTrackingActive(false);
+      this.statusText = 'Location access is needed to start a run.';
+      this.message.error(error instanceof Error ? error.message : 'Could not start native tracking.');
+    }
+  }
+
+  private startNativePolling(): void {
+    if (this.nativePoll) clearInterval(this.nativePoll);
+    this.nativePoll = setInterval(() => void this.readNativeRun(), 1000);
+  }
+
+  private async readNativeRun(): Promise<void> {
+    if (!this.nativeRun?.available || this.nativeReading || this.destroyed) return;
+    const generation = this.trackingGeneration;
+    const owner = this.authService.currentUserId;
+    this.nativeReading = true;
+    try {
+      const snapshot = await this.nativeRun.snapshot(owner);
+      if (this.destroyed || generation !== this.trackingGeneration || snapshot.session?.userId !== owner) return;
+      const update = () => this.applyNativeRun(snapshot);
+      if (this.zone) this.zone.run(update); else update();
+    } catch { /* The native service continues collecting GPS during bridge errors. */ }
+    finally { this.nativeReading = false; }
+  }
+
+  private applyNativeRun(snapshot: NativeRunSnapshot): void {
+    const session = snapshot.session;
+    if (!session) return;
+    this.nativeClientId = session.clientId ?? this.nativeClientId;
+    this.sessionStartedAt = Date.parse(session.startedAt); this.recoveredEndedAt = snapshot.active ? null : Date.parse(session.endedAt);
+    this.startTime = Date.now() - session.durationSeconds * 1000;
+    this.elapsedSeconds = session.durationSeconds; this.distanceMeters = session.distanceMeters;
+    this.steps = session.steps; this.avgSpeedKmh = session.averageSpeedKmh; this.calories = session.calories;
+    const oldLast = this.routePoints.at(-1);
+    const nextLast = session.route?.at(-1);
+    const routeChanged = this.routePoints.length !== (session.route?.length ?? 0) || oldLast?.[0] !== nextLast?.[0] || oldLast?.[1] !== nextLast?.[1];
+    this.routePoints = session.route ?? []; this.gpsAccuracy = session.gpsAccuracy;
+    this.isTracking = snapshot.active; this.recoveredRun = !snapshot.active;
+    this.isCalibrating = snapshot.active && this.routePoints.length === 0;
+    this.runningSessionService.setTrackingActive(snapshot.active);
+    if (!snapshot.active || Date.now() - this.checkpointAt >= 5000) {
+      this.runningSessionService.checkpointRun(session);
+      this.checkpointAt = Date.now();
+    }
+    this.statusText = session.trackingError ?? (snapshot.active ? this.isCalibrating ? 'Waiting for an accurate GPS position…' : 'Recording your run, including while the screen is locked.' : 'Your recorded run is safe. Resume or save it.');
+    const last = this.routePoints.at(-1);
+    if (last && routeChanged) {
+      this.initialPosition = L.latLng(last[0], last[1]); this.updateMarker(this.initialPosition, true);
+      this.polyline?.setLatLngs(this.routePoints); this.polylineCasing?.setLatLngs(this.routePoints);
+    }
+    if (!snapshot.active && this.nativePoll) { clearInterval(this.nativePoll); this.nativePoll = null; }
+  }
+
+  private async stopNativeRun(save: boolean): Promise<void> {
+    const generation = ++this.trackingGeneration;
+    try {
+      const snapshot = await this.nativeRun!.stop(this.authService.currentUserId);
+      if (this.destroyed || generation !== this.trackingGeneration) return;
+      this.applyNativeRun({ ...snapshot, active: false });
+      if (save) this.saveCompletedSession();
+    } catch { this.message.error('Could not stop the run. Try again; your recording is kept on this device.'); }
   }
 
   private handleCalibrationFix(point: L.LatLng, timestamp: number, accuracy: number) {

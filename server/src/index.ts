@@ -14,10 +14,21 @@ import workoutsRoutes from './routes/workouts.routes';
 import runningRoutes from './routes/running-sessions.routes';
 import migrateRoutes from './routes/migrate.routes';
 import { apiLimiter } from './middleware/rate-limit';
+import { resumeAccountDeletions } from './services/account-deletion';
+import { Workout } from './models/workout.model';
+import { RunningSession } from './models/running-session.model';
+import { AccountDeletion } from './models/account-deletion.model';
 
 async function main() {
   initFirebaseAdmin();
   await connectMongo();
+  // Idempotency relies on these indexes, including on an existing database.
+  await Promise.all([
+    Workout.createIndexes(),
+    RunningSession.createIndexes(),
+    AccountDeletion.createIndexes(),
+  ]);
+  resumeAccountDeletions();
 
   const app = express();
   app.disable('x-powered-by');
@@ -41,7 +52,11 @@ async function main() {
   app.use('/api/', apiLimiter);
 
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', uptime: process.uptime(), revision: process.env.RENDER_GIT_COMMIT ?? null });
+    res.json({
+      status: 'ok',
+      uptime: process.uptime(),
+      revision: process.env.RENDER_GIT_COMMIT ?? null,
+    });
   });
 
   app.use('/api/me', requireAuth, meRoutes);

@@ -12,7 +12,7 @@ describe('Workout session recovery', () => {
     history = vi.fn(() => of([]));
     component = new StartWorkoutComponent(
       { currentUserId: 'test' } as any,
-      { getWorkouts: history, addWorkout: save } as any,
+      { getWorkouts: history, addWorkout: save, isDurablySaved: () => true } as any,
       { weightKg: () => 75 } as any,
       { success: vi.fn(), error: vi.fn(), warning: vi.fn() } as any,
       { queryParams: of({}) } as any,
@@ -71,7 +71,8 @@ describe('Workout session recovery', () => {
     expect(saved.exercises).toEqual([expect.objectContaining({
       exerciseName: 'Wide Squat Hold', sets: 1, reps: 25, repUnit: 'seconds', setReps: [25], weight: 0,
     })]);
-    history.mockReturnValue(of([saved]));
+    expect(saved.kind).toBe('session');
+    history.mockReturnValue(of([{ ...saved, kind: 'routine' }, saved]));
     component.ngOnInit();
     expect(component.personalRoutines()[0].exercises[0].repUnit).toBe('seconds');
   });
@@ -257,4 +258,30 @@ describe('Workout session recovery', () => {
     expect(component.savedLocally()).toBe(true);
   });
 
+});
+
+describe('Workout draft and immediate input', () => {
+  let component: StartWorkoutComponent;
+  const create = () => new StartWorkoutComponent({ currentUserId: 'recovery-test' } as any, { getWorkouts: () => of([]), addWorkout: () => of({ id: 'saved' }), isDurablySaved: () => true } as any,
+    { weightKg: () => 75, units: () => 'metric' } as any, { success: vi.fn(), error: vi.fn(), warning: vi.fn() } as any, { queryParams: of({}) } as any, { confirm: vi.fn() } as any);
+  beforeEach(() => {
+    localStorage.clear(); vi.useFakeTimers(); component = create();
+    component.selectRoutine({ name: 'Legs', exercises: [{ name: 'Squat', sets: 2, reps: 20, weight: 50, muscleGroup: 'Legs' }] }, 'legs');
+    component.startWorkout();
+  });
+  afterEach(() => { component.ngOnDestroy(); vi.useRealTimers(); });
+  it('restores logged sets and an expired rest after the component is recreated', () => {
+    component.onRepsInput('18'); component.onWeightInput('52.5'); component.finishSet();
+    component.ngOnDestroy(); vi.setSystemTime(Date.now() + 100000);
+    component = create(); component.ngOnInit();
+    expect(component.currentRoutine().name).toBe('Legs'); expect(component.completedSets()).toBe(1);
+    expect(component.state()).toBe('active'); expect(component.currentSetIndex()).toBe(2);
+    component.previousSet(); expect(component.currentReps()).toBe(18); expect(component.currentWeight()).toBe(52.5);
+  });
+  it('logs typed values immediately and blocks invalid values instead of saving old defaults', () => {
+    component.onWeightInput('25'); component.onRepsInput('8'); component.finishSet(); component.previousSet();
+    expect(component.currentWeight()).toBe(25); expect(component.currentReps()).toBe(8);
+    component.onWeightInput('5025'); component.finishSet(); expect(component.state()).toBe('active');
+    component.adjustWeight(-2.5); component.onRepsInput('8.5'); component.finishSet(); expect(component.state()).toBe('active');
+  });
 });

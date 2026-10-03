@@ -32,10 +32,15 @@ export function feetInchesToCm(feet: number, inches: number): number {
 
 export const weightUnitLabel = (units: Units): string => (units === 'imperial' ? 'lb' : 'kg');
 export const heightUnitLabel = (units: Units): string => (units === 'imperial' ? 'ft/in' : 'cm');
+export const distanceUnitLabel = (units: Units): string => (units === 'imperial' ? 'mi' : 'km');
+export const displayDistance = (meters: number, units: Units): number =>
+  meters / (units === 'imperial' ? 1609.344 : 1000);
+export const displaySpeed = (kmh: number, units: Units): number =>
+  units === 'imperial' ? kmh / 1.609344 : kmh;
 
 // valoarea de greutate afisata in unitatea aleasa, dintr-o valoare canonica in kg
 export function displayWeight(kg: number, units: Units): number {
-  return units === 'imperial' ? Math.round(kgToLb(kg)) : Math.round(kg);
+  return Math.round((units === 'imperial' ? kgToLb(kg) : kg) * 10) / 10;
 }
 
 // converteste inapoi in kg (canonic) dintr-o valoare introdusa in unitatea aleasa

@@ -1,51 +1,27 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { Workout, MUSCLE_GROUPS } from '../models/workout.model';
+import { Workout } from '../models/workout.model';
 import { RunningSession } from '../models/running-session.model';
 import { UserProfile } from '../models/user-profile.model';
 import { strictLimiter } from '../middleware/rate-limit';
 
-const router = Router();
+import { createHash } from 'node:crypto';
+import { workoutBodySchema, sessionBodySchema } from '../validation/activity';
+import { createOnce } from '../utils/idempotent-create';
 
-const exerciseSchema = z.object({
-  exerciseName: z.string().trim().min(1),
-  muscleGroup: z.enum(MUSCLE_GROUPS),
-  sets: z.number().min(0).max(50),
-  reps: z.number().min(0).max(500),
-  repUnit: z.literal('seconds').optional(),
-  weight: z.number().min(0).max(1000),
-});
+const router = Router();
 
 const migrationSchema = z.object({
   workouts: z
-    .array(
-      z.object({
-        name: z.string().trim().min(1).max(120),
-        date: z.string().min(1),
-        notes: z.string().max(2000).optional().default(''),
-        isPredefined: z.boolean().optional().default(false),
-        exercises: z.array(exerciseSchema).max(50).default([]),
-      }),
-    )
+    .array(workoutBodySchema.extend({ exercises: workoutBodySchema.shape.exercises.default([]) }))
     .max(500)
     .default([]),
-  runningSessions: z
-    .array(
-      z.object({
-        mode: z.enum(['running', 'walking']),
-        startedAt: z.string().min(1),
-        endedAt: z.string().min(1),
-        durationSeconds: z.number().min(0).max(604800),
-        distanceMeters: z.number().min(0).max(500000),
-        steps: z.number().min(0).max(200000),
-        averageSpeedKmh: z.number().min(0),
-        calories: z.number().min(0).max(20000),
-        route: z.array(z.tuple([z.number(), z.number()])).max(5000).optional().default([]),
-      }),
-    )
-    .max(200)
-    .default([]),
+  runningSessions: z.array(sessionBodySchema).max(200).default([]),
 });
+
+// Content-derived keys also protect legacy clients that have no local record id.
+const legacyId = (type: string, value: unknown) =>
+  `legacy_${type}_${createHash('sha256').update(JSON.stringify(value)).digest('hex')}`;
 
 router.post('/', strictLimiter, async (req, res, next) => {
   try {
@@ -59,16 +35,21 @@ router.post('/', strictLimiter, async (req, res, next) => {
 
     const body = migrationSchema.parse(req.body);
 
-    const ops: Promise<unknown>[] = [];
-    if (body.workouts.length) {
-      ops.push(Workout.insertMany(body.workouts.map((w) => ({ ...w, userId: uid }))));
+    // Every insertion is idempotent. A partial failure or failed migration marker
+    // can safely be retried without requiring a Mongo replica-set transaction.
+    for (const workout of body.workouts) {
+      const value = { ...workout };
+      await createOnce(Workout, uid, {
+        ...value,
+        clientId: workout.clientId ?? legacyId('workout', value),
+      });
     }
-    if (body.runningSessions.length) {
-      ops.push(
-        RunningSession.insertMany(body.runningSessions.map((s) => ({ ...s, userId: uid }))),
-      );
+    for (const session of body.runningSessions) {
+      await createOnce(RunningSession, uid, {
+        ...session,
+        clientId: session.clientId ?? legacyId('run', session),
+      });
     }
-    await Promise.all(ops);
 
     await UserProfile.updateOne(
       { uid },
