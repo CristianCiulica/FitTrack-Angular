@@ -9,7 +9,7 @@
 
 .activity-head {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 14px;
   margin-bottom: 18px;
@@ -24,12 +24,6 @@
     color: #1d1d1f;
   }
 
-  p {
-    margin: 2px 0 0;
-    font-size: 14px;
-    letter-spacing: -0.01em;
-    color: #86868b;
-  }
 }
 
 .month-nav {
@@ -38,14 +32,6 @@
   gap: 12px;
   flex: 0 0 auto;
 
-  .month-label {
-    font-size: 14.5px;
-    font-weight: 650;
-    letter-spacing: -0.015em;
-    color: #1d1d1f;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
 
   .month-arrows {
     display: flex;
@@ -1186,22 +1172,12 @@
       white-space: nowrap;
     }
 
-    p {
-      font-size: clamp(11px, 3vw, 14px);
-      overflow-wrap: anywhere;
-    }
   }
 
   .month-nav {
     gap: 6px;
     justify-self: end;
 
-    .month-label {
-      // Reserve the same space for every full month name, including September.
-      width: 9em;
-      text-align: right;
-      font-size: clamp(11.5px, 3.2vw, 14.5px);
-    }
 
     .month-arrows {
       gap: 0;

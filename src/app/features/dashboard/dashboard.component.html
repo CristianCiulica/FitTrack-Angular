@@ -76,11 +76,9 @@
       <!-- Activity head: title + month navigation -->
       <div class="activity-head">
         <div class="activity-title">
-          <h1>Ready for a workout?</h1>
-          <p *ngIf="firstName()">Welcome back, {{ firstName() }}!</p>
+          <h1>{{ selectedDate() | date: 'MMMM y' }}</h1>
         </div>
         <div class="month-nav">
-          <span class="month-label">{{ selectedDate() | date: 'MMMM y' }}</span>
           <div class="month-arrows">
             <button type="button" aria-label="Previous week" (click)="shiftWeek(-1)">‹</button>
             <button type="button" aria-label="Next week" (click)="shiftWeek(1)">›</button>

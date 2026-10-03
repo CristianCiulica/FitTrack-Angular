@@ -56,10 +56,6 @@ export class DashboardComponent implements OnInit {
 
   private readonly destroy = inject(DestroyRef);
   private readonly profileService = inject(ProfileService);
-  readonly firstName = computed(() => {
-    const name = this.profileService.displayName().trim();
-    return name ? name.split(' ')[0] : '';
-  });
 
   workouts = signal<Workout[]>([]);
 
