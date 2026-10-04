@@ -262,14 +262,27 @@ describe('Workout session recovery', () => {
 
 describe('Workout draft and immediate input', () => {
   let component: StartWorkoutComponent;
-  const create = () => new StartWorkoutComponent({ currentUserId: 'recovery-test' } as any, { getWorkouts: () => of([]), addWorkout: () => of({ id: 'saved' }), isDurablySaved: () => true } as any,
-    { weightKg: () => 75, units: () => 'metric' } as any, { success: vi.fn(), error: vi.fn(), warning: vi.fn() } as any, { queryParams: of({}) } as any, { confirm: vi.fn() } as any);
+  const create = (params = {}) => new StartWorkoutComponent({ currentUserId: 'recovery-test' } as any, { getWorkouts: () => of([]), addWorkout: () => of({ id: 'saved' }), isDurablySaved: () => true } as any,
+    { weightKg: () => 75, units: () => 'metric' } as any, { success: vi.fn(), error: vi.fn(), warning: vi.fn() } as any, { queryParams: of(params) } as any, { confirm: vi.fn() } as any);
   beforeEach(() => {
     localStorage.clear(); vi.useFakeTimers(); component = create();
     component.selectRoutine({ name: 'Legs', exercises: [{ name: 'Squat', sets: 2, reps: 20, weight: 50, muscleGroup: 'Legs' }] }, 'legs');
     component.startWorkout();
   });
   afterEach(() => { component.ngOnDestroy(); vi.useRealTimers(); });
+  it('opens the recommended plan from onboarding when there is no active session', () => {
+    component.cancelWorkout(); component.ngOnDestroy();
+    component = create({ plan: 'push-pull-legs' }); component.ngOnInit();
+    expect(component.gymPlanOpen()).toBe(true);
+    expect(component.gymRoutines.map(routine => routine.name)).toEqual(['PUSH', 'PULL', 'LEGS']);
+  });
+  it('preserves a recovered session instead of covering it with the recommended plan', () => {
+    component.ngOnDestroy();
+    component = create({ plan: 'push-pull-legs' }); component.ngOnInit();
+    expect(component.currentRoutine().name).toBe('Legs');
+    expect(component.state()).toBe('active');
+    expect(component.gymPlanOpen()).toBe(false);
+  });
   it('restores logged sets and an expired rest after the component is recreated', () => {
     component.onRepsInput('18'); component.onWeightInput('52.5'); component.finishSet();
     component.ngOnDestroy(); vi.setSystemTime(Date.now() + 100000);

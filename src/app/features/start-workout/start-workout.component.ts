@@ -897,6 +897,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.selectRoutine(this.routines[0], 'predefined-0');
     this.loadPersonalRoutines();
     this.restoreWorkout();
+    this.reads.add(this.route.queryParams.subscribe(params => {
+      if (params['plan'] === 'push-pull-legs') this.openGymPlan();
+    }));
   }
 
   private previousBodyOverflow: string | null = null;

@@ -1,197 +1,148 @@
 <div class="onboarding">
   <div class="onboarding-card">
     <header class="onboarding-head">
-      <span class="brand">FitTrack<span>.</span></span>
-      <div class="progress-track" aria-hidden="true">
+      <div class="head-row">
+        <button type="button" class="back-button" [class.hidden]="stepIndex() === 0" [disabled]="saving() || stepIndex() === 0" aria-label="Back" (click)="back()">
+          <span nz-icon nzType="arrow-left" aria-hidden="true"></span>
+        </button>
+        <span class="brand">FitTrack<span>.</span></span>
+        <span class="step-count">{{ stepIndex() + 1 }} <span>/ {{ totalSteps }}</span></span>
+      </div>
+      <div class="progress-track" role="progressbar" aria-label="Profile setup" [attr.aria-valuenow]="progress()" aria-valuemin="0" aria-valuemax="100">
         <span [style.width.%]="progress()"></span>
       </div>
     </header>
 
-    <div class="onboarding-body">
-      <!-- NAME -->
-      <section class="step" *ngIf="step() === 'name'">
-        <span class="eyebrow">Welcome</span>
-        <h1>Let's set up your profile</h1>
-        <p class="lead">First, what should we call you?</p>
-        <input
-          class="glass-input"
-          type="text"
-          placeholder="Your name" aria-label="Your name"
-          [ngModel]="name()"
-          (ngModelChange)="name.set($event)"
-          autocomplete="name"
-        />
-      </section>
-
-      <!-- AGE -->
-      <section class="step" *ngIf="step() === 'age'">
-        <span class="eyebrow">About you</span>
-        <h1><label for="onboarding-age">How old are you, {{ firstName }}?</label></h1>
-        <p class="lead">We use this to estimate your energy needs.</p>
-        <div class="big-number-field">
-          <nz-input-number
-            nzId="onboarding-age" [ngModel]="age()"
-            (ngModelChange)="age.set($event)"
-            [nzMin]="12"
-            [nzMax]="100"
-            [nzStep]="1"
-          ></nz-input-number>
-          <span class="field-suffix">years</span>
-        </div>
-      </section>
-
-      <!-- BODY -->
-      <section class="step" *ngIf="step() === 'body'">
-        <span class="eyebrow">Your body</span>
-        <h1>Your height & weight</h1>
-        <p class="lead">This powers your BMI and calorie targets.</p>
-
-        <div class="dual-field">
-          <label>
-            <span>Height (cm)</span>
-            <nz-input-number
-              [ngModel]="heightCm()"
-              (ngModelChange)="heightCm.set($event)"
-              [nzMin]="120"
-              [nzMax]="230"
-              [nzStep]="1"
-            ></nz-input-number>
-          </label>
-          <label>
-            <span>Weight (kg)</span>
-            <nz-input-number
-              [ngModel]="weightKg()"
-              (ngModelChange)="weightKg.set($event)"
-              [nzMin]="30"
-              [nzMax]="300"
-              [nzStep]="1"
-            ></nz-input-number>
-          </label>
-        </div>
-
-        <div class="segmented sex-picker">
-          <button type="button" [class.selected]="sex() === 'male'" (click)="sex.set('male')">Male</button>
-          <button type="button" [class.selected]="sex() === 'female'" (click)="sex.set('female')">Female</button>
-        </div>
-      </section>
-
-      <!-- GOAL -->
-      <section class="step" *ngIf="step() === 'goal'">
-        <span class="eyebrow">Your goal</span>
-        <h1>What are you aiming for?</h1>
-        <p class="lead">We'll tailor your projection to it.</p>
-
-        <div class="goal-options">
-          <button type="button" [class.selected]="goal() === 'lose'" (click)="setGoal('lose')">
-            <strong>Lose weight</strong>
-            <small>Trim down at a steady pace</small>
-          </button>
-          <button type="button" [class.selected]="goal() === 'maintain'" (click)="setGoal('maintain')">
-            <strong>Maintain</strong>
-            <small>Stay where you are, get stronger</small>
-          </button>
-          <button type="button" [class.selected]="goal() === 'gain'" (click)="setGoal('gain')">
-            <strong>Build muscle</strong>
-            <small>Add size with a lean surplus</small>
-          </button>
-        </div>
-
-        <div class="pace-field" *ngIf="goal() !== 'maintain'">
-          <div class="pace-head">
-            <span>Weekly pace</span>
-            <strong>{{ goalRate() | number: '1.1-1' }} kg/week</strong>
-          </div>
-          <input
-            type="range"
-            min="0.1"
-            [max]="goal() === 'lose' ? 1 : 0.5"
-            step="0.1"
-            [ngModel]="goalRate()"
-            (ngModelChange)="goalRate.set(+$event)"
-          />
-        </div>
-      </section>
-
-      <!-- TRAINING -->
-      <section class="step" *ngIf="step() === 'training'">
-        <span class="eyebrow">Your routine</span>
-        <h1>How many workouts per week?</h1>
-
-        <div class="workout-count-picker">
-          <button
-            type="button"
-            *ngFor="let n of workoutOptions"
-            [class.selected]="weeklyWorkoutGoal() === n"
-            (click)="weeklyWorkoutGoal.set(n)"
-          >
-            {{ n }}
-          </button>
-        </div>
-        <p class="workout-count-caption">
-          <strong>{{ weeklyWorkoutGoal() }}</strong>
-          {{ weeklyWorkoutGoal() === 1 ? 'workout' : 'workouts' }} every week
-        </p>
-      </section>
-
-      <!-- RESULT -->
-      <section class="step result" *ngIf="step() === 'result'">
-        <span class="eyebrow">Your starting point</span>
-        <h1>Here's where you stand, {{ firstName }}</h1>
-
-        <div class="bmi-hero" [attr.data-tone]="bmiCategory().tone">
-          <span class="bmi-label">Your BMI</span>
-          <strong>{{ bmiLabel() }}</strong>
-          <span class="bmi-category">{{ bmiCategory().text }}</span>
-        </div>
-
-        <div class="projection">
-          <p class="projection-headline">{{ projectionHeadline() }}</p>
-          <div class="projection-grid">
-            <div>
-              <span>In {{ projectionWeeks }} weeks</span>
-              <strong>{{ projectedWeight() | number: '1.0-0' }} kg</strong>
+    <main #stepBody class="onboarding-body" [class.reverse]="direction() === 'back'" [class.plan-body]="step() === 'plan'">
+      @switch (step()) {
+        @case ('name') {
+          <section class="step" animate.enter="step-enter">
+            <span class="eyebrow">Made for you</span>
+            <h1 #stepTitle tabindex="-1">A little about you.<br>A better place to start.</h1>
+            <p class="lead">What should we call you?</p>
+            <label class="field-label" for="onboarding-name">Your name</label>
+            <input id="onboarding-name" class="glass-input" type="text" placeholder="First name" maxlength="80" [ngModel]="name()" (ngModelChange)="name.set($event)" autocomplete="given-name" (keydown.enter)="next()" />
+          </section>
+        }
+        @case ('appearance') {
+          <section class="step" animate.enter="step-enter">
+            <span class="eyebrow">Your space</span>
+            <h1 #stepTitle tabindex="-1">Make yourself at home.</h1>
+            <p class="lead">Choose the look you love. You can change it anytime in Settings.</p>
+            <div class="theme-options" role="group" aria-label="Appearance">
+              @for (option of themes; track option.value) {
+                <button type="button" class="theme-option" [attr.aria-pressed]="appearance.preference() === option.value" [class.selected]="appearance.preference() === option.value" (click)="appearance.setPreference(option.value)">
+                  <span class="theme-preview" [attr.data-appearance]="option.value" aria-hidden="true">
+                    <span class="preview-top"></span><span class="preview-title"></span>
+                    <span class="preview-activity"><span class="preview-lines"><i></i><i></i><i></i></span><span class="preview-ring"></span></span>
+                    <span class="preview-cards"><i></i><i></i></span><span class="preview-dock"><i></i><i></i><i></i></span>
+                  </span>
+                  <span class="theme-label">{{ option.label }}<span class="selection-dot" aria-hidden="true"></span></span>
+                </button>
+              }
             </div>
-            <div>
-              <span>Projected BMI</span>
-              <strong>{{ projectedBmi() | number: '1.1-1' }}</strong>
+            <p class="selection-note">{{ appearance.preference() === 'system' ? 'Auto follows your device appearance.' : appearance.preference() === 'dark' ? 'Soft contrast. A quieter dark canvas.' : 'A bright canvas for your daily progress.' }}</p>
+          </section>
+        }
+        @case ('age') {
+          <section class="step" animate.enter="step-enter">
+            <span class="eyebrow">About you</span>
+            <h1 #stepTitle tabindex="-1">How old are you, {{ firstName }}?</h1>
+            <p class="lead">We use this to estimate your energy needs.</p>
+            <label class="field-label" for="onboarding-age">Age</label>
+            <div class="big-number-field">
+              <nz-input-number nzId="onboarding-age" [ngModel]="age()" (ngModelChange)="age.set($event)" [nzMin]="12" [nzMax]="100" [nzStep]="1"></nz-input-number>
+              <span class="field-suffix">years</span>
             </div>
-          </div>
-        </div>
-      </section>
-    </div>
+          </section>
+        }
+        @case ('body') {
+          <section class="step" animate.enter="step-enter">
+            <span class="eyebrow">Your starting point</span>
+            <h1 #stepTitle tabindex="-1">Your height &amp; weight.</h1>
+            <p class="lead">A starting point for your calorie targets and progress.</p>
+            <div class="dual-field">
+              <div><label class="field-label" for="onboarding-height">Height (cm)</label><nz-input-number nzId="onboarding-height" [ngModel]="heightCm()" (ngModelChange)="heightCm.set($event)" [nzMin]="120" [nzMax]="230" [nzStep]="1"></nz-input-number></div>
+              <div><label class="field-label" for="onboarding-weight">Weight (kg)</label><nz-input-number nzId="onboarding-weight" [ngModel]="weightKg()" (ngModelChange)="weightKg.set($event)" [nzMin]="30" [nzMax]="300" [nzStep]="0.1"></nz-input-number></div>
+            </div>
+            <span class="field-label sex-label">Sex used for calorie estimates</span>
+            <div class="segmented" role="group" aria-label="Sex used for calorie estimates">
+              <button type="button" [class.selected]="sex() === 'male'" [attr.aria-pressed]="sex() === 'male'" (click)="sex.set('male')">Male</button>
+              <button type="button" [class.selected]="sex() === 'female'" [attr.aria-pressed]="sex() === 'female'" (click)="sex.set('female')">Female</button>
+            </div>
+          </section>
+        }
+        @case ('goal') {
+          <section class="step goal-step" animate.enter="step-enter">
+            <span class="eyebrow">Your direction</span>
+            <h1 #stepTitle tabindex="-1">What are you aiming for?</h1>
+            <p class="lead">Choose what matters to you right now.</p>
+            <div class="goal-options" role="group" aria-label="Your goal">
+              <button type="button" [class.selected]="goal() === 'lose'" [attr.aria-pressed]="goal() === 'lose'" (click)="setGoal('lose')"><span><strong>Lose weight</strong><small>Build a steady rhythm</small></span><span class="selection-dot" aria-hidden="true"></span></button>
+              <button type="button" [class.selected]="goal() === 'maintain'" [attr.aria-pressed]="goal() === 'maintain'" (click)="setGoal('maintain')"><span><strong>Maintain</strong><small>Stay balanced. Get stronger.</small></span><span class="selection-dot" aria-hidden="true"></span></button>
+              <button type="button" [class.selected]="goal() === 'gain'" [attr.aria-pressed]="goal() === 'gain'" (click)="setGoal('gain')"><span><strong>Build muscle</strong><small>Fuel your strength and growth</small></span><span class="selection-dot" aria-hidden="true"></span></button>
+            </div>
+            @if (goal() !== 'maintain') {
+              <div class="pace-field">
+                <div class="pace-head"><label for="onboarding-pace">Weekly pace</label><strong>{{ goalRate() | number: '1.1-1' }} kg/week</strong></div>
+                <input id="onboarding-pace" type="range" min="0.1" [max]="goal() === 'lose' ? 1 : 0.5" step="0.1" [ngModel]="goalRate()" (ngModelChange)="goalRate.set(+$event)" />
+              </div>
+            }
+          </section>
+        }
+        @case ('training') {
+          <section class="step" animate.enter="step-enter">
+            <span class="eyebrow">Your routine</span>
+            <h1 #stepTitle tabindex="-1">How many workouts per week?</h1>
+            <div class="workout-count-picker" role="group" aria-label="Weekly workout goal">
+              @for (n of workoutOptions; track n) {
+                <button type="button" [class.selected]="weeklyWorkoutGoal() === n" [attr.aria-pressed]="weeklyWorkoutGoal() === n" [attr.aria-label]="n + (n === 1 ? ' workout per week' : ' workouts per week')" (click)="weeklyWorkoutGoal.set(n)">{{ n }}</button>
+              }
+            </div>
+            <p class="workout-count-caption"><strong>{{ weeklyWorkoutGoal() }}</strong> {{ weeklyWorkoutGoal() === 1 ? 'workout' : 'workouts' }} every week</p>
+          </section>
+        }
+        @case ('result') {
+          <section class="step result" animate.enter="step-enter">
+            <span class="eyebrow">Your profile, in focus</span>
+            <h1 #stepTitle tabindex="-1">Your starting point,<br>{{ firstName }}.</h1>
+            <div class="bmi-hero">
+              <div><span class="bmi-label">Body mass index</span><strong>{{ bmiLabel() }}</strong></div>
+              <span class="bmi-category">{{ bmiCategory().text }}</span>
+            </div>
+            <div class="profile-summary"><span>{{ heightCm() }} cm</span><span>{{ weightKg() | number: '1.0-1' }} kg</span><span>{{ weeklyWorkoutGoal() }} / week</span></div>
+            <div class="starting-projection">
+              <p class="projection-headline">{{ projectionHeadline() }}</p>
+              <div class="projection-grid">
+                <div><span>{{ goal() === 'maintain' ? 'Weight goal' : '12-week estimate' }}</span><strong>{{ projectedWeight() | number: '1.0-1' }} <small>kg</small></strong></div>
+                <div><span>Weekly workouts</span><strong>{{ weeklyWorkoutGoal() }} <small>sessions</small></strong></div>
+              </div>
+            </div>
+          </section>
+        }
+        @case ('plan') {
+          <section class="step plan-step" animate.enter="step-enter">
+            <span class="eyebrow">A place to begin</span>
+            <h1 #stepTitle tabindex="-1">Your next chapter.<span class="plan-title-detail"><br>A little stronger.</span></h1>
+            <p class="lead">Meet your gym plan. Three focused sessions, ready when you are.</p>
+            <div class="recommended-plan">
+              <div class="plan-top"><span class="plan-symbol" nz-icon nzType="thunderbolt" aria-hidden="true"></span><span class="plan-tag">GYM COLLECTION</span></div>
+              <h2>Push Pull Legs</h2><p class="plan-subtitle">Aesthetics Plan</p>
+              <div class="plan-sessions"><div><span>01</span><strong>Push</strong><small>Chest · shoulders · triceps</small></div><div><span>02</span><strong>Pull</strong><small>Back · biceps</small></div><div><span>03</span><strong>Legs</strong><small>Legs · core</small></div></div>
+              <p class="plan-note">Rotate these sessions across your {{ weeklyWorkoutGoal() }} weekly {{ weeklyWorkoutGoal() === 1 ? 'workout' : 'workouts' }}.</p>
+            </div>
+          </section>
+        }
+      }
+    </main>
 
     <footer class="onboarding-foot">
-      <button
-        *ngIf="stepIndex() > 0"
-        type="button"
-        class="ghost-btn"
-        (click)="back()"
-      >
-        Back
-      </button>
-      <span class="foot-spacer"></span>
-      <button
-        *ngIf="step() !== 'result'"
-        nz-button
-        nzType="primary"
-        nzSize="large"
-        class="next-btn"
-        [disabled]="!canAdvance()"
-        (click)="next()"
-      >
-        Continue
-      </button>
-      <button
-        *ngIf="step() === 'result'"
-        nz-button
-        nzType="primary"
-        nzSize="large"
-        class="next-btn"
-        [nzLoading]="saving()"
-        (click)="finish()"
-      >
-        Start training
-      </button>
+      @if (step() !== 'plan') {
+        <button nz-button nzType="primary" nzSize="large" type="button" class="next-btn" [disabled]="!canAdvance()" (click)="next()">{{ step() === 'result' ? 'Find your first workout' : 'Continue' }}<span nz-icon nzType="arrow-right" aria-hidden="true"></span></button>
+      } @else {
+        <button nz-button nzType="primary" nzSize="large" type="button" class="next-btn" [nzLoading]="saving()" (click)="finish(true)">Explore the plan<span nz-icon nzType="arrow-right" aria-hidden="true"></span></button>
+        <button type="button" class="later-button" [disabled]="saving()" (click)="finish(false)">Later</button>
+      }
     </footer>
   </div>
 </div>
