@@ -122,7 +122,7 @@
               </button>
               <button type="button" class="plan-promo gym-promo" (click)="openGymPlan()">
                 <span class="promo-symbol" nz-icon nzType="ft:workout"></span>
-                <span class="promo-copy"><small>GYM</small><strong>Push Pull Legs</strong><span>Push Pull Legs plan</span></span>
+                <span class="promo-copy"><small>GYM</small><strong>Push Pull Legs</strong><span>Aesthetics Plan</span></span>
                 <span nz-icon nzType="arrow-right"></span>
               </button>
             </div>
@@ -142,8 +142,8 @@
           </section>
 
           <section class="routine-library">
-            <div class="plan-heading"><div><span class="section-eyebrow">FIND YOUR FOCUS</span><h2>Ready to train</h2></div><span class="library-count">{{ filteredPredefined().length }} routines</span></div>
-            <p class="library-guidance">Start light, leave 2 reps in reserve, and build up gradually. Set your own load; unilateral reps are per side.</p>
+            <div class="plan-heading"><div><h2>Start a Workout</h2></div><span class="library-count">{{ filteredPredefined().length }} routines</span></div>
+            <p class="library-guidance">Train to failure</p>
             <div class="filter-pills" role="group" aria-label="Workout categories"><button type="button" *ngFor="let filter of routineFilters" [class.selected]="routineFilter() === filter" [attr.aria-pressed]="routineFilter() === filter" (click)="routineFilter.set(filter)">{{ filter }}</button></div>
             <div class="plan-list">
               <article class="plan-card" *ngFor="let item of filteredPredefined(); trackBy: trackPredefined" [class.selected]="selectedRoutineKey() === 'predefined-' + item.index">
