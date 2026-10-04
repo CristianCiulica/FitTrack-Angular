@@ -143,7 +143,7 @@
 
           <section class="routine-library">
             <div class="plan-heading"><div><h2>Start a Workout</h2></div><span class="library-count">{{ filteredPredefined().length }} routines</span></div>
-            <p class="library-guidance">Train to failure</p>
+            <p class="library-guidance">Choose a routine and make it yours.</p>
             <div class="filter-pills" role="group" aria-label="Workout categories"><button type="button" *ngFor="let filter of routineFilters" [class.selected]="routineFilter() === filter" [attr.aria-pressed]="routineFilter() === filter" (click)="routineFilter.set(filter)">{{ filter }}</button></div>
             <div class="plan-list">
               <article class="plan-card" *ngFor="let item of filteredPredefined(); trackBy: trackPredefined" [class.selected]="selectedRoutineKey() === 'predefined-' + item.index">
