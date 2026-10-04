@@ -65,8 +65,8 @@
               <div><label class="field-label" for="onboarding-height">Height (cm)</label><nz-input-number nzId="onboarding-height" [ngModel]="heightCm()" (ngModelChange)="heightCm.set($event)" [nzMin]="120" [nzMax]="230" [nzStep]="1"></nz-input-number></div>
               <div><label class="field-label" for="onboarding-weight">Weight (kg)</label><nz-input-number nzId="onboarding-weight" [ngModel]="weightKg()" (ngModelChange)="weightKg.set($event)" [nzMin]="30" [nzMax]="300" [nzStep]="0.1"></nz-input-number></div>
             </div>
-            <span class="field-label sex-label">Sex used for calorie estimates</span>
-            <div class="segmented" role="group" aria-label="Sex used for calorie estimates">
+            <span class="field-label sex-label">Gender used for calorie estimates</span>
+            <div class="segmented" role="group" aria-label="Gender used for calorie estimates">
               <button type="button" [class.selected]="sex() === 'male'" [attr.aria-pressed]="sex() === 'male'" (click)="sex.set('male')">Male</button>
               <button type="button" [class.selected]="sex() === 'female'" [attr.aria-pressed]="sex() === 'female'" (click)="sex.set('female')">Female</button>
             </div>
