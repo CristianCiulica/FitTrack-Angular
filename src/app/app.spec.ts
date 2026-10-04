@@ -1,7 +1,8 @@
 import { vi, afterEach } from 'vitest';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { NavigationEnd, NavigationError, Router, provideRouter } from '@angular/router';
+import { Subject } from 'rxjs';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { App } from './app';
 import { ProfileService } from './core/services/profile.service';
@@ -41,5 +42,29 @@ describe('App shell', () => {
     loading.hide();
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('.loading-overlay')).toBeNull();
+  });
+
+  it('dismisses the startup screen only after navigation completes', () => {
+    const events = new Subject<NavigationEnd>();
+    vi.spyOn(TestBed.inject(Router), 'events', 'get').mockReturnValue(events);
+    const dispatch = vi.spyOn(document, 'dispatchEvent');
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    expect(dispatch.mock.calls.some(([event]) => event.type === 'fittrack:ready')).toBe(false);
+    events.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
+    expect(dispatch.mock.calls.some(([event]) => event.type === 'fittrack:ready')).toBe(true);
+    fixture.destroy();
+  });
+
+  it('offers startup recovery when the initial route fails to load', () => {
+    const events = new Subject<NavigationError>();
+    vi.spyOn(TestBed.inject(Router), 'events', 'get').mockReturnValue(events);
+    const dispatch = vi.spyOn(document, 'dispatchEvent');
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    events.next(new NavigationError(1, '/dashboard', new Error('Chunk unavailable')));
+    expect(dispatch.mock.calls.some(([event]) => event.type === 'fittrack:startup-error')).toBe(true);
+    expect(dispatch.mock.calls.some(([event]) => event.type === 'fittrack:ready')).toBe(false);
+    fixture.destroy();
   });
 });

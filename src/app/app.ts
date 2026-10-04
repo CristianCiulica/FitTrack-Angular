@@ -67,6 +67,8 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
+        // Keep the static startup screen until a route has actually rendered.
+        document.dispatchEvent(new Event('fittrack:ready'));
         const pendingDuration = this.loadingService.consumePendingDuration();
         if (pendingDuration) {
           this.loadingService.showFor(pendingDuration);
@@ -76,6 +78,9 @@ export class App implements OnInit {
       }
       if (event instanceof NavigationCancel || event instanceof NavigationError) {
         this.loadingService.hide();
+        if (event instanceof NavigationError) {
+          document.dispatchEvent(new Event('fittrack:startup-error'));
+        }
       }
     });
   }
