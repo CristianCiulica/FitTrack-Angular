@@ -56,6 +56,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
       { name: 'Overhead Triceps Extension', sets: 3, reps: 12, weight: 0, muscleGroup: 'Arms' },
       { name: 'Chest Dip', sets: 3, reps: 10, weight: 0, muscleGroup: 'Chest' },
       { name: 'Lateral Raise (Dumbbell)', sets: 6, reps: 15, weight: 0, muscleGroup: 'Shoulders' },
+      { name: 'Upper Chest Fly (Cable)', sets: 5, reps: 12, weight: 0, muscleGroup: 'Chest' },
     ],
   },
   {
@@ -70,6 +71,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
       { name: 'Bent Over Row (Machine)', sets: 3, reps: 10, weight: 0, muscleGroup: 'Back' },
       { name: 'Shrug (Barbell)', sets: 3, reps: 12, weight: 0, muscleGroup: 'Back' },
       { name: 'Rear Delt Work', sets: 3, reps: 15, weight: 0, muscleGroup: 'Shoulders' },
+      { name: 'Bicep Curl (Cable, Individual Handles)', sets: 5, reps: 12, weight: 0, muscleGroup: 'Arms' },
     ],
   },
   {
