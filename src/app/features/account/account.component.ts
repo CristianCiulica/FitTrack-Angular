@@ -13,6 +13,7 @@ import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.comp
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { Sex } from '../../core/models/user-profile.model';
+import { ActivityCalendarComponent } from '../../shared/components/activity-calendar/activity-calendar.component';
 import {
   cmToFeetInches,
   displayWeight,
@@ -36,6 +37,7 @@ import {
     NzCardModule,
     NzInputNumberModule,
     AppMenuComponent,
+    ActivityCalendarComponent,
   ],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.scss'],
