@@ -49,6 +49,11 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
+    path: 'progress',
+    canActivate: [authGuard, onboardingGuard],
+    loadComponent: () => import('./features/progress/progress.component').then((m) => m.ProgressComponent),
+  },
+  {
     path: 'account',
     canActivate: [authGuard, onboardingGuard],
     loadChildren: () => import('./features/account/account.routes').then((m) => m.accountRoutes),

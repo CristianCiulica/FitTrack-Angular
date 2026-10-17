@@ -30,12 +30,19 @@
           <span>Nutrition</span>
         </a>
       </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav">
+        <a routerLink="/progress" aria-label="Progress"
+          ><span nz-icon nzType="line-chart"></span><span>Progress</span></a
+        >
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/account" aria-label="Account">
-          <span nz-icon nzType="user"></span><span>Account</span>
+        <a routerLink="/weight" aria-label="Weight"
+          ><span nz-icon nzType="line-chart"></span><span>Weight</span></a
+        >
+      </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
+        <a routerLink="/account" aria-label="Profile">
+          <span nz-icon nzType="user"></span><span>Profile</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
@@ -56,130 +63,280 @@
       <div class="header-left">
         <app-menu></app-menu>
         <h2>
-          <span class="desktop-page-title">Account</span>
+          <span class="desktop-page-title">Profile</span>
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
-
     </nz-header>
 
     <nz-content class="app-content">
-      <div class="account-wrap">
-        <app-activity-calendar></app-activity-calendar>
-        <nz-card class="account-card">
-          <div class="account-heading">
-            <span>Your profile</span>
-            <h1>Account</h1>
-            <p>These details power your BMI, calorie targets and nutrition suggestions across the app.</p>
+      <div class="profile-page">
+        <div class="profile-page-heading">
+          <span class="profile-eyebrow">PERSONAL, BY DESIGN</span
+          ><a routerLink="/progress">See your progress <span aria-hidden="true">↗</span></a>
+        </div>
+        <section class="athlete-card" aria-labelledby="profile-name">
+          <div class="hero-orbit orbit-one" aria-hidden="true"></div>
+          <div class="hero-orbit orbit-two" aria-hidden="true"></div>
+          <div class="hero-orbit orbit-three" aria-hidden="true"></div>
+          <div class="athlete-card-top">
+            <span>FITTRACK / ATHLETE PROFILE</span
+            ><span class="personal-tag"><i></i>YOUR OWN PACE</span>
           </div>
-
-          <section class="account-identity" aria-label="Profile photo and email">
+          <div class="athlete-identity">
             <div class="avatar-wrap">
-              <span class="profile-avatar">
-                <img *ngIf="avatar()" [src]="avatar()" alt="Profile photo" />
-                <ng-container *ngIf="!avatar()">{{ initials(displayName() || email()) }}</ng-container>
-              </span>
-              <label class="avatar-edit" [class.busy]="uploading()">
-                <span nz-icon [nzType]="uploading() ? 'loading' : 'camera'"></span>
-                <input type="file" accept="image/*" aria-label="Change profile photo" [disabled]="uploading()" (change)="onAvatarSelected($event)" />
-              </label>
+              <div class="athlete-avatar">
+                @if (avatar()) {
+                  <img [src]="avatar()" alt="Your profile photo" />
+                } @else {
+                  <span>{{ initials(displayName() || email()) }}</span>
+                }
+              </div>
+              <label class="avatar-edit" [class.busy]="uploading()"
+                ><span nz-icon [nzType]="uploading() ? 'loading' : 'camera'"></span
+                ><input
+                  type="file"
+                  accept="image/*"
+                  aria-label="Change profile photo"
+                  [disabled]="uploading() || saving() || !loaded()"
+                  (change)="onAvatarSelected($event)"
+              /></label>
             </div>
-            <div class="identity-details">
-              <strong>{{ displayName() || 'Athlete' }}</strong>
-              <p>{{ email() }}</p>
-              <button type="button" class="avatar-remove" *ngIf="avatar()" [disabled]="uploading()" (click)="removeAvatar()">Remove photo</button>
+            <div class="athlete-name">
+              <span class="identity-eyebrow">THE PERSON BEHIND THE PROGRESS</span>
+              <h1 id="profile-name">
+                {{ displayName() || 'Your profile' }}<span class="name-dot">.</span>
+              </h1>
+              <p>{{ email() || 'Your space to build something good.' }}</p>
+              @if (avatar()) {
+                <button
+                  type="button"
+                  class="remove-avatar"
+                  [disabled]="uploading() || saving()"
+                  (click)="removeAvatar()"
+                >
+                  Remove photo
+                </button>
+              }
             </div>
+          </div>
+          <div class="athlete-card-bottom">
+            <span>Small steps. Your story.</span
+            ><span class="athlete-signature" aria-hidden="true">ft<span>✳</span></span>
+          </div>
+        </section>
+        <div class="profile-content-grid">
+          <section class="profile-form-card" aria-labelledby="profile-form-title">
+            <div class="form-heading">
+              <div>
+                <span class="profile-eyebrow">01 / THE ESSENTIALS</span>
+                <h2 id="profile-form-title">A little about you.</h2>
+              </div>
+              <span class="edit-indicator" [class.unsaved]="dirty()"
+                ><i></i>{{ dirty() ? 'Unsaved changes' : 'Your details' }}</span
+              >
+            </div>
+            <p class="form-description">The details that make FitTrack yours.</p>
+            @if (error()) {
+              <div class="form-error" role="alert">
+                {{ error() }}
+                @if (!loaded()) {
+                  <button type="button" (click)="loadProfile()">Try again</button>
+                }
+              </div>
+            }
+            @if (loading() && !loaded()) {
+              <div class="profile-loading" role="status">Getting your profile ready…</div>
+            }
+            @if (loaded()) {
+              <form class="profile-form" (ngSubmit)="save()">
+                <fieldset [disabled]="saving() || uploading()">
+                  <legend class="sr-only">Personal details</legend>
+                  <label class="profile-field name-field"
+                    ><span>What should we call you?</span
+                    ><input
+                      type="text"
+                      name="displayName"
+                      autocomplete="name"
+                      maxlength="80"
+                      required
+                      placeholder="Your name"
+                      [ngModel]="name()"
+                      (ngModelChange)="name.set($event)"
+                  /></label>
+                  <div class="field-grid">
+                    <label class="profile-field"
+                      ><span>Age <small>years</small></span
+                      ><input
+                        type="number"
+                        name="age"
+                        inputmode="numeric"
+                        min="1"
+                        max="120"
+                        step="1"
+                        required
+                        [ngModel]="age()"
+                        (ngModelChange)="age.set($event)" /></label
+                    ><label class="profile-field"
+                      ><span>Gender</span
+                      ><select name="gender" [ngModel]="sex()" (ngModelChange)="sex.set($event)">
+                        <option value="">Prefer not to say</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                      </select></label
+                    >
+                  </div>
+                  <div class="form-divider">
+                    <span>BODY MEASUREMENTS</span
+                    ><a routerLink="/settings"
+                      >{{ isImperial() ? 'Imperial' : 'Metric' }} units ↗</a
+                    >
+                  </div>
+                  <div class="field-grid">
+                    @if (!isImperial()) {
+                      <label class="profile-field"
+                        ><span>Height <small>cm</small></span
+                        ><input
+                          type="number"
+                          name="height"
+                          inputmode="decimal"
+                          min="1"
+                          max="300"
+                          step="1"
+                          required
+                          [ngModel]="heightCm()"
+                          (ngModelChange)="heightCm.set($event)"
+                      /></label>
+                    } @else {
+                      <div class="profile-field">
+                        <span>Height <small>ft / in</small></span>
+                        <div class="height-inputs">
+                          <input
+                            type="number"
+                            name="feet"
+                            aria-label="Height in feet"
+                            min="0"
+                            max="9"
+                            step="1"
+                            required
+                            [ngModel]="feet()"
+                            (ngModelChange)="onFeetInput($event)"
+                          /><input
+                            type="number"
+                            name="inches"
+                            aria-label="Height in inches"
+                            min="0"
+                            max="11"
+                            step="1"
+                            required
+                            [ngModel]="inches()"
+                            (ngModelChange)="onInchesInput($event)"
+                          />
+                        </div>
+                      </div>
+                    }
+                    <label class="profile-field"
+                      ><span
+                        >Weight <small>{{ weightUnit() }}</small></span
+                      ><input
+                        type="number"
+                        name="weight"
+                        inputmode="decimal"
+                        [min]="isImperial() ? 2.3 : 1"
+                        [max]="isImperial() ? 1102.3 : 500"
+                        step="0.1"
+                        required
+                        [ngModel]="weightInput()"
+                        (ngModelChange)="onWeightInput($event)"
+                    /></label>
+                  </div>
+                </fieldset>
+                @if (dirty() && !valid()) {
+                  <p class="validation-note" role="alert">
+                    Enter a name, a whole-number age (1–120), and valid height and weight values.
+                  </p>
+                }
+                <div class="save-row">
+                  <div class="save-status" aria-live="polite">
+                    {{ notice() || (dirty() ? 'Ready when you are.' : 'All set. All you.') }}
+                  </div>
+                  <div class="save-buttons">
+                    @if (dirty()) {
+                      <button
+                        class="discard-button"
+                        type="button"
+                        [disabled]="saving() || uploading()"
+                        (click)="discard()"
+                      >
+                        Discard
+                      </button>
+                    }
+                    <button
+                      class="save-profile"
+                      type="submit"
+                      [disabled]="!valid() || !dirty() || saving() || uploading()"
+                    >
+                      {{ saving() ? 'Saving…' : 'Save changes' }}<span aria-hidden="true">↗</span>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            }
           </section>
-
-          <div class="account-grid">
-            <label class="field field-full">
-              <span>Name</span>
-              <input
-                class="text-input"
-                type="text"
-                placeholder="Your name"
-                [ngModel]="name()"
-                (ngModelChange)="name.set($event)"
-              />
-            </label>
-
-            <label class="field">
-              <span>Age</span>
-              <nz-input-number
-                [ngModel]="age()"
-                (ngModelChange)="age.set($event)"
-                [nzMin]="12"
-                [nzMax]="100"
-                [nzStep]="1"
-              ></nz-input-number>
-            </label>
-
-            <div class="field" role="group" aria-label="Gender">
-              <span>Gender</span>
-              <div class="segmented">
-                <button type="button" [class.selected]="sex() === 'male'" [attr.aria-pressed]="sex() === 'male'" (click)="sex.set('male')">Male</button>
-                <button type="button" [class.selected]="sex() === 'female'" [attr.aria-pressed]="sex() === 'female'" (click)="sex.set('female')">Female</button>
+          <aside class="profile-side">
+            <section class="body-card" aria-labelledby="body-card-title">
+              <div class="side-card-top">
+                <span class="profile-eyebrow">02 / YOUR BASELINE</span
+                ><span aria-hidden="true">↗</span>
               </div>
-            </div>
-
-            <label class="field" *ngIf="!isImperial()">
-              <span>Height (cm)</span>
-              <nz-input-number
-                [ngModel]="heightCm()"
-                (ngModelChange)="heightCm.set($event)"
-                [nzMin]="120"
-                [nzMax]="230"
-                [nzStep]="1"
-              ></nz-input-number>
-            </label>
-
-            <div class="field field-split" *ngIf="isImperial()">
-              <span>Height (ft / in)</span>
-              <div class="split-inputs">
-                <label class="sr-only" for="account-height-feet">Height in feet</label>
-                <label class="sr-only" for="account-height-inches">Height in inches</label>
-                <nz-input-number
-                  nzId="account-height-feet" [ngModel]="feet()"
-                  (ngModelChange)="onFeetInput($event)"
-                  [nzMin]="3"
-                  [nzMax]="8"
-                  [nzStep]="1"
-                ></nz-input-number>
-                <nz-input-number
-                  nzId="account-height-inches" [ngModel]="inches()"
-                  (ngModelChange)="onInchesInput($event)"
-                  [nzMin]="0"
-                  [nzMax]="11"
-                  [nzStep]="1"
-                ></nz-input-number>
+              <h2 id="body-card-title">Made of more.</h2>
+              <div class="body-weight">
+                <strong>{{
+                  savedWeight() == null ? '—' : (savedWeight() | number: '1.1-1')
+                }}</strong
+                ><span>{{ weightUnit() }}<small>body weight</small></span>
               </div>
-            </div>
-
-            <label class="field">
-              <span>Weight ({{ weightUnit() }})</span>
-              <nz-input-number
-                [nzStep]="0.1" [ngModel]="weightInput()"
-                (ngModelChange)="onWeightInput($event)"
-                [nzMin]="isImperial() ? 66 : 30"
-                [nzMax]="isImperial() ? 661.4 : 300"
-              ></nz-input-number>
-            </label>
-          </div>
-
-          <div class="bmi-strip" [attr.data-tone]="bmiCategory().tone">
-            <div>
-              <span>Current BMI</span>
-              <strong>{{ bmiLabel() }}</strong>
-            </div>
-            <span class="bmi-pill">{{ bmiCategory().text }}</span>
-          </div>
-
-          <div class="account-actions">
-            <button nz-button nzType="primary" nzSize="large" [nzLoading]="saving()" (click)="save()">
-              Save changes
-            </button>
-          </div>
-        </nz-card>
+              <div class="body-facts">
+                <div>
+                  <span>Height</span><strong>{{ savedHeight() }}</strong>
+                </div>
+                <div>
+                  <span>Age</span><strong>{{ savedAge() ?? '—' }}<small> years</small></strong>
+                </div>
+                <div>
+                  <span>BMI</span><strong>{{ bmiLabel() }}</strong>
+                </div>
+              </div>
+              <a routerLink="/weight" class="body-track-link"
+                >Follow your measurements <span aria-hidden="true">↗</span></a
+              >
+            </section>
+            <section class="direction-card">
+              <span class="profile-eyebrow">03 / YOUR DIRECTION</span>
+              <div class="direction-symbol" aria-hidden="true">↗</div>
+              <h2>{{ goal().title }}.</h2>
+              <p>{{ goal().detail }}</p>
+              <div class="direction-goal">
+                <strong>{{ weeklyGoal() }}<span> workouts / week</span></strong
+                ><a routerLink="/settings" aria-label="Edit your goals">Edit ↗</a>
+              </div>
+            </section>
+            <a routerLink="/progress" class="profile-progress-link"
+              ><div>
+                <span class="profile-eyebrow">THE BIGGER PICTURE</span
+                ><strong>Your effort lives here.</strong>
+                <p>Explore your training & milestones.</p>
+              </div>
+              <span aria-hidden="true">↗</span></a
+            >
+          </aside>
+        </div>
+        <footer class="profile-footer">
+          <span>BUILT AROUND YOU.</span
+          ><a routerLink="/settings"
+            >Appearance, units & preferences <span aria-hidden="true">↗</span></a
+          >
+        </footer>
       </div>
     </nz-content>
   </nz-layout>

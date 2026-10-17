@@ -13,7 +13,7 @@ export interface ActivityDay {
 }
 
 /** Date-only workout records already represent a local calendar day. */
-function activityDate(value: string): string | null {
+export function activityDateKey(value: string): string | null {
   if (!value) return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     const parsed = new Date(`${value}T12:00:00`);
@@ -32,7 +32,7 @@ export function activityYear(
   const todayKey = localDateKey(today);
   const sessions = new Map<string, string[]>();
   const add = (date: string, name: string) => {
-    const key = activityDate(date);
+    const key = activityDateKey(date);
     if (!key || key > todayKey) return;
     sessions.set(key, [...(sessions.get(key) ?? []), name]);
   };

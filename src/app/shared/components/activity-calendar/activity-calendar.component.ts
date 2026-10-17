@@ -1,4 +1,16 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  inject,
+  model,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, interval } from 'rxjs';
 import { WorkoutService } from '../../../core/services/workout.service';
@@ -9,6 +21,7 @@ import { localDateKey } from '../../../core/utils/weight-progress';
 @Component({
   selector: 'app-activity-calendar',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './activity-calendar.component.html',
   styleUrl: './activity-calendar.component.scss',
 })
@@ -16,19 +29,36 @@ export class ActivityCalendarComponent implements OnInit {
   private readonly workouts = inject(WorkoutService);
   private readonly running = inject(RunningSessionService);
   private readonly destroyRef = inject(DestroyRef);
+  readonly picker = viewChild<ElementRef<HTMLDetailsElement>>('picker');
   readonly today = signal(new Date());
-  readonly year = signal(this.today().getFullYear());
+  readonly period = model(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  readonly pickerYear = signal(this.today().getFullYear());
   readonly selectedKey = signal(localDateKey(this.today()));
   readonly loading = signal(true);
   readonly failed = signal(false);
-  readonly weekdays = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  readonly calendar = computed(() =>
-    activityYear(this.workouts.workouts(), this.running.sessions(), this.year(), this.today()),
+  readonly weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  readonly monthNames = Array.from({ length: 12 }, (_, index) =>
+    new Date(2026, index, 1).toLocaleDateString('en-GB', { month: 'short' }),
   );
-  readonly selectedDay = computed(() =>
-    this.calendar()
-      .months.flatMap((month) => month.days)
-      .find((day) => day.key === this.selectedKey()),
+  readonly calendar = computed(() =>
+    activityYear(
+      this.workouts.workouts(),
+      this.running.sessions(),
+      this.period().getFullYear(),
+      this.today(),
+    ),
+  );
+  readonly month = computed(() => this.calendar().months[this.period().getMonth()]);
+  readonly selectedDay = computed(
+    () => this.month().days.find((day) => day.key === this.selectedKey()) ?? this.month().days[0],
+  );
+  readonly currentPeriod = computed(
+    () =>
+      this.period().getFullYear() === this.today().getFullYear() &&
+      this.period().getMonth() === this.today().getMonth(),
+  );
+  readonly monthLabel = computed(() =>
+    this.period().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }),
   );
 
   ngOnInit(): void {
@@ -39,7 +69,6 @@ export class ActivityCalendarComponent implements OnInit {
         if (localDateKey() !== localDateKey(this.today())) this.today.set(new Date());
       });
   }
-
   load(): void {
     this.loading.set(true);
     this.failed.set(false);
@@ -53,35 +82,40 @@ export class ActivityCalendarComponent implements OnInit {
         },
       });
   }
-
-  changeYear(offset: number): void {
-    const next = this.year() + offset;
-    if (next < 1970 || next > this.today().getFullYear()) return;
-    this.year.set(next);
+  selectMonth(year: number, index: number): void {
+    if (
+      year < 1970 ||
+      year * 12 + index > this.today().getFullYear() * 12 + this.today().getMonth()
+    )
+      return;
+    this.period.set(new Date(year, index, 1));
+    this.pickerYear.set(year);
     this.selectedKey.set(
-      next === this.today().getFullYear() ? localDateKey(this.today()) : `${next}-01-01`,
+      this.currentPeriod() ? localDateKey(this.today()) : localDateKey(this.period()),
     );
+    this.closePicker();
   }
-
+  shiftMonth(offset: number): void {
+    const next = new Date(this.period().getFullYear(), this.period().getMonth() + offset, 1);
+    this.selectMonth(next.getFullYear(), next.getMonth());
+  }
+  closePicker(): void {
+    const picker = this.picker()?.nativeElement;
+    if (picker) picker.open = false;
+  }
+  @HostListener('document:click', ['$event']) outsidePicker(event: MouseEvent): void {
+    const picker = this.picker()?.nativeElement;
+    if (picker?.open && !picker.contains(event.target as Node)) this.closePicker();
+  }
+  escapePicker(event: Event): void {
+    event.preventDefault();
+    this.closePicker();
+    this.picker()?.nativeElement.querySelector('summary')?.focus();
+  }
   dayDescription(day: ActivityDay): string {
-    const status =
-      day.state === 'future'
-        ? 'Upcoming day'
-        : day.sessions.length
-          ? `${day.sessions.length} ${day.sessions.length === 1 ? 'session' : 'sessions'}: ${day.sessions.join(', ')}`
-          : 'No training logged';
-    return `${day.label}${day.today ? ' · Today' : ''} · ${status}`;
+    return `${day.label}${day.today ? ' · Today' : ''} · ${day.state === 'future' ? 'Upcoming day' : day.sessions.length ? day.sessions.join(', ') : 'No training logged'}`;
   }
-
-  tabStop(days: ActivityDay[]): string {
-    return (
-      days.find((day) => day.key === this.selectedKey())?.key ??
-      days.find((day) => day.today)?.key ??
-      days[0].key
-    );
-  }
-
-  onDayKey(event: KeyboardEvent, day: ActivityDay, days: ActivityDay[]): void {
+  onDayKey(event: KeyboardEvent, day: ActivityDay): void {
     const step: Record<string, number> = {
       ArrowLeft: -1,
       ArrowRight: 1,
@@ -91,10 +125,10 @@ export class ActivityCalendarComponent implements OnInit {
     let index = day.number - 1;
     if (event.key in step) index += step[event.key];
     else if (event.key === 'Home') index = 0;
-    else if (event.key === 'End') index = days.length - 1;
+    else if (event.key === 'End') index = this.month().days.length - 1;
     else return;
     event.preventDefault();
-    const target = days[Math.max(0, Math.min(days.length - 1, index))];
+    const target = this.month().days[Math.max(0, Math.min(this.month().days.length - 1, index))];
     this.selectedKey.set(target.key);
     (event.currentTarget as HTMLElement).parentElement
       ?.querySelector<HTMLButtonElement>(`[data-date="${target.key}"]`)

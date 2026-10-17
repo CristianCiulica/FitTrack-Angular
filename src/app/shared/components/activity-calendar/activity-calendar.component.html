@@ -1,146 +1,176 @@
-<section class="activity-calendar" aria-labelledby="activity-title" [attr.aria-busy]="loading()">
-  <header class="calendar-heading">
+<section class="activity-calendar" aria-labelledby="calendar-title" [attr.aria-busy]="loading()">
+  <header class="calendar-top">
     <div>
-      <span class="eyebrow"
-        ><span class="spark" aria-hidden="true">✦</span> THE DAYS YOU SHOWED UP</span
-      >
-      <h2 id="activity-title">A little every day.<br /><span>A stronger you.</span></h2>
-      <p>Your training year, one square at a time.</p>
+      <span class="eyebrow">01 / SHOWING UP</span>
+      <h2 id="calendar-title">Your training days.</h2>
     </div>
-    <div class="year-picker" role="group" aria-label="Activity year">
+    <div class="month-navigation">
       <button
+        class="arrow"
         type="button"
-        (click)="changeYear(-1)"
-        [disabled]="year() <= 1970"
-        aria-label="Previous year"
+        (click)="shiftMonth(-1)"
+        [disabled]="period().getFullYear() === 1970 && period().getMonth() === 0"
+        aria-label="Previous month"
       >
-        <span aria-hidden="true">‹</span>
+        ‹
       </button>
-      <span aria-live="polite">{{ year() }}</span>
+      <details class="period-picker" #picker (keydown.escape)="escapePicker($event)">
+        <summary
+          [attr.aria-label]="'Choose month. Selected: ' + monthLabel()"
+          (click)="pickerYear.set(period().getFullYear())"
+        >
+          {{ monthLabel() }} <span aria-hidden="true">⌄</span>
+        </summary>
+        <div class="month-browser">
+          <div class="browser-heading">
+            <button
+              type="button"
+              aria-label="Previous year"
+              (click)="pickerYear.set(pickerYear() - 1)"
+              [disabled]="pickerYear() <= 1970"
+            >
+              ‹</button
+            ><strong>{{ pickerYear() }}</strong
+            ><button
+              type="button"
+              aria-label="Next year"
+              (click)="pickerYear.set(pickerYear() + 1)"
+              [disabled]="pickerYear() >= today().getFullYear()"
+            >
+              ›
+            </button>
+          </div>
+          <div class="month-options">
+            @for (name of monthNames; track $index) {
+              <button
+                type="button"
+                [class.chosen]="
+                  period().getFullYear() === pickerYear() && period().getMonth() === $index
+                "
+                [attr.aria-pressed]="
+                  period().getFullYear() === pickerYear() && period().getMonth() === $index
+                "
+                [disabled]="pickerYear() === today().getFullYear() && $index > today().getMonth()"
+                (click)="selectMonth(pickerYear(), $index)"
+              >
+                {{ name }}
+              </button>
+            }
+          </div>
+          <button
+            class="jump-today"
+            type="button"
+            (click)="selectMonth(today().getFullYear(), today().getMonth())"
+          >
+            Back to this month <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </details>
       <button
+        class="arrow"
         type="button"
-        (click)="changeYear(1)"
-        [disabled]="year() >= today().getFullYear()"
-        aria-label="Next year"
+        (click)="shiftMonth(1)"
+        [disabled]="currentPeriod()"
+        aria-label="Next month"
       >
-        <span aria-hidden="true">›</span>
+        ›
       </button>
     </div>
   </header>
-
   @if (loading()) {
-    <div class="calendar-placeholder" role="status">
-      <span class="loading-dot"></span> Gathering your training days…
-    </div>
+    <div class="calendar-placeholder" role="status">Gathering your training days…</div>
   } @else if (failed()) {
     <div class="calendar-placeholder" role="alert">
       Your activity couldn’t load. <button type="button" (click)="load()">Try again</button>
     </div>
   } @else {
-    <div class="calendar-stats">
-      <div class="primary-stat">
-        <strong
-          >{{ calendar().activeDays
-          }}<span>
-            / {{ year() % 4 === 0 && (year() % 100 !== 0 || year() % 400 === 0) ? 366 : 365 }}</span
-          ></strong
-        ><span>Training days</span>
-      </div>
-      <div>
-        <strong>{{ calendar().totalSessions }}</strong
-        ><span>Sessions logged</span>
-      </div>
-      <div>
-        <strong>{{ calendar().longestStreak }}<span> days</span></strong
-        ><span>Best streak</span>
-      </div>
-    </div>
-
-    <div class="months-grid">
-      @for (month of calendar().months; track month.index) {
-        <section
-          class="month"
-          [class.current-month]="month.current"
-          [attr.aria-label]="month.name + ' ' + year()"
-        >
-          <div class="month-heading">
-            <h3>
-              {{ month.name }}
-              @if (month.current) {
-                <span class="current-dot" aria-label="Current month"></span>
-              }
-            </h3>
-            <span [class.has-activity]="month.activeDays > 0"
-              >{{ month.activeDays }}<span class="sr-only"> training days</span></span
+    <div class="calendar-body">
+      <div class="month" [attr.aria-label]="monthLabel()">
+        <div class="weekdays" aria-hidden="true">
+          @for (weekday of weekdays; track $index) {
+            <span>{{ weekday }}</span>
+          }
+        </div>
+        <div class="days-grid">
+          @for (day of month().days; track day.key) {
+            <button
+              type="button"
+              class="day"
+              [class.active]="day.state === 'active'"
+              [class.inactive]="day.state === 'inactive'"
+              [class.future]="day.state === 'future'"
+              [class.today]="day.today"
+              [class.selected]="day.key === selectedDay().key"
+              [style.grid-column-start]="day.number === 1 ? month().offset + 1 : null"
+              [attr.data-date]="day.key"
+              [attr.title]="dayDescription(day)"
+              [attr.aria-label]="dayDescription(day)"
+              [attr.aria-pressed]="day.key === selectedDay().key"
+              [attr.aria-current]="day.today ? 'date' : null"
+              [attr.tabindex]="selectedDay().key === day.key ? 0 : -1"
+              (click)="selectedKey.set(day.key)"
+              (keydown)="onDayKey($event, day)"
             >
-          </div>
-          <div class="weekdays" aria-hidden="true">
-            @for (weekday of weekdays; track $index) {
-              <span>{{ weekday }}</span>
-            }
-          </div>
-          <div class="days-grid">
-            @for (day of month.days; track day.key) {
-              <button
-                type="button"
-                class="day"
-                [class.active]="day.state === 'active'"
-                [class.intense]="day.sessions.length > 1"
-                [class.inactive]="day.state === 'inactive'"
-                [class.future]="day.state === 'future'"
-                [class.today]="day.today"
-                [class.selected]="day.key === selectedKey()"
-                [style.grid-column-start]="day.number === 1 ? month.offset + 1 : null"
-                [attr.data-date]="day.key"
-                [attr.title]="dayDescription(day)"
-                [attr.aria-label]="dayDescription(day)"
-                [attr.aria-pressed]="day.key === selectedKey()"
-                [attr.aria-current]="day.today ? 'date' : null"
-                [attr.tabindex]="tabStop(month.days) === day.key ? 0 : -1"
-                (click)="selectedKey.set(day.key)"
-                (keydown)="onDayKey($event, day, month.days)"
-              >
-                <span>{{ day.number }}</span>
-              </button>
-            }
-          </div>
-        </section>
-      }
-    </div>
-
-    <div class="calendar-footer">
-      <div class="legend" aria-label="Calendar legend">
-        <span><i class="legend-active"></i>Trained</span
-        ><span><i class="legend-inactive"></i>No training</span
-        ><span><i class="legend-future"></i>Upcoming</span>
+              <span>{{ day.number }}</span
+              ><i aria-hidden="true">{{ day.state === 'active' ? '✓' : '' }}</i>
+            </button>
+          }
+        </div>
+        <div class="legend" aria-label="Calendar legend">
+          <span><i class="legend-active"></i>Trained</span
+          ><span><i class="legend-inactive"></i>No training</span
+          ><span><i class="legend-future"></i>Upcoming</span>
+        </div>
       </div>
-      <span class="today-note"><i></i> Today is outlined</span>
-    </div>
-    @if (selectedDay(); as day) {
-      <div class="day-detail" aria-live="polite" aria-atomic="true">
-        <span class="detail-mark" [class.trained]="day.state === 'active'" aria-hidden="true">{{
-          day.state === 'active' ? '✓' : day.state === 'future' ? '·' : '−'
-        }}</span>
-        <div>
-          <strong>{{ day.label }}</strong>
-          <p>
-            {{
-              day.state === 'future'
-                ? 'A fresh square. Your story is still ahead.'
-                : day.sessions.length
-                  ? day.sessions.join(' · ')
-                  : 'No training logged for this day.'
-            }}
-          </p>
+      <aside class="day-detail" aria-live="polite" aria-atomic="true">
+        @let day = selectedDay();
+        <div class="journal-label">THE DAILY RECORD <span aria-hidden="true">↙</span></div>
+        <div class="journal-date">
+          <strong>{{ day.number < 10 ? '0' + day.number : day.number }}</strong>
+          <div>
+            <span>{{ day.label.split(',')[0] }}</span
+            ><span>{{ monthLabel() }}{{ day.today ? ' · Today' : '' }}</span>
+          </div>
         </div>
         @if (day.sessions.length) {
-          <span class="session-count"
-            >{{ day.sessions.length }}
-            {{ day.sessions.length === 1 ? 'session' : 'sessions' }}</span
+          <span class="journal-status trained">You showed up.</span>
+          <div class="session-list">
+            @for (session of day.sessions; track $index) {
+              <div>
+                <span class="session-check" aria-hidden="true">✓</span
+                ><strong>{{ session }}</strong>
+              </div>
+            }
+          </div>
+          <p class="journal-note">
+            {{ day.sessions.length }} {{ day.sessions.length === 1 ? 'session' : 'sessions' }} in
+            the books. Keep building.
+          </p>
+        } @else {
+          <span class="journal-status">{{
+            day.state === 'future' ? 'Still to be written.' : 'A quiet square.'
+          }}</span>
+          <p class="journal-empty">
+            {{
+              day.state === 'future'
+                ? 'Your next chapter is ahead of you.'
+                : 'No training logged for this day. The next square is a fresh start.'
+            }}
+          </p>
+        }
+        @if (day.today) {
+          <a routerLink="/start-workout" class="journal-link"
+            >Start a workout <span aria-hidden="true">↗</span></a
+          >
+        } @else if (day.state !== 'future') {
+          <a routerLink="/workouts" class="journal-link"
+            >Open training history <span aria-hidden="true">↗</span></a
           >
         }
-      </div>
-    }
-    <p class="calendar-note">Completed workouts, runs and walks. Every day counts.</p>
+      </aside>
+    </div>
+    <footer class="calendar-footnote">
+      <span>Workouts, runs & walks. All part of your story.</span><span>Today is outlined.</span>
+    </footer>
   }
 </section>

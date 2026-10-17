@@ -1,25 +1,23 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { Sex } from '../../core/models/user-profile.model';
-import { ActivityCalendarComponent } from '../../shared/components/activity-calendar/activity-calendar.component';
 import {
   cmToFeetInches,
   displayWeight,
   feetInchesToCm,
   toCanonicalWeight,
   weightUnitLabel,
+  formatHeight,
 } from '../../core/utils/units';
 
 @Component({
@@ -32,12 +30,8 @@ import {
     RouterLinkActive,
     NzLayoutModule,
     NzMenuModule,
-    NzButtonModule,
     NzIconModule,
-    NzCardModule,
-    NzInputNumberModule,
     AppMenuComponent,
-    ActivityCalendarComponent,
   ],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.scss'],
@@ -47,86 +41,150 @@ export class AccountComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly message = inject(NzMessageService);
 
+  private readonly destroy = inject(DestroyRef);
   readonly saving = signal(false);
   readonly uploading = signal(false);
+  readonly loading = signal(true);
+  readonly loaded = signal(false);
+  readonly error = signal('');
+  readonly notice = signal('');
+  private readonly baseline = signal('');
   readonly displayName = this.profileService.displayName;
   readonly avatar = computed(() => this.profileService.profile()?.avatar ?? '');
   readonly email = computed(() => this.profileService.profile()?.email ?? '');
-
-  // stare canonica metrica; unitatile afecteaza doar afisarea
   readonly name = signal('');
-  readonly age = signal<number>(25);
-  readonly heightCm = signal<number>(170);
-  readonly weightKg = signal<number>(70);
-  readonly sex = signal<Sex>('male');
-
+  readonly age = signal<number | null>(null);
+  readonly heightCm = signal<number | null>(null);
+  readonly weightKg = signal<number | null>(null);
+  readonly sex = signal<Sex>('');
   readonly units = this.profileService.units;
   readonly isImperial = computed(() => this.units() === 'imperial');
   readonly weightUnit = computed(() => weightUnitLabel(this.units()));
-
-  readonly weightInput = computed(() => displayWeight(this.weightKg(), this.units()));
-  readonly feet = computed(() => cmToFeetInches(this.heightCm()).feet);
-  readonly inches = computed(() => cmToFeetInches(this.heightCm()).inches);
-
-  readonly bmi = computed(() => {
-    const h = this.heightCm() / 100;
-    if (h <= 0) return 0;
-    return this.weightKg() / (h * h);
+  readonly weightInput = computed(() =>
+    this.weightKg() == null ? null : displayWeight(this.weightKg()!, this.units()),
+  );
+  readonly feet = computed(() =>
+    this.heightCm() == null ? null : cmToFeetInches(this.heightCm()!).feet,
+  );
+  readonly inches = computed(() =>
+    this.heightCm() == null ? null : cmToFeetInches(this.heightCm()!).inches,
+  );
+  readonly savedWeight = computed(() => {
+    const kg = this.profileService.profile()?.weightKg;
+    return kg == null ? null : displayWeight(kg, this.units());
   });
-  readonly bmiLabel = computed(() => this.bmi().toFixed(1));
-  readonly bmiCategory = computed(() => {
-    const value = this.bmi();
-    if (value < 18.5) return { text: 'Underweight', tone: 'low' };
-    if (value < 25) return { text: 'Healthy weight', tone: 'good' };
-    if (value < 30) return { text: 'Overweight', tone: 'mid' };
-    return { text: 'Obesity', tone: 'high' };
+  readonly savedHeight = computed(() => {
+    const cm = this.profileService.profile()?.heightCm;
+    return cm == null ? '—' : formatHeight(cm, this.units());
   });
+  readonly savedAge = computed(() => this.profileService.profile()?.age);
+  readonly bmiLabel = computed(() => {
+    const profile = this.profileService.profile();
+    return profile?.heightCm && profile.weightKg
+      ? (profile.weightKg / (profile.heightCm / 100) ** 2).toFixed(1)
+      : '—';
+  });
+  readonly goal = computed(() => {
+    const goal = this.profileService.profile()?.goal;
+    return goal === 'lose'
+      ? { title: 'Lose weight', detail: 'A steady path toward your target.' }
+      : goal === 'gain'
+        ? { title: 'Build & grow', detail: 'Room to get a little stronger.' }
+        : { title: 'Find your balance', detail: 'Keep building on what feels right.' };
+  });
+  readonly weeklyGoal = this.profileService.weeklyWorkoutGoal;
+  readonly draft = computed(() => ({
+    displayName: this.name().trim(),
+    age: this.age(),
+    heightCm: this.heightCm() == null ? null : Math.round(this.heightCm()!),
+    weightKg: this.weightKg() == null ? null : Math.round(this.weightKg()! * 10) / 10,
+    sex: this.sex(),
+  }));
+  readonly dirty = computed(
+    () => this.loaded() && JSON.stringify(this.draft()) !== this.baseline(),
+  );
+  readonly valid = computed(
+    () =>
+      this.name().trim().length > 0 &&
+      this.name().trim().length <= 80 &&
+      this.age() != null &&
+      Number.isInteger(this.age()) &&
+      this.age()! >= 1 &&
+      this.age()! <= 120 &&
+      this.heightCm() != null &&
+      Number.isFinite(this.heightCm()) &&
+      this.heightCm()! >= 1 &&
+      this.heightCm()! <= 300 &&
+      this.weightKg() != null &&
+      Number.isFinite(this.weightKg()) &&
+      this.weightKg()! >= 1 &&
+      this.weightKg()! <= 500,
+  );
 
   ngOnInit(): void {
-    this.profileService.load().subscribe(() => this.hydrate());
-    this.hydrate();
+    this.loadProfile();
   }
-
-  private hydrate(): void {
-    const p = this.profileService.profile();
-    if (!p) return;
-    this.name.set(p.displayName ?? '');
-    if (p.age) this.age.set(p.age);
-    if (p.heightCm) this.heightCm.set(p.heightCm);
-    if (p.weightKg) this.weightKg.set(p.weightKg);
-    this.sex.set(p.sex ?? 'male');
-  }
-
-  onWeightInput(value: number): void {
-    this.weightKg.set(toCanonicalWeight(value, this.units()));
-  }
-
-  onFeetInput(value: number): void {
-    this.heightCm.set(feetInchesToCm(value, this.inches()));
-  }
-
-  onInchesInput(value: number): void {
-    this.heightCm.set(feetInchesToCm(this.feet(), value));
-  }
-
-  save(): void {
-    this.saving.set(true);
+  loadProfile(): void {
+    this.loading.set(true);
+    this.error.set('');
     this.profileService
-      .patch({
-        displayName: this.name().trim(),
-        age: this.age(),
-        heightCm: Math.round(this.heightCm()),
-        weightKg: Math.round(this.weightKg() * 10) / 10,
-        sex: this.sex(),
-      })
+      .load()
+      .pipe(takeUntilDestroyed(this.destroy))
+      .subscribe({
+        next: (profile) => {
+          if (profile) {
+            if (!this.dirty()) this.hydrate();
+            this.loaded.set(true);
+          } else this.error.set('Your profile couldn’t load. Please try again.');
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+          this.error.set('Your profile couldn’t load. Please try again.');
+        },
+      });
+  }
+  private hydrate(): void {
+    const profile = this.profileService.profile();
+    if (!profile) return;
+    this.name.set(profile.displayName ?? '');
+    this.age.set(profile.age);
+    this.heightCm.set(profile.heightCm);
+    this.weightKg.set(profile.weightKg);
+    this.sex.set(profile.sex ?? '');
+    this.baseline.set(JSON.stringify(this.draft()));
+  }
+  discard(): void {
+    this.hydrate();
+    this.error.set('');
+    this.notice.set('Changes discarded.');
+  }
+  onWeightInput(value: number | null): void {
+    this.weightKg.set(value == null ? null : toCanonicalWeight(value, this.units()));
+  }
+  onFeetInput(value: number | null): void {
+    this.heightCm.set(value == null ? null : feetInchesToCm(value, this.inches() ?? 0));
+  }
+  onInchesInput(value: number | null): void {
+    this.heightCm.set(value == null ? null : feetInchesToCm(this.feet() ?? 0, value));
+  }
+  save(): void {
+    if (!this.valid() || !this.dirty() || this.saving() || this.uploading()) return;
+    this.saving.set(true);
+    this.error.set('');
+    this.notice.set('');
+    this.profileService
+      .patch(this.draft())
+      .pipe(takeUntilDestroyed(this.destroy))
       .subscribe({
         next: () => {
+          this.hydrate();
           this.saving.set(false);
-          this.message.success('Profile saved.');
+          this.notice.set('Your profile is up to date.');
         },
         error: () => {
           this.saving.set(false);
-          this.message.error('Could not save. Please try again.');
+          this.error.set('Your changes weren’t saved. Please try again.');
         },
       });
   }
@@ -135,7 +193,7 @@ export class AccountComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     input.value = '';
-    if (!file) return;
+    if (!file || this.uploading() || this.saving()) return;
     if (!file.type.startsWith('image/')) {
       this.message.error('Please choose an image file.');
       return;
@@ -162,9 +220,17 @@ export class AccountComponent implements OnInit {
   }
 
   removeAvatar(): void {
+    if (this.uploading() || this.saving()) return;
+    this.uploading.set(true);
     this.profileService.patch({ avatar: '' }).subscribe({
-      next: () => this.message.success('Profile photo removed.'),
-      error: () => this.message.error('Could not remove the photo.'),
+      next: () => {
+        this.uploading.set(false);
+        this.message.success('Profile photo removed.');
+      },
+      error: () => {
+        this.uploading.set(false);
+        this.message.error('Could not remove the photo.');
+      },
     });
   }
 
@@ -196,7 +262,10 @@ export class AccountComponent implements OnInit {
   }
 
   initials(name: string): string {
-    const parts = (name || '').trim().split(/[\s@.]+/).filter(Boolean);
+    const parts = (name || '')
+      .trim()
+      .split(/[\s@.]+/)
+      .filter(Boolean);
     if (!parts.length) return '?';
     return parts.length === 1
       ? parts[0].charAt(0).toUpperCase()

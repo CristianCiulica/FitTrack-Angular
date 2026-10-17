@@ -1001,7 +1001,7 @@ a:hover {
 
   .app-layout > .sidebar .sidebar-menu {
     display: grid !important;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     align-items: stretch;
     width: 100% !important;
     height: 66px !important;

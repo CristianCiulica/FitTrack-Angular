@@ -1,295 +1,139 @@
-/* Account — Liquid Glass form. Shell styled globally in styles.css. */
-
-.account-wrap {
-  max-width: 960px;
+.profile-page {
+  max-width: 1080px;
   margin: 0 auto;
+  color: var(--ink);
 }
-
-.account-card {
-  max-width: 720px;
-  margin-inline: auto;
-  border-radius: 28px !important;
-
-  ::ng-deep .ant-card-body {
-    padding: 32px 34px;
-  }
-}
-
-.account-heading {
-  margin-bottom: 28px;
-
-  span {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: #0066cc;
-  }
-
-  h1 {
-    margin: 4px 0 8px;
-    font-size: 30px;
-    font-weight: 700;
-    letter-spacing: -0.035em;
-    color: #1d1d1f;
-  }
-
-  p {
-    margin: 0;
-    max-width: 460px;
-    font-size: 14.5px;
-    line-height: 1.5;
-    color: #6e6e73;
-  }
-}
-
-.account-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.field {
+.profile-page-heading {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-
-  > span {
-    font-size: 12.5px;
-    font-weight: 650;
-    color: #515154;
-  }
-
-  &.field-full {
-    grid-column: 1 / -1;
-  }
-
-  ::ng-deep nz-input-number {
-    width: 100%;
-    height: 48px;
-    border-radius: 12px !important;
-
-    .ant-input-number-input {
-      height: 46px;
-      font-size: 16px;
-      font-weight: 560;
-      font-variant-numeric: tabular-nums;
-    }
-  }
-}
-
-.text-input {
-  width: 100%;
-  height: 48px;
-  padding: 0 16px;
-  font-size: 16px;
-  font-family: inherit;
-  color: #1d1d1f;
-  border: 1px solid rgba(0, 0, 0, 0.09);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-
-  &::placeholder { color: var(--ink-quaternary); }
-
-  &:focus {
-    outline: none;
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 113, 227, 0.6);
-    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.13);
-  }
-}
-
-.split-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.segmented {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3px;
-  padding: 3px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.055);
-
-  button {
-    font-size: 14px;
-    font-weight: 590;
-    font-family: inherit;
-    color: #515154;
-    cursor: pointer;
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.22s ease;
-
-    &.selected {
-      color: #1d1d1f;
-      font-weight: 650;
-      background: rgba(255, 255, 255, 0.95);
-      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1);
-    }
-  }
-}
-
-.bmi-strip {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  margin-top: 24px;
-  padding: 18px 22px;
-  border-radius: 18px;
-  color: #fff;
-  background: linear-gradient(160deg, #0a84ff 0%, #0066cc 100%);
-  box-shadow: 0 18px 40px rgba(0, 102, 204, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-
-  &[data-tone='good'] {
-    background: linear-gradient(160deg, #34c759 0%, #248a3d 100%);
-    box-shadow: 0 18px 40px rgba(36, 138, 61, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  }
-  &[data-tone='high'] {
-    background: linear-gradient(160deg, #ff453a 0%, #d70015 100%);
-    box-shadow: 0 18px 40px rgba(215, 0, 21, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  }
-
-  > div {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-
-    span {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: rgba(255, 255, 255, 0.78);
-    }
-
-    strong {
-      font-size: 30px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      font-variant-numeric: tabular-nums;
-    }
-  }
-
-  .bmi-pill {
-    padding: 7px 15px;
-    font-size: 13px;
-    font-weight: 620;
-    border-radius: 980px;
-    background: rgba(255, 255, 255, 0.22);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
+  align-items: center;
+  gap: 15px;
+  margin: 3px 2px 17px;
 }
-
-.account-actions {
+.profile-eyebrow {
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  color: var(--ink-tertiary);
+}
+.profile-page-heading > .profile-eyebrow {
+  color: var(--accent);
+}
+.profile-page-heading > a {
+  font-size: 10px;
+  color: var(--ink-secondary);
+}
+.profile-page-heading > a > span {
+  margin-left: 7px;
+}
+.athlete-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #f5f7ff;
+  border-radius: 28px;
+  padding: 27px 32px 21px;
+  background:
+    radial-gradient(ellipse at 88% 70%, #3a4e8566, transparent 48%),
+    linear-gradient(120deg, #142238, #1e2d4e);
+  box-shadow: 0 16px 40px #17284722;
+}
+.hero-orbit {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  width: 520px;
+  height: 520px;
+  border: 1px solid #c5d2ff1c;
+  border-radius: 50%;
+  right: -115px;
+  top: -140px;
+  transform: rotate(-25deg) scaleX(0.68);
+}
+.orbit-two {
+  width: 650px;
+  height: 650px;
+  right: -175px;
+  top: -204px;
+  border-color: #c5d2ff13;
+}
+.orbit-three {
+  width: 390px;
+  height: 390px;
+  top: -74px;
+  right: -50px;
+  border-color: #c5d2ff2b;
+}
+.athlete-card-top {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-
-  button {
-    min-width: 170px;
-  }
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  color: #c3cee2;
+  font-size: 9px;
+  letter-spacing: 0.13em;
 }
-
-@media (max-width: 600px) {
-  .account-card ::ng-deep .ant-card-body {
-    padding: 22px 18px;
-  }
-
-  .account-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .account-actions button {
-    width: 100%;
-  }
+.personal-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 8px;
+  color: #d1dfbf;
 }
-
-.account-identity {
+.personal-tag i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #c1e89d;
+}
+.athlete-identity {
   display: flex;
   align-items: center;
-  gap: 22px;
-  margin-bottom: 28px;
-  padding-bottom: 26px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  gap: 25px;
+  margin: 35px 0 32px;
 }
-.identity-details {
-  min-width: 0;
-  strong { font-size: 18px; color: #1d1d1f; overflow-wrap: anywhere; }
-  p { margin: 4px 0; color: #6e6e73; font-size: 13px; overflow-wrap: anywhere; }
-}
-.avatar-wrap { flex-shrink: 0; }
-.avatar-remove:disabled { opacity: .5; cursor: default; }
 .avatar-wrap {
   position: relative;
+  flex-shrink: 0;
 }
-
-.profile-avatar {
+.athlete-avatar {
   display: grid;
   place-items: center;
-  width: 96px;
-  height: 96px;
-  overflow: hidden;
-  font-size: 32px;
-  font-weight: 750;
-  color: #fff;
-  border-radius: 50%;
-  background: linear-gradient(150deg, #1a86f0, #0071e3);
+  width: 100px;
+  height: 110px;
+  background: linear-gradient(145deg, #cfdfbe, #a9bca0);
+  border: 1px solid #f2ffe388;
+  border-radius: 24px;
+  color: #223e2b;
+  font-size: 38px;
+  font-weight: 550;
+  letter-spacing: -0.07em;
   box-shadow:
-    0 14px 30px rgba(0, 113, 227, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+    0 7px 24px #0002,
+    inset 0 1px #fff7;
+  overflow: hidden;
+  transform: rotate(-3deg);
 }
-
-/* butonul cu camera, suprapus pe avatar */
+.athlete-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .avatar-edit {
   position: absolute;
-  right: -4px;
-  bottom: -4px;
+  bottom: -5px;
+  right: -9px;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
-  font-size: 15px;
-  color: #0071e3;
-  cursor: pointer;
+  width: 31px;
+  height: 31px;
   border-radius: 50%;
+  color: #1e2d4e;
   background: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
-  transition: transform 0.15s ease;
-
-  &:hover { transform: scale(1.08); }
-  &:active { transform: scale(0.94); }
-  &.busy { pointer-events: none; opacity: 0.7; }
-}
-
-.avatar-remove {
-  margin-top: 4px;
-  padding: 0;
-  font-size: 12.5px;
-  font-weight: 620;
-  font-family: inherit;
-  color: var(--ink-tertiary);
+  box-shadow: 0 3px 10px #0003;
   cursor: pointer;
-  border: none;
-  background: transparent;
-
-  &:hover { color: #d70015; }
+  border: 3px solid #1c2a46;
 }
-
 .avatar-edit input {
   position: absolute;
   inset: 0;
@@ -298,8 +142,684 @@
   opacity: 0;
   cursor: pointer;
 }
-
+.avatar-edit.busy {
+  opacity: 0.6;
+}
 .avatar-edit:focus-within {
-  outline: 3px solid #0071e3;
+  outline: 2px solid #bfd8ff;
   outline-offset: 3px;
+}
+.athlete-name {
+  min-width: 0;
+}
+.identity-eyebrow {
+  color: #b5c4e0;
+  font-size: 8px;
+  letter-spacing: 0.13em;
+}
+.athlete-name h1 {
+  color: #f5f7ff;
+  font-size: clamp(32px, 4.8vw, 58px);
+  font-weight: 550;
+  letter-spacing: -0.065em;
+  line-height: 1.1;
+  margin: 9px 0 10px;
+  overflow-wrap: anywhere;
+}
+.name-dot {
+  color: #c4e6a5;
+}
+.athlete-name p {
+  font-size: 11px;
+  color: #c3cee2;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.remove-avatar {
+  color: #c3cee2;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 9px;
+  padding: 0;
+  margin-top: 8px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.remove-avatar:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.athlete-card-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #ffffff20;
+  font-size: 10px;
+  color: #b9c8df;
+}
+.athlete-signature {
+  font-size: 23px;
+  font-weight: 650;
+  letter-spacing: -0.1em;
+  line-height: 1;
+}
+.athlete-signature > span {
+  margin-left: 5px;
+  font-size: 22px;
+  color: #c4e6a5;
+}
+.profile-content-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  align-items: start;
+  gap: 22px;
+  margin-top: 24px;
+}
+.profile-form-card,
+.body-card {
+  background: var(--surface-strong);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: var(--glass-shadow);
+  min-width: 0;
+}
+.form-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+h2 {
+  margin: 8px 0 0;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+.edit-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  border: 1px solid var(--hairline);
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-size: 8px;
+  color: var(--ink-tertiary);
+}
+.edit-indicator i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #62b988;
+}
+.edit-indicator.unsaved i {
+  background: #dcab55;
+}
+.form-description {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  margin: 10px 0 27px;
+}
+fieldset {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+.profile-field > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--ink-secondary);
+  font-weight: 550;
+}
+.profile-field small {
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  font-weight: 400;
+}
+.profile-field input,
+.profile-field select {
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  border: 1px solid var(--hairline);
+  border-radius: 11px;
+  background: var(--surface-input);
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+.profile-field select {
+  padding-right: 5px;
+  font-size: 12px;
+}
+.profile-field input:focus,
+.profile-field select:focus {
+  outline: none;
+  border-color: #5375f599;
+  box-shadow: 0 0 0 3px #5375f515;
+}
+.profile-field input:disabled,
+.profile-field select:disabled {
+  opacity: 0.6;
+}
+.profile-field input::placeholder {
+  color: var(--ink-tertiary);
+}
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 22px;
+}
+.form-divider {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 30px 0 0;
+  padding-top: 25px;
+  border-top: 1px solid var(--hairline);
+  font-size: 8px;
+  color: var(--ink-tertiary);
+  letter-spacing: 0.1em;
+}
+.form-divider a {
+  font-size: 9px;
+  font-weight: 550;
+  letter-spacing: 0;
+  color: var(--ink-secondary);
+}
+.height-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.save-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 30px;
+  padding-top: 23px;
+  border-top: 1px solid var(--hairline);
+}
+.save-status {
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+.save-buttons {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.save-profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 17px;
+  background: #202e4b;
+  color: #fff;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 550;
+  cursor: pointer;
+}
+.save-profile:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.discard-button {
+  color: var(--ink-tertiary);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 10px 5px;
+}
+.form-error {
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e8a6a644;
+  border-radius: 10px;
+  color: var(--red);
+  font-size: 11px;
+}
+.form-error button {
+  color: var(--accent);
+  font: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.validation-note {
+  margin: 15px 0 0;
+  color: var(--red);
+  font-size: 10px;
+  line-height: 1.5;
+}
+.profile-loading {
+  display: grid;
+  place-items: center;
+  min-height: 240px;
+  color: var(--ink-tertiary);
+  font-size: 12px;
+}
+.profile-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+.body-card {
+  padding: 25px;
+}
+.side-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--ink-tertiary);
+  font-size: 16px;
+}
+.body-card h2 {
+  font-size: 23px;
+}
+.body-weight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 25px 0 23px;
+}
+.body-weight > strong {
+  font-size: 56px;
+  font-weight: 550;
+  line-height: 1;
+  letter-spacing: -0.075em;
+}
+.body-weight > span {
+  font-size: 13px;
+  color: var(--ink-secondary);
+}
+.body-weight small {
+  display: block;
+  font-size: 9px;
+  color: var(--ink-tertiary);
+  margin-top: 3px;
+}
+.body-facts {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr 1fr;
+  gap: 10px;
+}
+.body-facts > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.body-facts > div + div {
+  border-left: 1px solid var(--hairline);
+  padding-left: 12px;
+}
+.body-facts > div > span {
+  color: var(--ink-tertiary);
+  font-size: 9px;
+}
+.body-facts strong {
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+}
+.body-facts small {
+  font-size: 9px;
+  font-weight: 400;
+  color: var(--ink-tertiary);
+}
+.body-track-link {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 16px;
+  margin-top: 22px;
+  border-top: 1px solid var(--hairline);
+  color: var(--ink-secondary);
+  font-size: 10px;
+}
+.direction-card {
+  position: relative;
+  overflow: hidden;
+  background: #e5eddf;
+  color: #244436;
+  border: 1px solid #bfd2b866;
+  border-radius: 22px;
+  padding: 25px;
+}
+.direction-card > .profile-eyebrow {
+  color: #5b7360;
+}
+.direction-card h2 {
+  position: relative;
+  font-size: 25px;
+  color: #244436;
+  max-width: 230px;
+  margin-top: 25px;
+}
+.direction-card p {
+  font-size: 11px;
+  color: #5b7360;
+  margin: 8px 0 22px;
+  max-width: 220px;
+}
+.direction-symbol {
+  position: absolute;
+  right: 17px;
+  top: 25px;
+  color: #b9ccaf;
+  font-size: 80px;
+  font-weight: 300;
+  line-height: 1;
+}
+.direction-goal {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #2444361a;
+  padding-top: 14px;
+  font-size: 11px;
+}
+.direction-goal strong {
+  font-size: 16px;
+  font-weight: 650;
+}
+.direction-goal strong > span {
+  font-size: 10px;
+  font-weight: 400;
+  color: #5b7360;
+}
+.direction-goal a {
+  color: #244436;
+  font-size: 10px;
+  align-self: center;
+}
+.profile-progress-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  border-radius: 20px;
+  border: 1px solid var(--hairline);
+  padding: 22px;
+  color: var(--ink);
+}
+.profile-progress-link strong {
+  display: block;
+  font-size: 16px;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+  margin-top: 9px;
+}
+.profile-progress-link p {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+  margin: 5px 0 0;
+}
+.profile-progress-link > span {
+  flex-shrink: 0;
+  font-size: 22px;
+}
+.profile-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 26px 2px 10px;
+  color: var(--ink-tertiary);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+}
+.profile-footer a {
+  color: var(--ink-tertiary);
+  letter-spacing: 0;
+  font-size: 9px;
+}
+:host-context(html[data-theme='dark']) {
+  .athlete-card {
+    border: 1px solid #687f9b55;
+  }
+  .save-profile {
+    background: #708de0;
+    color: #111e37;
+  }
+  .direction-card {
+    background: #273c31;
+    border-color: #70907744;
+  }
+  .direction-card h2,
+  .direction-goal a {
+    color: #d3e8ca;
+  }
+  .direction-card .profile-eyebrow,
+  .direction-card p,
+  .direction-goal strong > span {
+    color: #b0c6ac;
+  }
+  .direction-card {
+    color: #d3e8ca;
+  }
+  .direction-symbol {
+    color: #5a79544d;
+  }
+  .direction-goal {
+    border-color: #ffffff1a;
+  }
+}
+@media (max-width: 1100px) {
+  .profile-content-grid {
+    gap: 18px;
+    grid-template-columns: 1.3fr 1fr;
+  }
+  .profile-form-card,
+  .body-card {
+    padding: 23px;
+  }
+  .form-heading {
+    flex-wrap: wrap;
+  }
+  .form-heading h2 {
+    font-size: 22px;
+  }
+  .edit-indicator {
+    font-size: 7px;
+  }
+  .body-weight > strong {
+    font-size: 48px;
+  }
+  .body-facts {
+    gap: 7px;
+  }
+  .body-facts > div + div {
+    padding-left: 8px;
+  }
+  .body-facts strong {
+    font-size: 11px;
+  }
+  .direction-card {
+    padding: 23px;
+  }
+}
+@media (max-width: 760px) {
+  .profile-content-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+  .profile-progress-link {
+    grid-column: 1/-1;
+  }
+  .profile-form-card {
+    padding: 26px;
+  }
+  .body-card {
+    padding: 23px;
+  }
+}
+@media (max-width: 600px) {
+  .profile-page-heading {
+    font-size: 8px;
+    margin-bottom: 15px;
+  }
+  .profile-eyebrow {
+    font-size: 8px;
+  }
+  .profile-page-heading > a {
+    font-size: 9px;
+  }
+  .athlete-card {
+    padding: 22px 23px 18px;
+    border-radius: 24px;
+  }
+  .athlete-card-top {
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+  .personal-tag {
+    font-size: 6px;
+    gap: 4px;
+  }
+  .athlete-identity {
+    align-items: flex-start;
+    gap: 18px;
+    margin: 32px 0 30px;
+  }
+  .athlete-avatar {
+    width: 66px;
+    height: 76px;
+    border-radius: 18px;
+    font-size: 27px;
+  }
+  .identity-eyebrow {
+    font-size: 6px;
+    letter-spacing: 0.07em;
+  }
+  .athlete-name h1 {
+    font-size: 33px;
+    margin: 9px 0 8px;
+  }
+  .athlete-name p {
+    font-size: 9px;
+  }
+  .athlete-card-bottom {
+    font-size: 8px;
+  }
+  .hero-orbit {
+    right: -300px;
+  }
+  .orbit-two {
+    right: -350px;
+  }
+  .orbit-three {
+    right: -240px;
+  }
+  .avatar-edit {
+    width: 28px;
+    height: 28px;
+    right: -8px;
+    bottom: -6px;
+    font-size: 11px;
+  }
+  .profile-content-grid {
+    margin-top: 18px;
+    gap: 18px;
+  }
+  .profile-form-card {
+    padding: 24px 20px;
+    border-radius: 22px;
+  }
+  .profile-side {
+    display: flex;
+    gap: 18px;
+  }
+  .form-heading {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  h2,
+  .form-heading h2 {
+    font-size: 23px;
+  }
+  .edit-indicator {
+    padding: 6px;
+    font-size: 7px;
+  }
+  .field-grid {
+    gap: 12px;
+  }
+  .profile-field input {
+    padding-inline: 12px;
+    font-size: 16px;
+  }
+  .profile-field select {
+    padding-left: 10px;
+    font-size: 11px;
+  }
+  .save-row {
+    align-items: stretch;
+  }
+  .save-buttons {
+    margin-left: auto;
+  }
+  .body-card {
+    padding: 25px;
+    border-radius: 22px;
+  }
+  .body-weight > strong {
+    font-size: 55px;
+  }
+  .body-facts strong {
+    font-size: 13px;
+  }
+  .body-facts > div + div {
+    padding-left: 14px;
+  }
+  .direction-card {
+    padding: 25px;
+  }
+  .profile-footer {
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 7px;
+  }
+  .profile-footer a {
+    font-size: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-field input,
+  .profile-field select {
+    transition: none;
+  }
 }

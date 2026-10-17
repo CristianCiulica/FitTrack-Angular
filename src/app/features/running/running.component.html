@@ -37,11 +37,12 @@
           <span>Nutrition</span>
         </a>
       </li>
+      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav" [class.tracking-locked]="isTracking"><a [routerLink]="isTracking ? null : '/progress'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking" class="sidebar-secondary-item"><a [routerLink]="isTracking ? null : '/weight'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a></li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking" class="sidebar-secondary-item">
-        <a [routerLink]="isTracking ? null : '/account'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Account">
+        <a [routerLink]="isTracking ? null : '/account'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Profile">
           <span nz-icon nzType="user"></span>
-          <span>Account</span>
+          <span>Profile</span>
         </a>
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking" class="sidebar-secondary-item">
