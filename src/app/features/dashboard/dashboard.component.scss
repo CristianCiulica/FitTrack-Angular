@@ -7,6 +7,8 @@
    Activity head: title + month navigation
    ------------------------------------------------------------ */
 
+:host { --dashboard-card-bg: #fff; }
+
 .activity-head {
   display: flex;
   align-items: center;
@@ -182,7 +184,7 @@
   padding: 4px;
   border: 1px solid var(--hairline);
   border-radius: 24px;
-  background: var(--dashboard-card-bg, var(--surface-strong));
+  background: var(--dashboard-card-bg);
   box-shadow: 0 2px 8px rgba(15, 23, 42, .03);
   overflow: hidden;
 }
@@ -280,7 +282,7 @@
   > span { color: var(--muted); font-size: 12px; }
 }
 .activity-card {
-  overflow: hidden; border-radius: 22px; background: var(--dashboard-card-bg, #fff);
+  overflow: hidden; border-radius: 22px; background: var(--dashboard-card-bg);
   border: 1px solid var(--hairline);
   box-shadow: 0 2px 8px rgba(15,23,42,.03);
   color: var(--ink); font-variant-numeric: tabular-nums;
@@ -334,17 +336,12 @@
   color: #fff;
   border-radius: 980px;
   background: linear-gradient(180deg, #1a86f0, #0071e3);
-  box-shadow:
-    0 12px 26px rgba(0, 113, 227, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.32);
-  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
+  box-shadow: none;
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1);
 
   &:hover {
     color: #fff;
     transform: translateY(-1px);
-    box-shadow:
-      0 15px 32px rgba(0, 113, 227, 0.42),
-      inset 0 1px 0 rgba(255, 255, 255, 0.35);
   }
 
   &:active {
@@ -668,5 +665,3 @@
 
 
 .run-recovery-notice { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; margin: 0 0 16px; padding: 10px 16px; color: var(--ink); background: var(--surface-strong); border: 1px solid var(--hairline); border-radius: 18px; font-size: 12px; }.run-recovery-notice strong { color: var(--accent); font-weight: 550; }
-
-:host-context(html[data-theme='dark']) .metric-grid { background: var(--surface-strong); }
