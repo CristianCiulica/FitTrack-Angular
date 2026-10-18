@@ -84,6 +84,13 @@ html[data-theme='dark'] .leaflet-control-attribution { background: #1c1c1eeb; co
 html[data-theme='dark'] .leaflet-control-attribution a { color: #8ac8ff; }
 html[data-theme='dark'] .liquid-panel::before { background: linear-gradient(150deg, #242428d9, #1c1c20b3 48%, #2c2c30cc); }
 html[data-theme='dark'] .liquid-panel::after { opacity: .3; }
+@media (max-width: 900px) {
+  html[data-theme='dark'] body .app-layout > .sidebar::before,
+  html[data-theme='dark'] body .app-layout > .sidebar.has-glass-lens::before { background: linear-gradient(150deg, #29292edb, #1c1c22b8 48%, #292932cf); }
+  html[data-theme='dark'] body .app-layout > .sidebar::after { opacity: .3; }
+  html[data-theme='dark'] body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected { background: transparent !important; }
+  html[data-theme='dark'] body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a::before { background: #64b5ff20 !important; box-shadow: inset 0 1px #ffffff12 !important; }
+}
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   html[data-theme='dark'] body .app-layout > .sidebar::before,
   html[data-theme='dark'] body .app-layout > .sidebar.has-glass-lens::before,

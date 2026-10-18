@@ -674,6 +674,10 @@
    Responsive
    ------------------------------------------------------------ */
 
+@media (max-width: 900px) {
+  .run-dashboard { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+}
+
 @media (max-width: 600px) {
   .run-card-top {
     flex-wrap: wrap;
