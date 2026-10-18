@@ -50,7 +50,7 @@ export class AppMenuComponent {
     },
     {
       label: 'Weight',
-      icon: 'line-chart',
+      icon: 'ft:weight',
       path: '/weight',
     },
     {

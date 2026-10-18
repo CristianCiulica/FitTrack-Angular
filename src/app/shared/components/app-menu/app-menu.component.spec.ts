@@ -45,7 +45,7 @@ describe('Mobile navigation lifecycle', () => {
       ],
     });
     const icons = TestBed.inject(NzIconService);
-    for (const name of ['home', 'history', 'workout', 'run', 'nutrition'])
+    for (const name of ['home', 'history', 'workout', 'run', 'nutrition', 'weight', 'sign-out'])
       icons.addIconLiteral(
         'ft:' + name,
         '<svg viewBox="0 0 24 24"><path d="M2 2h20v20H2z"/></svg>',

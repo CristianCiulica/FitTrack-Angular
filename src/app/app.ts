@@ -17,6 +17,8 @@ const FT_ICONS: Record<string, string> = {
   'ft:workout': `<svg ${FT_ICON_ATTRS}><path ${FT_SHAPE} d="M2.8 10.6v2.8"/><path ${FT_SHAPE} d="M6 8.2v7.6"/><path ${FT_SHAPE} d="M18 8.2v7.6"/><path ${FT_SHAPE} d="M21.2 10.6v2.8"/><path ${FT_SHAPE} d="M6 12h12"/></svg>`,
   'ft:run': `<svg ${FT_ICON_ATTRS}><circle ${FT_SHAPE} cx="5.4" cy="18.2" r="1.8"/><path ${FT_SHAPE} d="M7.2 18.2h6.6a4.1 4.1 0 0 0 0-8.2h-1.9"/><path ${FT_SHAPE} d="M18 3.4a3.3 3.3 0 0 1 3.3 3.3c0 2.5-3.3 5.5-3.3 5.5s-3.3-3-3.3-5.5A3.3 3.3 0 0 1 18 3.4Z"/><circle cx="18" cy="6.7" r="0.4" fill="currentColor"/></svg>`,
   'ft:nutrition': `<svg ${FT_ICON_ATTRS}><path ${FT_SHAPE} d="M12 7.8c-2.1-1.7-5.6-1-6.6 2-1.2 3.6 1.2 8.7 3.5 10.1 1 .7 2.1.7 3.1 0 1 .7 2.1.7 3.1 0 2.3-1.4 4.7-6.5 3.5-10.1-1-3-4.5-3.7-6.6-2Z"/><path ${FT_SHAPE} d="M12 7.8c0-2.1 1.1-3.6 3.1-4.3"/></svg>`,
+  'ft:weight': `<svg ${FT_ICON_ATTRS}><rect ${FT_SHAPE} x="4.5" y="3.5" width="15" height="17" rx="3.5"/><path ${FT_SHAPE} d="M8 10a4 4 0 0 1 8 0Z"/><path ${FT_SHAPE} d="m12 10 1.5-2"/></svg>`,
+  'ft:sign-out': `<svg ${FT_ICON_ATTRS}><path ${FT_SHAPE} d="M9 4.5H5.5A1.5 1.5 0 0 0 4 6v12a1.5 1.5 0 0 0 1.5 1.5H9"/><path ${FT_SHAPE} d="M10 12h10m-3.5-3.5L20 12l-3.5 3.5"/></svg>`,
 };
 
 @Component({
