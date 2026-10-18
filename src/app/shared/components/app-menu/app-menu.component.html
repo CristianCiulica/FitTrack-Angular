@@ -17,7 +17,8 @@
   [nzVisible]="open()"
   nzPlacement="left"
   [nzClosable]="false"
-  [nzWidth]="'min(336px, calc(100vw - 32px))'"
+  [nzWidth]="'min(320px, calc(100vw - 48px))'"
+  [nzMaskStyle]="{ background: 'rgba(0, 0, 0, .3)', backdropFilter: 'none' }"
   [nzZIndex]="1100"
   [nzCloseOnNavigation]="true"
   nzWrapClassName="app-menu-drawer"
@@ -32,27 +33,21 @@
       aria-label="Navigation menu"
       [attr.aria-hidden]="!open()"
     >
-      <div class="menu-brand">
-        <span class="brand">FitTrack<span>.</span></span>
-        <button type="button" class="close-btn" aria-label="Close menu" (click)="close()">
-          <span nz-icon nzType="close"></span>
-        </button>
-      </div>
+      <button type="button" class="close-btn" aria-label="Close menu" (click)="close()">
+        <span nz-icon nzType="close"></span>
+      </button>
 
-      <!-- Personal profile -->
-      <button type="button" class="menu-hero" (click)="go('/account')">
+      <button type="button" class="menu-hero" aria-label="View your profile" (click)="go('/account')">
         <span class="hero-avatar">
           <img *ngIf="avatar()" [src]="avatar()" alt="" />
           <ng-container *ngIf="!avatar()">{{ initials() }}</ng-container>
         </span>
-        <span class="hero-copy"
-          ><strong class="hero-name">{{ displayName() || 'Your profile' }}</strong
-          ><small class="hero-email">{{ profile()?.email }}</small
-          ><span class="hero-cta-pill">View profile <span aria-hidden="true">›</span></span></span
-        >
+        <span class="hero-copy">
+          <strong class="hero-name">{{ displayName() || 'Your profile' }}</strong>
+          <small class="hero-email">{{ profile()?.email }}</small>
+        </span>
       </button>
 
-      <span class="menu-section-label">Explore</span>
       <nav class="menu-links" aria-label="Main pages">
         <button
           type="button"
@@ -63,15 +58,14 @@
           (click)="go(link.path)"
         >
           <span class="link-icon" nz-icon [nzType]="link.icon"></span>
-          <span class="link-copy">
-            <strong>{{ link.label }}</strong>
-            <small>{{ link.description }}</small>
-          </span>
-          <span class="link-arrow" aria-hidden="true">›</span>
+          <span class="link-copy">{{ link.label }}</span>
         </button>
       </nav>
 
-      <button type="button" class="logout-link" (click)="logout()">Log out</button>
+      <button type="button" class="logout-link" (click)="logout()">
+        <span class="link-icon" nz-icon nzType="logout"></span>
+        <span>Log out</span>
+      </button>
     </div>
   </ng-container>
 </nz-drawer>

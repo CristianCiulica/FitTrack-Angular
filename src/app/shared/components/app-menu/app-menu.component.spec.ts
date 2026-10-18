@@ -8,6 +8,7 @@ import { NzIconService, provideNzIcons } from 'ng-zorro-antd/icon';
 import {
   CloseOutline,
   LineChartOutline,
+  LogoutOutline,
   SettingOutline,
   UserOutline,
 } from '@ant-design/icons-angular/icons';
@@ -30,7 +31,7 @@ describe('Mobile navigation lifecycle', () => {
       imports: [AppMenuComponent],
       providers: [
         provideNoopAnimations(),
-        provideNzIcons([CloseOutline, LineChartOutline, SettingOutline, UserOutline]),
+        provideNzIcons([CloseOutline, LineChartOutline, LogoutOutline, SettingOutline, UserOutline]),
         { provide: Router, useValue: { events, url: '/progress', navigate: vi.fn() } },
         {
           provide: ProfileService,

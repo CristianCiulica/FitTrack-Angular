@@ -71,7 +71,7 @@ html[data-theme='dark'] body :is(
   .metric-icon, .day-cell.selected .day-label, .recent-see-all, .recent-empty > span,
   .cardio-header-right > strong, .run-expand-btn, .stat-icon-inline,
   .account-heading > span, .avatar-edit, .calorie-target > strong, .pace-header strong,
-  .link-icon, .wm-count, .wm-add, .weather-summary-score strong, .weather-alert,
+  .wm-count, .wm-add, .weather-summary-score strong, .weather-alert,
   .auth-footer a, .brand-dot, .onboarding .eyebrow, .pace-head strong,
   .progress-copy strong, .answer-summary span, .result-kcal > strong,
   .result-kcal-copy > span, .result-kicker, .result-meta span
@@ -104,7 +104,7 @@ html[data-theme='dark'] body :is(
   .plan-promo, .plan-card, .legend-card, .plan-hero, .live-weight,
   .cardio-session-card, .table-card, .mobile-workout-card, .wm-exercise,
   .settings-card, .projection, .assistant-options button, .macro-card,
-  .menu-link, .recent-empty, .empty-cardio-history, .mobile-empty-state,
+  .recent-empty, .empty-cardio-history, .mobile-empty-state,
   .empty-personal-routines, .goal-options button
 ) {
   color: var(--theme-ink) !important;
@@ -112,11 +112,11 @@ html[data-theme='dark'] body :is(
   border-color: var(--theme-line) !important;
   box-shadow: 0 8px 26px rgba(0, 0, 0, .12) !important;
 }
-html[data-theme='dark'] body :is(.plan-card:hover, .plan-promo:hover, .menu-link:hover, .assistant-options button:hover) {
+html[data-theme='dark'] body :is(.plan-card:hover, .plan-promo:hover, .assistant-options button:hover) {
   border-color: rgba(100, 181, 255, .35) !important;
 }
 html[data-theme='dark'] body :is(.heading-count, .plan-chip, .filter-pills button, .stepper-btn,
-  .segmented, .goal-segmented-large, .modern-close-icon, .menu-brand .close-btn,
+  .segmented, .goal-segmented-large, .modern-close-icon,
   .desktop-exercise-stats span, .cardio-details, .wm-summary,
   .projection-grid > div, .result-section.compact p, .option-icon) {
   background: var(--theme-raised) !important;
@@ -179,12 +179,6 @@ html[data-theme='dark'] body .calc-row nz-input-number { background: transparent
 html[data-theme='dark'] body .wm-input.is-invalid { border-color: #ff6961 !important; }
 html[data-theme='dark'] body .wm-select-native.is-invalid { border-color: #ff6961 !important; }
 html[data-theme='dark'] body .wm-weight-hint { background: rgba(10,132,255,.12) !important; }
-html[data-theme='dark'] body .app-menu-drawer .ant-drawer-body { background: #19191c !important; }
-html[data-theme='dark'] body .menu-hero {
-  background: radial-gradient(90% 130% at 50% 0%, rgba(10,132,255,.14), transparent 65%), #232326 !important;
-  border-color: var(--theme-line) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
-}
 html[data-theme='dark'] body :is(.auth-wrapper, .onboarding)::before {
   background: radial-gradient(70% 65% at 10% 8%, rgba(10,132,255,.12), transparent 70%),
     radial-gradient(60% 60% at 95% 90%, rgba(94,92,230,.09), transparent 70%), #101014 !important;
@@ -205,7 +199,7 @@ html[data-theme='dark'] body .coach-tip strong { color: #75dc8e !important; }
 html[data-theme='dark'] body .coach-tip p { color: #b8d6bd !important; }
 
 /* Semantic accents retain their meaning with luminance suitable for charcoal. */
-html[data-theme='dark'] body :is(.plan-delete, .wm-remove, .wm-error, .logout-link,
+html[data-theme='dark'] body :is(.plan-delete, .wm-remove, .wm-error,
   .weather-summary-score.poor strong) { color: #ff6961 !important; }
 html[data-theme='dark'] body :is(.goal-done-text, .review-symbol, .hint-delta.up,
   .fv-delta.up, .gps-badge, .weather-summary-score.great strong) { color: #65d985 !important; }

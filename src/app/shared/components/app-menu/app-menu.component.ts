@@ -9,7 +9,6 @@ import { ProfileService } from '../../../core/services/profile.service';
 
 interface MenuLink {
   label: string;
-  description: string;
   icon: string;
   path: string;
 }
@@ -46,25 +45,21 @@ export class AppMenuComponent {
   readonly links: MenuLink[] = [
     {
       label: 'Progress',
-      description: 'Your training, month by month',
       icon: 'line-chart',
       path: '/progress',
     },
     {
       label: 'Weight',
-      description: 'Daily weigh-ins & your progress',
       icon: 'line-chart',
       path: '/weight',
     },
     {
       label: 'Profile',
-      description: 'Your details & body metrics',
       icon: 'user',
       path: '/account',
     },
     {
       label: 'Settings',
-      description: 'Appearance, units & goals',
       icon: 'setting',
       path: '/settings',
     },
