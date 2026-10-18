@@ -720,3 +720,6 @@
 }
 
 .run-recovery { margin-top: 12px; }.run-recovery > strong { font-size: 14px; color: var(--ink); }.run-recovery p { margin: 4px 0 12px; font-size: 12px; color: var(--ink-secondary); }.run-recovery > div { display: flex; gap: 8px; flex-wrap: wrap; }.run-recovery button { flex: 1; min-height: 44px; border-radius: 22px; font-size: 12px; }
+
+.run-indoor-button { min-height: 38px; padding: 8px 13px; border: 1px solid var(--hairline); border-radius: 10px; background: var(--surface-strong); color: var(--accent); font: inherit; font-size: 12px; font-weight: 550; cursor: pointer; }
+.run-indoor-button:disabled { opacity: .4; cursor: default; }

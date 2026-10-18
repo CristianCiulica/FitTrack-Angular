@@ -36,7 +36,6 @@ import {
   swapTrainingMovement,
   trainingAlternatives,
   trainingBlocker,
-  trainingVolume,
   validPreferences,
 } from './training-planner.engine';
 import { savedTrainingPlans, trainingPlanWorkouts } from './training-plan-storage';
@@ -115,7 +114,6 @@ export class TrainingPlannerComponent {
     },
   ];
   readonly selectedDay = computed(() => this.plan()?.days[this.activeDay()] ?? null);
-  readonly volume = computed(() => (this.plan() ? trainingVolume(this.plan()!) : []));
   readonly alternatives = computed(() => {
     const p = this.plan(),
       d = this.selectedDay(),

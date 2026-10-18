@@ -1,7 +1,8 @@
+import { indoorCardio } from './indoor-cardio';
 import { Workout } from '../models/workout.model';
 import { RunningSession } from '../models/running-session.model';
 import { activityDateKey, activityYear } from './activity-calendar';
-import { isWorkoutSession } from './workout-kind';
+import { isWorkoutSession, isStrengthWorkoutSession } from './workout-kind';
 import { localDateKey } from './weight-progress';
 
 export function trainingProgress(
@@ -23,15 +24,16 @@ export function trainingProgress(
     const key = activityDateKey(run.startedAt);
     return key && key <= todayKey;
   });
-  const strength = completed.filter((workout) =>
+  const strength = completed.filter(isStrengthWorkoutSession).filter((workout) =>
     activityDateKey(workout.date)?.startsWith(prefix),
   ).length;
   const running = finishedRuns.filter(
     (run) => run.mode === 'running' && activityDateKey(run.startedAt)?.startsWith(prefix),
-  ).length;
+  ).length + completed.filter(w => indoorCardio(w)?.mode === 'running' && activityDateKey(w.date)?.startsWith(prefix)).length;
   const walking = finishedRuns.filter(
     (run) => run.mode === 'walking' && activityDateKey(run.startedAt)?.startsWith(prefix),
   ).length;
+  const indoorWalking = completed.filter(w => indoorCardio(w)?.mode === 'walking' && activityDateKey(w.date)?.startsWith(prefix)).length;
   const elapsedDays = month.days.filter((day) => day.state !== 'future').length;
   let bestStreak = 0,
     streak = 0;
@@ -69,10 +71,10 @@ export function trainingProgress(
   }
   const weekStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
-  const weeklyWorkouts = completed.filter(
+  const weeklyWorkouts = completed.filter(isStrengthWorkoutSession).filter(
     (workout) => activityDateKey(workout.date)! >= localDateKey(weekStart),
   ).length;
-  const total = strength + running + walking;
+  const total = strength + running + walking + indoorWalking;
   return {
     activeDays: month.activeDays,
     totalSessions: total,
@@ -85,7 +87,7 @@ export function trainingProgress(
     mix: [
       { label: 'Strength', count: strength, color: '#5375f5' },
       { label: 'Running', count: running, color: '#26b985' },
-      { label: 'Walking', count: walking, color: '#e6ad57' },
+      { label: 'Walking', count: walking + indoorWalking, color: '#e6ad57' },
     ].map((item) => ({ ...item, percent: total ? (item.count / total) * 100 : 0 })),
     milestones: [
       {

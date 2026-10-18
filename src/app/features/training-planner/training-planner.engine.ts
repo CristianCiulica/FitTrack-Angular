@@ -233,6 +233,11 @@ function prescription(m: TrainingMovement, p: TrainingPreferences): TrainingExer
     rir: returning || p.experience === 'new' ? 3 : 2,
   };
 }
+/** Stable order within each category: compound movements before isolation work. */
+export function compoundsFirst(exercises: TrainingExercise[]): TrainingExercise[] {
+  return [...exercises].sort((a, b) => Number(b.movement.compound) - Number(a.movement.compound));
+}
+
 /** Includes warm-up, exercise transitions, rest and both sides of unilateral work. */
 export function estimateTrainingMinutes(exercises: TrainingExercise[]): number {
   const seconds =
@@ -320,6 +325,20 @@ export function buildTrainingPlan(
       used.add(movement.id);
       exercises.push(exercise);
     }
+    // At short session lengths, a focus needs room to progress rather than just a reordered list.
+    // Keep the main patterns and trade a redundant/supporting slot for priority work.
+    if (p.minutes <= 45 && p.focus !== 'balanced' && exercises.length >= 5) {
+      let optional = -1;
+      if (p.focus === 'arms' && exercises.some((e) => e.movement.pattern === 'press'))
+        optional = exercises.findIndex((e) => e.movement.pattern === 'incline');
+      if (p.focus === 'upper' && type === 'upper')
+        optional = exercises.findIndex((e) => e.movement.pattern === 'rear');
+      if (p.focus === 'lower' && type === 'lower')
+        optional = exercises.findIndex(
+          (e) => e.movement.pattern === (index % 2 ? 'core' : 'calves'),
+        );
+      if (optional >= 0) exercises.splice(optional, 1);
+    }
     return {
       index,
       weekday: p.days[index],
@@ -333,7 +352,7 @@ export function buildTrainingPlan(
     };
   });
   // Add useful sets within the session time and a conservative direct-set ceiling.
-  // Secondary work is displayed separately rather than being counted as full direct sets.
+  // Secondary work does not count as full direct sets toward this ceiling.
   const baseCap =
     p.readiness === 'returning' || p.experience === 'new'
       ? 8
@@ -361,6 +380,7 @@ export function buildTrainingPlan(
           .reduce((sum, e) => sum + e.sets, 0);
         if (estimateTrainingMinutes(day.exercises) > p.minutes || sameMuscle > 8) exercise.sets--;
       }
+      day.exercises = compoundsFirst(day.exercises);
       day.estimatedMinutes = estimateTrainingMinutes(day.exercises);
     }
   const notes: string[] = [];
@@ -430,7 +450,9 @@ export function swapTrainingMovement(
   );
   if (!movement) throw new Error('This exercise does not match the equipment and training role.');
   const replacement = { ...prescription(movement, plan.preferences), sets: exercise.sets };
-  const exercises = day.exercises.map((e, i) => (i === exerciseIndex ? replacement : e));
+  const exercises = compoundsFirst(
+    day.exercises.map((e, i) => (i === exerciseIndex ? replacement : e)),
+  );
   if (estimateTrainingMinutes(exercises) > plan.preferences.minutes)
     throw new Error(
       'This alternative needs more time. Choose another movement or edit your session length.',

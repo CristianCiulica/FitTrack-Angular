@@ -561,21 +561,6 @@
                   adjust assistance or leverage instead.
                 </p>
               </section>
-              <section class="volume-card">
-                <h3>Your weekly workload</h3>
-                <p>Direct working sets. Supporting work is shown separately and overlaps.</p>
-                <div class="volume-legend">
-                  <span>Muscle</span><span>Direct <i>/</i> Support</span>
-                </div>
-                @for (row of volume(); track row.muscle) {
-                  <div class="volume-row">
-                    <span>{{ row.muscle }}</span
-                    ><strong
-                      >{{ row.direct }} <span>/ {{ row.support }}</span></strong
-                    >
-                  </div>
-                }
-              </section>
               <details class="plan-guidance">
                 <summary>Make the plan work for you <span aria-hidden="true">+</span></summary>
                 <p>

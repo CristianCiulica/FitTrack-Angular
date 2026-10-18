@@ -1,13 +1,17 @@
+import { indoorCardio } from './indoor-cardio';
+import { readProgramEnrollment } from './program-records';
 import { Workout } from '../models/workout.model';
 
 export const isWorkoutSession = (workout: Workout): boolean =>
   workout.kind !== 'routine' && !workout.isPredefined;
 
+export const isStrengthWorkoutSession = (workout: Workout): boolean => isWorkoutSession(workout) && !indoorCardio(workout);
+
 /** Retain legacy personal plans once each, without turning new sessions into plans. */
 export function personalWorkoutPlans(workouts: Workout[]): Workout[] {
   const plans = new Map<string, Workout>();
   const candidates = [...workouts].sort((a, b) => b.date.localeCompare(a.date));
-  for (const workout of candidates.filter((item) => item.kind === 'routine')) {
+  for (const workout of candidates.filter((item) => item.kind === 'routine' && !readProgramEnrollment(item))) {
     plans.set(workout.id ?? workout.name.trim().toLowerCase(), workout);
   }
   for (const workout of candidates.filter((item) => item.kind == null && !item.isPredefined)) {

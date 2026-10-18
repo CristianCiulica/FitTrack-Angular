@@ -1,0 +1,173 @@
+<button *ngIf="showLauncher" type="button" class="indoor-launch" (click)="open()">
+  <span class="indoor-symbol" aria-hidden="true"
+    ><svg viewBox="0 0 24 24"><path d="M4 18h15l2-3H8l-3-9H2m11-2h5v8m-9 6v3m9-3v3" /></svg></span
+  ><span><strong>Trained on a treadmill?</strong><small>Log your indoor walk or run.</small></span
+  ><span aria-hidden="true">↗</span>
+</button>
+<dialog
+  #dialog
+  class="indoor-dialog"
+  aria-labelledby="indoor-title"
+  aria-modal="true"
+  (cancel)="cancel($event)"
+  (keydown)="trapTab($event)"
+>
+  <div class="indoor-screen">
+    <header>
+      <div>
+        <span class="indoor-eyebrow">INDOOR CARDIO</span>
+        <h2 id="indoor-title">Your treadmill session.</h2>
+      </div>
+      <button
+        type="button"
+        class="indoor-close"
+        aria-label="Close treadmill logger"
+        [disabled]="saving()"
+        (click)="close()"
+      >
+        ×
+      </button>
+    </header>
+    <div class="indoor-body">
+      @if (success()) {
+        <div class="indoor-done">
+          <span aria-hidden="true">✓</span>
+          <h3>Another session, recorded.</h3>
+          <p role="status">{{ success() }}</p>
+          <div>
+            <strong>{{ minutes }}<small> min</small></strong
+            ><strong
+              >{{ distance }}<small> {{ distanceUnit }}</small></strong
+            >
+          </div>
+          <p>Find the full details in History → Cardio.</p>
+        </div>
+      } @else {
+        <p class="indoor-intro">
+          Enter the readings from your treadmill. This records an indoor session without requesting
+          GPS.
+        </p>
+        @if (targetMinutes) {
+          <p class="indoor-target">
+            Planned: {{ targetMinutes }} min at conversational effort. Record what you actually
+            completed below.
+          </p>
+        }
+        <form id="indoor-form" (ngSubmit)="save()">
+          <fieldset>
+            <legend>Activity</legend>
+            <div class="mode-switch">
+              <button
+                type="button"
+                [class.selected]="mode === 'walking'"
+                [attr.aria-pressed]="mode === 'walking'"
+                (click)="mode = 'walking'"
+              >
+                Walking</button
+              ><button
+                type="button"
+                [class.selected]="mode === 'running'"
+                [attr.aria-pressed]="mode === 'running'"
+                (click)="mode = 'running'"
+              >
+                Running
+              </button>
+            </div>
+          </fieldset>
+          <div class="indoor-fields">
+            <label class="wide"
+              >Finished at<input
+                type="datetime-local"
+                name="finishedAt"
+                [(ngModel)]="finishedAt"
+                required /></label
+            ><label
+              >Actual duration <span>minutes</span
+              ><input
+                type="number"
+                inputmode="decimal"
+                name="minutes"
+                [(ngModel)]="minutes"
+                min="1"
+                max="240"
+                step="0.1"
+                placeholder="30"
+                required /></label
+            ><label
+              >Distance <span>{{ distanceUnit }}</span
+              ><input
+                type="number"
+                inputmode="decimal"
+                name="distance"
+                [(ngModel)]="distance"
+                min="0.01"
+                max="100"
+                step="0.01"
+                placeholder="2.50"
+                required
+            /></label>
+          </div>
+          <details class="optional-readings">
+            <summary>More treadmill readings <span>Optional +</span></summary>
+            <div class="indoor-fields">
+              <label
+                >Incline <span>%</span
+                ><input
+                  type="number"
+                  inputmode="decimal"
+                  name="incline"
+                  [(ngModel)]="incline"
+                  min="0"
+                  max="25"
+                  step="0.5"
+                  placeholder="—" /></label
+              ><label
+                >Calories <span>from machine</span
+                ><input
+                  type="number"
+                  inputmode="decimal"
+                  name="calories"
+                  [(ngModel)]="calories"
+                  min="0"
+                  max="5000"
+                  step="0.1"
+                  placeholder="—" /></label
+              ><label
+                >Steps <span>if measured</span
+                ><input
+                  type="number"
+                  inputmode="numeric"
+                  name="steps"
+                  [(ngModel)]="steps"
+                  min="0"
+                  max="100000"
+                  step="1"
+                  placeholder="—"
+              /></label>
+            </div>
+            <p>
+              Leave unknown readings blank. Machine calories are estimates; no steps or calories are
+              invented.
+            </p>
+          </details>
+        </form>
+        <p class="indoor-note">
+          Duration and distance are required. Keep sessions within 1–240 minutes and check the units
+          against your treadmill display.
+        </p>
+      }
+    </div>
+    <footer>
+      @if (error()) {
+        <p class="indoor-error" role="alert">{{ error() }}</p>
+      }
+      @if (success()) {
+        <button type="button" class="indoor-primary" (click)="close()">Done</button>
+      } @else {
+        <button type="submit" form="indoor-form" class="indoor-primary" [disabled]="!canSave">
+          {{ saving() ? 'Saving…' : 'Save treadmill session' }}
+        </button>
+      }
+    </footer>
+  </div>
+</dialog>

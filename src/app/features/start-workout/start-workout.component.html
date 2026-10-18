@@ -113,49 +113,17 @@
 
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
-          <section class="workout-intro">
-            <div><span class="section-eyebrow">WORKOUTS</span><h1>A good day<br>to get stronger.</h1><p>Choose a routine and pick up where you left off.</p></div>
-            <div class="plan-promos">
-              <button type="button" class="plan-promo" (click)="openLegends()">
-                <span class="promo-symbol" nz-icon nzType="trophy"></span>
-                <span class="promo-copy"><small>THE COLLECTION</small><strong>Legends’ plans</strong><span>Explore iconic training splits</span></span>
-                <span nz-icon nzType="arrow-right"></span>
-              </button>
-              <button type="button" class="plan-promo gym-promo" (click)="openGymPlan()">
-                <span class="promo-symbol" nz-icon nzType="ft:workout"></span>
-                <span class="promo-copy"><small>GYM</small><strong>Push Pull Legs</strong><span>Aesthetics Plan</span></span>
-                <span nz-icon nzType="arrow-right"></span>
-              </button>
-            </div>
-          </section>
-
-          <section class="personal-section">
-            <div class="plan-heading"><div><span class="section-eyebrow">BUILT BY YOU</span><h2>My workouts <span class="heading-count">{{ personalRoutines().length }}</span></h2></div><button type="button" class="text-action" (click)="openAddWorkout()"><span nz-icon nzType="plus"></span> New workout</button></div>
-            <div class="plan-list personal-list" *ngIf="personalRoutines().length > 0; else noPersonalRoutines">
-              <article class="plan-card" *ngFor="let routine of personalRoutines(); trackBy: trackPersonalRoutine" [class.selected]="selectedRoutineKey() === 'personal-' + routine.id">
-                <div class="card-topline"><span class="plan-chip">Custom</span><button type="button" class="plan-delete" [disabled]="deletingIds().has(routine.id!)" [attr.aria-label]="'Delete ' + routine.name" (click)="confirmDeleteWorkout(routine.id)"><span nz-icon nzType="delete"></span><span>{{ deletingIds().has(routine.id!) ? 'Deleting…' : 'Delete' }}</span></button></div>
-                <h3>{{ routine.name }}</h3><p class="plan-muscles">{{ muscleSummary(routine) }}</p>
-                <div class="routine-facts"><span><strong>{{ routineMinutes(routine) }}</strong> min</span><span><strong>{{ routine.exercises.length }}</strong> exercises</span></div>
-                <button type="button" class="plan-start" (click)="selectRoutine(routine, 'personal-' + routine.id); startWorkout()"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start workout</button>
-              </article>
-            </div>
-            <ng-template #noPersonalRoutines><button type="button" class="empty-personal-routines" (click)="openAddWorkout()"><span class="empty-plus" nz-icon nzType="plus"></span><span><strong>Your routine, your way.</strong><span>Add the exercises you love and keep them here.</span></span><span nz-icon nzType="arrow-right"></span></button></ng-template>
-          </section>
-
-          <section class="routine-library">
-            <div class="plan-heading"><div><h2>Start a Workout</h2></div><span class="library-count">{{ filteredPredefined().length }} routines</span></div>
-            <p class="library-guidance">Choose a workout and start tracking it</p>
-            <div class="filter-pills" role="group" aria-label="Workout categories"><button type="button" *ngFor="let filter of routineFilters" [class.selected]="routineFilter() === filter" [attr.aria-pressed]="routineFilter() === filter" (click)="routineFilter.set(filter)">{{ filter }}</button></div>
-            <div class="plan-list">
-              <article class="plan-card" *ngFor="let item of filteredPredefined(); trackBy: trackPredefined" [class.selected]="selectedRoutineKey() === 'predefined-' + item.index">
-                <div class="card-topline"><span class="routine-symbol" nz-icon nzType="ft:workout"></span><span class="plan-chip">{{ item.routine.category }}</span></div>
-                <h3>{{ item.routine.name }}</h3><p class="plan-muscles">{{ item.routine.description }}</p>
-                <div class="routine-facts"><span><strong>{{ routineMinutes(item.routine) }}</strong> min</span><span><strong>{{ item.routine.exercises.length }}</strong> exercises</span><span>~{{ routineKcal(item.routine) }} kcal</span></div>
-                <div class="exercise-preview"><span *ngFor="let exercise of item.routine.exercises | slice:0:3">{{ exercise.name }}<small>{{ exercise.sets }} × {{ exercise.reps }}{{ exercise.repUnit === 'seconds' ? ' s' : '' }}</small></span></div>
-                <button type="button" class="plan-start" (click)="selectRoutine(item.routine, 'predefined-' + item.index); startWorkout()"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start workout</button>
-              </article>
-            </div>
-          </section>
+          <app-workout-library
+            [gymRoutines]="gymRoutines"
+            [homeRoutines]="homeRoutines"
+            [routines]="routines"
+            [personalRoutines]="personalRoutines()"
+            [deletingIds]="deletingIds()"
+            (startRoutine)="startLibraryRoutine($event)"
+            (createWorkout)="openAddWorkout()"
+            (deleteRoutine)="confirmDeleteWorkout($event)"
+            (openLegends)="openLegends()"
+          />
         </ng-container>
 
         <!-- FINISHED STATE -->
@@ -294,19 +262,19 @@
   [nzWidth]="'100%'"
   [nzBodyStyle]="{ padding: '0', background: 'var(--bg)' }"
   nzPlacement="right"
-  nzTitle="Push Pull Legs Gym"
+  [nzTitle]="homePlanSelected() ? 'Upper Lower Home' : 'Push Pull Legs Gym'"
   (nzOnClose)="gymPlanOpen.set(false)"
 >
   <ng-container *nzDrawerContent>
     <div class="plan-drawer gym-plan-drawer">
       <div class="gym-plan-intro">
-        <span class="section-eyebrow">YOUR GYM PLAN</span>
-        <h2>Push. Pull. Legs.</h2>
-        <p>Your three gym sessions, all in one place. Choose a workout to start.</p>
-        <div class="gym-plan-facts"><span>3 workouts</span><span>{{ gymTotalSets }} sets</span><span>1:30 rest</span></div>
+        <span class="section-eyebrow">{{ homePlanSelected() ? 'YOUR HOME PLAN' : 'YOUR GYM PLAN' }}</span>
+        <h2>{{ homePlanSelected() ? 'Upper. Lower. Home.' : 'Push. Pull. Legs.' }}</h2>
+        <p>{{ homePlanSelected() ? 'Your two home sessions, all in one place. Choose a workout to start.' : 'Your three gym sessions, all in one place. Choose a workout to start.' }}</p>
+        <div class="gym-plan-facts"><span>{{ collectionRoutines().length }} workouts</span><span>{{ collectionTotalSets() }} sets</span><span>1:30 rest</span></div>
       </div>
       <div class="plan-list gym-plan-list">
-        @for (routine of gymRoutines; track routine.name; let i = $index) {
+        @for (routine of collectionRoutines(); track routine.name; let i = $index) {
           <article class="plan-card">
             <div class="card-topline"><span class="plan-chip">SESSION {{ i + 1 }}</span><span class="gym-set-count">{{ routineSets(routine) }} sets</span></div>
             <h3>{{ routine.name }}</h3>
@@ -314,7 +282,7 @@
             <div class="routine-facts"><span><strong>{{ routineMinutes(routine) }}</strong> min</span><span><strong>{{ routine.exercises.length }}</strong> exercises</span></div>
             <ul class="plan-exercise-list gym-exercise-list">
               @for (exercise of routine.exercises; track exercise.name) {
-                <li><span>{{ exercise.name }}</span><span class="ex-detail">{{ exercise.sets }} × {{ exercise.reps }}</span></li>
+                <li><span>{{ exercise.name }}</span><span class="ex-detail">{{ exercise.sets }} × {{ exercise.repRange || exercise.reps }}{{ exercise.repUnit === 'seconds' ? ' sec' : '' }}</span></li>
               }
             </ul>
             <button type="button" class="plan-start" (click)="startFromGymPlan(routine)"><span nz-icon nzType="play-circle" nzTheme="fill"></span> Start {{ routine.name }}</button>

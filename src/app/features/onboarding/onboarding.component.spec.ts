@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Router } from '@angular/router';
 import { signal } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, EMPTY } from 'rxjs';
 import { vi } from 'vitest';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { provideNzIcons } from 'ng-zorro-antd/icon';
@@ -13,6 +13,7 @@ import { OnboardingComponent } from './onboarding.component';
 
 describe('New account onboarding', () => {
   let component: OnboardingComponent;
+  let originalUrl: string;
   let onboarded: ReturnType<typeof signal<boolean>>;
   let response: Subject<any>;
   let patch: ReturnType<typeof vi.fn>;
@@ -20,6 +21,8 @@ describe('New account onboarding', () => {
   let error: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    originalUrl = window.location.href;
+    window.history.replaceState(null, '', '/onboarding');
     localStorage.removeItem(THEME_STORAGE_KEY);
     onboarded = signal(false);
     response = new Subject();
@@ -30,7 +33,7 @@ describe('New account onboarding', () => {
       imports: [OnboardingComponent],
       providers: [provideNoopAnimations(), provideNzIcons([ArrowLeftOutline, ArrowRightOutline, ThunderboltOutline]),
         { provide: ProfileService, useValue: { profile: signal(null), isOnboarded: onboarded, patch } },
-        { provide: Router, useValue: { navigate } },
+        { provide: Router, useValue: { navigate, events: EMPTY } },
         { provide: NzMessageService, useValue: { error } },
       ],
     });
@@ -41,6 +44,7 @@ describe('New account onboarding', () => {
 
   afterEach(() => {
     TestBed.resetTestingModule();
+    window.history.replaceState(null, '', originalUrl);
     localStorage.removeItem(THEME_STORAGE_KEY);
     document.documentElement.removeAttribute('data-theme');
     document.documentElement.style.removeProperty('color-scheme');

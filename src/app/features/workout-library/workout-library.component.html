@@ -1,0 +1,651 @@
+<section class="library-hero">
+  <div>
+    <span class="library-eyebrow">YOUR TRAINING SPACE</span>
+    <h1>Your next<br /><span>30 days.</span></h1>
+    <p>A clear plan. A session you can find. A reason to come back.</p>
+  </div>
+  <div class="hero-actions">
+    <button type="button" class="library-text-button" (click)="logCardio()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 18h16l2-3H8L5 6H2m12-2h5v8M8 18v3m10-3v3" /></svg
+      >Log treadmill</button
+    ><button type="button" class="library-text-button" (click)="openLegends.emit()">
+      Legends’ collection <span aria-hidden="true">↗</span>
+    </button>
+  </div>
+</section>
+@if (activeSummary(); as active) {
+  <section class="active-program">
+    <div class="active-program-copy">
+      <span class="library-eyebrow">YOUR CURRENT PLAN · DAY {{ active.day }} / 30</span>
+      <h2>{{ active.program.title }}</h2>
+      <p>
+        Next up: <strong>{{ nextSession() }}</strong>
+      </p>
+      <div
+        class="active-progress"
+        role="progressbar"
+        aria-label="Completed plan sessions"
+        [attr.aria-valuenow]="active.done"
+        aria-valuemin="0"
+        [attr.aria-valuemax]="active.total"
+      >
+        <span [style.width.%]="active.percent"></span>
+      </div>
+      <small>{{ completionText() }}</small>
+    </div>
+    <button
+      type="button"
+      class="library-primary"
+      (click)="showProgram(active.program, active.enrollment)"
+    >
+      Continue plan <span aria-hidden="true">→</span>
+    </button>
+  </section>
+}
+<div class="library-toolbar">
+  <div class="library-tabs" role="group" aria-label="Workout library">
+    <button
+      type="button"
+      [class.active]="tab() === 'discover'"
+      [attr.aria-pressed]="tab() === 'discover'"
+      (click)="setTab('discover')"
+    >
+      Discover plans</button
+    ><button
+      type="button"
+      [class.active]="tab() === 'mine'"
+      [attr.aria-pressed]="tab() === 'mine'"
+      (click)="setTab('mine')"
+    >
+      My training</button
+    ><button
+      type="button"
+      [class.active]="tab() === 'sessions'"
+      [attr.aria-pressed]="tab() === 'sessions'"
+      (click)="setTab('sessions')"
+    >
+      Single sessions
+    </button>
+  </div>
+  <label class="library-search"
+    ><svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10" cy="10" r="6" />
+      <path d="m15 15 5 5" /></svg
+    ><input
+      type="search"
+      [ngModel]="query()"
+      (ngModelChange)="search($event)"
+      [placeholder]="
+        tab() === 'discover'
+          ? 'Find your plan'
+          : tab() === 'mine'
+            ? 'Find a plan or custom session'
+            : 'Search sessions or exercises'
+      "
+      aria-label="Search training library"
+  /></label>
+</div>
+@if (tab() === 'discover') {
+  <div class="program-goals" role="group" aria-label="Plan goals">
+    @for (item of goals; track item.id) {
+      <button
+        type="button"
+        [class.selected]="goal() === item.id"
+        [attr.aria-pressed]="goal() === item.id"
+        (click)="goal.set(item.id)"
+      >
+        {{ item.label }}
+      </button>
+    }
+  </div>
+  <div class="library-section-heading">
+    <div>
+      <h2>A plan for your kind of week.</h2>
+      <p>Choose by goal, time and experience. Each block lasts 30 days.</p>
+    </div>
+    <span>{{ filteredPrograms().length }} plans</span>
+  </div>
+  <div class="program-grid">
+    @for (program of filteredPrograms(); track program.id) {
+      <button type="button" class="program-tile" (click)="showProgram(program)">
+        <div class="program-tile-top">
+          <span class="program-art" [attr.data-art]="program.icon" aria-hidden="true"
+            ><svg viewBox="0 0 48 48">
+              @switch (program.icon) {
+                @case ('build') {
+                  <path d="M8 32V21m8 17V13m16 25V13m8 19V21M16 25h16" />
+                }
+                @case ('lean') {
+                  <path d="m8 29 9-12 8 9 14-17M8 39h32M32 9h7v7" />
+                }
+                @case ('busy') {
+                  <circle cx="24" cy="24" r="16" />
+                  <path d="M24 14v11l8 5" />
+                }
+                @case ('aesthetic') {
+                  <path d="m24 6 15 10-5 23H14L9 16 24 6Zm-9 10 9 10 9-10M24 26v13" />
+                }
+                @case ('glutes') {
+                  <path
+                    d="M12 9c0 8 7 10 7 17 0 7-7 8-7 14m24-31c0 8-7 10-7 17 0 7 7 8 7 14M19 26h10"
+                  />
+                }
+                @case ('home') {
+                  <path d="m7 22 17-15 17 15M12 19v21h24V19M20 40V28h8v12" />
+                }
+              }</svg></span
+          ><span class="program-duration">30 <small>days</small></span>
+        </div>
+        <span class="library-eyebrow">{{ program.eyebrow }}</span>
+        <h3>{{ program.title }}</h3>
+        <p class="program-tile-description">{{ program.description }}</p>
+        <div class="program-tile-facts">
+          <span
+            ><strong>{{ program.gymDays }}</strong> lifting days / week</span
+          ><span
+            ><strong>{{ program.minutes }}</strong> min</span
+          >
+        </div>
+        <div class="program-tile-bottom">
+          <span>{{ program.level }}</span
+          ><span class="tile-arrow" aria-hidden="true">↗</span>
+        </div>
+      </button>
+    } @empty {
+      <div class="library-empty">
+        <h3>No matching plans.</h3>
+        <p>Try another goal or a shorter search.</p>
+        <button type="button" (click)="query.set(''); goal.set('all')">Show all plans</button>
+      </div>
+    }
+  </div>
+  <div class="library-footnote">
+    <span aria-hidden="true">↗</span>
+    <p>
+      Every plan includes a weekly structure, progression guidance and recovery days. Choose your
+      own working loads during warm-up.
+    </p>
+  </div>
+} @else if (tab() === 'mine') {
+  <div class="library-section-heading">
+    <div>
+      <h2>Built around you.</h2>
+      <p>Your personalised plans and custom sessions, kept together.</p>
+    </div>
+    <button type="button" class="library-text-button" (click)="createWorkout.emit()">
+      + New session
+    </button>
+  </div>
+  @if (filteredSaved().length) {
+    <div class="saved-plan-grid">
+      @for (item of visibleSaved(); track item.plan.id) {
+        <button type="button" class="saved-plan-card" (click)="viewSavedPlan(item.plan.id)">
+          <span class="library-eyebrow">TRAINING ASSISTANT</span>
+          <h3>{{ item.plan.split }}</h3>
+          <p>
+            {{ item.plan.days.length }} sessions · {{ item.plan.preferences.minutes }} min ·
+            {{ goalLabels[item.plan.preferences.goal] }} ·
+            {{ dateLabel(item.plan.createdAt.slice(0, 10)) }}
+          </p>
+          <span>Open your plan <span aria-hidden="true">→</span></span>
+        </button>
+      }
+    </div>
+  }
+  @if (filteredSaved().length > 6) {
+    <div class="library-pagination">
+      <button type="button" [disabled]="savedPage() === 0" (click)="changeSavedPage(-1)">
+        ← Previous plans</button
+      ><span>Page {{ savedPage() + 1 }}</span
+      ><button
+        type="button"
+        [disabled]="(savedPage() + 1) * 6 >= filteredSaved().length"
+        (click)="changeSavedPage(1)"
+      >
+        Next plans →
+      </button>
+    </div>
+  }
+  @if (enrollments().length > 1) {
+    <details class="previous-blocks">
+      <summary>
+        Previous 30-day blocks <span>{{ enrollments().length - 1 }}</span>
+      </summary>
+      @for (enrollment of visibleBlocks(); track enrollment.id) {
+        @for (program of programs(); track program.id) {
+          @if (program.id === enrollment.programId) {
+            <button type="button" (click)="showProgram(program, enrollment)">
+              <span>{{ program.title }}</span
+              ><span>{{ dateLabel(enrollment.startDate) }} →</span>
+            </button>
+          }
+        }
+      }
+      @if (previousBlocks().length > 6) {
+        <div class="library-pagination">
+          <button type="button" [disabled]="blockPage() === 0" (click)="changeBlockPage(-1)">
+            ← Previous</button
+          ><span>Page {{ blockPage() + 1 }}</span
+          ><button
+            type="button"
+            [disabled]="(blockPage() + 1) * 6 >= previousBlocks().length"
+            (click)="changeBlockPage(1)"
+          >
+            Next →
+          </button>
+        </div>
+      }
+    </details>
+  }
+  <div class="library-section-heading compact">
+    <h2>Custom sessions</h2>
+    <span>{{ customRoutines().length }} saved</span>
+  </div>
+  <div class="session-grid">
+    @for (routine of visibleCustom(); track routine.id) {
+      <article class="session-tile">
+        <div>
+          <span class="library-eyebrow">CUSTOM SESSION</span
+          ><button
+            type="button"
+            class="session-delete"
+            [disabled]="deletingIds.has(routine.id!)"
+            [attr.aria-label]="'Delete ' + routine.name"
+            (click)="deleteRoutine.emit(routine.id!)"
+          >
+            {{ deletingIds.has(routine.id!) ? '…' : '×' }}
+          </button>
+        </div>
+        <h3>{{ routine.name }}</h3>
+        <p>{{ routine.exercises.length }} exercises · ~{{ minuteEstimate(routine) }} min</p>
+        <button type="button" class="session-view" (click)="viewRoutine(routine)">
+          View session <span aria-hidden="true">→</span>
+        </button>
+      </article>
+    } @empty {
+      <div class="library-empty">
+        <h3>Your sessions live here.</h3>
+        <p>
+          Create a custom workout, or build a personalised plan with Training Assistant on Home.
+        </p>
+        <button type="button" (click)="createWorkout.emit()">Create a session</button>
+      </div>
+    }
+  </div>
+  @if (filteredCustom().length > 6) {
+    <div class="library-pagination">
+      <button type="button" [disabled]="minePage() === 0" (click)="changeMinePage(-1)">
+        ← Previous</button
+      ><span>Page {{ minePage() + 1 }}</span
+      ><button
+        type="button"
+        [disabled]="(minePage() + 1) * 6 >= filteredCustom().length"
+        (click)="changeMinePage(1)"
+      >
+        Next →
+      </button>
+    </div>
+  }
+} @else {
+  <div class="library-section-heading">
+    <div>
+      <h2>One session. Easy to find.</h2>
+      <p>Useful when you want to train without starting a full block.</p>
+    </div>
+    <span>{{ filteredSessions().length }} sessions</span>
+  </div>
+  <div class="session-grid">
+    @for (routine of visibleSessions(); track routine.name) {
+      <article class="session-tile">
+        <span class="library-eyebrow">{{ routine.category || 'STRENGTH' }}</span>
+        <h3>{{ routine.name }}</h3>
+        <p>
+          {{
+            routine.description || routine.exercises.length + ' exercises for a focused session.'
+          }}
+        </p>
+        <div class="session-facts">
+          <span>{{ routine.exercises.length }} exercises</span
+          ><span>~{{ minuteEstimate(routine) }} min</span>
+        </div>
+        <button type="button" class="session-view" (click)="viewRoutine(routine)">
+          View session <span aria-hidden="true">→</span>
+        </button>
+      </article>
+    } @empty {
+      <div class="library-empty">
+        <h3>No sessions found.</h3>
+        <p>Try a workout name or an exercise such as “row”.</p>
+      </div>
+    }
+  </div>
+  @if (filteredSessions().length > 6) {
+    <div class="library-pagination">
+      <button type="button" [disabled]="page() === 0" (click)="changePage(-1)">← Previous</button
+      ><span
+        >{{ page() * 6 + 1 }}–{{ page() * 6 + visibleSessions().length }} of
+        {{ filteredSessions().length }}</span
+      ><button
+        type="button"
+        [disabled]="(page() + 1) * 6 >= filteredSessions().length"
+        (click)="changePage(1)"
+      >
+        Next →
+      </button>
+    </div>
+  }
+}
+<app-indoor-cardio [showLauncher]="false" />
+<dialog
+  #detailDialog
+  class="program-dialog"
+  aria-modal="true"
+  aria-labelledby="program-detail-title"
+  (cancel)="cancel($event)"
+  (keydown)="trapTab($event)"
+>
+  <div class="program-detail-screen">
+    <header>
+      <span class="library-eyebrow">{{
+        selectedProgram()
+          ? 'YOUR 30-DAY BLOCK'
+          : selectedSavedPlan()
+            ? 'YOUR PERSONALISED PLAN'
+            : 'SESSION PREVIEW'
+      }}</span
+      ><button
+        type="button"
+        class="program-close"
+        aria-label="Close plan details"
+        [disabled]="saving()"
+        autofocus
+        (click)="close()"
+      >
+        ×
+      </button>
+    </header>
+    <div #detailBody class="program-detail-scroll">
+      @if (selectedProgram(); as program) {
+        <section class="program-detail-intro">
+          <span class="library-eyebrow">{{ program.eyebrow }}</span>
+          <h2 id="program-detail-title">{{ program.title }}<span>.</span></h2>
+          <p>{{ program.description }}</p>
+          <div class="program-detail-facts">
+            <span><strong>30</strong> days</span
+            ><span
+              ><strong>{{ program.gymDays }}</strong> lifting days / week</span
+            ><span
+              ><strong>{{ program.minutes }}</strong> min</span
+            >
+          </div>
+          <p class="program-audience">{{ program.audience }}</p>
+          <div class="program-equipment">
+            <span>Equipment</span><strong>{{ program.equipment }}</strong>
+          </div>
+        </section>
+        <div class="program-detail-columns">
+          <section class="program-calendar-column">
+            <div class="detail-section-heading">
+              <h3>Your month, mapped out.</h3>
+              <span>{{ completed() }} / {{ totalSessions() }} sessions</span>
+            </div>
+            <div class="month-map" role="group" aria-label="30-day plan calendar">
+              @for (entry of calendar(); track entry.index) {
+                <button
+                  type="button"
+                  [class.selected]="selectedDay() === entry.index"
+                  [class.completed]="entry.done"
+                  [class.recovery]="entry.day.type === 'rest'"
+                  [class.today]="entry.today"
+                  [attr.aria-pressed]="selectedDay() === entry.index"
+                  [attr.aria-label]="
+                    'Day ' +
+                    (entry.index + 1) +
+                    ': ' +
+                    entry.day.title +
+                    (entry.done ? ', completed' : '')
+                  "
+                  (click)="selectDay(entry.index)"
+                >
+                  <strong>{{ entry.done ? '✓' : entry.index + 1 }}</strong
+                  ><small>{{
+                    entry.day.type === 'strength'
+                      ? 'Lift'
+                      : entry.day.type === 'cardio'
+                        ? 'Cardio'
+                        : 'Rest'
+                  }}</small>
+                </button>
+              }
+            </div>
+            <div class="month-map-legend">
+              <span><i></i>Strength</span><span><i class="cardio"></i>Cardio</span
+              ><span><i class="rest"></i>Recovery</span>
+            </div>
+            @if (selectedEnrollment()) {
+              <button
+                type="button"
+                class="library-text-button new-block-action"
+                (click)="newBlock()"
+              >
+                Start a new 30-day block <span aria-hidden="true">↗</span>
+              </button>
+            }
+            <div class="program-phase">
+              <span class="library-eyebrow">WEEK {{ currentWeek() + 1 }}</span>
+              <h4>{{ phases[currentWeek()].title }}</h4>
+              <p>{{ phases[currentWeek()].detail }}</p>
+            </div>
+            <details class="program-guidance">
+              <summary>What makes this plan work <span>+</span></summary>
+              <ul>
+                @for (highlight of program.highlights; track highlight) {
+                  <li>{{ highlight }}</li>
+                }
+              </ul>
+              @for (note of program.guidance; track note) {
+                <p>{{ note }}</p>
+              }
+            </details>
+          </section>
+          <section class="program-session-column">
+            @if (currentDay(); as entry) {
+              <div class="selected-day-caption">
+                <span>DAY {{ entry.index + 1 }} · {{ dateLabel(entry.date) }}</span
+                ><span>{{
+                  entry.done
+                    ? 'Completed'
+                    : entry.partial
+                      ? 'Partial session logged'
+                      : entry.day.type === 'rest'
+                        ? 'Recovery'
+                        : entry.today
+                          ? 'Today'
+                          : entry.future
+                            ? 'Upcoming'
+                            : 'Ready to train'
+                }}</span>
+              </div>
+              <h3>{{ entry.day.title }}</h3>
+              <p class="selected-day-copy">{{ entry.day.subtitle }}</p>
+              @if (entry.day.routine; as routine) {
+                <p class="session-prescription-note">
+                  {{ routine.exercises.length }} exercises · {{ totalSets(routine) }} working sets ·
+                  Compounds first
+                </p>
+                <div class="program-exercises">
+                  @for (exercise of routine.exercises; track $index) {
+                    <article>
+                      <div>
+                        <span class="exercise-order">{{
+                          ($index + 1).toString().padStart(2, '0')
+                        }}</span>
+                        <div>
+                          <h4>{{ exercise.name }}</h4>
+                          <p>
+                            {{ exercise.sets }} × {{ exercise.repRange || exercise.reps
+                            }}{{ exercise.repUnit === 'seconds' ? ' sec' : ' reps' }}
+                            <span>· {{ exercise.restSeconds || 90 }} sec rest</span>
+                          </p>
+                        </div>
+                      </div>
+                      @if (exercise.cue) {
+                        <details>
+                          <summary>Technique <span>+</span></summary>
+                          <p>{{ exercise.cue }}</p>
+                        </details>
+                      }
+                    </article>
+                  }
+                </div>
+              } @else if (entry.day.cardio; as cardio) {
+                <div class="program-cardio">
+                  <svg viewBox="0 0 48 48" aria-hidden="true">
+                    <path d="M6 35h32l4-6H16L10 12H4m24-4h10v18M16 35v7m20-7v7" /></svg
+                  ><strong>{{ cardio.minutes }}<small> minutes</small></strong
+                  ><span>{{ cardio.effort }}</span>
+                  <p>{{ cardio.instructions }}</p>
+                  <p>
+                    After your session, log the actual treadmill readings. Outdoor walks can be
+                    recorded from Run.
+                  </p>
+                </div>
+              } @else {
+                <div class="program-recovery">
+                  <span aria-hidden="true">↗</span>
+                  <h4>Recovery is part of the plan.</h4>
+                  <p>
+                    Take a break from structured lifting. Eat normally, get enough sleep and enjoy
+                    easy movement if you feel like it.
+                  </p>
+                  <p>There is nothing to check off on a rest day.</p>
+                </div>
+              }
+            }
+          </section>
+        </div>
+      } @else {
+        <section class="single-session-intro">
+          <h2 id="program-detail-title">
+            {{ selectedSavedPlan()?.split || selectedRoutine()?.name || 'Your session' }}
+          </h2>
+          @if (selectedSavedPlan(); as plan) {
+            <p>{{ plan.rationale }}</p>
+            <div class="saved-day-tabs" role="group" aria-label="Personal plan sessions">
+              @for (day of plan.days; track day.index) {
+                <button
+                  type="button"
+                  [class.active]="selectedRoutine()?.clientId === plan.id + '.' + day.index"
+                  [attr.aria-pressed]="selectedRoutine()?.clientId === plan.id + '.' + day.index"
+                  (click)="chooseSavedDay(day.index)"
+                >
+                  {{ day.name }}
+                </button>
+              }
+            </div>
+          }
+        </section>
+        @if (selectedRoutine(); as routine) {
+          <section class="single-session-content">
+            <h3>{{ routine.name }}</h3>
+            <p>
+              {{ routine.exercises.length }} exercises · {{ totalSets(routine) }} working sets · ~{{
+                minuteEstimate(routine)
+              }}
+              min
+            </p>
+            <div class="program-exercises">
+              @for (exercise of routine.exercises; track $index) {
+                <article>
+                  <div>
+                    <span class="exercise-order">{{
+                      ($index + 1).toString().padStart(2, '0')
+                    }}</span>
+                    <div>
+                      <h4>{{ exercise.name }}</h4>
+                      <p>
+                        {{ exercise.sets }} × {{ exercise.repRange || exercise.reps
+                        }}{{ exercise.repUnit === 'seconds' ? ' sec' : ' reps' }}
+                      </p>
+                    </div>
+                  </div>
+                  @if (exercise.cue) {
+                    <details>
+                      <summary>Technique <span>+</span></summary>
+                      <p>{{ exercise.cue }}</p>
+                    </details>
+                  }
+                </article>
+              }
+            </div>
+          </section>
+        } @else {
+          <p class="missing-routine">
+            This saved day is unavailable. Open Training Assistant on Home to finish saving your
+            plan.
+          </p>
+        }
+      }
+    </div>
+    <footer>
+      @if (error()) {
+        <p class="program-error" role="alert">{{ error() }}</p>
+      }
+      @if (status()) {
+        <p class="program-status" role="status">{{ status() }}</p>
+      }
+      <div class="program-footer-inner">
+        @if (selectedProgram()) {
+          @if (!selectedEnrollment()) {
+            <label
+              >Start date<input
+                type="date"
+                [ngModel]="startDate"
+                (ngModelChange)="updateStartDate($event)"
+                [min]="today()" /></label
+            ><button type="button" class="library-primary" [disabled]="saving()" (click)="enroll()">
+              {{ saving() ? 'Saving…' : 'Start this 30-day plan' }}
+              <span aria-hidden="true">→</span>
+            </button>
+          } @else {
+            <span class="program-footer-hint">{{
+              currentDay()?.future
+                ? 'Scheduled for ' + dateLabel(currentDay()!.date)
+                : currentDay()?.day?.type === 'rest'
+                  ? 'An easier day, on purpose.'
+                  : 'Warm up, then choose your working loads.'
+            }}</span>
+            @if (currentDay()?.day?.type !== 'rest') {
+              <button
+                type="button"
+                class="library-primary"
+                [disabled]="currentDay()?.future"
+                (click)="startDay()"
+              >
+                {{
+                  currentDay()?.day?.type === 'cardio'
+                    ? 'Log treadmill session'
+                    : currentDay()?.done
+                      ? 'Train this session again'
+                      : 'Start this session'
+                }}
+                <span aria-hidden="true">↗</span>
+              </button>
+            }
+          }
+        } @else {
+          <span class="program-footer-hint">Choose your own starting loads during warm-up.</span
+          ><button
+            type="button"
+            class="library-primary"
+            [disabled]="!selectedRoutine()"
+            (click)="startSingle()"
+          >
+            Start this session <span aria-hidden="true">↗</span>
+          </button>
+        }
+      </div>
+    </footer>
+  </div>
+</dialog>

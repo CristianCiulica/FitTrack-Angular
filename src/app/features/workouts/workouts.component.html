@@ -64,7 +64,7 @@
       <div class="header-left">
         <app-menu></app-menu>
         <h2>
-          <span class="desktop-page-title">Workouts</span>
+          <span class="desktop-page-title">History</span>
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
@@ -73,6 +73,7 @@
 
     <nz-content class="app-content">
       <section class="history-intro"><span>YOUR ACTIVITY</span><h1>A little stronger.<br>Every session.</h1><p>Your runs and workouts, all in one place.</p></section>
+      <app-indoor-cardio class="history-indoor-entry" (saved)="refreshWorkouts()" />
       <section class="cardio-history">
         <div class="section-heading">
           <div>
@@ -103,7 +104,7 @@
             >
               <div class="cardio-session-header">
                 <div>
-                  <h4>Run</h4>
+                  <h4>{{ session.indoor ? (session.mode === 'walking' ? 'Treadmill walk' : 'Treadmill run') : session.mode === 'walking' ? 'Walk' : 'Run' }}</h4>
                   <span>{{ session.startedAt | date: 'd MMM y, HH:mm' }}</span>
                 </div>
                 <div class="cardio-header-right">
@@ -123,7 +124,7 @@
                 </div>
               </div>
 
-              <div class="cardio-route" [class.tall]="expandedRuns().has(session.id!)">
+              <div *ngIf="session.route?.length" class="cardio-route" [class.tall]="expandedRuns().has(session.id!)">
                 <app-route-map [route]="session.route" label="Recorded running route"></app-route-map>
               </div>
 
@@ -139,7 +140,7 @@
                 </div>
                 <div>
                   <span><span nz-icon nzType="fire" class="stat-icon-inline"></span>Calories</span>
-                  <strong>{{ session.calories }} kcal</strong>
+                  <strong>{{ session.indoor && session.indoor.calories === null ? 'Not recorded' : session.calories + ' kcal' }}</strong>
                 </div>
               </div>
 
@@ -151,7 +152,10 @@
                 </div>
                 <div class="detail-row">
                   <span>Steps</span>
-                  <strong>{{ session.steps }}</strong>
+                  <strong>{{ session.indoor && session.indoor.steps === null ? 'Not recorded' : session.steps }}</strong>
+                </div>
+                <div class="detail-row" *ngIf="session.indoor && session.indoor.inclinePercent !== null">
+                  <span>Incline</span><strong>{{ session.indoor.inclinePercent }}%</strong>
                 </div>
                 <div class="detail-row">
                   <span>Started</span>
@@ -181,7 +185,7 @@
 
           <ng-template #noCardioSessions>
             <div class="empty-cardio-history">
-              Completed runs will appear here.
+              Outdoor runs and treadmill sessions will appear here.
             </div>
           </ng-template>
         </div>

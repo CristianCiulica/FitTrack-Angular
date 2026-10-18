@@ -1,3 +1,6 @@
+import { WorkoutLibraryComponent } from '../workout-library/workout-library.component';
+import { WorkoutRoutine as Routine, orderRoutineExercises } from '../../core/models/workout-routine.model';
+import { programSessionNotes } from '../../core/utils/program-records';
 import { trainingRoutineDetails } from '../training-planner/training-plan-storage';
 import { Subscription } from 'rxjs';
 import { isWorkoutSession, personalWorkoutPlans } from '../../core/utils/workout-kind';
@@ -26,28 +29,30 @@ import { estimateSessionCalories, estimateSessionMinutes } from '../../core/util
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 
-interface PlannedExercise {
-  name: string;
-  sets: number;
-  reps: number;
-  repUnit?: 'seconds';
-  repRange?: string;
-  restSeconds?: number;
-  rir?: number;
-  cue?: string;
-  weight: number;
-  muscleGroup: MuscleGroup;
-}
-
-interface Routine {
-  id?: string;
-  clientId?: string;
-  name: string;
-  category?: string;
-  description?: string;
-  restSeconds?: number;
-  exercises: PlannedExercise[];
-}
+const HOME_ROUTINES: Routine[] = [
+  {
+    name: 'Upper Home', category: 'Upper', restSeconds: 90,
+    exercises: [
+      { name: 'Pushups', sets: 3, reps: 8, repRange: '8–12', weight: 0, muscleGroup: 'Chest' },
+      { name: 'Pullups / Rows', sets: 3, reps: 8, repRange: '8–12', weight: 0, muscleGroup: 'Back' },
+      { name: 'Shoulder Press', sets: 3, reps: 8, repRange: '8–12', weight: 0, muscleGroup: 'Shoulders' },
+      { name: 'Lateral Raises', sets: 3, reps: 12, repRange: '12–20', weight: 0, muscleGroup: 'Shoulders' },
+      { name: 'Hammer Curls', sets: 2, reps: 10, repRange: '10–15', weight: 0, muscleGroup: 'Arms' },
+      { name: 'Triceps Extensions Above Head', sets: 2, reps: 10, repRange: '10–15', weight: 0, muscleGroup: 'Arms' },
+    ],
+  },
+  {
+    name: 'Lower Home', category: 'Lower', restSeconds: 90,
+    exercises: [
+      { name: 'Wide Squats', sets: 4, reps: 8, repRange: '8–15', weight: 0, muscleGroup: 'Legs' },
+      { name: 'Romanian Deadlift', sets: 4, reps: 8, repRange: '8–12', weight: 0, muscleGroup: 'Legs' },
+      { name: 'Donkey Kickbacks (each leg)', sets: 3, reps: 10, repRange: '10–12 / leg', weight: 0, muscleGroup: 'Legs' },
+      { name: 'Calf Raises', sets: 3, reps: 12, repRange: '12–20', weight: 0, muscleGroup: 'Legs' },
+      { name: 'Plank', sets: 3, reps: 30, repRange: '30–60', repUnit: 'seconds', weight: 0, muscleGroup: 'Core' },
+      { name: 'Leg Raises', sets: 3, reps: 20, weight: 0, muscleGroup: 'Core' },
+    ],
+  },
+];
 
 // General-purpose templates; users choose loads appropriate to their experience.
 const PREDEFINED_ROUTINES: Routine[] = [
@@ -728,6 +733,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
   standalone: true,
   imports: [
     CommonModule,
+    WorkoutLibraryComponent,
     RouterLink,
     RouterLinkActive,
     NzLayoutModule,
@@ -755,6 +761,10 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   readonly gymRoutines = PREDEFINED_ROUTINES.filter(routine => ['PUSH', 'PULL', 'LEGS'].includes(routine.name));
   readonly gymTotalSets = this.gymRoutines.reduce((total, routine) => total + routine.exercises.reduce((sets, exercise) => sets + exercise.sets, 0), 0);
   gymPlanOpen = signal(false);
+  readonly homeRoutines = HOME_ROUTINES;
+  homePlanSelected = signal(false);
+  readonly collectionRoutines = computed(() => this.homePlanSelected() ? this.homeRoutines : this.gymRoutines);
+  readonly collectionTotalSets = computed(() => this.collectionRoutines().reduce((total, routine) => total + this.routineSets(routine), 0));
   personalRoutines = signal<Routine[]>([]);
   selectedRoutineKey = signal('predefined-0');
   modalVisible = signal(false);
@@ -907,6 +917,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.restoreWorkout();
     this.reads.add(this.route.queryParams.subscribe(params => {
       if (params['plan'] === 'push-pull-legs') this.openGymPlan();
+      if (params['plan'] === 'upper-lower-home') this.openHomePlan();
     }));
   }
 
@@ -936,17 +947,15 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.authService.logout().subscribe();
   }
 
-  selectRoutine(routine: Routine, key: string) {
+  selectRoutine(routine: Routine, key: string, preserveOrder = false) {
     this.selectedRoutineKey.set(key);
     this.restTimeTarget.set(routine.restSeconds ?? 90);
-    this.currentRoutine.set({
-      ...routine,
-      exercises: routine.exercises.map(exercise => ({
+    const exercises = routine.exercises.map(exercise => ({
         ...exercise,
         // Older saved routines allowed fractional/out-of-range set counts.
         sets: Math.max(1, Math.min(50, Math.floor(Number(exercise.sets) || 1))),
-      })),
-    });
+      }));
+    this.currentRoutine.set({ ...routine, exercises: preserveOrder ? exercises : orderRoutineExercises(exercises) });
   }
 
   blockNavigation(event: Event) {
@@ -1048,13 +1057,23 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   openGymPlan(): void {
-    if (!this.workoutInProgress()) this.gymPlanOpen.set(true);
+    if (!this.workoutInProgress()) {
+      this.homePlanSelected.set(false);
+      this.gymPlanOpen.set(true);
+    }
+  }
+
+  openHomePlan(): void {
+    if (!this.workoutInProgress()) {
+      this.homePlanSelected.set(true);
+      this.gymPlanOpen.set(true);
+    }
   }
 
   startFromGymPlan(routine: Routine): void {
-    if (this.workoutInProgress() || !this.gymRoutines.includes(routine)) return;
+    if (this.workoutInProgress() || !this.collectionRoutines().includes(routine)) return;
     this.gymPlanOpen.set(false);
-    this.selectRoutine(routine, `gym-ppl-${routine.name.toLowerCase()}`);
+    this.selectRoutine(routine, `${this.homePlanSelected() ? 'home-upper-lower' : 'gym-ppl'}-${routine.name.toLowerCase()}`);
     this.startWorkout();
   }
 
@@ -1131,6 +1150,12 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   exerciseRestSeconds(): number {
     return this.currentExercise()?.restSeconds ?? this.restTimeTarget();
+  }
+
+  startLibraryRoutine(event: { routine: Routine; key: string }): void {
+    if (this.workoutInProgress()) return;
+    this.selectRoutine(event.routine, event.key);
+    this.startWorkout();
   }
 
   startWorkout() {
@@ -1456,7 +1481,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       clientId: this.sessionClientId,
       name: workout.name,
       date: dateStr,
-      notes: 'Auto-finished workout',
+      notes: workout.program ? programSessionNotes(workout.program, this.completedSets() === this.totalSets()) : 'Auto-finished workout',
       durationSeconds: this.finishedDuration(),
       isPredefined: false,
       kind: 'session',
@@ -1546,7 +1571,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.workoutService.workouts?.().some(workout => workout.clientId === draft.clientId)) {
       clearWorkoutDraft(this.authService.currentUserId); return;
     }
-    this.selectRoutine(draft.routine, draft.routine.id ?? 'recovered');
+    this.selectRoutine(draft.routine, draft.routine.id ?? 'recovered', true);
     this.previousBodyOverflow ??= document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     this.sessionClientId = draft.clientId;

@@ -1,3 +1,5 @@
+import { ProgramSessionContext } from '../models/workout-routine.model';
+import { validProgramContext } from './program-records';
 import { MuscleGroup, MUSCLE_GROUPS } from '../models/workout.model';
 
 export interface WorkoutDraft {
@@ -9,6 +11,7 @@ export interface WorkoutDraft {
     id?: string;
     name: string;
     restSeconds?: number;
+    program?: ProgramSessionContext;
     exercises: {
       name: string;
       sets: number;
@@ -20,6 +23,7 @@ export interface WorkoutDraft {
       restSeconds?: number;
       rir?: number;
       cue?: string;
+      compound?: boolean;
     }[];
   };
   state: 'active' | 'rest' | 'review';
@@ -51,6 +55,7 @@ export function readWorkoutDraft(owner: string): WorkoutDraft | null {
       !['active', 'rest', 'review'].includes(value.state) ||
       !/^\d{4}-\d{2}-\d{2}$/.test(value.date) ||
       !value.routine?.name ||
+      (value.routine.program != null && !validProgramContext(value.routine.program)) ||
       !Array.isArray(value.routine.exercises) ||
       value.routine.exercises.length < 1 ||
       value.routine.exercises.length > 50 ||
@@ -91,7 +96,8 @@ export function readWorkoutDraft(owner: string): WorkoutDraft | null {
         (exercise.repRange != null && (typeof exercise.repRange !== 'string' || exercise.repRange.length > 30)) ||
         (exercise.restSeconds != null && (!bounded(exercise.restSeconds, 900) || exercise.restSeconds < 1)) ||
         (exercise.rir != null && (!bounded(exercise.rir, 5) || !Number.isInteger(exercise.rir))) ||
-        (exercise.cue != null && (typeof exercise.cue !== 'string' || exercise.cue.length > 600))
+        (exercise.cue != null && (typeof exercise.cue !== 'string' || exercise.cue.length > 600)) ||
+        (exercise.compound != null && typeof exercise.compound !== 'boolean')
       )
         return null;
       for (const [rows, maximum] of [

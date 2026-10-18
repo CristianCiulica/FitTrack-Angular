@@ -1,3 +1,4 @@
+import { IndoorCardioComponent } from '../../shared/components/indoor-cardio/indoor-cardio.component';
 import { Subscription } from 'rxjs';
 import { NativeRunService, NativeRunSnapshot } from '../../core/services/native-run.service';
 import { ProfileService } from '../../core/services/profile.service';
@@ -49,6 +50,7 @@ interface AcceptedPosition {
     NzIconModule,
     NzCardModule,
     AppMenuComponent,
+    IndoorCardioComponent,
     NzModalModule,
   ],
   templateUrl: './running.component.html',

@@ -375,7 +375,6 @@ details[open] > summary > span {
   gap: 18px;
 }
 .coach-card,
-.volume-card,
 .plan-guidance,
 .plan-sources {
   padding: 22px;
@@ -414,48 +413,6 @@ details[open] > summary > span {
     font-size: 11px;
     color: var(--ink-tertiary);
     line-height: 1.8;
-  }
-}
-.volume-card {
-  h3 {
-    font-size: 15px;
-    font-weight: 650;
-    letter-spacing: -0.025em;
-  }
-  > p {
-    font-size: 11px;
-    line-height: 1.8;
-    color: var(--ink-secondary);
-    margin-top: 9px;
-  }
-}
-.volume-legend {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  color: var(--ink-tertiary);
-  font-size: 9px;
-  margin: 20px 0 8px;
-  i {
-    font-style: normal;
-    margin: 0 3px;
-  }
-}
-.volume-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-  padding: 9px 0;
-  border-top: 1px solid var(--hairline);
-  font-size: 11px;
-  strong {
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    > span {
-      color: var(--ink-tertiary);
-      font-weight: 450;
-    }
   }
 }
 .plan-guidance,

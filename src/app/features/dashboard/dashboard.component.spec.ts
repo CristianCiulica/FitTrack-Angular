@@ -1,3 +1,4 @@
+import { indoorCardioWorkout } from '../../core/utils/indoor-cardio';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
@@ -40,6 +41,16 @@ describe('Dashboard Activity data', () => {
     expect(component.activityDistanceUnit()).toBe('MI');
     expect(component.activityRings()[0].progress).toBe(100);
     expect(component.activityRings()[0].value).toBe(650);
+  });
+
+  it('includes measured indoor duration, distance and steps without increasing strength goals', () => {
+    component.workouts.set([indoorCardioWorkout({ version: 1, mode: 'walking', startedAt: new Date(2026, 9, 1, 10).toISOString(), endedAt: new Date(2026, 9, 1, 10, 30).toISOString(), distanceMeters: 2000, inclinePercent: 3, calories: 120, steps: 2400 }, 'u', 'indoor_test')]);
+    expect(component.exerciseMinutes()).toBe(30);
+    expect(component.burnedKcal()).toBe(120);
+    expect(component.stepsForDay()).toBe(2400);
+    expect(component.activityDistance()).toBe(2);
+    expect(component.activityWeekWorkouts()).toBe(0);
+    expect(component.workoutMeta(component.workouts()[0])).toBe('30 min · 2.00 km');
   });
 
   it('counts the selected calendar week across month boundaries and resets on an empty day', () => {

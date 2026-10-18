@@ -208,11 +208,11 @@
             routerLink="/workouts"
           >
             <span class="recent-icon" [attr.data-tone]="muscleTone(getPrimaryMuscle(w))">
-              <span nz-icon nzType="ft:workout"></span>
+              <span nz-icon [nzType]="isIndoorWorkout(w) ? 'ft:run' : 'ft:workout'"></span>
             </span>
             <span class="recent-copy">
               <span class="recent-name">{{ w.name || 'Untitled workout' }}</span>
-              <span class="recent-meta">{{ w.exercises.length || 0 }} exercises · ~{{ workoutKcal(w) }} kcal</span>
+              <span class="recent-meta">{{ workoutMeta(w) }}</span>
             </span>
             <span class="recent-side">
               <span class="recent-date">{{ w.date | date: 'd MMM' }}</span>

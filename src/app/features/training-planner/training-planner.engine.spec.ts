@@ -63,7 +63,13 @@ describe('Personal training programming', () => {
                 expect(new Set(day.exercises.map((e) => e.movement.id)).size).toBe(
                   day.exercises.length,
                 );
+                let foundIsolation = false;
                 for (const e of day.exercises) {
+                  if (!e.movement.compound) foundIsolation = true;
+                  else
+                    expect(foundIsolation, 'Compound after isolation: ' + e.movement.name).toBe(
+                      false,
+                    );
                   expect(canUseMovement(e.movement, p)).toBe(true);
                   expect(e.sets).toBeGreaterThanOrEqual(2);
                   expect(e.sets).toBeLessThanOrEqual(4);

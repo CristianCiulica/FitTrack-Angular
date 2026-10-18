@@ -1,3 +1,5 @@
+import { Workout } from '../models/workout.model';
+import { indoorCardio } from './indoor-cardio';
 // Estimare de calorii pentru antrenamentele de forta, pe baza volumului de seturi
 // si a greutatii corporale (MET ~5 pentru antrenament moderat cu greutati).
 
@@ -23,4 +25,10 @@ export function estimateSessionMinutes(
 ): number {
   const totalSets = exercises?.reduce((acc, e) => acc + (e.sets || 0), 0) ?? 0;
   return Math.round(totalSets * MINUTES_PER_SET);
+}
+
+/** Indoor cardio uses the user's machine reading, with unknown calories left unestimated. */
+export function workoutActivityCalories(workout: Workout, bodyWeightKg?: number | null): number {
+  const cardio = indoorCardio(workout);
+  return cardio ? cardio.calories ?? 0 : estimateSessionCalories(workout.exercises, bodyWeightKg);
 }

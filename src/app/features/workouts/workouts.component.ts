@@ -1,6 +1,8 @@
+import { IndoorCardioComponent } from '../../shared/components/indoor-cardio/indoor-cardio.component';
+import { CardioHistorySession, indoorHistorySession } from '../../core/utils/indoor-cardio';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { durationLabel } from '../../core/utils/workout-history';
-import { isWorkoutSession } from '../../core/utils/workout-kind';
+import { isStrengthWorkoutSession, isWorkoutSession } from '../../core/utils/workout-kind';
 import { displayWeight, displayDistance, displaySpeed, distanceUnitLabel, weightUnitLabel } from '../../core/utils/units';
 import { Component, DestroyRef, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -33,6 +35,7 @@ type SortDirection = 'ascend' | 'descend' | null;
   standalone: true,
   imports: [
     CommonModule,
+    IndoorCardioComponent,
     RouterLink,
     RouterLinkActive,
     NzTableModule,
@@ -58,7 +61,11 @@ export class WorkoutsComponent implements OnInit {
   private readonly destroy = inject(DestroyRef);
   readonly durationLabel = durationLabel;
   workouts = signal<Workout[]>([]);
-  runningSessions = signal<RunningSession[]>([]);
+  private readonly outdoorSessions = signal<RunningSession[]>([]);
+  readonly runningSessions = computed<CardioHistorySession[]>(() => [
+    ...this.outdoorSessions(),
+    ...this.workouts().map(indoorHistorySession).filter((session): session is CardioHistorySession => !!session),
+  ].sort((a,b) => b.startedAt.localeCompare(a.startedAt)));
   sortColumn = signal<WorkoutSortColumn>('date');
   sortDirection = signal<SortDirection>('descend');
   modalVisible = signal(false);
@@ -70,7 +77,7 @@ export class WorkoutsComponent implements OnInit {
   expandSet = new Set<string>();
 
   filteredWorkouts = computed(() => {
-    let data = this.workouts().filter(isWorkoutSession);
+    let data = this.workouts().filter(isStrengthWorkoutSession);
 
     const sc = this.sortColumn();
     const sd = this.sortDirection();
@@ -222,7 +229,7 @@ export class WorkoutsComponent implements OnInit {
   ngOnInit() {
     this.refreshWorkouts();
     this.runningSessionService.getSessions().pipe(takeUntilDestroyed(this.destroy)).subscribe((sessions) => {
-      this.runningSessions.set(sessions);
+      this.outdoorSessions.set(sessions);
     });
   }
 
@@ -240,7 +247,7 @@ export class WorkoutsComponent implements OnInit {
     return `${seconds}s`;
   }
 
-  private refreshWorkouts() {
+  refreshWorkouts() {
     this.workoutService.getWorkouts().pipe(takeUntilDestroyed(this.destroy)).subscribe((data) => this.workouts.set(data.filter(isWorkoutSession)));
   }
 
@@ -294,11 +301,18 @@ export class WorkoutsComponent implements OnInit {
 
   deleteRunningSession(id: string) {
     if (!id) return;
+    if (id.startsWith('indoor:')) {
+      this.workoutService.deleteWorkout(id.slice(7)).subscribe({
+        next: () => { this.message.success('Treadmill session deleted.'); this.refreshWorkouts(); },
+        error: () => this.message.error('Delete failed.'),
+      });
+      return;
+    }
     this.runningSessionService.deleteSession(id).subscribe({
       next: () => {
         this.message.success('Running session deleted!');
         this.runningSessionService.getSessions().pipe(takeUntilDestroyed(this.destroy)).subscribe((sessions) => {
-          this.runningSessions.set(sessions);
+          this.outdoorSessions.set(sessions);
         });
       },
       error: () => this.message.error('Delete failed.')

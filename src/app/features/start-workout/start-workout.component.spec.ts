@@ -1,3 +1,4 @@
+import { readProgramSession } from '../../core/utils/program-records';
 import { vi } from 'vitest';
 import { of, throwError, Subject } from 'rxjs';
 import { StartWorkoutComponent } from './start-workout.component';
@@ -43,6 +44,39 @@ describe('Workout session recovery', () => {
     expect(component.currentExercise()?.name).toBe('Leg Press');
     component.openGymPlan();
     expect(component.gymPlanOpen()).toBe(false);
+  });
+
+  it('starts the home lower session with its ranges and timed plank', () => {
+    component.cancelWorkout();
+    component.openHomePlan();
+    expect(component.gymPlanOpen()).toBe(true);
+    expect(component.collectionTotalSets()).toBe(36);
+    const lower = component.homeRoutines[1];
+    component.startFromGymPlan(lower);
+    expect(component.gymPlanOpen()).toBe(false);
+    expect(component.totalSets()).toBe(20);
+    expect(component.currentExercise()?.repRange).toBe('8–15');
+    for (let i = 0; i < 14; i++) component.skipSet();
+    expect(component.currentExercise()?.name).toBe('Plank');
+    expect(component.currentExercise()?.repUnit).toBe('seconds');
+    expect(component.holdTargetSeconds()).toBe(30);
+    for (let i = 0; i < 3; i++) component.skipSet();
+    expect(component.currentExercise()?.name).toBe('Leg Raises');
+    expect(component.currentExercise()?.reps).toBe(20);
+    component.openHomePlan();
+    expect(component.gymPlanOpen()).toBe(false);
+  });
+
+  it.each([true, false])('saves linked program progress with completed=%s', (complete) => {
+    component.currentRoutine.update(r => ({ ...r, program: { enrollmentId: 'pg_test', programId: 'build-30', dayIndex: 0, sessionId: 'upper-a' } }));
+    while (component.state() !== 'review') {
+      if (component.state() === 'rest') component.skipRest();
+      else if (complete || component.completedSets() === 0) component.finishSet();
+      else component.skipSet();
+    }
+    component.finishWorkout();
+    expect(readProgramSession(save.mock.calls[0][0])).toMatchObject({ enrollmentId: 'pg_test', completed: complete, dayIndex: 0 });
+    expect(save.mock.calls[0][0].exercises.reduce((sum: number, ex: any) => sum + ex.sets, 0)).toBe(complete ? 3 : 1);
   });
 
   it('normalizes legacy fractional set counts before allocating session slots', () => {

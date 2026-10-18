@@ -1,6 +1,7 @@
 import { Workout } from '../../core/models/workout.model';
 import {
   buildTrainingPlan,
+  compoundsFirst,
   estimateTrainingMinutes,
   startingLoad,
   validPreferences,
@@ -70,7 +71,7 @@ export function trainingMetadata(
 }
 export function trainingRoutineDetails(
   workout: Workout,
-): { repRange: string; restSeconds: number; rir: number; cue: string }[] | null {
+): { repRange: string; restSeconds: number; rir: number; cue: string; compound: boolean }[] | null {
   const m = trainingMetadata(workout);
   if (!m) return null;
   return m.exercises.map((e) => ({
@@ -78,6 +79,7 @@ export function trainingRoutineDetails(
     restSeconds: e.rest,
     rir: e.rir,
     cue: TRAINING_MOVEMENTS.find((item) => item.id === e.id)!.cue,
+    compound: TRAINING_MOVEMENTS.find((item) => item.id === e.id)!.compound,
   }));
 }
 export function trainingPlanWorkouts(
@@ -148,7 +150,7 @@ export function savedTrainingPlans(
         }));
         plan.days[index] = {
           ...plan.days[index],
-          exercises,
+          exercises: compoundsFirst(exercises),
           estimatedMinutes: estimateTrainingMinutes(exercises),
         };
       }

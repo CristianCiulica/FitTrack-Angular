@@ -1,3 +1,4 @@
+import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { TrainingPlannerComponent } from '../training-planner/training-planner.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivityGoalsComponent } from '../../shared/components/activity-goals/activity-goals.component';
@@ -18,8 +19,8 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Workout } from '../../core/models/workout.model';
-import { isWorkoutSession } from '../../core/utils/workout-kind';
-import { estimateSessionCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
+import { isWorkoutSession, isStrengthWorkoutSession } from '../../core/utils/workout-kind';
+import { workoutActivityCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import {
   ASSISTANT_OPTIONS,
@@ -130,7 +131,7 @@ export class DashboardComponent implements OnInit {
   thisWeekWorkouts = computed(() => {
     const monday = this.startOfWeek();
     const end = new Date(monday); end.setDate(end.getDate() + 7);
-    return this.workouts().filter(w => isWorkoutSession(w) && w.date.slice(0, 10) >= this.toKey(monday) && w.date.slice(0, 10) < this.toKey(end)).length;
+    return this.workouts().filter(w => isStrengthWorkoutSession(w) && w.date.slice(0, 10) >= this.toKey(monday) && w.date.slice(0, 10) < this.toKey(end)).length;
   });
   recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
 
@@ -214,7 +215,7 @@ export class DashboardComponent implements OnInit {
   });
 
   readonly stepsForDay = computed(() =>
-    this.sessionsForDay().reduce((acc, s) => acc + (s.steps ?? 0), 0),
+    this.sessionsForDay().reduce((acc, s) => acc + (s.steps ?? 0), 0) + this.workoutsForDay().reduce((sum, w) => sum + (indoorCardio(w)?.steps ?? 0), 0),
   );
 
   private readonly workoutsForDay = computed(() => {
@@ -226,7 +227,17 @@ export class DashboardComponent implements OnInit {
 
   // caloriile estimate ale unui antrenament de forta, pe baza greutatii din profil
   workoutKcal(workout: Workout): number {
-    return estimateSessionCalories(workout.exercises, this.profileService.weightKg());
+    return workoutActivityCalories(workout, this.profileService.weightKg());
+  }
+
+  isIndoorWorkout(workout: Workout): boolean { return !!indoorCardio(workout); }
+  workoutMeta(workout: Workout): string {
+    const cardio = indoorCardio(workout);
+    if (cardio) {
+      const distance = cardio.distanceMeters / (this.profileService.units() === 'imperial' ? 1609.344 : 1000);
+      return `${Math.round((workout.durationSeconds ?? 0) / 60)} min · ${distance.toFixed(2)} ${this.activityDistanceUnit().toLowerCase()}`;
+    }
+    return `${workout.exercises.length} exercises · ~${this.workoutKcal(workout)} kcal`;
   }
 
   // arse = alergari + antrenamentele de forta din ziua selectata
@@ -234,7 +245,7 @@ export class DashboardComponent implements OnInit {
     const runs = this.sessionsForDay().reduce((acc, s) => acc + (s.calories ?? 0), 0);
     const weight = this.profileService.weightKg();
     const workouts = this.workoutsForDay().reduce(
-      (acc, w) => acc + estimateSessionCalories(w.exercises, weight),
+      (acc, w) => acc + workoutActivityCalories(w, weight),
       0,
     );
     return Math.round(runs + workouts);
@@ -254,13 +265,13 @@ export class DashboardComponent implements OnInit {
     const end = new Date(start);
     end.setDate(end.getDate() + 7);
     return this.workouts().filter(workout => {
-      if (!isWorkoutSession(workout)) return false;
+      if (!isStrengthWorkoutSession(workout)) return false;
       const key = (workout.date ?? '').slice(0, 10);
       return key >= this.toKey(start) && key < this.toKey(end);
     }).length;
   });
   readonly activityDistance = computed(() => {
-    const meters = this.sessionsForDay().reduce((sum, session) => sum + session.distanceMeters, 0);
+    const meters = this.sessionsForDay().reduce((sum, session) => sum + session.distanceMeters, 0) + this.workoutsForDay().reduce((sum,w) => sum + (indoorCardio(w)?.distanceMeters ?? 0),0);
     return meters / (this.profileService.units() === 'imperial' ? 1609.344 : 1000);
   });
   readonly activityDistanceUnit = computed(() => this.profileService.units() === 'imperial' ? 'MI' : 'KM');

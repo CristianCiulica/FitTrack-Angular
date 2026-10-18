@@ -1,0 +1,344 @@
+:host {
+  display: block;
+}
+.indoor-launch {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 19px 21px;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  color: var(--ink);
+  background: var(--surface-strong);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  > span:nth-child(2) {
+    flex: 1;
+  }
+  strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  small {
+    display: block;
+    margin-top: 5px;
+    color: var(--ink-secondary);
+    font-size: 11px;
+  }
+  > span:last-child {
+    color: var(--accent);
+  }
+}
+.indoor-symbol {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--accent);
+  svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+.indoor-dialog {
+  --card: #fff;
+  position: fixed;
+  inset: 0;
+  width: min(620px, 100vw);
+  max-width: none;
+  max-height: none;
+  height: min(820px, 100dvh);
+  padding: 0;
+  margin: auto;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  color: var(--ink);
+  background: var(--bg);
+  overflow: hidden;
+  &::backdrop {
+    background: #0008;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  button,
+  input {
+    font: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:focus-visible,
+  input:focus-visible,
+  summary:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  h2,
+  h3,
+  p {
+    margin: 0;
+    color: inherit;
+  }
+}
+:host-context(html[data-theme='dark']) .indoor-dialog {
+  --card: #1c1c1e;
+}
+.indoor-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: max(24px, env(safe-area-inset-top)) 26px 22px;
+    background: var(--card);
+    border-bottom: 1px solid var(--hairline);
+    h2 {
+      font-size: 27px;
+      font-weight: 700;
+      letter-spacing: -0.045em;
+      margin-top: 7px;
+      line-height: 1.1;
+    }
+  }
+  > footer {
+    flex-shrink: 0;
+    padding: 16px 26px max(16px, env(safe-area-inset-bottom));
+    border-top: 1px solid var(--hairline);
+    background: var(--card);
+  }
+}
+.indoor-eyebrow {
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  color: var(--ink-tertiary);
+}
+.indoor-close {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font-size: 25px !important;
+  line-height: 1;
+}
+.indoor-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
+  padding: 26px;
+}
+.indoor-intro {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--ink-secondary) !important;
+}
+.indoor-target {
+  margin-top: 16px !important;
+  font-size: 12px;
+  line-height: 1.8;
+  padding: 13px 16px;
+  border-left: 2px solid var(--accent);
+  background: var(--card);
+}
+fieldset {
+  border: 0;
+  margin: 24px 0;
+  padding: 0;
+  legend {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+}
+.mode-switch {
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid var(--hairline);
+  border-radius: 13px;
+  background: var(--card);
+  button {
+    flex: 1;
+    min-height: 40px;
+    border: 0;
+    border-radius: 9px;
+    color: var(--ink-secondary);
+    background: transparent;
+    font-size: 12px;
+    &.selected {
+      background: #0071e3;
+      color: #fff;
+    }
+  }
+}
+.indoor-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 14px;
+  label {
+    display: block;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 550;
+    > span {
+      font-size: 10px;
+      font-weight: 450;
+      color: var(--ink-tertiary);
+      margin-left: 4px;
+    }
+    &.wide {
+      grid-column: 1/-1;
+    }
+  }
+  input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin-top: 9px;
+    min-height: 48px;
+    padding: 11px 13px;
+    border: 1px solid var(--hairline);
+    border-radius: 11px;
+    background: var(--card);
+    color: var(--ink);
+    font-size: 16px;
+  }
+}
+.optional-readings {
+  margin-top: 26px;
+  border-top: 1px solid var(--hairline);
+  padding-top: 17px;
+  summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 32px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    &::-webkit-details-marker {
+      display: none;
+    }
+    > span {
+      font-size: 10px;
+      font-weight: 450;
+      color: var(--ink-tertiary);
+    }
+  }
+  .indoor-fields {
+    margin-top: 18px;
+  }
+  p {
+    font-size: 11px;
+    line-height: 1.8;
+    margin-top: 15px;
+    color: var(--ink-secondary);
+  }
+}
+.indoor-note {
+  font-size: 10px;
+  line-height: 1.8;
+  color: var(--ink-tertiary) !important;
+  margin-top: 22px !important;
+}
+.indoor-primary {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 12px;
+  background: #0071e3;
+  color: #fff;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: none;
+}
+.indoor-error {
+  font-size: 12px;
+  color: #e34d4d !important;
+  line-height: 1.7;
+  margin-bottom: 12px !important;
+}
+.indoor-done {
+  text-align: center;
+  padding-top: 55px;
+  > span {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--card));
+    font-size: 25px;
+    margin: 0 auto 25px;
+  }
+  h3 {
+    font-size: 29px;
+    letter-spacing: -0.045em;
+    line-height: 1.2;
+  }
+  p {
+    font-size: 12px;
+    color: var(--ink-secondary);
+    line-height: 1.8;
+    margin-top: 15px;
+  }
+  > div {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 32px 0;
+    strong {
+      font-size: 32px;
+      font-weight: 650;
+      letter-spacing: -0.04em;
+    }
+    small {
+      font-size: 12px;
+      font-weight: 450;
+      color: var(--ink-secondary);
+    }
+  }
+}
+@media (max-width: 620px) {
+  .indoor-dialog {
+    width: 100vw;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+  }
+  .indoor-screen > header {
+    padding-inline: 20px;
+    h2 {
+      font-size: 25px;
+    }
+  }
+  .indoor-screen > footer {
+    padding-inline: 20px;
+  }
+  .indoor-body {
+    padding: 23px 20px;
+  }
+}
