@@ -1,3 +1,4 @@
+import { trainingRoutineDetails } from '../training-planner/training-plan-storage';
 import { Subscription } from 'rxjs';
 import { isWorkoutSession, personalWorkoutPlans } from '../../core/utils/workout-kind';
 import { readWorkoutDraft, writeWorkoutDraft, clearWorkoutDraft } from '../../core/utils/workout-draft';
@@ -30,12 +31,17 @@ interface PlannedExercise {
   sets: number;
   reps: number;
   repUnit?: 'seconds';
+  repRange?: string;
+  restSeconds?: number;
+  rir?: number;
+  cue?: string;
   weight: number;
   muscleGroup: MuscleGroup;
 }
 
 interface Routine {
   id?: string;
+  clientId?: string;
   name: string;
   category?: string;
   description?: string;
@@ -913,6 +919,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.componentDestroyed = true;
     this.checkpointWorkout();
     if (this.draftInterval) clearInterval(this.draftInterval);
     this.unlockPageScroll();
@@ -1087,24 +1094,43 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.startWorkout();
   }
 
+  private launchedPlanRoutine: string | null = null;
+  private componentDestroyed = false;
+
   private loadPersonalRoutines() {
     this.reads.add(this.workoutService.getWorkouts().subscribe((workouts) => {
-      this.personalRoutines.set(
-        personalWorkoutPlans(workouts)
-          .map((workout) => ({
-            id: workout.id,
-            name: workout.name,
-            exercises: workout.exercises.map((exercise) => ({
-              name: exercise.exerciseName,
-              muscleGroup: exercise.muscleGroup,
-              sets: exercise.sets,
-              reps: exercise.reps,
-              repUnit: exercise.repUnit,
-              weight: exercise.weight,
-            })),
+      this.personalRoutines.set(personalWorkoutPlans(workouts).map((workout) => {
+        const details = trainingRoutineDetails(workout);
+        return {
+          id: workout.id,
+          clientId: workout.clientId,
+          name: workout.name,
+          exercises: workout.exercises.map((exercise, index) => ({
+            name: exercise.exerciseName,
+            muscleGroup: exercise.muscleGroup,
+            sets: exercise.sets,
+            reps: exercise.reps,
+            repUnit: exercise.repUnit,
+            weight: exercise.weight,
+            ...(details?.[index] ?? {}),
           })),
-      );
+        };
+      }));
+      // Let recovery restore an unfinished workout before applying a launch link.
+      queueMicrotask(() => {
+        const requested = this.route.snapshot?.queryParamMap.get('routine');
+        if (this.componentDestroyed || !requested || this.launchedPlanRoutine === requested || this.workoutInProgress()) return;
+        const routine = this.personalRoutines().find(item => item.clientId === requested || item.id === requested);
+        if (!routine) return;
+        this.launchedPlanRoutine = requested;
+        this.selectRoutine(routine, 'personal-' + routine.id);
+        this.startWorkout();
+      });
     }));
+  }
+
+  exerciseRestSeconds(): number {
+    return this.currentExercise()?.restSeconds ?? this.restTimeTarget();
   }
 
   startWorkout() {
@@ -1272,7 +1298,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       const completedAt = this.holdStartedAt + this.holdTargetSeconds() * 1000 - this.holdAccumulatedMs;
       this.finishSet();
       // Preserve elapsed rest if the browser suspended timer callbacks.
-      this.restDeadline = completedAt + this.restTimeTarget() * 1000;
+      this.restDeadline = completedAt + this.exerciseRestSeconds() * 1000;
       this.updateRestTime();
     }
   }
@@ -1290,8 +1316,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.loggedReps[exIdx][setIdx] = this.currentReps();
     this.updateCompletedSets();
     this.state.set('rest');
-    this.restTimeRemaining.set(this.restTimeTarget());
-    this.restDeadline = Date.now() + this.restTimeTarget() * 1000;
+    this.restTimeRemaining.set(this.exerciseRestSeconds());
+    this.restDeadline = Date.now() + this.exerciseRestSeconds() * 1000;
     this.timerInterval = setInterval(() => this.updateRestTime(), 1000);
     this.checkpointWorkout();
   }

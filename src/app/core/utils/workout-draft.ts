@@ -16,6 +16,10 @@ export interface WorkoutDraft {
       weight: number;
       muscleGroup: MuscleGroup;
       repUnit?: 'seconds';
+      repRange?: string;
+      restSeconds?: number;
+      rir?: number;
+      cue?: string;
     }[];
   };
   state: 'active' | 'rest' | 'review';
@@ -83,7 +87,11 @@ export function readWorkoutDraft(owner: string): WorkoutDraft | null {
         exercise.sets > 50 ||
         !bounded(exercise.reps, 500) ||
         !bounded(exercise.weight, 1000) ||
-        (exercise.repUnit != null && exercise.repUnit !== 'seconds')
+        (exercise.repUnit != null && exercise.repUnit !== 'seconds') ||
+        (exercise.repRange != null && (typeof exercise.repRange !== 'string' || exercise.repRange.length > 30)) ||
+        (exercise.restSeconds != null && (!bounded(exercise.restSeconds, 900) || exercise.restSeconds < 1)) ||
+        (exercise.rir != null && (!bounded(exercise.rir, 5) || !Number.isInteger(exercise.rir))) ||
+        (exercise.cue != null && (typeof exercise.cue !== 'string' || exercise.cue.length > 600))
       )
         return null;
       for (const [rows, maximum] of [

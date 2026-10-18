@@ -36,3 +36,15 @@
   .previous-performance, .timed-exercise .previous-performance { margin-top: 6px; padding-top: 6px; }
   .review-symbol { margin-bottom: 8px; }.review h1 { margin: 8px 0; }.review p { margin-bottom: 6px; }
 }
+
+.live-plan-guidance { width: min(100%, 500px); text-align: left; padding: 10px 14px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--surface-strong); }
+.live-plan-guidance summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--ink); }
+.live-plan-guidance summary span { color: var(--ink-secondary); font-size: 10px; font-weight: 450; }
+.live-plan-guidance p { margin: 10px 0 0; font-size: 11px; color: var(--ink-secondary); line-height: 1.65; }
+
+.live-body:has(.live-plan-guidance[open]) { justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; }
+.live-body:has(.live-plan-guidance[open]) > * { flex-shrink: 0; }
+@media (max-height: 700px) {
+  .live-body:has(.live-plan-guidance) { justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; }
+  .live-body:has(.live-plan-guidance) > * { flex-shrink: 0; }
+}

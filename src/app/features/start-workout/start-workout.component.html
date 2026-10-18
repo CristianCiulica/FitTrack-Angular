@@ -352,9 +352,15 @@
       </div>
       <div class="live-stat">
         <label>Target</label>
-        <div class="value">{{ ex.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}</div>
+        <div class="value">{{ ex.repRange || ex.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}</div>
       </div>
     </div>
+
+    <details class="live-plan-guidance" *ngIf="ex.cue">
+      <summary>Technique & effort <span>{{ ex.rir }} reps left · {{ exerciseRestSeconds() }} sec rest</span></summary>
+      <p>{{ ex.cue }}</p>
+      <p>Finish with about {{ ex.rir }} good repetitions left. Use a comfortable range and adjust the load during warm-up.</p>
+    </details>
 
     <!-- logheaza ce ai facut efectiv la setul curent: repetari + greutate -->
     <div class="live-weight">

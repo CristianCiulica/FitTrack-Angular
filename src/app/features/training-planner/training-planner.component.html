@@ -1,0 +1,670 @@
+<button
+  #launcher
+  type="button"
+  class="training-fab"
+  aria-label="Training Assistant"
+  aria-haspopup="dialog"
+  aria-controls="training-planner-screen"
+  [attr.aria-expanded]="opened()"
+  (click)="open()"
+>
+  <span nz-icon nzType="ft:workout" aria-hidden="true"></span>
+  <svg class="fab-star" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <path d="M8 0 10.2 5.8 16 8l-5.8 2.2L8 16l-2.2-5.8L0 8l5.8-2.2Z" />
+  </svg>
+  <span class="fab-label" aria-hidden="true">Training Assistant</span>
+</button>
+<dialog
+  #dialog
+  id="training-planner-screen"
+  class="training-dialog"
+  aria-labelledby="training-planner-title"
+  aria-modal="true"
+  (cancel)="cancel($event)"
+  (close)="opened.set(false)"
+  (keydown)="trapTab($event)"
+>
+  <div #screen class="training-screen">
+    <header class="planner-header">
+      <span class="planner-mark" nz-icon nzType="ft:workout" aria-hidden="true"></span>
+      <div>
+        <span class="eyebrow">YOUR TRAINING, CONSIDERED</span>
+        <h2 id="training-planner-title">Training Assistant</h2>
+      </div>
+      <button
+        type="button"
+        class="planner-close"
+        aria-label="Close Training Assistant"
+        autofocus
+        (click)="close()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
+      </button>
+    </header>
+    <div #scrollBody class="planner-scroll">
+      @if (step() < 6) {
+        <div class="wizard-layout">
+          <section class="wizard-main">
+            <div class="step-caption">
+              <span>{{ steps[step()] }}</span
+              ><span>{{ step() + 1 }} <span class="muted">/ 6</span></span>
+            </div>
+            <div
+              class="step-track"
+              role="progressbar"
+              aria-label="Training preferences"
+              [attr.aria-valuenow]="step() + 1"
+              aria-valuemin="0"
+              aria-valuemax="6"
+            >
+              @for (label of steps; track label; let i = $index) {
+                <span [class.complete]="i <= step()"></span>
+              }
+            </div>
+            <h1 #heading tabindex="-1">{{ questions[step()].title }}</h1>
+            <p class="question-copy">{{ questions[step()].description }}</p>
+            @switch (step()) {
+              @case (0) {
+                <div class="choice-stack">
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().goal === 'muscle'"
+                    [attr.aria-pressed]="answers().goal === 'muscle'"
+                    (click)="choose('goal', 'muscle')"
+                  >
+                    <span class="choice-symbol"><span nz-icon nzType="ft:workout"></span></span
+                    ><span
+                      ><strong>Build muscle</strong
+                      ><small>Progressive, balanced training for hypertrophy.</small></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().goal === 'muscle' ? '✓' : ''
+                    }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().goal === 'strength'"
+                    [attr.aria-pressed]="answers().goal === 'strength'"
+                    (click)="choose('goal', 'strength')"
+                  >
+                    <span class="choice-symbol"
+                      ><svg viewBox="0 0 24 24"><path d="m4 16 5-5 4 3 7-9M14 5h6v6" /></svg></span
+                    ><span
+                      ><strong>Get stronger</strong
+                      ><small
+                        >Lower rep ranges on main lifts, with muscle-building support work.</small
+                      ></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().goal === 'strength' ? '✓' : ''
+                    }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().goal === 'recomp'"
+                    [attr.aria-pressed]="answers().goal === 'recomp'"
+                    (click)="choose('goal', 'recomp')"
+                  >
+                    <span class="choice-symbol"
+                      ><svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" />
+                        <path d="m8 12 3 3 5-6" /></svg></span
+                    ><span
+                      ><strong>Build & maintain muscle</strong
+                      ><small
+                        >A manageable workload alongside your body-composition goals.</small
+                      ></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().goal === 'recomp' ? '✓' : ''
+                    }}</span>
+                  </button>
+                </div>
+              }
+              @case (1) {
+                <div class="choice-stack">
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().experience === 'new'"
+                    [attr.aria-pressed]="answers().experience === 'new'"
+                    (click)="choose('experience', 'new')"
+                  >
+                    <span class="level-symbol" aria-hidden="true"
+                      ><i></i><i class="off"></i><i class="off"></i></span
+                    ><span
+                      ><strong>Building my foundation</strong
+                      ><small
+                        >New to structured lifting, or still learning consistent technique.</small
+                      ></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().experience === 'new' ? '✓' : ''
+                    }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().experience === 'consistent'"
+                    [attr.aria-pressed]="answers().experience === 'consistent'"
+                    (click)="choose('experience', 'consistent')"
+                  >
+                    <span class="level-symbol" aria-hidden="true"
+                      ><i></i><i></i><i class="off"></i></span
+                    ><span
+                      ><strong>Training consistently</strong
+                      ><small
+                        >Comfortable with the main movements and logging my workouts.</small
+                      ></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().experience === 'consistent' ? '✓' : ''
+                    }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().experience === 'experienced'"
+                    [attr.aria-pressed]="answers().experience === 'experienced'"
+                    (click)="choose('experience', 'experienced')"
+                  >
+                    <span class="level-symbol" aria-hidden="true"><i></i><i></i><i></i></span
+                    ><span
+                      ><strong>Experienced lifter</strong
+                      ><small
+                        >Years of consistent training, with reliable technique and effort
+                        control.</small
+                      ></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().experience === 'experienced' ? '✓' : ''
+                    }}</span>
+                  </button>
+                </div>
+              }
+              @case (2) {
+                <div class="preset-actions">
+                  <button type="button" (click)="equipmentPreset(true)">Select gym setup</button
+                  ><button type="button" (click)="equipmentPreset(false)">Dumbbells at home</button>
+                </div>
+                <div class="equipment-grid">
+                  @for (option of equipmentOptions; track option.value) {
+                    <button
+                      type="button"
+                      class="choice equipment-choice"
+                      [class.selected]="answers().equipment?.includes(option.value)"
+                      [attr.aria-pressed]="answers().equipment?.includes(option.value)"
+                      (click)="toggleEquipment(option.value)"
+                    >
+                      <span
+                        ><strong>{{ option.label }}</strong
+                        ><small>{{ option.detail }}</small></span
+                      ><span class="choice-check" aria-hidden="true">{{
+                        answers().equipment?.includes(option.value) ? '✓' : ''
+                      }}</span>
+                    </button>
+                  }
+                </div>
+                <p class="field-note">
+                  Bodyweight movements are included when useful. For balanced back training, select
+                  at least one source of pulling resistance.
+                </p>
+              }
+              @case (3) {
+                <fieldset class="schedule-field">
+                  <legend>Your training days <span>Choose 2–6</span></legend>
+                  <div class="weekday-picker">
+                    @for (day of weekdays; track day; let i = $index) {
+                      <button
+                        type="button"
+                        [class.selected]="answers().days?.includes(i)"
+                        [attr.aria-pressed]="answers().days?.includes(i)"
+                        [attr.aria-label]="day"
+                        (click)="toggleDay(i)"
+                      >
+                        <span>{{ day.slice(0, 3) }}</span
+                        ><strong>{{ day.slice(0, 1) }}</strong
+                        ><span class="day-dot" aria-hidden="true"></span>
+                      </button>
+                    }
+                  </div>
+                </fieldset>
+                <fieldset class="duration-field">
+                  <legend>Time per session <span>Including warm-up</span></legend>
+                  <div class="duration-picker">
+                    @for (minutes of minuteOptions; track minutes) {
+                      <button
+                        type="button"
+                        [class.selected]="answers().minutes === minutes"
+                        [attr.aria-pressed]="answers().minutes === minutes"
+                        (click)="choose('minutes', minutes)"
+                      >
+                        <strong>{{ minutes }}</strong
+                        ><span>min</span>
+                      </button>
+                    }
+                  </div>
+                </fieldset>
+                <p class="field-note">
+                  Choose the week you can repeat. Your split will follow your actual days, and
+                  longer rests stay in the time estimate.
+                </p>
+              }
+              @case (4) {
+                <div class="choice-stack">
+                  @for (option of focusOptions; track option.value) {
+                    <button
+                      type="button"
+                      class="choice"
+                      [class.selected]="answers().focus === option.value"
+                      [attr.aria-pressed]="answers().focus === option.value"
+                      (click)="choose('focus', option.value)"
+                    >
+                      <span
+                        ><strong>{{ option.title }}</strong
+                        ><small>{{ option.description }}</small></span
+                      ><span class="choice-check" aria-hidden="true">{{
+                        answers().focus === option.value ? '✓' : ''
+                      }}</span>
+                    </button>
+                  }
+                </div>
+              }
+              @case (5) {
+                <div class="choice-stack">
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().readiness === 'ready'"
+                    [attr.aria-pressed]="answers().readiness === 'ready'"
+                    (click)="choose('readiness', 'ready')"
+                  >
+                    <span
+                      ><strong>Ready to train</strong
+                      ><small
+                        >No current pain, injury or medical restriction affecting my
+                        training.</small
+                      ></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().readiness === 'ready' ? '✓' : ''
+                    }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().readiness === 'returning'"
+                    [attr.aria-pressed]="answers().readiness === 'returning'"
+                    (click)="choose('readiness', 'returning')"
+                  >
+                    <span
+                      ><strong>Returning after a break</strong
+                      ><small>Ready to exercise, with a gentler starting workload.</small></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().readiness === 'returning' ? '✓' : ''
+                    }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="choice"
+                    [class.selected]="answers().readiness === 'restricted'"
+                    [attr.aria-pressed]="answers().readiness === 'restricted'"
+                    (click)="choose('readiness', 'restricted')"
+                  >
+                    <span
+                      ><strong>I have pain or restrictions</strong
+                      ><small
+                        >I need individual guidance before following a general plan.</small
+                      ></span
+                    ><span class="choice-check" aria-hidden="true">{{
+                      answers().readiness === 'restricted' ? '✓' : ''
+                    }}</span>
+                  </button>
+                </div>
+                <p class="field-note">
+                  Designed for adults who can exercise independently. This planner does not assess
+                  injuries or prescribe rehabilitation.
+                </p>
+              }
+            }
+          </section>
+          <aside class="planner-aside">
+            <div class="blueprint" aria-hidden="true">
+              <svg viewBox="0 0 280 200">
+                <defs>
+                  <pattern id="training-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M20 0H0V20" fill="none" stroke="currentColor" stroke-opacity=".08" />
+                  </pattern>
+                </defs>
+                <rect width="280" height="200" fill="url(#training-grid)" />
+                <rect x="37" y="30" width="206" height="140" rx="16" class="blueprint-card" />
+                <path d="M56 62h70M56 73h45" class="blueprint-line" />
+                <path d="M56 143h168" class="blueprint-axis" />
+                <path d="m62 129 28-12 28 5 28-28 28 5 40-34" class="blueprint-curve" />
+                <circle cx="214" cy="65" r="5" class="blueprint-point" /></svg
+              ><span>Small steps. Strong foundations.</span>
+            </div>
+            <h3>The thinking behind your plan.</h3>
+            <div class="principle">
+              <span>01</span>
+              <div>
+                <strong>A workload you can repeat</strong>
+                <p>Your schedule and experience shape the split, sets and session length.</p>
+              </div>
+            </div>
+            <div class="principle">
+              <span>02</span>
+              <div>
+                <strong>Every movement has a role</strong>
+                <p>
+                  Presses, pulls and lower-body patterns form the foundation. Accessories follow
+                  your priorities.
+                </p>
+              </div>
+            </div>
+            <div class="principle">
+              <span>03</span>
+              <div>
+                <strong>Progress with a purpose</strong>
+                <p>Clear rep ranges, useful rest and room to improve before adding weight.</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      } @else if (plan(); as p) {
+        <div class="result-layout">
+          <section class="plan-intro">
+            <div class="plan-intro-top">
+              <span class="eyebrow">BUILT AROUND YOUR WEEK</span
+              ><button
+                type="button"
+                class="quiet-action"
+                [disabled]="saving()"
+                (click)="editPreferences()"
+              >
+                Edit preferences
+              </button>
+            </div>
+            <h1 #heading tabindex="-1">{{ p.split }}<span class="title-dot">.</span></h1>
+            <p>{{ p.rationale }}</p>
+            <div class="plan-context">
+              <span>{{ goalLabels[p.preferences.goal] }}</span
+              ><span>{{ focusLabels[p.preferences.focus] }}</span>
+            </div>
+          </section>
+          <div class="plan-summary">
+            <div>
+              <strong>{{ p.days.length }}<small> days</small></strong
+              ><span>Per week</span>
+            </div>
+            <div>
+              <strong>{{ p.preferences.minutes }}<small> min</small></strong
+              ><span>Session budget</span>
+            </div>
+            <div>
+              <strong
+                >{{
+                  p.preferences.readiness === 'returning' || p.preferences.experience === 'new'
+                    ? '3'
+                    : '2'
+                }}<small> reps</small></strong
+              ><span>Left in reserve</span>
+            </div>
+          </div>
+          <div class="result-columns">
+            <div class="sessions-column">
+              <div class="section-heading">
+                <h2>Your training week</h2>
+                <span>Repeat & progress</span>
+              </div>
+              <div class="plan-week" role="group" aria-label="Select a training day">
+                @for (weekday of weekdays; track weekday; let i = $index) {
+                  @if (dayForWeekday(i); as day) {
+                    <button
+                      type="button"
+                      [class.active]="activeDay() === day.index"
+                      [attr.aria-pressed]="activeDay() === day.index"
+                      [attr.aria-label]="weekday + ': ' + day.name"
+                      (click)="selectDay(day.index)"
+                    >
+                      <span>{{ weekLabel(i) }}</span
+                      ><strong>{{ day.index + 1 }}</strong
+                      ><span class="week-status">Train</span>
+                    </button>
+                  } @else {
+                    <div class="rest-day">
+                      <span>{{ weekLabel(i) }}</span
+                      ><strong>—</strong><span class="week-status">Rest</span>
+                    </div>
+                  }
+                }
+              </div>
+              @if (selectedDay(); as day) {
+                <div class="session-title">
+                  <div>
+                    <h2>{{ day.name }}</h2>
+                    <p>{{ day.emphasis }}</p>
+                  </div>
+                  <span class="session-duration">~{{ day.estimatedMinutes }} min</span>
+                </div>
+                <p class="session-meta">
+                  {{ day.exercises.length }} exercises <span>·</span> {{ totalSets() }} working sets
+                  <span>·</span> Warm-up included in time
+                </p>
+                <div class="exercise-list">
+                  @for (exercise of day.exercises; track exercise.movement.id; let i = $index) {
+                    <article class="exercise-card">
+                      <div class="exercise-top">
+                        <span class="exercise-number">{{
+                          (i + 1).toString().padStart(2, '0')
+                        }}</span>
+                        <div>
+                          <h3>{{ exercise.movement.name }}</h3>
+                          <p>
+                            {{ exercise.movement.primary
+                            }}{{ exercise.movement.unilateral ? ' · Both sides' : '' }}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          class="swap-button"
+                          [disabled]="saving()"
+                          [attr.aria-expanded]="swapIndex() === i"
+                          [attr.aria-label]="'Swap ' + exercise.movement.name"
+                          (click)="toggleSwap(i)"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M4 7h15m-4-4 4 4-4 4M20 17H5m4-4-4 4 4 4" /></svg
+                          ><span>Swap</span>
+                        </button>
+                      </div>
+                      <div class="exercise-prescription">
+                        <div>
+                          <strong>{{ exercise.sets }}</strong
+                          ><span>Sets</span>
+                        </div>
+                        <div>
+                          <strong>{{ exercise.minReps }}–{{ exercise.maxReps }}</strong
+                          ><span>{{ exercise.movement.unilateral ? 'Reps / side' : 'Reps' }}</span>
+                        </div>
+                        <div>
+                          <strong>{{ restLabel(exercise.restSeconds) }}</strong
+                          ><span>Rest</span>
+                        </div>
+                        <div>
+                          <strong>{{ exercise.rir }}</strong
+                          ><span>Reps left</span>
+                        </div>
+                      </div>
+                      <details class="coaching-detail">
+                        <summary>
+                          Execution & starting load <span aria-hidden="true">+</span>
+                        </summary>
+                        <p>{{ exercise.movement.cue }}</p>
+                        <div class="load-reference">
+                          <strong>{{ loadHint(exercise).value }}</strong>
+                          <p>{{ loadHint(exercise).label }}</p>
+                        </div>
+                      </details>
+                      @if (swapIndex() === i) {
+                        <section
+                          class="swap-panel"
+                          [attr.aria-label]="'Alternatives for ' + exercise.movement.name"
+                        >
+                          <div>
+                            <strong>Same role. Different movement.</strong>
+                            <p>Matched to your equipment and this exercise’s primary muscle.</p>
+                          </div>
+                          @for (alternative of alternatives(); track alternative.id) {
+                            <button type="button" (click)="swap(i, alternative.id)">
+                              <span>{{ alternative.name }}</span
+                              ><span aria-hidden="true">↗</span>
+                            </button>
+                          } @empty {
+                            <p class="no-alternatives">
+                              No equivalent alternative fits your selected equipment. Edit your
+                              equipment preferences to see more options; this movement has been kept
+                              in your plan.
+                            </p>
+                          }
+                          <button type="button" class="swap-cancel" (click)="swapIndex.set(null)">
+                            Keep current exercise
+                          </button>
+                        </section>
+                      }
+                    </article>
+                  }
+                </div>
+                <div class="warmup-note">
+                  <span class="note-icon" aria-hidden="true">↗</span>
+                  <div>
+                    <strong>Earn your working weight.</strong>
+                    <p>
+                      Start with easy movement, then 2–3 progressively heavier warm-up sets for your
+                      first main lift. Use fewer warm-up reps as load rises; stay well short of
+                      fatigue. The listed working sets exclude warm-ups.
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+            <aside class="plan-sidebar">
+              <section class="coach-card">
+                <span class="eyebrow">YOUR PROGRESSION RULE</span>
+                <h3>Reps first.<br />Then resistance.</h3>
+                <ol>
+                  <li>Choose a load that leaves the planned good reps in reserve.</li>
+                  <li>Build reps inside the range while keeping technique and range consistent.</li>
+                  <li>
+                    When every set reaches the top with the planned reserve, try the smallest
+                    available load increase. Return toward the lower end.
+                  </li>
+                </ol>
+                <p>
+                  If you miss the lower end, reduce the load or take more rest. With bodyweight,
+                  adjust assistance or leverage instead.
+                </p>
+              </section>
+              <section class="volume-card">
+                <h3>Your weekly workload</h3>
+                <p>Direct working sets. Supporting work is shown separately and overlaps.</p>
+                <div class="volume-legend">
+                  <span>Muscle</span><span>Direct <i>/</i> Support</span>
+                </div>
+                @for (row of volume(); track row.muscle) {
+                  <div class="volume-row">
+                    <span>{{ row.muscle }}</span
+                    ><strong
+                      >{{ row.direct }} <span>/ {{ row.support }}</span></strong
+                    >
+                  </div>
+                }
+              </section>
+              <details class="plan-guidance">
+                <summary>Make the plan work for you <span aria-hidden="true">+</span></summary>
+                <p>
+                  Keep the same exercises for several weeks so your logs are comparable. Swap when
+                  equipment or comfort requires it.
+                </p>
+                <p>
+                  If performance drops over several sessions and fatigue persists, take an easier
+                  week with fewer sets and lighter effort, then reassess.
+                </p>
+                @for (note of p.notes; track note) {
+                  <p>{{ note }}</p>
+                }
+                <p>
+                  Use comfortable, controlled movement. Stop an exercise that causes pain and seek
+                  individual advice.
+                </p>
+              </details>
+              <details class="plan-sources">
+                <summary>The principles behind this plan <span aria-hidden="true">+</span></summary>
+                <p>
+                  These are practical starting prescriptions informed by resistance-training
+                  research. Your response and recovery still guide adjustments.
+                </p>
+                @for (source of sources; track source.url) {
+                  <a [href]="source.url" target="_blank" rel="noopener noreferrer"
+                    >{{ source.label }} <span aria-hidden="true">↗</span></a
+                  >
+                }
+              </details>
+            </aside>
+          </div>
+        </div>
+      }
+    </div>
+    <footer class="planner-footer">
+      @if (error()) {
+        <div class="planner-feedback error" role="alert">{{ error() }}</div>
+      }
+      @if (saveMessage()) {
+        <div class="planner-feedback success" role="status">{{ saveMessage() }}</div>
+      }
+      <div class="footer-inner">
+        @if (step() < 6) {
+          <button type="button" class="back-action" [disabled]="step() === 0" (click)="back()">
+            <span aria-hidden="true">←</span> Back</button
+          ><button
+            type="button"
+            class="primary-action"
+            [disabled]="!canContinue()"
+            (click)="next()"
+          >
+            {{ step() === 5 ? 'Build my plan' : 'Continue'
+            }}<span aria-hidden="true">{{ step() === 5 ? '↗' : '→' }}</span>
+          </button>
+        } @else {
+          <div class="footer-status">
+            <span class="status-dot" [class.is-saved]="saved()"></span
+            ><span>{{
+              saving()
+                ? 'Saving your routines…'
+                : saved()
+                  ? 'Ready in My workouts'
+                  : 'Preview your plan, then make it yours.'
+            }}</span>
+          </div>
+          <div class="result-actions">
+            <button
+              type="button"
+              [class.secondary-action]="!saved()"
+              [class.primary-action]="saved()"
+              [disabled]="saving()"
+              (click)="saved() ? startSelectedDay() : save()"
+            >
+              {{ saving() ? 'Saving…' : saved() ? 'Start this session' : 'Save my plan' }}
+            </button>
+            @if (!saved()) {
+              <button
+                type="button"
+                class="primary-action"
+                [disabled]="saving()"
+                (click)="startSelectedDay()"
+              >
+                Save & train <span aria-hidden="true">↗</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </footer>
+  </div>
+</dialog>

@@ -1,3 +1,4 @@
+import { TrainingPlannerComponent } from '../training-planner/training-planner.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivityGoalsComponent } from '../../shared/components/activity-goals/activity-goals.component';
 import { DestroyRef, Component, ElementRef, OnInit, ViewChild, signal, computed, inject } from '@angular/core';
@@ -34,6 +35,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    TrainingPlannerComponent,
     ActivityGoalsComponent,
     RouterLink,
     RouterLinkActive,
