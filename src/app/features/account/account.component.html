@@ -30,7 +30,11 @@
           <span>Nutrition</span>
         </a>
       </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav">
+      <li
+        nz-menu-item
+        routerLinkActive="ant-menu-item-selected"
+        class="progress-nav sidebar-secondary-item"
+      >
         <a routerLink="/progress" aria-label="Progress"
           ><span nz-icon nzType="line-chart"></span><span>Progress</span></a
         >
@@ -71,272 +75,235 @@
 
     <nz-content class="app-content">
       <div class="profile-page">
-        <div class="profile-page-heading">
-          <span class="profile-eyebrow">PERSONAL, BY DESIGN</span
-          ><a routerLink="/progress">See your progress <span aria-hidden="true">↗</span></a>
-        </div>
-        <section class="athlete-card" aria-labelledby="profile-name">
-          <div class="hero-orbit orbit-one" aria-hidden="true"></div>
-          <div class="hero-orbit orbit-two" aria-hidden="true"></div>
-          <div class="hero-orbit orbit-three" aria-hidden="true"></div>
-          <div class="athlete-card-top">
-            <span>FITTRACK / ATHLETE PROFILE</span
-            ><span class="personal-tag"><i></i>YOUR OWN PACE</span>
-          </div>
-          <div class="athlete-identity">
-            <div class="avatar-wrap">
-              <div class="athlete-avatar">
-                @if (avatar()) {
-                  <img [src]="avatar()" alt="Your profile photo" />
-                } @else {
-                  <span>{{ initials(displayName() || email()) }}</span>
-                }
-              </div>
-              <label class="avatar-edit" [class.busy]="uploading()"
-                ><span nz-icon [nzType]="uploading() ? 'loading' : 'camera'"></span
-                ><input
-                  type="file"
-                  accept="image/*"
-                  aria-label="Change profile photo"
-                  [disabled]="uploading() || saving() || !loaded()"
-                  (change)="onAvatarSelected($event)"
-              /></label>
-            </div>
-            <div class="athlete-name">
-              <span class="identity-eyebrow">THE PERSON BEHIND THE PROGRESS</span>
-              <h1 id="profile-name">
-                {{ displayName() || 'Your profile' }}<span class="name-dot">.</span>
-              </h1>
-              <p>{{ email() || 'Your space to build something good.' }}</p>
+        <header class="profile-identity">
+          <div class="avatar-wrap">
+            <div class="profile-avatar">
               @if (avatar()) {
-                <button
-                  type="button"
-                  class="remove-avatar"
-                  [disabled]="uploading() || saving()"
-                  (click)="removeAvatar()"
-                >
-                  Remove photo
-                </button>
+                <img [src]="avatar()" alt="Your profile photo" />
+              } @else {
+                <span>{{ initials(displayName() || email()) }}</span>
               }
             </div>
+            <label class="avatar-edit"
+              ><span nz-icon [nzType]="uploading() ? 'loading' : 'camera'"></span
+              ><input
+                type="file"
+                accept="image/*"
+                aria-label="Change profile photo"
+                [disabled]="uploading() || saving() || !loaded()"
+                (change)="onAvatarSelected($event)"
+            /></label>
           </div>
-          <div class="athlete-card-bottom">
-            <span>Small steps. Your story.</span
-            ><span class="athlete-signature" aria-hidden="true">ft<span>✳</span></span>
+          <div>
+            <h1>{{ displayName() || 'Your profile' }}</h1>
+            <p>{{ email() }}</p>
+            @if (avatar()) {
+              <button
+                type="button"
+                class="remove-avatar"
+                [disabled]="uploading() || saving()"
+                (click)="removeAvatar()"
+              >
+                Remove photo
+              </button>
+            }
           </div>
-        </section>
-        <div class="profile-content-grid">
-          <section class="profile-form-card" aria-labelledby="profile-form-title">
-            <div class="form-heading">
-              <div>
-                <span class="profile-eyebrow">01 / THE ESSENTIALS</span>
-                <h2 id="profile-form-title">A little about you.</h2>
-              </div>
-              <span class="edit-indicator" [class.unsaved]="dirty()"
-                ><i></i>{{ dirty() ? 'Unsaved changes' : 'Your details' }}</span
+        </header>
+        <section class="weight-journey" aria-labelledby="weight-journey-title">
+          <div class="journey-heading">
+            <h2 id="weight-journey-title">Weight progress</h2>
+            <a routerLink="/weight">View history</a>
+          </div>
+          <div class="journey-values">
+            <div>
+              <span>Starting weight</span
+              ><strong
+                >{{ journey().start == null ? '—' : (journey().start | number: '1.1-1')
+                }}<small>{{ weightUnit() }}</small></strong
               >
             </div>
-            <p class="form-description">The details that make FitTrack yours.</p>
-            @if (error()) {
-              <div class="form-error" role="alert">
-                {{ error() }}
-                @if (!loaded()) {
-                  <button type="button" (click)="loadProfile()">Try again</button>
-                }
-              </div>
+            <div>
+              <span>Current weight</span
+              ><strong
+                >{{ journey().current == null ? '—' : (journey().current | number: '1.1-1')
+                }}<small>{{ weightUnit() }}</small></strong
+              >
+            </div>
+          </div>
+          <div class="journey-time" aria-live="polite">
+            @if (weightHistoryLoading()) {
+              <span>Loading your history…</span>
+            } @else if (weightHistoryError()) {
+              <span>Your starting weight couldn’t load.</span
+              ><button type="button" (click)="loadWeightHistory()">Try again</button>
+            } @else if (journey().startedOn) {
+              <span>{{
+                journey().elapsedDays === 0
+                  ? 'Started today'
+                  : journey().elapsedDays +
+                    (journey().elapsedDays === 1 ? ' day' : ' days') +
+                    ' since you started'
+              }}</span
+              ><span>{{ journey().startedOn | date: 'd MMM y' }}</span>
+            } @else {
+              <a routerLink="/weight">Log your first weigh-in to start tracking.</a>
             }
-            @if (loading() && !loaded()) {
-              <div class="profile-loading" role="status">Getting your profile ready…</div>
-            }
-            @if (loaded()) {
-              <form class="profile-form" (ngSubmit)="save()">
-                <fieldset [disabled]="saving() || uploading()">
-                  <legend class="sr-only">Personal details</legend>
-                  <label class="profile-field name-field"
-                    ><span>What should we call you?</span
+          </div>
+        </section>
+        <section class="profile-form-card" aria-labelledby="profile-form-title">
+          <div class="form-heading">
+            <div>
+              <h2 id="profile-form-title">Personal details</h2>
+            </div>
+            <span class="edit-indicator" [class.unsaved]="dirty()"
+              ><i></i>{{ dirty() ? 'Unsaved changes' : 'Your details' }}</span
+            >
+          </div>
+
+          @if (error()) {
+            <div class="form-error" role="alert">
+              {{ error() }}
+              @if (!loaded()) {
+                <button type="button" (click)="loadProfile()">Try again</button>
+              }
+            </div>
+          }
+          @if (loading() && !loaded()) {
+            <div class="profile-loading" role="status">Getting your profile ready…</div>
+          }
+          @if (loaded()) {
+            <form class="profile-form" (ngSubmit)="save()">
+              <fieldset [disabled]="saving() || uploading()">
+                <legend class="sr-only">Personal details</legend>
+                <label class="profile-field name-field"
+                  ><span>Name</span
+                  ><input
+                    type="text"
+                    name="displayName"
+                    autocomplete="name"
+                    maxlength="80"
+                    required
+                    placeholder="Your name"
+                    [ngModel]="name()"
+                    (ngModelChange)="name.set($event)"
+                /></label>
+                <div class="field-grid">
+                  <label class="profile-field"
+                    ><span>Age <small>years</small></span
                     ><input
-                      type="text"
-                      name="displayName"
-                      autocomplete="name"
-                      maxlength="80"
+                      type="number"
+                      name="age"
+                      inputmode="numeric"
+                      min="1"
+                      max="120"
+                      step="1"
                       required
-                      placeholder="Your name"
-                      [ngModel]="name()"
-                      (ngModelChange)="name.set($event)"
-                  /></label>
-                  <div class="field-grid">
+                      [ngModel]="age()"
+                      (ngModelChange)="age.set($event)" /></label
+                  ><label class="profile-field"
+                    ><span>Gender</span
+                    ><select name="gender" [ngModel]="sex()" (ngModelChange)="sex.set($event)">
+                      <option value="">Prefer not to say</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select></label
+                  >
+                </div>
+                <div class="form-divider">
+                  <span>BODY MEASUREMENTS</span
+                  ><a routerLink="/settings">{{ isImperial() ? 'Imperial' : 'Metric' }} units ↗</a>
+                </div>
+                <div class="field-grid">
+                  @if (!isImperial()) {
                     <label class="profile-field"
-                      ><span>Age <small>years</small></span
+                      ><span>Height <small>cm</small></span
                       ><input
                         type="number"
-                        name="age"
-                        inputmode="numeric"
+                        name="height"
+                        inputmode="decimal"
                         min="1"
-                        max="120"
+                        max="300"
                         step="1"
                         required
-                        [ngModel]="age()"
-                        (ngModelChange)="age.set($event)" /></label
-                    ><label class="profile-field"
-                      ><span>Gender</span
-                      ><select name="gender" [ngModel]="sex()" (ngModelChange)="sex.set($event)">
-                        <option value="">Prefer not to say</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                      </select></label
-                    >
-                  </div>
-                  <div class="form-divider">
-                    <span>BODY MEASUREMENTS</span
-                    ><a routerLink="/settings"
-                      >{{ isImperial() ? 'Imperial' : 'Metric' }} units ↗</a
-                    >
-                  </div>
-                  <div class="field-grid">
-                    @if (!isImperial()) {
-                      <label class="profile-field"
-                        ><span>Height <small>cm</small></span
-                        ><input
+                        [ngModel]="heightCm()"
+                        (ngModelChange)="heightCm.set($event)"
+                    /></label>
+                  } @else {
+                    <div class="profile-field">
+                      <span>Height <small>ft / in</small></span>
+                      <div class="height-inputs">
+                        <input
                           type="number"
-                          name="height"
-                          inputmode="decimal"
-                          min="1"
-                          max="300"
+                          name="feet"
+                          aria-label="Height in feet"
+                          min="0"
+                          max="9"
                           step="1"
                           required
-                          [ngModel]="heightCm()"
-                          (ngModelChange)="heightCm.set($event)"
-                      /></label>
-                    } @else {
-                      <div class="profile-field">
-                        <span>Height <small>ft / in</small></span>
-                        <div class="height-inputs">
-                          <input
-                            type="number"
-                            name="feet"
-                            aria-label="Height in feet"
-                            min="0"
-                            max="9"
-                            step="1"
-                            required
-                            [ngModel]="feet()"
-                            (ngModelChange)="onFeetInput($event)"
-                          /><input
-                            type="number"
-                            name="inches"
-                            aria-label="Height in inches"
-                            min="0"
-                            max="11"
-                            step="1"
-                            required
-                            [ngModel]="inches()"
-                            (ngModelChange)="onInchesInput($event)"
-                          />
-                        </div>
+                          [ngModel]="feet()"
+                          (ngModelChange)="onFeetInput($event)"
+                        /><input
+                          type="number"
+                          name="inches"
+                          aria-label="Height in inches"
+                          min="0"
+                          max="11"
+                          step="1"
+                          required
+                          [ngModel]="inches()"
+                          (ngModelChange)="onInchesInput($event)"
+                        />
                       </div>
-                    }
-                    <label class="profile-field"
-                      ><span
-                        >Weight <small>{{ weightUnit() }}</small></span
-                      ><input
-                        type="number"
-                        name="weight"
-                        inputmode="decimal"
-                        [min]="isImperial() ? 2.3 : 1"
-                        [max]="isImperial() ? 1102.3 : 500"
-                        step="0.1"
-                        required
-                        [ngModel]="weightInput()"
-                        (ngModelChange)="onWeightInput($event)"
-                    /></label>
-                  </div>
-                </fieldset>
-                @if (dirty() && !valid()) {
-                  <p class="validation-note" role="alert">
-                    Enter a name, a whole-number age (1–120), and valid height and weight values.
-                  </p>
-                }
-                <div class="save-row">
-                  <div class="save-status" aria-live="polite">
-                    {{ notice() || (dirty() ? 'Ready when you are.' : 'All set. All you.') }}
-                  </div>
-                  <div class="save-buttons">
-                    @if (dirty()) {
-                      <button
-                        class="discard-button"
-                        type="button"
-                        [disabled]="saving() || uploading()"
-                        (click)="discard()"
-                      >
-                        Discard
-                      </button>
-                    }
+                    </div>
+                  }
+                  <label class="profile-field"
+                    ><span
+                      >Weight <small>{{ weightUnit() }}</small></span
+                    ><input
+                      type="number"
+                      name="weight"
+                      inputmode="decimal"
+                      [min]="isImperial() ? 2.3 : 1"
+                      [max]="isImperial() ? 1102.3 : 500"
+                      step="0.1"
+                      required
+                      [ngModel]="weightInput()"
+                      (ngModelChange)="onWeightInput($event)"
+                  /></label>
+                </div>
+              </fieldset>
+              @if (dirty() && !valid()) {
+                <p class="validation-note" role="alert">
+                  Enter a name, a whole-number age (1–120), and valid height and weight values.
+                </p>
+              }
+              <div class="save-row">
+                <div class="save-status" aria-live="polite">
+                  {{ notice() || (dirty() ? 'Ready when you are.' : 'All set. All you.') }}
+                </div>
+                <div class="save-buttons">
+                  @if (dirty()) {
                     <button
-                      class="save-profile"
-                      type="submit"
-                      [disabled]="!valid() || !dirty() || saving() || uploading()"
+                      class="discard-button"
+                      type="button"
+                      [disabled]="saving() || uploading()"
+                      (click)="discard()"
                     >
-                      {{ saving() ? 'Saving…' : 'Save changes' }}<span aria-hidden="true">↗</span>
+                      Discard
                     </button>
-                  </div>
-                </div>
-              </form>
-            }
-          </section>
-          <aside class="profile-side">
-            <section class="body-card" aria-labelledby="body-card-title">
-              <div class="side-card-top">
-                <span class="profile-eyebrow">02 / YOUR BASELINE</span
-                ><span aria-hidden="true">↗</span>
-              </div>
-              <h2 id="body-card-title">Made of more.</h2>
-              <div class="body-weight">
-                <strong>{{
-                  savedWeight() == null ? '—' : (savedWeight() | number: '1.1-1')
-                }}</strong
-                ><span>{{ weightUnit() }}<small>body weight</small></span>
-              </div>
-              <div class="body-facts">
-                <div>
-                  <span>Height</span><strong>{{ savedHeight() }}</strong>
-                </div>
-                <div>
-                  <span>Age</span><strong>{{ savedAge() ?? '—' }}<small> years</small></strong>
-                </div>
-                <div>
-                  <span>BMI</span><strong>{{ bmiLabel() }}</strong>
+                  }
+                  <button
+                    class="save-profile"
+                    type="submit"
+                    [disabled]="!valid() || !dirty() || saving() || uploading()"
+                  >
+                    {{ saving() ? 'Saving…' : 'Save changes' }}<span aria-hidden="true">↗</span>
+                  </button>
                 </div>
               </div>
-              <a routerLink="/weight" class="body-track-link"
-                >Follow your measurements <span aria-hidden="true">↗</span></a
-              >
-            </section>
-            <section class="direction-card">
-              <span class="profile-eyebrow">03 / YOUR DIRECTION</span>
-              <div class="direction-symbol" aria-hidden="true">↗</div>
-              <h2>{{ goal().title }}.</h2>
-              <p>{{ goal().detail }}</p>
-              <div class="direction-goal">
-                <strong>{{ weeklyGoal() }}<span> workouts / week</span></strong
-                ><a routerLink="/settings" aria-label="Edit your goals">Edit ↗</a>
-              </div>
-            </section>
-            <a routerLink="/progress" class="profile-progress-link"
-              ><div>
-                <span class="profile-eyebrow">THE BIGGER PICTURE</span
-                ><strong>Your effort lives here.</strong>
-                <p>Explore your training & milestones.</p>
-              </div>
-              <span aria-hidden="true">↗</span></a
-            >
-          </aside>
-        </div>
-        <footer class="profile-footer">
-          <span>BUILT AROUND YOU.</span
-          ><a routerLink="/settings"
-            >Appearance, units & preferences <span aria-hidden="true">↗</span></a
-          >
-        </footer>
+            </form>
+          }
+        </section>
       </div>
     </nz-content>
   </nz-layout>

@@ -59,7 +59,7 @@
           </a>
         </li>
 
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav"><a [routerLink]="workoutInProgress() ? null : '/progress'" [attr.aria-disabled]="workoutInProgress()" [class.navigation-locked]="workoutInProgress()" (click)="blockNavigation($event)" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
+        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav sidebar-secondary-item"><a [routerLink]="workoutInProgress() ? null : '/progress'" [attr.aria-disabled]="workoutInProgress()" [class.navigation-locked]="workoutInProgress()" (click)="blockNavigation($event)" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item"><a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a></li>
         <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
           <a
@@ -197,6 +197,7 @@
 <!-- Drawer-ul Legends' Plans: lista de staruri sau planul selectat -->
 <nz-drawer
   [nzVisible]="legendsOpen()"
+  nzWrapClassName="legends-drawer"
   [nzWidth]="'100%'"
   [nzBodyStyle]="{ padding: '0', background: '#f5f5f7' }"
   nzPlacement="right"
@@ -341,7 +342,6 @@
   <!-- ACTIVE -->
   <div class="live-body" *ngIf="state() === 'active' && currentExercise() as ex" [class.timed-exercise]="ex.repUnit === 'seconds'">
     <div class="live-exercise-head">
-      <nz-tag nzColor="blue">{{ ex.muscleGroup }}</nz-tag>
       <h1>{{ ex.name }}</h1>
     </div>
 

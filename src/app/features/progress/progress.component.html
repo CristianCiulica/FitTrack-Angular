@@ -29,7 +29,11 @@
           <span nz-icon nzType="ft:nutrition"></span><span>Nutrition</span>
         </a>
       </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav">
+      <li
+        nz-menu-item
+        routerLinkActive="ant-menu-item-selected"
+        class="progress-nav sidebar-secondary-item"
+      >
         <a routerLink="/progress" aria-label="Progress"
           ><span nz-icon nzType="line-chart"></span><span>Progress</span></a
         >
@@ -71,28 +75,14 @@
     <nz-content class="app-content">
       <div class="progress-page">
         <header class="progress-intro">
-          <div>
-            <span class="page-eyebrow">YOUR EFFORT, IN PERSPECTIVE</span>
-            <h1>Progress is<br /><em>showing up.</em></h1>
-            <p>The days, the work, the little wins. All here.</p>
-          </div>
+          <h1>See your progress</h1>
           <section class="weekly-focus" aria-label="This week's workout goal">
             <div>
-              <span class="focus-eyebrow">THIS WEEK’S FOCUS</span
+              <span class="focus-eyebrow">Weekly goal</span
               ><strong
-                >{{ loading() ? '—' : summary().weeklyWorkouts }}
-                <small>/ {{ weeklyGoal() }} workouts</small></strong
-              >
-              <p>
-                {{
-                  loading()
-                    ? 'Gathering your activity…'
-                    : summary().weeklyWorkouts >= weeklyGoal()
-                      ? 'Your weekly goal. Accomplished.'
-                      : 'One session closer to your goal.'
-                }}
-              </p>
-              <app-activity-goals />
+                >{{ loading() ? '—' : summary().weeklyWorkouts
+                }}<small> / {{ weeklyGoal() }} workouts</small></strong
+              ><app-activity-goals />
             </div>
             <div
               class="goal-ring"
@@ -100,10 +90,7 @@
               role="img"
               [attr.aria-label]="goalPercent() + '% of weekly workout goal'"
             >
-              <span
-                >{{ loading() ? '—' : (goalPercent() | number: '1.0-0') + '%'
-                }}<small>of your goal</small></span
-              >
+              <span>{{ loading() ? '—' : (goalPercent() | number: '1.0-0') + '%' }}</span>
             </div>
           </section>
         </header>
@@ -112,193 +99,47 @@
             {{ error() }} <button type="button" (click)="load()">Try again</button>
           </div>
         }
-        <div class="section-caption">
-          <span>THE MONTH AT A GLANCE</span><strong>{{ monthLabel() }}</strong>
-        </div>
-        <div class="progress-stats" [attr.aria-busy]="loading()">
-          <section class="stat-card">
-            <span class="stat-top">Training days <span aria-hidden="true">↗</span></span
-            ><strong>{{ loading() ? '—' : summary().activeDays }}<small> days</small></strong>
-            <p>{{ summary().elapsedDays }} calendar days so far</p>
-          </section>
-          <section class="stat-card">
-            <span class="stat-top">Sessions logged <span aria-hidden="true">✦</span></span
-            ><strong>{{ loading() ? '—' : summary().totalSessions }}</strong>
-            <p>Strength, running & walking</p>
-          </section>
-          <section class="stat-card consistency-card">
-            <span class="stat-top">Consistency <span aria-hidden="true">◷</span></span
-            ><strong>{{ loading() ? '—' : summary().consistency }}<small>%</small></strong>
-            <div class="consistency-track">
-              <span [style.width.%]="loading() ? 0 : summary().consistency"></span>
+        <section class="month-overview" aria-labelledby="month-overview-title">
+          <div class="section-caption">
+            <h2 id="month-overview-title">The month at a glance</h2>
+            <span>{{ monthLabel() }}</span>
+          </div>
+          <div class="progress-stats" [attr.aria-busy]="loading()">
+            <div class="stat-card">
+              <span>Training days</span><strong>{{ loading() ? '—' : summary().activeDays }}</strong
+              ><small>{{ summary().elapsedDays }} days so far</small>
             </div>
-            <p>Active days / elapsed days</p>
-          </section>
-        </div>
+            <div class="stat-card">
+              <span>Sessions</span><strong>{{ loading() ? '—' : summary().totalSessions }}</strong
+              ><small>Completed this month</small>
+            </div>
+            <div class="stat-card">
+              <span>Consistency</span
+              ><strong>{{ loading() ? '—' : summary().consistency }}<small>%</small></strong
+              ><small>Active / elapsed days</small>
+            </div>
+          </div>
+        </section>
         <app-activity-calendar [(period)]="period" />
-        <div class="insights-grid">
-          <section class="insight-card rhythm-card">
-            <div class="insight-heading">
-              <div>
-                <span class="eyebrow">02 / YOUR RHYTHM</span>
-                <h2>One week at a time.</h2>
-              </div>
-              <span class="soft-pill"
-                >{{ loading() ? '—' : summary().bestStreak }} day best streak</span
-              >
-            </div>
-            @if (loading()) {
-              <p class="insight-empty">Loading your rhythm…</p>
-            } @else {
-              <div class="weekly-chart" role="img" [attr.aria-label]="rhythmDescription()">
-                @for (week of summary().weeks; track $index) {
-                  <div class="week-column">
-                    <span class="week-value">{{ week.upcoming ? '—' : week.count }}</span>
-                    <div class="week-bar-track">
-                      <span
-                        class="week-bar"
-                        [class.upcoming]="week.upcoming"
-                        [style.height.%]="
-                          week.upcoming
-                            ? 3
-                            : week.count
-                              ? 12 + (week.count / summary().peakWeek) * 88
-                              : 3
-                        "
-                      ></span>
-                    </div>
-                    <span class="week-label">{{ week.label }}</span>
-                  </div>
-                }
-              </div>
-              <p class="chart-note">Date ranges · completed sessions</p>
-            }
-          </section>
-          <section class="insight-card mix-card">
-            <span class="eyebrow">03 / THE MIX</span>
-            <h2>Every way you move.</h2>
-            <div class="mix-track" aria-hidden="true">
-              @for (item of summary().mix; track item.label) {
-                <span
-                  [style.width.%]="loading() ? 0 : item.percent"
-                  [style.background]="item.color"
-                ></span>
-              }
-            </div>
-            <div class="mix-list">
-              @for (item of summary().mix; track item.label) {
+        <section class="achievements-card" aria-labelledby="achievements-title">
+          <h2 id="achievements-title">Achievements</h2>
+          <div class="milestones">
+            @for (milestone of summary().milestones; track milestone.label) {
+              <div class="milestone" [class.earned]="!loading() && milestone.earned">
+                <span class="milestone-mark" aria-hidden="true">{{ milestone.mark }}</span>
                 <div>
-                  <span><i [style.background]="item.color"></i>{{ item.label }}</span
-                  ><strong>{{ loading() ? '—' : item.count }}<small> sessions</small></strong>
+                  <strong>{{ milestone.label }}</strong
+                  ><span>{{ milestone.detail }}</span>
                 </div>
-              }
-            </div>
-          </section>
-        </div>
-        <div class="insights-grid bottom-insights">
-          <section class="insight-card weight-insight">
-            <div class="insight-heading">
-              <div>
-                <span class="eyebrow">04 / BODY TREND</span>
-                <h2>A wider perspective.</h2>
-              </div>
-              <a routerLink="/weight" class="round-link" aria-label="Open weight tracking">↗</a>
-            </div>
-            @if (weightLoading()) {
-              <p class="insight-empty">Loading your weigh-ins…</p>
-            } @else if (weightError()) {
-              <div class="insight-empty">
-                Your weight trend couldn’t load.
-                <button type="button" (click)="loadWeight()">Try again</button>
-              </div>
-            } @else if (latestWeight(); as latest) {
-              <div class="weight-summary">
-                <strong
-                  >{{ latest.value | number: '1.1-1' }}<small>{{ weightUnit() }}</small></strong
-                ><span>Latest weigh-in<br />{{ latest.date | date: 'd MMM y' }}</span>
-              </div>
-              @if (chart().points.length > 1) {
-                <svg
-                  class="weight-sparkline"
-                  viewBox="0 0 360 180"
-                  role="img"
-                  aria-label="Weight measurements over the last 90 days. Open weight tracking for individual values."
+                <span
+                  class="earned-check"
+                  [attr.aria-label]="!loading() && milestone.earned ? 'Earned' : 'Not yet earned'"
+                  >{{ !loading() && milestone.earned ? '✓' : '○' }}</span
                 >
-                  <defs>
-                    <linearGradient id="progress-weight-fill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#5375f5" stop-opacity=".2" />
-                      <stop offset="100%" stop-color="#5375f5" stop-opacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    [attr.d]="
-                      chart().path +
-                      ' L' +
-                      chart().points[chart().points.length - 1].x +
-                      ',180 L' +
-                      chart().points[0].x +
-                      ',180 Z'
-                    "
-                    fill="url(#progress-weight-fill)"
-                  />
-                  <path
-                    [attr.d]="chart().path"
-                    fill="none"
-                    stroke="#5375f5"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    vector-effect="non-scaling-stroke"
-                  />
-                </svg>
-                <div class="weight-chart-caption">
-                  <span>LAST 90 DAYS</span
-                  ><strong
-                    >{{ chart().change! > 0 ? '+' : '' }}{{ chart().change | number: '1.1-1' }}
-                    {{ weightUnit() }}</strong
-                  >
-                </div>
-              } @else {
-                <p class="insight-empty compact-empty">
-                  {{
-                    chart().points.length
-                      ? 'Another weigh-in will start your trend.'
-                      : 'Log a recent weigh-in to see your 90-day trend.'
-                  }}
-                </p>
-              }
-            } @else {
-              <p class="insight-empty">
-                Your story is more than a number.<br />Log a weigh-in whenever you’re ready.
-              </p>
-              <a routerLink="/weight" class="text-link">Log your first weigh-in ↗</a>
+              </div>
             }
-          </section>
-          <section class="insight-card milestones-card">
-            <span class="eyebrow">05 / LITTLE WINS</span>
-            <h2>Earned, one day at a time.</h2>
-            <p class="milestone-intro">Your milestones, across all your training.</p>
-            <div class="milestones">
-              @for (milestone of summary().milestones; track milestone.label) {
-                <div class="milestone" [class.earned]="!loading() && milestone.earned">
-                  <span class="milestone-mark" aria-hidden="true">{{ milestone.mark }}</span>
-                  <div>
-                    <strong>{{ milestone.label }}</strong
-                    ><span>{{ milestone.detail }}</span>
-                  </div>
-                  <span
-                    class="earned-check"
-                    [attr.aria-label]="!loading() && milestone.earned ? 'Earned' : 'Not yet earned'"
-                    >{{ !loading() && milestone.earned ? '✓' : '○' }}</span
-                  >
-                </div>
-              }
-            </div>
-          </section>
-        </div>
-        <footer class="page-signoff">
-          <span>KEEP YOUR OWN PACE.</span
-          ><span>Make the next day count. <a routerLink="/start-workout">Let’s train ↗</a></span>
-        </footer>
+          </div>
+        </section>
       </div>
     </nz-content>
   </nz-layout>

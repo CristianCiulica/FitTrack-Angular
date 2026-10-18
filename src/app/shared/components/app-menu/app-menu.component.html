@@ -1,19 +1,37 @@
-<button type="button" class="hamburger" aria-label="Open menu" (click)="toggle()">
+<button
+  type="button"
+  class="hamburger"
+  [attr.aria-label]="open() ? 'Close menu' : 'Open menu'"
+  [attr.aria-expanded]="open()"
+  [attr.aria-controls]="menuCreated() ? 'mobile-navigation' : null"
+  aria-haspopup="dialog"
+  (click)="toggle()"
+>
   <span></span>
   <span></span>
   <span></span>
 </button>
 
 <nz-drawer
+  *ngIf="menuCreated()"
   [nzVisible]="open()"
   nzPlacement="left"
   [nzClosable]="false"
-  [nzWidth]="308"
+  [nzWidth]="'min(336px, calc(100vw - 32px))'"
+  [nzZIndex]="1100"
+  [nzCloseOnNavigation]="true"
   nzWrapClassName="app-menu-drawer"
   (nzOnClose)="close()"
 >
   <ng-container *nzDrawerContent>
-    <div class="menu-panel">
+    <div
+      class="menu-panel"
+      id="mobile-navigation"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigation menu"
+      [attr.aria-hidden]="!open()"
+    >
       <div class="menu-brand">
         <span class="brand">FitTrack<span>.</span></span>
         <button type="button" class="close-btn" aria-label="Close menu" (click)="close()">
@@ -27,14 +45,23 @@
           <img *ngIf="avatar()" [src]="avatar()" alt="" />
           <ng-container *ngIf="!avatar()">{{ initials() }}</ng-container>
         </span>
-        <strong class="hero-name">{{ displayName() || 'Your profile' }}</strong>
-        <small class="hero-email">{{ profile()?.email }}</small>
-        <span class="hero-cta-pill">View profile <span aria-hidden="true">›</span></span>
+        <span class="hero-copy"
+          ><strong class="hero-name">{{ displayName() || 'Your profile' }}</strong
+          ><small class="hero-email">{{ profile()?.email }}</small
+          ><span class="hero-cta-pill">View profile <span aria-hidden="true">›</span></span></span
+        >
       </button>
 
-      <span class="menu-section-label">Manage</span>
-      <nav class="menu-links">
-        <button type="button" *ngFor="let link of links" class="menu-link" (click)="go(link.path)">
+      <span class="menu-section-label">Explore</span>
+      <nav class="menu-links" aria-label="Main pages">
+        <button
+          type="button"
+          *ngFor="let link of links"
+          class="menu-link"
+          [class.current]="isCurrent(link.path)"
+          [attr.aria-current]="isCurrent(link.path) ? 'page' : null"
+          (click)="go(link.path)"
+        >
           <span class="link-icon" nz-icon [nzType]="link.icon"></span>
           <span class="link-copy">
             <strong>{{ link.label }}</strong>
@@ -44,9 +71,7 @@
         </button>
       </nav>
 
-      <button type="button" class="logout-link" (click)="logout()">
-        Log out
-      </button>
+      <button type="button" class="logout-link" (click)="logout()">Log out</button>
     </div>
   </ng-container>
 </nz-drawer>

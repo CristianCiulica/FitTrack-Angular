@@ -1,7 +1,6 @@
 <section class="activity-calendar" aria-labelledby="calendar-title" [attr.aria-busy]="loading()">
   <header class="calendar-top">
     <div>
-      <span class="eyebrow">01 / SHOWING UP</span>
       <h2 id="calendar-title">Your training days.</h2>
     </div>
     <div class="month-navigation">
@@ -62,7 +61,7 @@
             type="button"
             (click)="selectMonth(today().getFullYear(), today().getMonth())"
           >
-            Back to this month <span aria-hidden="true">↗</span>
+            Back to this month
           </button>
         </div>
       </details>
@@ -124,7 +123,7 @@
       </div>
       <aside class="day-detail" aria-live="polite" aria-atomic="true">
         @let day = selectedDay();
-        <div class="journal-label">THE DAILY RECORD <span aria-hidden="true">↙</span></div>
+        <div class="journal-label">THE DAILY RECORD</div>
         <div class="journal-date">
           <strong>{{ day.number < 10 ? '0' + day.number : day.number }}</strong>
           <div>
@@ -148,7 +147,7 @@
           </p>
         } @else {
           <span class="journal-status">{{
-            day.state === 'future' ? 'Still to be written.' : 'A quiet square.'
+            day.state === 'future' ? 'Still to be written.' : 'Become Stronger'
           }}</span>
           <p class="journal-empty">
             {{
@@ -159,13 +158,9 @@
           </p>
         }
         @if (day.today) {
-          <a routerLink="/start-workout" class="journal-link"
-            >Start a workout <span aria-hidden="true">↗</span></a
-          >
+          <a routerLink="/start-workout" class="journal-link">Start a workout </a>
         } @else if (day.state !== 'future') {
-          <a routerLink="/workouts" class="journal-link"
-            >Open training history <span aria-hidden="true">↗</span></a
-          >
+          <a routerLink="/workouts" class="journal-link">Open training history </a>
         }
       </aside>
     </div>

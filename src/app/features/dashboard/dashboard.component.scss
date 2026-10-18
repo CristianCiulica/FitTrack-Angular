@@ -177,8 +177,14 @@
 .metric-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 0;
   margin-bottom: 14px;
+  padding: 4px;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--dashboard-card-bg, var(--surface-strong));
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .03);
+  overflow: hidden;
 }
 
 .metric-card {
@@ -186,10 +192,11 @@
   flex-direction: column;
   gap: 4px;
   padding: 20px 22px;
-  border-radius: 24px;
-  background: var(--dashboard-card-bg, #fff);
-  border: 1px solid var(--hairline);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, .03);
+  min-width: 0;
+  border-radius: 0;
+  background: transparent !important;
+  border: 0;
+  box-shadow: none;
 
   .metric-head {
     display: flex;
@@ -227,7 +234,7 @@
   }
 }
 
-.goals-card.goal-complete { border-color: rgba(52, 199, 89, .3); }
+.metric-grid > .metric-card + .metric-card { border-left: 1px solid var(--hairline); }
 
 .goal-done {
   display: flex;
@@ -638,13 +645,11 @@
     font-size: 14px;
   }
 
-  .metric-grid {
-    gap: 10px;
-  }
+  .metric-grid { gap: 0; }
 
   .metric-card {
     padding: 16px 16px;
-    border-radius: 22px;
+    border-radius: 0;
 
     .metric-value {
       font-size: 28px;
@@ -663,3 +668,5 @@
 
 
 .run-recovery-notice { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; margin: 0 0 16px; padding: 10px 16px; color: var(--ink); background: var(--surface-strong); border: 1px solid var(--hairline); border-radius: 18px; font-size: 12px; }.run-recovery-notice strong { color: var(--accent); font-weight: 550; }
+
+:host-context(html[data-theme='dark']) .metric-grid { background: var(--surface-strong); }

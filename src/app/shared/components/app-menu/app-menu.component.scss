@@ -1,288 +1,254 @@
-/* The host itself shouldn't introduce a box — let the button size/center like a normal flex item */
 :host {
-  display: contents;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
 }
-
-/* Hamburger button — top-left in the header */
 .hamburger {
   display: inline-flex;
   flex-direction: column;
+  flex-shrink: 0;
   justify-content: center;
   gap: 4px;
-  width: 40px;
-  height: 40px;
-  padding: 0 9px;
+  width: 42px;
+  height: 42px;
+  padding: 0 10px;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--hairline);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
-  transition: background 0.16s ease, transform 0.15s ease, border-color 0.16s ease;
-
+  background: var(--surface-strong);
+  box-shadow: 0 1px 3px #0f172a0d;
   span {
     display: block;
     height: 2px;
+    width: 20px;
     border-radius: 2px;
-    background: #1d1d1f;
-    transition: width 0.2s ease;
+    background: var(--ink);
   }
-
-  span:nth-child(1) { width: 20px; }
-  span:nth-child(2) { width: 14px; }
-  span:nth-child(3) { width: 20px; }
-
-  &:hover {
-    background: #fff;
-    border-color: rgba(0, 0, 0, 0.16);
-    span:nth-child(2) { width: 20px; }
+  span:nth-child(2) {
+    width: 14px;
   }
-
-  &:active { transform: scale(0.95); }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
 }
-
-/* Account/Settings live in the left sidebar on desktop — the hamburger is mobile-only */
-@media (min-width: 601px) {
-  .hamburger {
+@media (min-width: 901px) {
+  :host {
     display: none;
   }
 }
-
-/* Drawer panel */
 .menu-panel {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding: 20px;
+  min-height: 0;
+  width: 100%;
+  padding: max(18px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  color: var(--ink);
 }
-
 .menu-brand {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 22px;
-
+  flex-shrink: 0;
+  gap: 12px;
+  margin-bottom: 16px;
   .brand {
-    font-size: 22px;
+    font-size: 23px;
     font-weight: 750;
     letter-spacing: -0.045em;
-    color: #1d1d1f;
-
-    span { color: #0071e3; }
+    color: var(--ink);
   }
-
+  .brand > span {
+    color: var(--accent);
+  }
   .close-btn {
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 34px;
-    font-size: 15px;
-    color: #515154;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    color: var(--ink-secondary);
+    background: var(--surface);
     cursor: pointer;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.05);
-    transition: background 0.16s ease;
-
-    &:hover { background: rgba(0, 0, 0, 0.1); }
+    font-size: 15px;
   }
 }
-
-/* cardul-erou de profil: avatar mare, nume, acces rapid la /account */
 .menu-hero {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 3px;
+  flex-shrink: 0;
+  gap: 12px;
   width: 100%;
-  margin-bottom: 22px;
-  padding: 22px 16px 18px;
-  font-family: inherit;
+  margin-bottom: 20px;
+  padding: 13px;
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  background: var(--surface);
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
   cursor: pointer;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  background:
-    radial-gradient(90% 130% at 50% 0%, rgba(10, 132, 255, 0.14), transparent 65%),
-    rgba(255, 255, 255, 0.75);
-  box-shadow:
-    0 14px 34px rgba(15, 23, 42, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow:
-      0 18px 40px rgba(15, 23, 42, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  }
-
-  &:active { transform: scale(0.99); }
-
   .hero-avatar {
     display: grid;
     place-items: center;
-    width: 68px;
-    height: 68px;
-    margin-bottom: 7px;
+    flex-shrink: 0;
+    width: 44px;
+    height: 48px;
+    border-radius: 13px;
     overflow: hidden;
-    font-size: 24px;
-    font-weight: 750;
-    color: #fff;
-    border-radius: 50%;
-    background: linear-gradient(150deg, #1a86f0, #0071e3);
-    box-shadow: 0 10px 24px rgba(0, 113, 227, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.35);
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    color: white;
+    background: #356dbb;
+    font-size: 17px;
+    font-weight: 650;
   }
-
+  .hero-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+  }
   .hero-name {
-    max-width: 100%;
-    font-size: 16.5px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #1d1d1f;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--ink);
   }
-
   .hero-email {
-    max-width: 100%;
-    font-size: 12px;
+    font-size: 10px;
     color: var(--ink-tertiary);
+  }
+  .hero-name,
+  .hero-email {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
   .hero-cta-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 10px;
-    padding: 7px 16px;
-    font-size: 12.5px;
-    font-weight: 680;
-    color: #fff;
-    border-radius: 980px;
-    background: linear-gradient(180deg, #1a86f0, #0071e3);
-    box-shadow: 0 7px 16px rgba(0, 113, 227, 0.3);
-
-    span { font-size: 15px; line-height: 1; }
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 3px;
   }
 }
-
 .menu-section-label {
-  display: block;
-  margin: 0 4px 8px;
-  font-size: 11px;
+  flex-shrink: 0;
+  margin: 0 8px 8px;
+  color: var(--ink-tertiary);
+  font-size: 9px;
+  letter-spacing: 0.13em;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #a1a1a6;
 }
-
 .menu-links {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 2px 10px;
 }
-
 .menu-link {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
-  gap: 14px;
+  gap: 11px;
   width: 100%;
-  padding: 14px 16px;
+  min-height: 54px;
+  padding: 8px 10px;
   text-align: left;
+  font: inherit;
+  color: var(--ink);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
   cursor: pointer;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  background: rgba(255, 255, 255, 0.66);
-  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), background 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 113, 227, 0.3);
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
-  }
-
-  &:active { transform: scale(0.99); }
-
   .link-icon {
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
-    flex: 0 0 auto;
-    font-size: 18px;
-    color: #0071e3;
-    border-radius: 12px;
-    background: rgba(0, 113, 227, 0.1);
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    font-size: 17px;
   }
-
   .link-copy {
     flex: 1;
     min-width: 0;
-
-    strong {
-      display: block;
-      font-size: 15px;
-      font-weight: 620;
-      letter-spacing: -0.015em;
-      color: #1d1d1f;
-    }
-
-    small {
-      font-size: 12.5px;
-      color: var(--ink-tertiary);
-    }
   }
-
+  .link-copy strong {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .link-copy small {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    color: var(--ink-tertiary);
+  }
   .link-arrow {
-    font-size: 22px;
-    font-weight: 500;
-    color: #c7c7cc;
-    flex: 0 0 auto;
+    flex-shrink: 0;
+    color: var(--ink-tertiary);
+    font-size: 20px;
+  }
+  &:hover,
+  &.current {
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 14%, transparent);
   }
 }
-
 .logout-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
+  flex-shrink: 0;
+  margin-top: 10px;
   width: 100%;
-  height: 46px;
-  margin-top: auto;
-  font-size: 15px;
+  min-height: 42px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--red) 25%, transparent);
+  background: color-mix(in srgb, var(--red) 5%, transparent);
+  color: var(--red);
+  font: inherit;
+  font-size: 12px;
   font-weight: 600;
-  font-family: inherit;
-  color: #d70015;
   cursor: pointer;
-  border: 1px solid rgba(255, 59, 48, 0.24);
-  border-radius: 980px;
-  background: rgba(255, 59, 48, 0.06);
-  transition: background 0.16s ease, border-color 0.16s ease;
-
-  &:hover {
-    background: rgba(255, 59, 48, 0.1);
-    border-color: rgba(255, 59, 48, 0.4);
-  }
 }
-
-::ng-deep .app-menu-drawer .ant-drawer-content-wrapper {
-  border-radius: 0 26px 26px 0;
+::ng-deep .ant-drawer-content-wrapper.app-menu-drawer {
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100vw;
+  border-radius: 0 24px 24px 0;
   overflow: hidden;
 }
-
 ::ng-deep .app-menu-drawer .ant-drawer-body {
+  height: 100%;
+  min-height: 0;
   padding: 0;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(245, 247, 251, 0.92));
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
+  overflow: hidden;
+  background: var(--bg);
+}
+@media (max-height: 550px) {
+  .menu-panel {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .menu-brand {
+    margin-bottom: 10px;
+  }
+  .menu-hero {
+    display: none;
+  }
+  .menu-link {
+    min-height: 48px;
+  }
 }

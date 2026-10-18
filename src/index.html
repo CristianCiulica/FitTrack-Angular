@@ -6,6 +6,15 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ffffff">
+  <style>
+    /* Fail closed on mobile, including the first paint of a direct URL or refresh. */
+    @media (max-width: 900px) {
+      html, body { overflow-x: clip; }
+      html body .app-layout > .sidebar { display: none !important; }
+      html body .app-layout { display: block !important; }
+      html body .app-layout > .main-layout { width: 100%; min-width: 0; margin: 0; }
+    }
+  </style>
   <script>
     // Apply before styles and Angular load so a saved dark appearance never flashes white.
     (function () {

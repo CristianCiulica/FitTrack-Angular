@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
+import { WeightService } from '../../core/services/weight.service';
 import { AccountComponent } from './account.component';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -35,6 +36,7 @@ describe('Redesigned profile', () => {
     patch.mockReset();
     TestBed.configureTestingModule({
       providers: [
+        { provide: WeightService, useValue: { getEntries: () => of([]) } },
         {
           provide: ProfileService,
           useValue: {

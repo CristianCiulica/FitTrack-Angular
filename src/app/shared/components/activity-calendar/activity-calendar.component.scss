@@ -436,3 +436,10 @@ summary > span {
     transition: none;
   }
 }
+/* Neutral journal controls use the same blue accent as the rest of the app. */
+.journal-status.trained, .session-check { color: var(--accent); }
+.session-check { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.journal-link { margin-top: auto; border: 0; border-radius: 12px; padding: 13px 16px; background: var(--accent); color: #fff; justify-content: center; min-height: 44px; }
+.journal-link:hover { color: #fff; background: var(--accent-strong); }
+:host-context(html[data-theme='dark']) .journal-status.trained,
+:host-context(html[data-theme='dark']) .session-check { color: var(--accent); }

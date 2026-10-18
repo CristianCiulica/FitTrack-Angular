@@ -11,13 +11,15 @@ import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.comp
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { Sex } from '../../core/models/user-profile.model';
+import { WeightService } from '../../core/services/weight.service';
+import { WeightEntry } from '../../core/models/weight-entry.model';
+import { weightJourney } from '../../core/utils/weight-journey';
 import {
   cmToFeetInches,
   displayWeight,
   feetInchesToCm,
   toCanonicalWeight,
   weightUnitLabel,
-  formatHeight,
 } from '../../core/utils/units';
 
 @Component({
@@ -39,6 +41,7 @@ import {
 export class AccountComponent implements OnInit {
   private readonly profileService = inject(ProfileService);
   private readonly auth = inject(AuthService);
+  private readonly weights = inject(WeightService);
   private readonly message = inject(NzMessageService);
 
   private readonly destroy = inject(DestroyRef);
@@ -69,30 +72,12 @@ export class AccountComponent implements OnInit {
   readonly inches = computed(() =>
     this.heightCm() == null ? null : cmToFeetInches(this.heightCm()!).inches,
   );
-  readonly savedWeight = computed(() => {
-    const kg = this.profileService.profile()?.weightKg;
-    return kg == null ? null : displayWeight(kg, this.units());
-  });
-  readonly savedHeight = computed(() => {
-    const cm = this.profileService.profile()?.heightCm;
-    return cm == null ? '—' : formatHeight(cm, this.units());
-  });
-  readonly savedAge = computed(() => this.profileService.profile()?.age);
-  readonly bmiLabel = computed(() => {
-    const profile = this.profileService.profile();
-    return profile?.heightCm && profile.weightKg
-      ? (profile.weightKg / (profile.heightCm / 100) ** 2).toFixed(1)
-      : '—';
-  });
-  readonly goal = computed(() => {
-    const goal = this.profileService.profile()?.goal;
-    return goal === 'lose'
-      ? { title: 'Lose weight', detail: 'A steady path toward your target.' }
-      : goal === 'gain'
-        ? { title: 'Build & grow', detail: 'Room to get a little stronger.' }
-        : { title: 'Find your balance', detail: 'Keep building on what feels right.' };
-  });
-  readonly weeklyGoal = this.profileService.weeklyWorkoutGoal;
+  readonly weightHistory = signal<WeightEntry[]>([]);
+  readonly weightHistoryLoading = signal(true);
+  readonly weightHistoryError = signal(false);
+  readonly journey = computed(() =>
+    weightJourney(this.weightHistory(), this.profileService.profile()?.weightKg, this.units()),
+  );
   readonly draft = computed(() => ({
     displayName: this.name().trim(),
     age: this.age(),
@@ -123,6 +108,24 @@ export class AccountComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProfile();
+    this.loadWeightHistory();
+  }
+  loadWeightHistory(): void {
+    this.weightHistoryLoading.set(true);
+    this.weightHistoryError.set(false);
+    this.weights
+      .getEntries()
+      .pipe(takeUntilDestroyed(this.destroy))
+      .subscribe({
+        next: (entries) => {
+          this.weightHistory.set(entries);
+          this.weightHistoryLoading.set(false);
+        },
+        error: () => {
+          this.weightHistoryLoading.set(false);
+          this.weightHistoryError.set(true);
+        },
+      });
   }
   loadProfile(): void {
     this.loading.set(true);

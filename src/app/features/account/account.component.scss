@@ -1,138 +1,49 @@
 .profile-page {
-  max-width: 1080px;
+  max-width: 840px;
   margin: 0 auto;
   color: var(--ink);
 }
-.profile-page-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  margin: 3px 2px 17px;
-}
-.profile-eyebrow {
-  font-size: 9px;
-  font-weight: 650;
-  letter-spacing: 0.13em;
-  color: var(--ink-tertiary);
-}
-.profile-page-heading > .profile-eyebrow {
-  color: var(--accent);
-}
-.profile-page-heading > a {
-  font-size: 10px;
-  color: var(--ink-secondary);
-}
-.profile-page-heading > a > span {
-  margin-left: 7px;
-}
-.athlete-card {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  color: #f5f7ff;
-  border-radius: 28px;
-  padding: 27px 32px 21px;
-  background:
-    radial-gradient(ellipse at 88% 70%, #3a4e8566, transparent 48%),
-    linear-gradient(120deg, #142238, #1e2d4e);
-  box-shadow: 0 16px 40px #17284722;
-}
-.hero-orbit {
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  width: 520px;
-  height: 520px;
-  border: 1px solid #c5d2ff1c;
-  border-radius: 50%;
-  right: -115px;
-  top: -140px;
-  transform: rotate(-25deg) scaleX(0.68);
-}
-.orbit-two {
-  width: 650px;
-  height: 650px;
-  right: -175px;
-  top: -204px;
-  border-color: #c5d2ff13;
-}
-.orbit-three {
-  width: 390px;
-  height: 390px;
-  top: -74px;
-  right: -50px;
-  border-color: #c5d2ff2b;
-}
-.athlete-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-  color: #c3cee2;
-  font-size: 9px;
-  letter-spacing: 0.13em;
-}
-.personal-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 8px;
-  color: #d1dfbf;
-}
-.personal-tag i {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #c1e89d;
-}
-.athlete-identity {
+.profile-identity {
   display: flex;
   align-items: center;
-  gap: 25px;
-  margin: 35px 0 32px;
+  gap: 20px;
+  margin: 8px 0 30px;
 }
 .avatar-wrap {
   position: relative;
   flex-shrink: 0;
 }
-.athlete-avatar {
+.profile-avatar {
   display: grid;
   place-items: center;
-  width: 100px;
-  height: 110px;
-  background: linear-gradient(145deg, #cfdfbe, #a9bca0);
-  border: 1px solid #f2ffe388;
-  border-radius: 24px;
-  color: #223e2b;
-  font-size: 38px;
-  font-weight: 550;
-  letter-spacing: -0.07em;
-  box-shadow:
-    0 7px 24px #0002,
-    inset 0 1px #fff7;
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
   overflow: hidden;
-  transform: rotate(-3deg);
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  color: var(--accent);
+  font-size: 26px;
+  font-weight: 600;
 }
-.athlete-avatar img {
+.profile-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 .avatar-edit {
   position: absolute;
+  right: -5px;
   bottom: -5px;
-  right: -9px;
   display: grid;
   place-items: center;
-  width: 31px;
-  height: 31px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--hairline);
   border-radius: 50%;
-  color: #1e2d4e;
-  background: #fff;
-  box-shadow: 0 3px 10px #0003;
+  background: var(--bg);
+  color: var(--ink-secondary);
+  font-size: 12px;
   cursor: pointer;
-  border: 3px solid #1c2a46;
 }
 .avatar-edit input {
   position: absolute;
@@ -142,135 +53,142 @@
   opacity: 0;
   cursor: pointer;
 }
-.avatar-edit.busy {
-  opacity: 0.6;
-}
-.avatar-edit:focus-within {
-  outline: 2px solid #bfd8ff;
-  outline-offset: 3px;
-}
-.athlete-name {
+.profile-identity > div + div {
   min-width: 0;
 }
-.identity-eyebrow {
-  color: #b5c4e0;
-  font-size: 8px;
-  letter-spacing: 0.13em;
-}
-.athlete-name h1 {
-  color: #f5f7ff;
-  font-size: clamp(32px, 4.8vw, 58px);
-  font-weight: 550;
-  letter-spacing: -0.065em;
-  line-height: 1.1;
-  margin: 9px 0 10px;
+.profile-identity h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.045em;
   overflow-wrap: anywhere;
 }
-.name-dot {
-  color: #c4e6a5;
-}
-.athlete-name p {
-  font-size: 11px;
-  color: #c3cee2;
-  margin: 0;
+.profile-identity p {
+  margin: 7px 0 0;
+  font-size: 12px;
+  color: var(--ink-tertiary);
   overflow-wrap: anywhere;
 }
 .remove-avatar {
-  color: #c3cee2;
-  cursor: pointer;
   border: 0;
-  background: transparent;
-  font: inherit;
-  font-size: 9px;
+  background: none;
   padding: 0;
-  margin-top: 8px;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.remove-avatar:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-.athlete-card-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #ffffff20;
+  color: var(--accent);
   font-size: 10px;
-  color: #b9c8df;
+  cursor: pointer;
+  margin-top: 8px;
 }
-.athlete-signature {
-  font-size: 23px;
-  font-weight: 650;
-  letter-spacing: -0.1em;
-  line-height: 1;
-}
-.athlete-signature > span {
-  margin-left: 5px;
-  font-size: 22px;
-  color: #c4e6a5;
-}
-.profile-content-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  align-items: start;
-  gap: 22px;
-  margin-top: 24px;
-}
-.profile-form-card,
-.body-card {
-  background: var(--surface-strong);
-  border: 1px solid var(--glass-border);
-  border-radius: 24px;
+.weight-journey,
+.profile-form-card {
   padding: 28px;
+  background: var(--surface-strong);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
   box-shadow: var(--glass-shadow);
-  min-width: 0;
 }
+.weight-journey {
+  margin-bottom: 22px;
+}
+.journey-heading,
 .form-heading {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 14px;
+  align-items: center;
+  gap: 16px;
 }
 h2 {
-  margin: 8px 0 0;
-  color: var(--ink);
-  font-size: 24px;
+  margin: 0;
+  font-size: 21px;
+  letter-spacing: -0.035em;
   font-weight: 600;
-  letter-spacing: -0.045em;
+  color: var(--ink);
+}
+.journey-heading h2 {
+  font-size: 16px;
+}
+.journey-heading a {
+  font-size: 11px;
+  color: var(--accent);
+}
+.journey-values {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 26px 0 23px;
+}
+.journey-values > div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.journey-values > div + div {
+  border-left: 1px solid var(--hairline);
+  padding-left: 28px;
+}
+.journey-values > div > span {
+  font-size: 12px;
+  color: var(--ink-secondary);
+}
+.journey-values strong {
+  font-size: 40px;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+.journey-values small {
+  margin-left: 7px;
+  font-size: 13px;
+  color: var(--ink-tertiary);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.journey-time {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hairline);
+  font-size: 11px;
+  color: var(--ink-tertiary);
+}
+.journey-time button {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
 }
 .edit-indicator {
   display: flex;
   align-items: center;
   gap: 5px;
-  white-space: nowrap;
   border: 1px solid var(--hairline);
-  padding: 6px 8px;
   border-radius: 7px;
-  font-size: 8px;
+  padding: 6px 8px;
+  font-size: 9px;
   color: var(--ink-tertiary);
+  white-space: nowrap;
 }
 .edit-indicator i {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #62b988;
+  background: var(--ink-tertiary);
 }
 .edit-indicator.unsaved i {
-  background: #dcab55;
+  background: var(--accent);
 }
-.form-description {
-  font-size: 11px;
-  color: var(--ink-tertiary);
-  margin: 10px 0 27px;
+.profile-form {
+  margin-top: 26px;
 }
 fieldset {
   min-width: 0;
   margin: 0;
-  border: 0;
   padding: 0;
+  border: 0;
 }
 .profile-field {
   display: flex;
@@ -281,72 +199,55 @@ fieldset {
 .profile-field > span {
   display: flex;
   justify-content: space-between;
-  gap: 5px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
   color: var(--ink-secondary);
-  font-weight: 550;
 }
 .profile-field small {
-  font-size: 10px;
-  color: var(--ink-tertiary);
+  font-size: 11px;
   font-weight: 400;
+  color: var(--ink-tertiary);
 }
 .profile-field input,
 .profile-field select {
   width: 100%;
   min-width: 0;
   height: 48px;
-  padding: 0 14px;
-  font: inherit;
-  font-size: 14px;
-  color: var(--ink);
   border: 1px solid var(--hairline);
   border-radius: 11px;
+  padding: 0 14px;
   background: var(--surface-input);
-  transition:
-    border-color 0.18s,
-    box-shadow 0.18s;
-}
-.profile-field select {
-  padding-right: 5px;
-  font-size: 12px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
 }
 .profile-field input:focus,
 .profile-field select:focus {
-  outline: none;
-  border-color: #5375f599;
-  box-shadow: 0 0 0 3px #5375f515;
-}
-.profile-field input:disabled,
-.profile-field select:disabled {
-  opacity: 0.6;
-}
-.profile-field input::placeholder {
-  color: var(--ink-tertiary);
+  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline-offset: 1px;
 }
 .field-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 18px;
   margin-top: 22px;
 }
 .form-divider {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  margin: 30px 0 0;
-  padding-top: 25px;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 24px;
   border-top: 1px solid var(--hairline);
-  font-size: 8px;
   color: var(--ink-tertiary);
-  letter-spacing: 0.1em;
+  font-size: 9px;
+  letter-spacing: 0.06em;
 }
 .form-divider a {
-  font-size: 9px;
-  font-weight: 550;
+  font-size: 10px;
   letter-spacing: 0;
-  color: var(--ink-secondary);
 }
 .height-inputs {
   display: grid;
@@ -355,471 +256,133 @@ fieldset {
 }
 .save-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
   gap: 15px;
-  margin-top: 30px;
-  padding-top: 23px;
+  margin-top: 28px;
+  padding-top: 22px;
   border-top: 1px solid var(--hairline);
 }
 .save-status {
+  font-size: 10px;
   color: var(--ink-tertiary);
-  font-size: 9px;
 }
 .save-buttons {
   display: flex;
-  gap: 9px;
   align-items: center;
+  gap: 10px;
 }
 .save-profile {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 20px;
+  gap: 16px;
+  padding: 13px 18px;
   border: 0;
   border-radius: 12px;
-  padding: 13px 17px;
-  background: #202e4b;
-  color: #fff;
   font: inherit;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
+  background: var(--accent);
+  color: white;
   cursor: pointer;
 }
 .save-profile:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: default;
 }
 .discard-button {
-  color: var(--ink-tertiary);
   border: 0;
-  background: transparent;
+  background: none;
+  color: var(--ink-tertiary);
   font: inherit;
-  font-size: 10px;
+  font-size: 11px;
   cursor: pointer;
   padding: 10px 5px;
 }
 .form-error {
+  margin-top: 18px;
   padding: 12px;
-  margin-bottom: 20px;
-  border: 1px solid #e8a6a644;
-  border-radius: 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
   color: var(--red);
-  font-size: 11px;
+  font-size: 12px;
 }
 .form-error button {
-  color: var(--accent);
-  font: inherit;
   border: 0;
   background: none;
+  color: var(--accent);
+  font: inherit;
   cursor: pointer;
 }
 .validation-note {
-  margin: 15px 0 0;
-  color: var(--red);
-  font-size: 10px;
+  margin: 16px 0 0;
+  font-size: 11px;
   line-height: 1.5;
+  color: var(--red);
 }
 .profile-loading {
+  min-height: 200px;
   display: grid;
   place-items: center;
-  min-height: 240px;
   color: var(--ink-tertiary);
   font-size: 12px;
 }
-.profile-side {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-width: 0;
-}
-.body-card {
-  padding: 25px;
-}
-.side-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: var(--ink-tertiary);
-  font-size: 16px;
-}
-.body-card h2 {
-  font-size: 23px;
-}
-.body-weight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 25px 0 23px;
-}
-.body-weight > strong {
-  font-size: 56px;
-  font-weight: 550;
-  line-height: 1;
-  letter-spacing: -0.075em;
-}
-.body-weight > span {
-  font-size: 13px;
-  color: var(--ink-secondary);
-}
-.body-weight small {
-  display: block;
-  font-size: 9px;
-  color: var(--ink-tertiary);
-  margin-top: 3px;
-}
-.body-facts {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr 1fr;
-  gap: 10px;
-}
-.body-facts > div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.body-facts > div + div {
-  border-left: 1px solid var(--hairline);
-  padding-left: 12px;
-}
-.body-facts > div > span {
-  color: var(--ink-tertiary);
-  font-size: 9px;
-}
-.body-facts strong {
-  font-size: 13px;
-  font-weight: 550;
-  white-space: nowrap;
-}
-.body-facts small {
-  font-size: 9px;
-  font-weight: 400;
-  color: var(--ink-tertiary);
-}
-.body-track-link {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding-top: 16px;
-  margin-top: 22px;
-  border-top: 1px solid var(--hairline);
-  color: var(--ink-secondary);
-  font-size: 10px;
-}
-.direction-card {
-  position: relative;
-  overflow: hidden;
-  background: #e5eddf;
-  color: #244436;
-  border: 1px solid #bfd2b866;
-  border-radius: 22px;
-  padding: 25px;
-}
-.direction-card > .profile-eyebrow {
-  color: #5b7360;
-}
-.direction-card h2 {
-  position: relative;
-  font-size: 25px;
-  color: #244436;
-  max-width: 230px;
-  margin-top: 25px;
-}
-.direction-card p {
-  font-size: 11px;
-  color: #5b7360;
-  margin: 8px 0 22px;
-  max-width: 220px;
-}
-.direction-symbol {
-  position: absolute;
-  right: 17px;
-  top: 25px;
-  color: #b9ccaf;
-  font-size: 80px;
-  font-weight: 300;
-  line-height: 1;
-}
-.direction-goal {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  border-top: 1px solid #2444361a;
-  padding-top: 14px;
-  font-size: 11px;
-}
-.direction-goal strong {
-  font-size: 16px;
-  font-weight: 650;
-}
-.direction-goal strong > span {
-  font-size: 10px;
-  font-weight: 400;
-  color: #5b7360;
-}
-.direction-goal a {
-  color: #244436;
-  font-size: 10px;
-  align-self: center;
-}
-.profile-progress-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  border-radius: 20px;
-  border: 1px solid var(--hairline);
-  padding: 22px;
-  color: var(--ink);
-}
-.profile-progress-link strong {
-  display: block;
-  font-size: 16px;
-  letter-spacing: -0.025em;
-  font-weight: 600;
-  margin-top: 9px;
-}
-.profile-progress-link p {
-  color: var(--ink-tertiary);
-  font-size: 10px;
-  margin: 5px 0 0;
-}
-.profile-progress-link > span {
-  flex-shrink: 0;
-  font-size: 22px;
-}
-.profile-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 26px 2px 10px;
-  color: var(--ink-tertiary);
-  font-size: 8px;
-  letter-spacing: 0.1em;
-}
-.profile-footer a {
-  color: var(--ink-tertiary);
-  letter-spacing: 0;
-  font-size: 9px;
-}
-:host-context(html[data-theme='dark']) {
-  .athlete-card {
-    border: 1px solid #687f9b55;
-  }
-  .save-profile {
-    background: #708de0;
-    color: #111e37;
-  }
-  .direction-card {
-    background: #273c31;
-    border-color: #70907744;
-  }
-  .direction-card h2,
-  .direction-goal a {
-    color: #d3e8ca;
-  }
-  .direction-card .profile-eyebrow,
-  .direction-card p,
-  .direction-goal strong > span {
-    color: #b0c6ac;
-  }
-  .direction-card {
-    color: #d3e8ca;
-  }
-  .direction-symbol {
-    color: #5a79544d;
-  }
-  .direction-goal {
-    border-color: #ffffff1a;
-  }
-}
-@media (max-width: 1100px) {
-  .profile-content-grid {
-    gap: 18px;
-    grid-template-columns: 1.3fr 1fr;
-  }
-  .profile-form-card,
-  .body-card {
-    padding: 23px;
-  }
-  .form-heading {
-    flex-wrap: wrap;
-  }
-  .form-heading h2 {
-    font-size: 22px;
-  }
-  .edit-indicator {
-    font-size: 7px;
-  }
-  .body-weight > strong {
-    font-size: 48px;
-  }
-  .body-facts {
-    gap: 7px;
-  }
-  .body-facts > div + div {
-    padding-left: 8px;
-  }
-  .body-facts strong {
-    font-size: 11px;
-  }
-  .direction-card {
-    padding: 23px;
-  }
-}
-@media (max-width: 760px) {
-  .profile-content-grid {
-    grid-template-columns: 1fr;
-  }
-  .profile-side {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-  .profile-progress-link {
-    grid-column: 1/-1;
-  }
-  .profile-form-card {
-    padding: 26px;
-  }
-  .body-card {
-    padding: 23px;
-  }
-}
 @media (max-width: 600px) {
-  .profile-page-heading {
-    font-size: 8px;
-    margin-bottom: 15px;
+  .profile-identity {
+    gap: 15px;
+    margin: 5px 0 24px;
   }
-  .profile-eyebrow {
-    font-size: 8px;
-  }
-  .profile-page-heading > a {
-    font-size: 9px;
-  }
-  .athlete-card {
-    padding: 22px 23px 18px;
-    border-radius: 24px;
-  }
-  .athlete-card-top {
-    font-size: 7px;
-    letter-spacing: 0.08em;
-  }
-  .personal-tag {
-    font-size: 6px;
-    gap: 4px;
-  }
-  .athlete-identity {
-    align-items: flex-start;
-    gap: 18px;
-    margin: 32px 0 30px;
-  }
-  .athlete-avatar {
-    width: 66px;
-    height: 76px;
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
     border-radius: 18px;
-    font-size: 27px;
-  }
-  .identity-eyebrow {
-    font-size: 6px;
-    letter-spacing: 0.07em;
-  }
-  .athlete-name h1 {
-    font-size: 33px;
-    margin: 9px 0 8px;
-  }
-  .athlete-name p {
-    font-size: 9px;
-  }
-  .athlete-card-bottom {
-    font-size: 8px;
-  }
-  .hero-orbit {
-    right: -300px;
-  }
-  .orbit-two {
-    right: -350px;
-  }
-  .orbit-three {
-    right: -240px;
-  }
-  .avatar-edit {
-    width: 28px;
-    height: 28px;
-    right: -8px;
-    bottom: -6px;
-    font-size: 11px;
-  }
-  .profile-content-grid {
-    margin-top: 18px;
-    gap: 18px;
-  }
-  .profile-form-card {
-    padding: 24px 20px;
-    border-radius: 22px;
-  }
-  .profile-side {
-    display: flex;
-    gap: 18px;
-  }
-  .form-heading {
-    flex-wrap: nowrap;
-    gap: 8px;
-  }
-  h2,
-  .form-heading h2 {
     font-size: 23px;
   }
-  .edit-indicator {
-    padding: 6px;
-    font-size: 7px;
+  .profile-identity h1 {
+    font-size: 25px;
+  }
+  .profile-identity p {
+    font-size: 11px;
+  }
+  .weight-journey,
+  .profile-form-card {
+    padding: 23px 20px;
+    border-radius: 22px;
+  }
+  .weight-journey {
+    margin-bottom: 18px;
+  }
+  .journey-values strong {
+    font-size: 35px;
+  }
+  .journey-values > div + div {
+    padding-left: 21px;
+  }
+  .journey-values > div > span {
+    font-size: 11px;
+  }
+  .journey-values small {
+    font-size: 11px;
+    margin-left: 5px;
+  }
+  .journey-time {
+    font-size: 10px;
   }
   .field-grid {
-    gap: 12px;
+    gap: 13px;
   }
   .profile-field input {
-    padding-inline: 12px;
     font-size: 16px;
   }
   .profile-field select {
-    padding-left: 10px;
-    font-size: 11px;
-  }
-  .save-row {
-    align-items: stretch;
+    font-size: 12px;
+    padding-inline: 10px;
   }
   .save-buttons {
     margin-left: auto;
   }
-  .body-card {
-    padding: 25px;
-    border-radius: 22px;
-  }
-  .body-weight > strong {
-    font-size: 55px;
-  }
-  .body-facts strong {
-    font-size: 13px;
-  }
-  .body-facts > div + div {
-    padding-left: 14px;
-  }
-  .direction-card {
-    padding: 25px;
-  }
-  .profile-footer {
-    gap: 14px;
-    flex-wrap: wrap;
-    font-size: 7px;
-  }
-  .profile-footer a {
+  .edit-indicator {
     font-size: 8px;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .profile-field input,
-  .profile-field select {
-    transition: none;
   }
 }
