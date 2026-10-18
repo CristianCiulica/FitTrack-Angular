@@ -2,6 +2,15 @@
    Auth — Liquid Glass sign-in
    ============================================================ */
 
+:host(app-login) {
+  display: block;
+  color-scheme: light;
+  background: #fff;
+  .auth-wrapper, .auth-card { background: #fff; }
+  .auth-wrapper::before, .auth-wrapper::after { display: none; }
+  .auth-card { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+
 .auth-wrapper {
   position: relative;
   display: grid;
