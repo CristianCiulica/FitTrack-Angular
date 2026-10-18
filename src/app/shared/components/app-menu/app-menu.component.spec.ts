@@ -61,7 +61,7 @@ describe('Mobile navigation lifecycle', () => {
     first.nativeElement.querySelector('.hamburger').click();
     first.detectChanges();
     expect(document.querySelector('.ant-drawer-open')).not.toBeNull();
-    expect(document.querySelectorAll('#mobile-navigation .menu-link')).toHaveLength(9);
+    expect(document.querySelectorAll('#mobile-navigation .menu-link')).toHaveLength(4);
     first.destroy();
     const refreshed = TestBed.createComponent(AppMenuComponent);
     refreshed.detectChanges();
@@ -86,16 +86,11 @@ describe('Mobile navigation lifecycle', () => {
     expect(menu.open()).toBe(false);
     fixture.destroy();
   });
-  it('includes every primary destination when the persistent sidebar is hidden', () => {
+  it('keeps secondary destinations in the drawer without duplicating the bottom dock', () => {
     const fixture = TestBed.createComponent(AppMenuComponent);
     fixture.detectChanges();
     const paths = fixture.componentInstance.links.map((link) => link.path);
     expect(paths).toEqual([
-      '/dashboard',
-      '/workouts',
-      '/start-workout',
-      '/running',
-      '/bmi',
       '/progress',
       '/weight',
       '/account',

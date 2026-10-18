@@ -44,26 +44,6 @@ export class AppMenuComponent {
   });
 
   readonly links: MenuLink[] = [
-    { label: 'Home', description: 'Your daily activity', icon: 'ft:home', path: '/dashboard' },
-    {
-      label: 'History',
-      description: 'Your completed workouts',
-      icon: 'ft:history',
-      path: '/workouts',
-    },
-    {
-      label: 'Workout',
-      description: 'Start your next session',
-      icon: 'ft:workout',
-      path: '/start-workout',
-    },
-    { label: 'Run', description: 'Running & walking', icon: 'ft:run', path: '/running' },
-    {
-      label: 'Nutrition',
-      description: 'Your nutrition targets',
-      icon: 'ft:nutrition',
-      path: '/bmi',
-    },
     {
       label: 'Progress',
       description: 'Your training, month by month',
