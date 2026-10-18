@@ -79,12 +79,13 @@ html[data-theme='dark'] body :is(
 
 /* Glass surfaces keep subtle rims instead of the light appearance's white edges. */
 html[data-theme='dark'] body :is(
-  .month-arrows, .week-strip, .recent-item,
+  .recent-item,
   .collapse-toggle, .auth-card, .onboarding-card
 ) {
   border-color: var(--glass-border) !important;
   box-shadow: var(--glass-shadow), var(--glass-edge) !important;
 }
+html[data-theme='dark'] body :is(.month-arrows, .week-strip) { border-color: var(--glass-border) !important; }
 html[data-theme='dark'] body .goals-card.goal-complete {
   border-color: rgba(48, 209, 88, .25) !important;
 }

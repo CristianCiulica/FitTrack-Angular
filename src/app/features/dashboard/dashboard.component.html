@@ -219,7 +219,6 @@
               <span class="recent-meta">{{ w.exercises.length || 0 }} exercises · ~{{ workoutKcal(w) }} kcal</span>
             </span>
             <span class="recent-side">
-              <span class="recent-chip" [attr.data-tone]="muscleTone(getPrimaryMuscle(w))">{{ getPrimaryMuscle(w) }}</span>
               <span class="recent-date">{{ w.date | date: 'd MMM' }}</span>
             </span>
           </a>
