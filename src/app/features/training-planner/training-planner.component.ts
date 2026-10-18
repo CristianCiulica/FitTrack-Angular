@@ -380,7 +380,7 @@ export class TrainingPlannerComponent {
       this.saveMessage.set(
         local
           ? 'Saved on this device. Your routines sync when you reconnect.'
-          : 'Saved to My workouts. Your plan is ready when you are.',
+          : 'Saved to Workout → My training. Your plan is ready when you are.',
       );
       try {
         localStorage.removeItem(this.draftKey);
