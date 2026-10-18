@@ -15,7 +15,6 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Workout } from '../../core/models/workout.model';
 import { isWorkoutSession } from '../../core/utils/workout-kind';
@@ -46,7 +45,6 @@ import {
     NzButtonModule,
     NzDropDownModule,
     NzTagModule,
-    NzModalModule,
     AppMenuComponent,
   ],
   templateUrl: './dashboard.component.html',
@@ -55,6 +53,12 @@ import {
 export class DashboardComponent implements OnInit {
   @ViewChild('chatBody') private chatBody?: ElementRef<HTMLElement>;
   @ViewChild('assistantHeading') private assistantHeading?: ElementRef<HTMLElement>;
+  @ViewChild('assistantTrigger') private assistantTrigger?: ElementRef<HTMLButtonElement>;
+  @ViewChild('assistantDialog') private assistantDialog?: ElementRef<HTMLDialogElement>;
+  private assistantMotion?: Animation;
+  private assistantContentMotion?: Animation;
+  private assistantAnimationId = 0;
+  private assistantClosing = false;
 
   private readonly destroy = inject(DestroyRef);
   private readonly profileService = inject(ProfileService);
@@ -272,11 +276,131 @@ export class DashboardComponent implements OnInit {
   // obiectivul saptamanal a fost atins
   readonly goalReached = computed(() => this.thisWeekWorkouts() >= this.weeklyGoal());
 
-  toggleChat() {
-    this.isChatOpen.update(v => !v);
-    if (this.isChatOpen()) {
+  toggleChat(): void {
+    if (this.isChatOpen()) this.closeAssistant();
+    else this.openAssistant();
+  }
+
+  private openAssistant(): void {
+    const dialog = this.assistantDialog?.nativeElement;
+    if (!dialog || dialog.open) return;
+    const token = ++this.assistantAnimationId;
+    this.cancelAssistantMotion();
+    this.assistantClosing = false;
+    dialog.showModal();
+    this.isChatOpen.set(true);
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !dialog.animate) {
       this.scrollAssistantToTop();
+      return;
     }
+
+    const { collapsed, expanded, blue } = this.assistantRevealGeometry(dialog);
+    const surface = getComputedStyle(dialog).backgroundColor;
+    this.assistantMotion = dialog.animate([
+      { clipPath: collapsed, backgroundColor: blue, offset: 0 },
+      { backgroundColor: surface, offset: .45 },
+      { clipPath: expanded, backgroundColor: surface, offset: 1 },
+    ], { duration: 520, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
+    const content = dialog.querySelector<HTMLElement>('.modern-chat');
+    this.assistantContentMotion = content?.animate([
+      { opacity: 0, transform: 'translateY(18px) scale(.985)' },
+      { opacity: 1, transform: 'translateY(0) scale(1)' },
+    ], { duration: 320, delay: 110, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
+    void this.assistantContentMotion?.finished.catch(() => {});
+    void this.assistantMotion.finished.then(() => {
+      if (token !== this.assistantAnimationId || !dialog.open) return;
+      this.cancelAssistantMotion();
+      this.scrollAssistantToTop();
+    }, () => {});
+  }
+
+  closeAssistant(): void {
+    const dialog = this.assistantDialog?.nativeElement;
+    if (!dialog?.open || this.assistantClosing) return;
+    this.assistantClosing = true;
+    const token = ++this.assistantAnimationId;
+    const { collapsed, expanded, blue } = this.assistantRevealGeometry(dialog);
+    const current = getComputedStyle(dialog);
+    const clip = current.clipPath === 'none' ? expanded : current.clipPath;
+    const background = current.backgroundColor;
+    const content = dialog.querySelector<HTMLElement>('.modern-chat');
+    const contentOpacity = content ? getComputedStyle(content).opacity : '1';
+    this.cancelAssistantMotion();
+    const finish = () => {
+      if (token !== this.assistantAnimationId) return;
+      this.cancelAssistantMotion();
+      dialog.close();
+      this.isChatOpen.set(false);
+      this.assistantClosing = false;
+      this.assistantTrigger?.nativeElement.focus({ preventScroll: true });
+    };
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !dialog.animate) {
+      finish();
+      return;
+    }
+    this.assistantContentMotion = content?.animate([
+      { opacity: contentOpacity, transform: 'translateY(0) scale(1)' },
+      { opacity: 0, transform: 'translateY(12px) scale(.985)' },
+    ], { duration: 140, fill: 'both' });
+    void this.assistantContentMotion?.finished.catch(() => {});
+    this.assistantMotion = dialog.animate([
+      { clipPath: clip, backgroundColor: background, offset: 0 },
+      { backgroundColor: background, offset: .55 },
+      { clipPath: collapsed, backgroundColor: blue, offset: 1 },
+    ], { duration: 420, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'both' });
+    void this.assistantMotion.finished.then(finish, () => {});
+  }
+
+  onAssistantCancel(event: Event): void {
+    event.preventDefault();
+    this.closeAssistant();
+  }
+
+  trapAssistantTab(event: KeyboardEvent): void {
+    if (event.key !== 'Tab') return;
+    const dialog = this.assistantDialog?.nativeElement;
+    if (!dialog) return;
+    const buttons = Array.from(dialog.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    )).filter(element => element.getClientRects().length > 0);
+    const first = buttons[0];
+    const last = buttons.at(-1);
+    const active = dialog.ownerDocument.activeElement;
+    if (first && last && ((event.shiftKey && active === first) || (!event.shiftKey && active === last))) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+    }
+  }
+
+  onAssistantClosed(): void {
+    ++this.assistantAnimationId;
+    this.cancelAssistantMotion();
+    this.isChatOpen.set(false);
+    this.assistantClosing = false;
+  }
+
+  private assistantRevealGeometry(dialog: HTMLDialogElement) {
+    const button = this.assistantTrigger!.nativeElement;
+    const rect = button.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const radius = Math.ceil(Math.hypot(
+      Math.max(x, dialog.clientWidth - x),
+      Math.max(y, dialog.clientHeight - y),
+    ));
+    return {
+      collapsed: `circle(${rect.width / 2}px at ${x}px ${y}px)`,
+      expanded: `circle(${radius}px at ${x}px ${y}px)`,
+      blue: getComputedStyle(button).backgroundColor,
+    };
+  }
+
+  private cancelAssistantMotion(): void {
+    this.assistantMotion?.cancel();
+    this.assistantContentMotion?.cancel();
+    this.assistantMotion = undefined;
+    this.assistantContentMotion = undefined;
   }
 
   chooseAssistantOption(value: string) {
@@ -331,7 +455,7 @@ export class DashboardComponent implements OnInit {
   private scrollAssistantToTop() {
     setTimeout(() => {
       const chatBody = this.chatBody?.nativeElement;
-      if (!chatBody) return;
+      if (!chatBody || !this.isChatOpen()) return;
       chatBody.scrollTop = 0;
       this.assistantHeading?.nativeElement.focus({ preventScroll: true });
     });
@@ -341,7 +465,14 @@ export class DashboardComponent implements OnInit {
     private workoutService: WorkoutService,
     private authService: AuthService,
     private message: NzMessageService
-  ) { }
+  ) {
+    this.destroy.onDestroy(() => {
+      ++this.assistantAnimationId;
+      this.cancelAssistantMotion();
+      const dialog = this.assistantDialog?.nativeElement;
+      if (dialog?.open) dialog.close();
+    });
+  }
 
   ngOnInit() {
     this.recoveredRunAvailable.set(!!this.runningSessionService.recoverRun());

@@ -192,10 +192,6 @@
         Start a new workout
       </a>
 
-      <button nz-button nzBlock nzSize="large" class="ai-coach-trigger" (click)="toggleChat()">
-        <span nz-icon nzType="fire"></span>
-        Nutrition Assistant
-      </button>
       <section class="recent-section">
         <div class="recent-heading">
           <div>
@@ -232,30 +228,41 @@
         </ng-template>
       </section>
 
-      <nz-modal
-        [nzVisible]="isChatOpen()"
-        nzTitle=""
-        (nzOnCancel)="toggleChat()"
-        [nzFooter]="null"
-        [nzWidth]="640"
-        nzCentered
-        [nzStyle]="{ padding: '0' }"
-        [nzBodyStyle]="{ padding: '0' }"
-        nzWrapClassName="nutrition-modal"
-        [nzCloseIcon]="customCloseIcon"
+      <button
+        #assistantTrigger
+        type="button"
+        class="assistant-fab"
+        aria-label="Nutrition Assistant"
+        aria-haspopup="dialog"
+        aria-controls="nutrition-assistant-screen"
+        [attr.aria-expanded]="isChatOpen()"
+        (click)="toggleChat()"
       >
-        <ng-template #customCloseIcon>
-          <span class="modern-close-icon" aria-hidden="true">×</span>
-        </ng-template>
+        <span class="fab-nutrition-icon" nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
+        <svg class="fab-sparkle" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0 10.2 5.8 16 8l-5.8 2.2L8 16l-2.2-5.8L0 8l5.8-2.2Z"/></svg>
+        <span class="assistant-fab-label" aria-hidden="true">Nutrition Assistant</span>
+      </button>
 
-        <ng-container *nzModalContent>
-          <div class="chat-container modern-chat" role="region" aria-label="Nutrition Assistant">
+      <dialog
+        #assistantDialog
+        id="nutrition-assistant-screen"
+        class="nutrition-modal nutrition-screen"
+        aria-labelledby="nutrition-assistant-title"
+        aria-modal="true"
+        (cancel)="onAssistantCancel($event)"
+        (close)="onAssistantClosed()"
+        (keydown)="trapAssistantTab($event)"
+      >
+          <div class="chat-container modern-chat">
             <div class="chat-header-modern">
               <span class="assistant-mark" nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
               <div class="chat-title-info">
                 <span class="chat-brand">MEAL PLANNER</span>
-                <h3>Nutrition Assistant</h3>
+                <h3 id="nutrition-assistant-title">Nutrition Assistant</h3>
               </div>
+              <button type="button" class="assistant-collapse" aria-label="Close Nutrition Assistant" autofocus (click)="closeAssistant()">
+                <span nz-icon nzType="close" aria-hidden="true"></span>
+              </button>
             </div>
 
             <div class="assistant-body" #chatBody>
@@ -385,8 +392,7 @@
               </div>
             </div>
           </div>
-        </ng-container>
-      </nz-modal>
+      </dialog>
     </nz-content>
   </nz-layout>
 </nz-layout>

@@ -1,46 +1,96 @@
-/* The assistant lives in the overlay container, outside the dashboard host. */
-::ng-deep .nutrition-modal {
-  .ant-modal {
-    max-width: calc(100vw - 24px);
-    margin: 12px auto;
+.assistant-fab {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  z-index: 850;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: #007aff;
+  box-shadow: 0 6px 20px #00000024, 0 2px 5px #00000012;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  .fab-nutrition-icon { font-size: 26px; transform: translate(-1px, 2px); }
+  .fab-sparkle { position: absolute; top: 10px; right: 10px; width: 11px; height: 11px; }
+  &:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+  &:active { transform: scale(.94); }
+}
+:host-context(html[data-theme='dark']) .assistant-fab { background: #0a84ff; }
+.assistant-fab-label {
+  position: absolute;
+  right: calc(100% + 12px);
+  padding: 9px 13px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--surface-strong);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(6px);
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.assistant-fab:focus-visible .assistant-fab-label { opacity: 1; transform: none; }
+@media (hover: hover) {
+  .assistant-fab:hover { transform: translateY(-2px); }
+  .assistant-fab:hover .assistant-fab-label { opacity: 1; transform: none; }
+}
+@media (max-width: 900px) {
+  .assistant-fab {
+    right: max(20px, env(safe-area-inset-right));
+    bottom: calc(80px + env(safe-area-inset-bottom));
   }
-  .ant-modal-content {
-    overflow: hidden;
-    border-radius: 28px;
-    background: var(--bg);
-  }
-  .ant-modal-body {
-    padding: 0;
-  }
-  .ant-modal-close {
-    top: 24px;
-    right: 22px;
-    width: 32px;
-    height: 32px;
-  }
-  .ant-modal-close-x {
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    line-height: 1;
-  }
-  .modern-close-icon {
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--hairline);
-    color: var(--ink-secondary);
-    font-size: 24px;
-  }
+}
+
+/* Native top-layer dialog covers the shell and provides modal focus management. */
+::ng-deep dialog.nutrition-screen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: none;
+  &::backdrop { background: transparent; }
+}
+::ng-deep .nutrition-screen .assistant-collapse {
+  position: absolute;
+  top: max(22px, env(safe-area-inset-top));
+  right: max(24px, env(safe-area-inset-right));
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--surface-strong);
+  font-size: 17px;
+  &:hover { background: var(--hairline); }
 }
 
 ::ng-deep .nutrition-modal .modern-chat {
   display: flex;
   flex-direction: column;
-  height: min(780px, calc(100dvh - 48px));
+  height: 100%;
   color: var(--ink);
   background: var(--bg);
   button {
@@ -60,7 +110,7 @@
     align-items: center;
     gap: 14px;
     flex-shrink: 0;
-    padding: 24px 64px 22px 28px;
+    padding: max(22px, env(safe-area-inset-top)) max(76px, calc((100vw - 760px) / 2)) 22px max(28px, calc((100vw - 760px) / 2));
     border-bottom: 1px solid var(--hairline);
   }
   .assistant-mark {
@@ -97,6 +147,7 @@
     overscroll-behavior: contain;
     padding: 24px 28px 28px;
     scrollbar-width: thin;
+    > * { max-width: 760px; margin-left: auto; margin-right: auto; }
   }
   .assistant-progress {
     margin-bottom: 28px;
@@ -456,7 +507,10 @@
     align-items: center;
     flex-shrink: 0;
     gap: 10px;
-    padding: 16px 28px;
+    width: 100%;
+    max-width: 816px;
+    margin-inline: auto;
+    padding: 16px 28px max(16px, env(safe-area-inset-bottom));
     border-top: 1px solid var(--hairline);
   }
   .assistant-back,
@@ -522,14 +576,13 @@
 
 @media (max-width: 600px) {
   ::ng-deep .nutrition-modal {
-    .ant-modal-close {
-      top: 20px;
-      right: 18px;
+    .assistant-collapse {
+      top: max(18px, env(safe-area-inset-top));
+      right: max(16px, env(safe-area-inset-right));
     }
     .modern-chat {
-      height: min(740px, calc(100dvh - 32px));
       .chat-header-modern {
-        padding: 20px 60px 20px 20px;
+        padding: max(20px, env(safe-area-inset-top)) 72px 20px max(20px, env(safe-area-inset-left));
         gap: 11px;
       }
       .assistant-mark {
@@ -561,7 +614,7 @@
         grid-template-columns: 1fr;
       }
       .assistant-footer {
-        padding: 12px 20px;
+        padding: 12px 20px max(12px, env(safe-area-inset-bottom));
         gap: 8px;
       }
       .result-visible .assistant-back {
@@ -609,6 +662,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .assistant-fab, .assistant-fab-label { transition: none; }
   ::ng-deep .nutrition-modal .modern-chat * {
     transition: none !important;
   }

@@ -94,9 +94,3 @@ html[data-theme='dark'] .liquid-panel::after { opacity: .3; }
 html[data-theme='dark'] body .ant-tag.ant-tag-green { color: #70e792 !important; background: #32d74b1a !important; }
 html[data-theme='dark'] body .ant-tag.ant-tag-red { color: #ff928b !important; background: #ff453a1a !important; }
 html[data-theme='dark'] body .ant-tag.ant-tag-blue { color: #8ac8ff !important; background: #0a84ff22 !important; }
-/* Opaque content surfaces avoid overlapping backdrop sampling around the CTA. */
-html[data-theme='dark'] body .ai-coach-trigger {
-  background: #132032 !important;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}

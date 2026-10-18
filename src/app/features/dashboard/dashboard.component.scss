@@ -351,44 +351,6 @@
 }
 
 /* ------------------------------------------------------------
-   Nutrition assistant trigger
-   ------------------------------------------------------------ */
-
-.ai-coach-trigger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  height: 52px !important;
-  margin-bottom: 22px;
-  font-size: 16px !important;
-  font-weight: 620 !important;
-  letter-spacing: -0.012em;
-  color: #0066cc !important;
-  border-radius: 12px !important;
-  border: 1px solid rgba(0, 113, 227, 0.28) !important;
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.7), rgba(0, 113, 227, 0.08)) !important;
-  box-shadow:
-    0 12px 30px rgba(15, 23, 42, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.22s ease !important;
-
-  &:hover {
-    transform: translateY(-1px);
-    border-color: rgba(0, 113, 227, 0.45) !important;
-    box-shadow:
-      0 16px 36px rgba(15, 23, 42, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
-  }
-
-  &:active {
-    transform: scale(0.99);
-  }
-}
-
-/* ------------------------------------------------------------
    Recent workouts
    ------------------------------------------------------------ */
 
