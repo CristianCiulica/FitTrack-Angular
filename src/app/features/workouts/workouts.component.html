@@ -73,7 +73,6 @@
 
     <nz-content class="app-content">
       <section class="history-intro"><span>YOUR ACTIVITY</span><h1>A little stronger.<br>Every session.</h1><p>Your runs and workouts, all in one place.</p></section>
-      <app-indoor-cardio class="history-indoor-entry" (saved)="refreshWorkouts()" />
       <section class="cardio-history">
         <div class="section-heading">
           <div>
@@ -289,7 +288,7 @@
                       </span>
                     </td>
                     <td class="workout-volume-cell">
-                      {{ displayLoad(getWorkoutVolume(w)) | number: '1.0-0' }} {{ weightUnit }}
+                      @if (w.exercises.length) { {{ displayLoad(getWorkoutVolume(w)) | number: '1.0-0' }} {{ weightUnit }} } @else { — }
                     </td>
                     <td class="workout-kcal-cell">
                       ~{{ getWorkoutCalories(w) }} kcal
@@ -309,7 +308,7 @@
                         nz-button
                         nzType="text"
                         nzSize="small"
-                        (click)="openEdit(w)"
+                        *ngIf="!treadmillRecords(w).length" (click)="openEdit(w)"
                         style="margin-right: 4px"
                       >
                         <span nz-icon nzType="edit"></span>
@@ -329,6 +328,8 @@
                   <tr class="workout-details-row" *ngIf="expandSet.has(w.id!)">
                     <td colspan="7">
                       <div class="desktop-exercise-list">
+                        @for (record of treadmillRecords(w); track record.exerciseIndex) {<div class="desktop-exercise-row"><div class="desktop-exercise-info"><strong>Treadmill walk</strong><span>Timed cardio</span></div><div class="desktop-exercise-stats"><span>{{ durationLabel(record.seconds) }}</span><span>~{{ treadmillEnergy(record) }} kcal estimated</span></div></div>}
+
                         <div class="desktop-exercise-row" *ngFor="let ex of w.exercises">
                           <div class="desktop-exercise-info">
                             <strong>{{ ex.exerciseName }}</strong>
@@ -380,7 +381,7 @@
                   <span class="stat-label">Exercises</span>
                   <span class="stat-value">{{ getExerciseCount(w) }}</span>
                 </div>
-                <div class="stat-clean">
+                <div class="stat-clean" *ngIf="w.exercises.length">
                   <span class="stat-label">Volume</span>
                   <span class="stat-value">{{ displayLoad(getWorkoutVolume(w)) | number: '1.0-0' }} {{ weightUnit }}</span>
                 </div>
@@ -395,6 +396,8 @@
               </div>
 
               <div class="mobile-exercise-list-clean" *ngIf="expandSet.has(w.id!)">
+                @for (record of treadmillRecords(w); track record.exerciseIndex) {<div class="mobile-exercise-row-clean"><div><strong>Treadmill walk</strong><span>{{ durationLabel(record.seconds) }} · ~{{ treadmillEnergy(record) }} kcal estimated</span></div></div>}
+
                 <div class="mobile-exercise-row-clean" *ngFor="let ex of w.exercises">
                   <div class="ex-info">
                     <strong>{{ ex.exerciseName }}</strong>
@@ -414,7 +417,7 @@
                 <button type="button" class="action-btn" (click)="onExpandChange(w.id!, !expandSet.has(w.id!))">
                   {{ expandSet.has(w.id!) ? 'Hide Details' : 'Details' }}
                 </button>
-                <button type="button" class="action-btn" (click)="openEdit(w)">Edit</button>
+                <button type="button" class="action-btn" *ngIf="!treadmillRecords(w).length" (click)="openEdit(w)">Edit</button>
                 <button type="button" class="action-btn danger" (click)="deleteWorkout(w.id!)">
                   Delete
                 </button>

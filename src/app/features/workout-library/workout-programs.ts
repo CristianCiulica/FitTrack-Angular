@@ -13,6 +13,7 @@ import {
   readProgramSession,
   validProgramContext,
 } from '../../core/utils/program-records';
+import { isTimedCardioOnly, treadmillSeconds } from '../../core/utils/timed-cardio';
 import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { TRAINING_MOVEMENTS } from '../training-planner/training-movements';
 
@@ -344,7 +345,7 @@ export function workoutPrograms(
       ],
       guidance: [
         'Start with two working sets and about three reps in reserve. Repeat the same sessions so progress is easy to see.',
-        'The walking days can be done outdoors. Use the treadmill logger when you walk indoors.',
+        'Choose an easy treadmill pace on walking days. Adjust your duration before starting the timer.',
         ...common,
       ],
       week: [
@@ -559,7 +560,22 @@ export function programRoutine(
   )
     throw new Error('Invalid plan session.');
   const day = program.week[dayIndex % 7];
-  if (!day.routine) throw new Error('This day is not a strength session.');
+  if (enrollment.stoppedAt || day.type === 'rest')
+    throw new Error('This day is not available to train.');
+  const routine = day.routine ?? {
+    name: day.title,
+    exercises: [
+      {
+        name: 'Treadmill walk',
+        sets: 1,
+        reps: 1,
+        weight: 0,
+        muscleGroup: 'Cardio' as const,
+        activity: 'treadmill' as const,
+        durationMinutes: day.cardio!.minutes,
+      },
+    ],
+  };
   const context: ProgramSessionContext = {
     enrollmentId: enrollment.id,
     programId: program.id,
@@ -567,11 +583,11 @@ export function programRoutine(
     sessionId: day.id,
   };
   return {
-    ...day.routine,
+    ...routine,
     name: program.title + ' · ' + day.title,
     program: context,
     exercises: orderRoutineExercises(
-      day.routine.exercises.map((e) => ({
+      routine.exercises.map((e) => ({
         ...e,
         weight: 0,
         rir: dayIndex < 7 ? 3 : 2,
@@ -604,10 +620,18 @@ export function programCompletions(
     const planned = program?.week[context.dayIndex % 7];
     if (
       planned &&
-      (planned.id !== context.sessionId || planned.type !== (strength ? 'strength' : 'cardio'))
+      (planned.id !== context.sessionId ||
+        planned.type !== (isTimedCardioOnly(workout) || cardio ? 'cardio' : 'strength'))
     )
       continue;
-    if (strength) {
+    if (isTimedCardioOnly(workout)) {
+      const seconds = (cardioSeconds.get(context.dayIndex) ?? 0) + treadmillSeconds(workout);
+      cardioSeconds.set(context.dayIndex, seconds);
+      result.set(context.dayIndex, {
+        complete: seconds >= (planned?.cardio?.minutes ?? 1) * 60,
+        date: workout.date,
+      });
+    } else if (strength) {
       if (!result.get(context.dayIndex)?.complete)
         result.set(context.dayIndex, { complete: strength.completed, date: workout.date });
     } else if (cardio) {

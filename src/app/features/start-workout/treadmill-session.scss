@@ -1,0 +1,105 @@
+.treadmill-exercise {
+  justify-content: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.treadmill-exercise > * {
+  flex-shrink: 0;
+}
+.treadmill-exercise .live-weight {
+  width: min(100%, 500px);
+}
+.treadmill-setup {
+  text-align: center;
+}
+.treadmill-setup > label {
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--ink-secondary);
+}
+.treadmill-duration {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  margin: 6px 0 14px;
+}
+.treadmill-duration input {
+  width: 100px;
+  min-height: 48px;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 35px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  text-align: center;
+}
+.treadmill-duration input:disabled {
+  opacity: 0.7;
+}
+.treadmill-duration input:focus-visible {
+  outline: 2px solid var(--accent);
+  border-radius: 8px;
+}
+.treadmill-duration > span {
+  color: var(--ink-secondary);
+  font-size: 12px;
+}
+.treadmill-energy {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  margin-top: 15px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+  text-align: center;
+}
+.treadmill-energy > div + div {
+  border-left: 1px solid var(--hairline);
+}
+.treadmill-energy strong {
+  display: block;
+  font-size: 25px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.treadmill-energy small {
+  font-size: 11px;
+  font-weight: 450;
+}
+.treadmill-energy span {
+  font-size: 10px;
+  color: var(--ink-secondary);
+  display: block;
+  margin-top: 5px;
+}
+.treadmill-estimate-note {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 350px;
+  margin: 14px 0 0;
+}
+.treadmill-error {
+  color: #df5050;
+  font-size: 11px;
+  margin-top: 7px;
+}
+@media (max-height: 700px) {
+  .treadmill-duration {
+    margin-bottom: 8px;
+  }
+  .treadmill-duration input {
+    font-size: 29px;
+    min-height: 42px;
+  }
+  .treadmill-timer .hold-countdown {
+    width: 110px;
+  }
+}

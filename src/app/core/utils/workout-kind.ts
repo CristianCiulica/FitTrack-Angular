@@ -1,3 +1,4 @@
+import { isTimedCardioOnly } from './timed-cardio';
 import { indoorCardio } from './indoor-cardio';
 import { readProgramEnrollment } from './program-records';
 import { Workout } from '../models/workout.model';
@@ -5,7 +6,7 @@ import { Workout } from '../models/workout.model';
 export const isWorkoutSession = (workout: Workout): boolean =>
   workout.kind !== 'routine' && !workout.isPredefined;
 
-export const isStrengthWorkoutSession = (workout: Workout): boolean => isWorkoutSession(workout) && !indoorCardio(workout);
+export const isStrengthWorkoutSession = (workout: Workout): boolean => isWorkoutSession(workout) && !indoorCardio(workout) && !isTimedCardioOnly(workout);
 
 /** Retain legacy personal plans once each, without turning new sessions into plans. */
 export function personalWorkoutPlans(workouts: Workout[]): Workout[] {

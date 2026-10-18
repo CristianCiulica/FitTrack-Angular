@@ -1,4 +1,4 @@
-import { ProgramSessionContext } from '../models/workout-routine.model';
+import { ProgramSessionContext, isTreadmillExercise } from '../models/workout-routine.model';
 import { validProgramContext } from './program-records';
 import { MuscleGroup, MUSCLE_GROUPS } from '../models/workout.model';
 
@@ -24,6 +24,8 @@ export interface WorkoutDraft {
       rir?: number;
       cue?: string;
       compound?: boolean;
+      activity?: 'treadmill';
+      durationMinutes?: number;
     }[];
   };
   state: 'active' | 'rest' | 'review';
@@ -63,8 +65,8 @@ export function readWorkoutDraft(owner: string): WorkoutDraft | null {
       value.startedAt <= 0 ||
       value.startedAt > Date.now() ||
       !bounded(value.currentWeight, 1000) ||
-      !bounded(value.currentReps, 500) ||
-      !bounded(value.holdElapsedMs, 500_000) ||
+      !bounded(value.currentReps, 7200) ||
+      !bounded(value.holdElapsedMs, 7_200_000) ||
       !bounded(value.restSeconds, 900) ||
       value.restSeconds < 1 ||
       !Number.isFinite(value.restDeadline) ||
@@ -93,16 +95,24 @@ export function readWorkoutDraft(owner: string): WorkoutDraft | null {
         !bounded(exercise.reps, 500) ||
         !bounded(exercise.weight, 1000) ||
         (exercise.repUnit != null && exercise.repUnit !== 'seconds') ||
-        (exercise.repRange != null && (typeof exercise.repRange !== 'string' || exercise.repRange.length > 30)) ||
-        (exercise.restSeconds != null && (!bounded(exercise.restSeconds, 900) || exercise.restSeconds < 1)) ||
+        (exercise.repRange != null &&
+          (typeof exercise.repRange !== 'string' || exercise.repRange.length > 30)) ||
+        (exercise.restSeconds != null &&
+          (!bounded(exercise.restSeconds, 900) || exercise.restSeconds < 1)) ||
         (exercise.rir != null && (!bounded(exercise.rir, 5) || !Number.isInteger(exercise.rir))) ||
         (exercise.cue != null && (typeof exercise.cue !== 'string' || exercise.cue.length > 600)) ||
-        (exercise.compound != null && typeof exercise.compound !== 'boolean')
+        (exercise.compound != null && typeof exercise.compound !== 'boolean') ||
+        (exercise.activity != null && exercise.activity !== 'treadmill') ||
+        (exercise.durationMinutes != null &&
+          (!Number.isInteger(exercise.durationMinutes) ||
+            exercise.durationMinutes < 1 ||
+            exercise.durationMinutes > 120)) ||
+        (isTreadmillExercise(exercise) && exercise.sets !== 1)
       )
         return null;
       for (const [rows, maximum] of [
         [value.weights, 1000],
-        [value.reps, 500],
+        [value.reps, isTreadmillExercise(exercise) ? 7200 : 500],
       ] as const) {
         if (
           !Array.isArray(rows[i]) ||
@@ -115,7 +125,20 @@ export function readWorkoutDraft(owner: string): WorkoutDraft | null {
         value.weights[i].some((weight, set) => (weight === null) !== (value.reps[i][set] === null))
       )
         return null;
+      if (
+        isTreadmillExercise(exercise) &&
+        (value.weights[i].some((weight) => weight !== null && weight !== 0) ||
+          value.reps[i].some(
+            (seconds) =>
+              seconds !== null &&
+              (!Number.isInteger(seconds) || seconds > (exercise.durationMinutes ?? 20) * 60),
+          ))
+      )
+        return null;
     }
+    const current = value.routine.exercises[value.exerciseIndex];
+    const maximum = isTreadmillExercise(current) ? (current.durationMinutes ?? 20) * 60 : 500;
+    if (value.currentReps > maximum || value.holdElapsedMs > maximum * 1000) return null;
     return value;
   } catch {
     return null;

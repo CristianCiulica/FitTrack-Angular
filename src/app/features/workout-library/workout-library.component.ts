@@ -23,11 +23,11 @@ import {
   offsetDay,
   programDayIndex,
   validDayKey,
+  readProgramEnrollment,
 } from '../../core/utils/program-records';
 import { localDateKey } from '../../core/utils/weight-progress';
 import { GOAL_LABELS } from '../training-planner/training-planner.model';
 import { savedTrainingPlans } from '../training-planner/training-plan-storage';
-import { IndoorCardioComponent } from '../../shared/components/indoor-cardio/indoor-cardio.component';
 import {
   WorkoutProgram,
   PROGRAM_PHASES,
@@ -40,7 +40,7 @@ import {
 @Component({
   selector: 'app-workout-library',
   standalone: true,
-  imports: [CommonModule, FormsModule, IndoorCardioComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './workout-library.component.html',
   styleUrls: ['./workout-library.component.scss', './workout-program-detail.scss'],
 })
@@ -56,7 +56,6 @@ export class WorkoutLibraryComponent {
   @Output() openLegends = new EventEmitter<void>();
   @ViewChild('detailDialog') private dialog!: ElementRef<HTMLDialogElement>;
   @ViewChild('detailBody') private detailBody!: ElementRef<HTMLElement>;
-  @ViewChild(IndoorCardioComponent) private indoor!: IndoorCardioComponent;
   private readonly workouts = inject(WorkoutService);
   private readonly auth = inject(AuthService);
   private readonly destroy = inject(DestroyRef);
@@ -89,7 +88,11 @@ export class WorkoutLibraryComponent {
       this.programs().some((p) => p.id === e.programId),
     ),
   );
-  readonly activeEnrollment = computed(() => this.enrollments()[0] ?? null);
+  readonly activeEnrollment = computed(() => {
+    const latest = this.enrollments()[0];
+    return latest && !latest.stoppedAt ? latest : null;
+  });
+  readonly stopRequested = signal(false);
   readonly activeProgram = computed(
     () => this.programs().find((p) => p.id === this.activeEnrollment()?.programId) ?? null,
   );
@@ -138,7 +141,9 @@ export class WorkoutLibraryComponent {
   readonly visibleSaved = computed(() =>
     this.filteredSaved().slice(this.savedPage() * 6, this.savedPage() * 6 + 6),
   );
-  readonly previousBlocks = computed(() => this.enrollments().slice(1));
+  readonly previousBlocks = computed(() =>
+    this.enrollments().filter((e) => e.id !== this.activeEnrollment()?.id),
+  );
   readonly visibleBlocks = computed(() =>
     this.previousBlocks().slice(this.blockPage() * 6, this.blockPage() * 6 + 6),
   );
@@ -219,6 +224,7 @@ export class WorkoutLibraryComponent {
   }
   showProgram(program: WorkoutProgram, enrollment?: ProgramEnrollment) {
     this.today.set(localDateKey());
+    this.stopRequested.set(false);
     this.selectedProgram.set(program);
     this.selectedRoutine.set(null);
     this.selectedSavedId.set(null);
@@ -270,6 +276,7 @@ export class WorkoutLibraryComponent {
   }
   close() {
     if (this.saving()) return;
+    this.stopRequested.set(false);
     this.dialog.nativeElement.close();
     this.opener?.focus({ preventScroll: true });
   }
@@ -358,17 +365,41 @@ export class WorkoutLibraryComponent {
       e = this.selectedEnrollment(),
       day = this.currentDay();
     if (!p || !e || !day || day.future) return;
-    if (day.day.type === 'cardio') {
-      this.indoor.open(
-        { enrollmentId: e.id, programId: p.id, dayIndex: day.index, sessionId: day.day.id },
-        day.day.cardio?.minutes,
+    if (e.stoppedAt || day.day.type === 'rest') return;
+    const routine = programRoutine(p, day.index, e);
+    this.close();
+    this.startRoutine.emit({ routine, key: `${e.id}.${day.index}` });
+  }
+  requestStop(program: WorkoutProgram, enrollment: ProgramEnrollment) {
+    this.showProgram(program, enrollment);
+    this.stopRequested.set(true);
+  }
+  async stopPlan() {
+    const enrollment = this.selectedEnrollment(),
+      owner = this.auth.currentUserId;
+    const workout = this.workouts
+      .workouts()
+      .find((w) => readProgramEnrollment(w)?.id === enrollment?.id);
+    if (!enrollment || !workout?.id || !owner || this.saving() || enrollment.stoppedAt) return;
+    const stopped = { ...enrollment, stoppedAt: new Date().toISOString() };
+    this.saving.set(true);
+    this.error.set('');
+    try {
+      const saved = await firstValueFrom(
+        this.workouts.updateWorkout(workout.id, {
+          notes: enrollmentWorkout(stopped, this.selectedProgram()!.title, owner).notes,
+        }),
       );
-      return;
-    }
-    if (day.day.type === 'strength') {
-      const routine = programRoutine(p, day.index, e);
-      this.close();
-      this.startRoutine.emit({ routine, key: `${e.id}.${day.index}` });
+      if (this.destroyed || this.auth.currentUserId !== owner) return;
+      if (!this.workouts.isDurablySaved(saved))
+        throw new Error('Could not save the change. Keep this screen open and retry.');
+      this.selectedEnrollment.set(stopped);
+      this.stopRequested.set(false);
+      this.status.set('Plan stopped. Your completed sessions and progress are kept.');
+    } catch (e) {
+      this.error.set(e instanceof Error ? e.message : 'Could not stop this plan. Please retry.');
+    } finally {
+      if (!this.destroyed) this.saving.set(false);
     }
   }
   startSingle() {
@@ -379,9 +410,6 @@ export class WorkoutLibraryComponent {
       routine,
       key: routine.id ? 'personal-' + routine.id : 'library-' + routine.name,
     });
-  }
-  logCardio() {
-    this.indoor.open();
   }
   minuteEstimate(routine: WorkoutRoutine) {
     return Math.round(

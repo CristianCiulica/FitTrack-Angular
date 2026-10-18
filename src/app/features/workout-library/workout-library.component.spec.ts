@@ -1,6 +1,7 @@
+import { enrollmentWorkout, readProgramEnrollment } from '../../core/utils/program-records';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
@@ -20,6 +21,7 @@ describe('Workout library navigation', () => {
             workouts: signal([]),
             addWorkout: vi.fn((w) => of({ ...w, id: 'saved' })),
             isDurablySaved: () => true,
+            updateWorkout: vi.fn(),
           },
         },
       ],
@@ -86,5 +88,44 @@ describe('Workout library navigation', () => {
     const launch = vi.spyOn(component.startRoutine, 'emit');
     component.startDay();
     expect(launch).not.toHaveBeenCalled();
+  });
+  it('stops the active block without deleting progress or reviving an older block', async () => {
+    const component = TestBed.createComponent(WorkoutLibraryComponent).componentInstance;
+    const service = TestBed.inject(WorkoutService);
+    const old = {
+      version: 1 as const,
+      id: 'pg_old',
+      programId: 'busy-30',
+      startDate: '2026-10-16',
+      createdAt: '2026-10-16T10:00:00Z',
+    };
+    const current = {
+      ...old,
+      id: 'pg_current',
+      programId: 'build-30',
+      createdAt: '2026-10-18T10:00:00Z',
+    };
+    service.workouts.set(
+      [old, current].map((e) => ({ ...enrollmentWorkout(e, 'Plan', 'u'), id: e.id })),
+    );
+    component.selectedProgram.set(component.programs()[0]);
+    component.selectedEnrollment.set(current);
+    vi.mocked(service.updateWorkout).mockReturnValueOnce(throwError(() => new Error('Offline')));
+    await component.stopPlan();
+    expect(component.error()).toBe('Offline');
+    expect(component.activeEnrollment()?.id).toBe('pg_current');
+    vi.mocked(service.updateWorkout).mockImplementation((id, patch) => {
+      const saved = { ...service.workouts().find((w) => w.id === id)!, ...patch };
+      service.workouts.update((list) => list.map((w) => (w.id === id ? saved : w)));
+      return of(saved);
+    });
+    await component.stopPlan();
+    expect(service.workouts().length).toBe(2);
+    expect(readProgramEnrollment(service.workouts()[1])?.stoppedAt).toBeTruthy();
+    expect(component.activeEnrollment()).toBeNull();
+    expect(component.previousBlocks().length).toBe(2);
+    const start = vi.spyOn(component.startRoutine, 'emit');
+    component.startDay();
+    expect(start).not.toHaveBeenCalled();
   });
 });

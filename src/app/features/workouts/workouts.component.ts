@@ -1,8 +1,9 @@
-import { IndoorCardioComponent } from '../../shared/components/indoor-cardio/indoor-cardio.component';
+import { timedSession, TreadmillLog, estimateTreadmillCalories } from '../../core/utils/timed-cardio';
+import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { CardioHistorySession, indoorHistorySession } from '../../core/utils/indoor-cardio';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { durationLabel } from '../../core/utils/workout-history';
-import { isStrengthWorkoutSession, isWorkoutSession } from '../../core/utils/workout-kind';
+import { isWorkoutSession } from '../../core/utils/workout-kind';
 import { displayWeight, displayDistance, displaySpeed, distanceUnitLabel, weightUnitLabel } from '../../core/utils/units';
 import { Component, DestroyRef, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -25,7 +26,7 @@ import { RouterLinkActive } from '@angular/router';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { ProfileService } from '../../core/services/profile.service';
-import { estimateSessionCalories } from '../../core/utils/workout-calories';
+import { workoutActivityCalories } from '../../core/utils/workout-calories';
 
 type WorkoutSortColumn = 'name' | 'date' | 'exerciseCount' | 'primaryMuscle' | 'volume';
 type SortDirection = 'ascend' | 'descend' | null;
@@ -35,7 +36,6 @@ type SortDirection = 'ascend' | 'descend' | null;
   standalone: true,
   imports: [
     CommonModule,
-    IndoorCardioComponent,
     RouterLink,
     RouterLinkActive,
     NzTableModule,
@@ -77,7 +77,7 @@ export class WorkoutsComponent implements OnInit {
   expandSet = new Set<string>();
 
   filteredWorkouts = computed(() => {
-    let data = this.workouts().filter(isStrengthWorkoutSession);
+    let data = this.workouts().filter(w => isWorkoutSession(w) && !indoorCardio(w));
 
     const sc = this.sortColumn();
     const sd = this.sortDirection();
@@ -107,11 +107,11 @@ export class WorkoutsComponent implements OnInit {
   }
 
   getExerciseCount(workout: Workout): number {
-    return workout.exercises?.length ?? 0;
+    return (workout.exercises?.length ?? 0) + this.treadmillRecords(workout).length;
   }
 
   getPrimaryMuscle(workout: Workout): string {
-    return workout.exercises?.[0]?.muscleGroup ?? 'Mixed';
+    return workout.exercises?.[0]?.muscleGroup ?? (this.treadmillRecords(workout).length ? 'Cardio' : 'Mixed');
   }
 
   // ton de culoare distinct pentru fiecare grupa musculara, in loc de tag-ul gri implicit
@@ -158,8 +158,11 @@ export class WorkoutsComponent implements OnInit {
 
   // estimare de calorii arse, pe baza greutatii din profil
   getWorkoutCalories(workout: Workout): number {
-    return estimateSessionCalories(workout.exercises, this.profileService.weightKg());
+    return workoutActivityCalories(workout, this.profileService.weightKg());
   }
+
+  treadmillRecords(workout: Workout): TreadmillLog[] { return timedSession(workout)?.treadmill ?? []; }
+  treadmillEnergy(log: TreadmillLog): number { return estimateTreadmillCalories(log.seconds, log.weightKg); }
 
   // ritmul mediu, in stil alergare: min/km (ex. 5'32")
   formatPace(session: RunningSession): string {

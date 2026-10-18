@@ -134,15 +134,15 @@
             <h1 id="summary-title">{{ currentRoutine().name }}</h1>
             <p class="summary-date">{{ targetDate() | date:'EEEE, MMMM d' }}</p>
             <div class="summary-metrics">
-              <div><span>Duration</span><strong>{{ durationLabel(finishedDuration()) }}</strong><small>including rests</small></div>
-              <div><span>Sets completed</span><strong>{{ completedSets() }}<small> / {{ totalSets() }}</small></strong><small>{{ totalSets() - completedSets() }} skipped</small></div>
-              <div><span>Total volume</span><strong>{{ displayLoad(finishedVolume()) | number:'1.0-0' }}<small> {{ weightUnit() }}</small></strong><small>reps × weight</small></div>
-              <div><span>Estimated energy</span><strong>{{ finishedCalories() }}<small> kcal</small></strong><small>from completed sets</small></div>
+              <div><span>Duration</span><strong>{{ durationLabel(finishedDuration()) }}</strong><small>{{ cardioOnly() ? 'walking time · pauses excluded' : 'including rests' }}</small></div>
+              <div><span>{{ hasTreadmill() ? 'Steps completed' : 'Sets completed' }}</span><strong>{{ completedSets() }}<small> / {{ totalSets() }}</small></strong><small>{{ totalSets() - completedSets() }} skipped</small></div>
+              <div *ngIf="!cardioOnly()"><span>Total volume</span><strong>{{ displayLoad(finishedVolume()) | number:'1.0-0' }}<small> {{ weightUnit() }}</small></strong><small>reps × weight</small></div>
+              <div><span>Estimated energy</span><strong>{{ finishedCalories() }}<small> kcal</small></strong><small>{{ hasTreadmill() ? 'from completed activity' : 'from completed sets' }}</small></div>
             </div>
             @if (finishedPrevious(); as previous) {
               <div class="summary-comparison"><span>Compared with {{ previous.date | date:'MMM d' }}</span><strong>{{ finishedDelta()! > 0 ? '+' : '' }}{{ displayLoad(finishedDelta()!) | number:'1.0-0' }} {{ weightUnit() }} <small>volume</small></strong>@if (previous.durationSeconds != null) { <small>Previous duration · {{ durationLabel(previous.durationSeconds) }}</small> }</div>
             }
-            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><strong>{{ exercise.name }}</strong><span>{{ exercise.sets }} {{ exercise.sets === 1 ? 'set' : 'sets' }} · {{ displayLoad(exercise.volume) | number:'1.0-0' }} {{ weightUnit() }}</span></div> }</div>
+            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><strong>{{ exercise.name }}</strong><span>{{ exercise.seconds != null ? durationLabel(exercise.seconds) + ' · treadmill' : exercise.sets + (exercise.sets === 1 ? ' set' : ' sets') + ' · ' + displayLoad(exercise.volume) + ' ' + weightUnit() }}</span></div> }</div>
             <p class="summary-saved" role="status">{{ savedLocally() ? 'Saved on this device. It will sync when you reconnect and open your history.' : 'Saved to your workout history.' }}</p>
             <div class="summary-actions"><button type="button" (click)="exportSummary()" [disabled]="exporting()">{{ exporting() ? 'Preparing image…' : 'Save as image' }}</button><a routerLink="/dashboard" class="summary-primary" (click)="reset()">Back to Home</a></div>
           </section>
@@ -162,98 +162,33 @@
 >
 </app-workout-modal>
 
-<!-- Drawer-ul Legends' Plans: lista de staruri sau planul selectat -->
-<nz-drawer
-  [nzVisible]="legendsOpen()"
-  nzWrapClassName="legends-drawer"
-  [nzWidth]="'100%'"
-  [nzBodyStyle]="{ padding: '0', background: '#f5f5f7' }"
-  nzPlacement="right"
-  [nzTitle]="activePlan()?.name ?? 'Legends\' Plans'"
-  (nzOnClose)="closePlan()"
->
+<nz-drawer [nzVisible]="legendsOpen()" nzWrapClassName="legends-drawer legend-collection-drawer" [nzWidth]="'100%'" [nzBodyStyle]="{ padding: '0', background: 'var(--bg)' }" nzPlacement="right" [nzTitle]="activePlan()?.athlete ?? 'The Legends Collection'" (nzOnClose)="closePlan()">
   <ng-container *nzDrawerContent>
-    <!-- Nivelul 1: hub-ul cu toate legendele -->
-    <div class="plan-drawer legends-hub" *ngIf="activePlan() === null">
-      <div class="legends-intro">
-        <span class="plan-hero-badge">
-          <span nz-icon nzType="trophy"></span>
-          Official plans
-        </span>
-        <h2>Train like the greats</h2>
-        <p>Authentic training styles from the legends of bodybuilding. Pick an athlete, pick a day, hit start.</p>
+    @if (activePlan(); as plan) {
+      <div class="lc-detail">
+        <button type="button" class="lc-back" (click)="backToLegends()"><span aria-hidden="true">←</span> All legends</button>
+        <section class="lc-athlete-hero">
+          <div><span class="lc-eyebrow">THE LEGENDS COLLECTION</span><h1>{{ plan.athlete }}<span>.</span></h1><p class="lc-athlete-title">{{ plan.title }}</p><p>{{ plan.description }}</p><div class="lc-athlete-meta"><span>{{ plan.routines.length }} sessions to explore</span><span>Advanced training</span></div></div>
+          <img [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" />
+        </section>
+        <section class="lc-session-section">
+          <div class="lc-section-heading"><div><span class="lc-eyebrow">PICK YOUR SESSION</span><h2>One day. Full focus.</h2></div><span>{{ legendRoutineIndex() + 1 }} / {{ plan.routines.length }}</span></div>
+          <div class="lc-day-tabs" role="group" aria-label="Legend plan sessions">@for (routine of plan.routines; track $index) {<button type="button" [class.active]="legendRoutineIndex() === $index" [attr.aria-pressed]="legendRoutineIndex() === $index" (click)="legendRoutineIndex.set($index)"><small>SESSION {{ $index + 1 }}</small><strong>{{ routine.name }}</strong></button>}</div>
+          @if (legendRoutine(); as routine) {
+            <div class="lc-session-card"><header><div><span class="lc-eyebrow">YOUR SELECTED SESSION</span><h2>{{ routine.name }}</h2></div><div class="lc-session-metrics"><span><strong>{{ routine.exercises.length }}</strong> exercises</span><span><strong>{{ routineSets(routine) }}</strong> working sets</span><span><strong>~{{ routineMinutes(routine) }}</strong> min</span></div></header>
+              <ol class="lc-exercises">@for (exercise of routine.exercises; track $index) {<li><span class="lc-exercise-number">{{ ($index + 1).toString().padStart(2, '0') }}</span><strong>{{ exercise.name }}</strong><span>{{ exercise.sets }} × {{ exercise.repRange || exercise.reps }}<small>{{ exercise.repUnit === 'seconds' ? 'sec' : 'reps' }}</small></span></li>}</ol>
+              <footer><p>Compounds first. Choose working loads that suit you during warm-up. These high-volume sessions are intended for experienced lifters.</p><button type="button" class="lc-start" (click)="startFromPlan(routine, plan.id, legendRoutineIndex())">Start this session <span aria-hidden="true">↗</span></button></footer>
+            </div>
+          }
+        </section>
       </div>
-      <div class="legends-list">
-        <button
-          type="button"
-          class="legend-card"
-          *ngFor="let plan of officialPlans"
-          [attr.data-tone]="plan.tone"
-          (click)="openPlan(plan)"
-        >
-          <span class="legend-copy">
-            <strong>{{ plan.athlete }}</strong>
-            <span class="legend-title">{{ plan.title }}</span>
-            <span class="legend-tagline">{{ plan.tagline }}</span>
-            <span class="legend-count">{{ plan.routines.length }} routines <span class="legend-chevron" aria-hidden="true"></span></span>
-          </span>
-          <img class="legend-photo" [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" loading="lazy" />
-        </button>
+    } @else {
+      <div class="lc-index">
+        <header class="lc-intro"><span class="lc-eyebrow">THE LEGENDS COLLECTION</span><h1>Train like<br />the greats<span>.</span></h1><p>Explore classic bodybuilding splits. Choose an athlete, find your session and bring your own intensity.</p><div class="lc-index-meta"><span>{{ officialPlans.length }} icons of bodybuilding</span><span>One session at a time</span></div></header>
+        <div class="lc-grid">@for (plan of officialPlans; track plan.id) {<button type="button" class="lc-athlete-card" (click)="openPlan(plan)"><div class="lc-portrait"><img [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" loading="lazy" /><span class="lc-card-number">{{ ($index + 1).toString().padStart(2, '0') }}</span><div><span>{{ plan.title }}</span><h2>{{ plan.athlete }}</h2></div></div><div class="lc-card-footer"><span>{{ plan.routines.length }} sessions<span>Explore the split</span></span><span aria-hidden="true">↗</span></div></button>}</div>
+        <p class="lc-note">Classic training styles, adapted to your logging flow. Select exercises and loads you can perform with control, and allow enough recovery between sessions.</p>
       </div>
-    </div>
-
-    <!-- Nivelul 2: planul unei legende -->
-    <div class="plan-drawer" *ngIf="activePlan() as plan">
-      <button type="button" class="legends-back" (click)="backToLegends()">
-        <span nz-icon nzType="arrow-left"></span>
-        All legends
-      </button>
-      <div class="plan-hero" [attr.data-tone]="plan.tone">
-        <div class="plan-hero-copy">
-          <span class="plan-hero-badge">
-            <span nz-icon nzType="trophy"></span>
-            Official plan
-          </span>
-          <h2>{{ plan.name }}</h2>
-          <p>{{ plan.description }}</p>
-          <span class="plan-hero-meta">{{ plan.routines.length }} routines · pick one and start</span>
-        </div>
-        <img class="plan-hero-photo" [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" />
-      </div>
-
-      <div class="plan-list drawer-plan-list">
-        <div
-          class="plan-card"
-          *ngFor="let routine of plan.routines; let i = index"
-          [attr.data-tone]="cardTone(i)"
-        >
-          <div class="duration-badge">
-            <strong>{{ routineMinutes(routine) }}</strong>
-            <span>mins</span>
-          </div>
-          <h3>{{ routine.name }}</h3>
-          <div class="plan-chips">
-            <span class="plan-chip">{{ routine.category }}</span>
-            <span class="plan-count">{{ routine.exercises.length }} exercises · ~{{ routineKcal(routine) }} kcal</span>
-          </div>
-          <p class="plan-muscles">{{ muscleSummary(routine) }}</p>
-          <ul class="plan-exercise-list">
-            <li *ngFor="let ex of routine.exercises">
-              <span>{{ ex.name }}</span>
-              <span class="ex-detail">{{ ex.sets }}×{{ ex.reps }}{{ ex.repUnit === 'seconds' ? ' s' : '' }}<ng-container *ngIf="ex.weight > 0"> · {{ displayLoad(ex.weight) }} {{ weightUnit() }}</ng-container></span>
-            </li>
-          </ul>
-          <button
-            type="button"
-            class="plan-start always"
-            (click)="startFromPlan(routine, plan.id, i)"
-          >
-            <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-            Start workout
-          </button>
-        </div>
-      </div>
-    </div>
+    }
   </ng-container>
 </nz-drawer>
 
@@ -301,19 +236,19 @@
       <span class="live-eyebrow">Workout in progress</span>
       <h2>{{ currentRoutine().name }}</h2>
     </div>
-    <div class="live-progress-ring"><strong>{{ completedSets() }}</strong><span>/ {{ totalSets() }} sets</span></div>
+    <div class="live-progress-ring"><strong>{{ completedSets() }}</strong><span>/ {{ totalSets() }} {{ hasTreadmill() ? 'steps' : 'sets' }}</span></div>
   </div>
   <div class="live-progress-track" aria-hidden="true">
     <span [style.width.%]="progressPercent()"></span>
   </div>
 
   <!-- ACTIVE -->
-  <div class="live-body" *ngIf="state() === 'active' && currentExercise() as ex" [class.timed-exercise]="ex.repUnit === 'seconds'">
+  <div class="live-body" *ngIf="state() === 'active' && currentExercise() as ex" [class.timed-exercise]="ex.repUnit === 'seconds' || treadmillActive()" [class.treadmill-exercise]="treadmillActive()">
     <div class="live-exercise-head">
       <h1>{{ ex.name }}</h1>
     </div>
 
-    <div class="live-stats">
+    <div class="live-stats" *ngIf="!treadmillActive()">
       <div class="live-stat">
         <label>Set</label>
         <div class="value">{{ currentSetIndex() }} / {{ ex.sets }}</div>
@@ -324,7 +259,7 @@
       </div>
     </div>
 
-    <details class="live-plan-guidance" *ngIf="ex.cue">
+    <details class="live-plan-guidance" *ngIf="ex.cue && !treadmillActive()">
       <summary>Technique & effort <span>{{ ex.rir }} reps left · {{ exerciseRestSeconds() }} sec rest</span></summary>
       <p>{{ ex.cue }}</p>
       <p>Finish with about {{ ex.rir }} good repetitions left. Use a comfortable range and adjust the load during warm-up.</p>
@@ -332,7 +267,23 @@
 
     <!-- logheaza ce ai facut efectiv la setul curent: repetari + greutate -->
     <div class="live-weight">
-      @if (ex.repUnit === 'seconds') {
+      @if (treadmillActive()) {
+        <div class="treadmill-setup">
+          <label for="treadmill-minutes">How many minutes would you like to walk?</label>
+          <div class="treadmill-duration"><input id="treadmill-minutes" type="number" inputmode="numeric" min="1" max="120" step="1" [value]="treadmillMinutes()" [disabled]="holdRunning() || holdElapsedMs() > 0" [attr.aria-invalid]="!treadmillInputValid()" (input)="updateTreadmillMinutes($any($event.target).value)" /><span>minutes</span></div>
+          @if (!treadmillInputValid()) { <p class="treadmill-error" role="alert">Choose a whole number between 1 and 120 minutes.</p> }
+        </div>
+        <div class="hold-timer treadmill-timer">
+          <div class="hold-countdown" role="timer" [attr.aria-label]="holdRemainingSeconds() + ' seconds remaining'">
+            <svg viewBox="0 0 160 160" aria-hidden="true"><circle class="hold-track" cx="80" cy="80" r="70" /><circle class="hold-progress" cx="80" cy="80" r="70" pathLength="100" stroke-dasharray="100" [attr.stroke-dashoffset]="holdProgress()" /></svg>
+            <div><strong>{{ holdClock() }}</strong><span>remaining</span></div>
+          </div>
+          <p class="hold-status">{{ holdRunning() ? 'Keep a comfortable walking pace.' : holdElapsedMs() > 0 ? 'Paused · resume when you’re ready.' : 'Set your duration. Start when you’re ready.' }}</p>
+          <div class="treadmill-energy"><div><strong>~{{ treadmillCalories(holdElapsedMs() / 1000) }}<small> kcal</small></strong><span>estimated so far</span></div><div><strong>~{{ treadmillCalories(holdTargetSeconds()) }}<small> kcal</small></strong><span>at your target duration</span></div></div>
+          <p class="treadmill-estimate-note">Estimate assumes level walking at 4.0–4.7 km/h{{ profileWeightAvailable() ? ' and your profile weight' : ' and 75 kg body weight' }}. Your actual pace and incline can change it.</p>
+          <div class="hold-controls"><button type="button" [disabled]="holdElapsedMs() === 0 && !holdRunning()" (click)="resetHoldTimer()"><span nz-icon nzType="reload"></span> Reset</button><button type="button" *ngIf="holdElapsedMs() >= 1000" (click)="finishSet()">Finish early</button></div>
+        </div>
+      } @else if (ex.repUnit === 'seconds') {
         <div class="hold-timer">
           <div class="hold-countdown" role="timer" [attr.aria-label]="holdRemainingSeconds() + ' seconds remaining'">
             <svg viewBox="0 0 160 160" aria-hidden="true">
@@ -387,7 +338,7 @@
           </div>
         </div>
       }
-      <div class="previous-performance">
+      <div class="previous-performance" *ngIf="!treadmillActive()">
         <p *ngIf="!setInputsValid()" role="alert">Enter valid reps and weight before finishing this set.</p>
         @if (previousSetData(); as previous) {
           <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}<ng-container *ngIf="ex.repUnit !== 'seconds'"> <i>·</i> {{ displayLoad(previous.weight) }} {{ weightUnit() }}</ng-container></strong></div>
@@ -415,26 +366,26 @@
   <div class="live-body review" *ngIf="state() === 'review'">
     <span class="review-symbol" nz-icon nzType="check-circle"></span>
     <span class="rest-label">Session review</span><h1>Ready to wrap up?</h1>
-    <p>{{ completedSets() }} of {{ totalSets() }} sets completed.</p>
-    <p class="review-note">{{ completedSets() === 0 ? 'Go back and complete a set to save this workout.' : 'Only completed sets are saved. You can still go back to a skipped set.' }}</p>
+    <p>{{ completedSets() }} of {{ totalSets() }} {{ hasTreadmill() ? 'steps' : 'sets' }} completed.</p>
+    <p class="review-note">{{ completedSets() === 0 ? 'Go back and complete an exercise to save this workout.' : 'Only completed work is saved. You can still go back to a skipped exercise.' }}</p>
   </div>
 
   <div class="set-navigation">
-    <button type="button" class="set-back" [disabled]="!canGoBack() || saving()" (click)="previousSet()"><span nz-icon nzType="arrow-left"></span>{{ state() === 'rest' ? 'Edit this set' : 'Previous set' }}</button>
-    <span *ngIf="currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} · Set {{ currentSetIndex() }} of {{ exercise.sets }}</span>
-    <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">Skip set <span nz-icon nzType="arrow-right"></span></button>
+    <button type="button" class="set-back" [disabled]="!canGoBack() || saving()" (click)="previousSet()"><span nz-icon nzType="arrow-left"></span>{{ state() === 'rest' ? 'Edit this set' : treadmillActive() ? 'Previous exercise' : 'Previous set' }}</button>
+    <span *ngIf="currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} <ng-container *ngIf="!treadmillActive()"> · Set {{ currentSetIndex() }} of {{ exercise.sets }}</ng-container></span>
+    <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">{{ treadmillActive() ? 'Skip treadmill' : 'Skip set' }} <span nz-icon nzType="arrow-right"></span></button>
   </div>
   <!-- Actiuni, fixate jos -->
   <div class="live-actions">
     <button nz-button nzDanger nzSize="large" class="live-stop" [disabled]="saving()" (click)="confirmStopWorkout()">
       <span nz-icon nzType="close"></span> Stop
     </button>
-    <button *ngIf="state() === 'active' && currentExercise()?.repUnit === 'seconds'" nz-button nzType="primary" nzSize="large" class="live-primary" (click)="toggleHoldTimer()">
+    <button *ngIf="state() === 'active' && (currentExercise()?.repUnit === 'seconds' || treadmillActive())" nz-button nzType="primary" nzSize="large" class="live-primary" [disabled]="treadmillActive() && !treadmillInputValid()" (click)="toggleHoldTimer()">
       <svg class="hold-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path [attr.d]="holdRunning() ? 'M9 8v8m6-8v8' : 'm10 8 6 4-6 4V8Z'"/></svg>
       {{ holdRunning() ? 'Pause timer' : holdElapsedMs() > 0 ? 'Resume timer' : 'Start timer' }}
     </button>
     <button
-      *ngIf="state() === 'active' && currentExercise()?.repUnit !== 'seconds'"
+      *ngIf="state() === 'active' && currentExercise()?.repUnit !== 'seconds' && !treadmillActive()"
       nz-button
       nzType="primary"
       nzSize="large"

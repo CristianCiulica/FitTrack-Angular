@@ -4,6 +4,8 @@ export function createWorkoutSummaryImage(summary: {
   date: string;
   durationSeconds: number;
   sets: number;
+  hasTimedCardio?: boolean;
+  cardioTargetSeconds?: number;
   plannedSets: number;
   volume: number;
   calories: number;
@@ -58,8 +60,12 @@ export function createWorkoutSummaryImage(summary: {
   const top = Math.max(520, y + 70);
   const cells = [
     ['DURATION', durationLabel(summary.durationSeconds)],
-    ['SETS', `${summary.sets} / ${summary.plannedSets}`],
-    ['VOLUME', `${summary.volume.toLocaleString('en-US')} ${summary.weightUnit ?? 'kg'}`],
+    summary.cardioTargetSeconds != null
+      ? ['TARGET', durationLabel(summary.cardioTargetSeconds)]
+      : [summary.hasTimedCardio ? 'STEPS' : 'SETS', `${summary.sets} / ${summary.plannedSets}`],
+    summary.cardioTargetSeconds != null
+      ? ['ACTIVITY', 'Treadmill walk']
+      : ['VOLUME', `${summary.volume.toLocaleString('en-US')} ${summary.weightUnit ?? 'kg'}`],
     ['EST. ENERGY', `${summary.calories} kcal`],
   ];
   cells.forEach(([label, value], i) => {

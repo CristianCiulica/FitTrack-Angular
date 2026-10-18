@@ -1,5 +1,7 @@
 import { Workout } from '../models/workout.model';
-import { ProgramSessionContext } from '../models/workout-routine.model';
+import { ProgramSessionContext, validProgramContext } from '../models/workout-routine.model';
+import { timedSession } from './timed-cardio';
+export { validProgramContext } from '../models/workout-routine.model';
 import { localDateKey } from './weight-progress';
 
 export const PROGRAM_ENROLLMENT_PREFIX = 'FitTrack Program · ';
@@ -10,6 +12,7 @@ export interface ProgramEnrollment {
   programId: string;
   startDate: string;
   createdAt: string;
+  stoppedAt?: string;
 }
 export interface ProgramSessionLog extends ProgramSessionContext {
   version: 1;
@@ -22,19 +25,6 @@ export function validDayKey(value: unknown): value is string {
     /^\d{4}-\d{2}-\d{2}$/.test(value) &&
     Number.isFinite(Date.parse(value)) &&
     new Date(value + 'T12:00:00Z').toISOString().slice(0, 10) === value
-  );
-}
-export function validProgramContext(value: unknown): value is ProgramSessionContext {
-  if (!value || typeof value !== 'object') return false;
-  const c = value as ProgramSessionContext;
-  return (
-    typeof c.enrollmentId === 'string' &&
-    /^pg_[a-zA-Z0-9-]{1,80}$/.test(c.enrollmentId) &&
-    slug(c.programId) &&
-    slug(c.sessionId) &&
-    Number.isInteger(c.dayIndex) &&
-    c.dayIndex >= 0 &&
-    c.dayIndex < 30
   );
 }
 export function readProgramEnrollment(
@@ -50,7 +40,9 @@ export function readProgramEnrollment(
       /^pg_[a-zA-Z0-9-]{1,80}$/.test(m.id) &&
       slug(m.programId) &&
       validDayKey(m.startDate) &&
-      Number.isFinite(Date.parse(m.createdAt))
+      Number.isFinite(Date.parse(m.createdAt)) &&
+      (m.stoppedAt === undefined ||
+        (typeof m.stoppedAt === 'string' && Number.isFinite(Date.parse(m.stoppedAt))))
       ? m
       : null;
   } catch {
@@ -80,6 +72,8 @@ export function programSessionNotes(context: ProgramSessionContext, completed: b
 export function readProgramSession(
   workout: Pick<Workout, 'kind' | 'notes'>,
 ): ProgramSessionLog | null {
+  const timed = timedSession(workout);
+  if (timed?.program) return { version: 1, ...timed.program, completed: timed.completed };
   if (workout.kind !== 'session' || !workout.notes?.startsWith(SESSION_PREFIX)) return null;
   try {
     const m: unknown = JSON.parse(workout.notes.slice(SESSION_PREFIX.length));

@@ -3,8 +3,8 @@
 }
 .training-fab {
   position: fixed;
-  left: max(232px, env(safe-area-inset-left));
-  bottom: max(28px, env(safe-area-inset-bottom));
+  right: max(24px, env(safe-area-inset-right));
+  bottom: calc(max(28px, env(safe-area-inset-bottom)) + 68px);
   z-index: 850;
   display: grid;
   place-items: center;
@@ -45,7 +45,7 @@
 }
 .fab-label {
   position: absolute;
-  left: calc(100% + 12px);
+  right: calc(100% + 12px);
   padding: 9px 13px;
   border: 1px solid var(--hairline);
   border-radius: 12px;
@@ -55,7 +55,7 @@
   font-weight: 600;
   white-space: nowrap;
   opacity: 0;
-  transform: translateX(-6px);
+  transform: translateX(6px);
   pointer-events: none;
   transition:
     opacity 160ms ease,
@@ -656,8 +656,8 @@ fieldset {
 }
 @media (max-width: 900px) {
   .training-fab {
-    left: max(20px, env(safe-area-inset-left));
-    bottom: calc(80px + env(safe-area-inset-bottom));
+    right: max(20px, env(safe-area-inset-right));
+    bottom: calc(148px + env(safe-area-inset-bottom));
   }
   .wizard-layout {
     grid-template-columns: minmax(0, 1fr);

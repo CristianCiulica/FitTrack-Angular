@@ -765,3 +765,22 @@ svg {
     transition: none;
   }
 }
+
+.active-program-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
+}
+.stop-plan-link {
+  border: 0;
+  background: transparent;
+  color: var(--ink-secondary);
+  font: inherit;
+  font-size: 11px;
+  min-height: 36px;
+  cursor: pointer;
+}
+.stop-plan-link:hover {
+  color: #df5050;
+}

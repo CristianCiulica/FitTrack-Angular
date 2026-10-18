@@ -1,3 +1,4 @@
+import { isTimedCardioOnly } from './timed-cardio';
 import { indoorCardio } from './indoor-cardio';
 import { Workout } from '../models/workout.model';
 import { RunningSession } from '../models/running-session.model';
@@ -33,7 +34,7 @@ export function trainingProgress(
   const walking = finishedRuns.filter(
     (run) => run.mode === 'walking' && activityDateKey(run.startedAt)?.startsWith(prefix),
   ).length;
-  const indoorWalking = completed.filter(w => indoorCardio(w)?.mode === 'walking' && activityDateKey(w.date)?.startsWith(prefix)).length;
+  const indoorWalking = completed.filter(w => (indoorCardio(w)?.mode === 'walking' || isTimedCardioOnly(w)) && activityDateKey(w.date)?.startsWith(prefix)).length;
   const elapsedDays = month.days.filter((day) => day.state !== 'future').length;
   let bestStreak = 0,
     streak = 0;

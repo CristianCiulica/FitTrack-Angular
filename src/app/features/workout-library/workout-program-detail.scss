@@ -598,3 +598,46 @@
     font-size: 29px;
   }
 }
+
+.stop-plan-confirm {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.stop-plan-confirm > div {
+  flex: 1;
+}
+.stop-plan-confirm strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.stop-plan-confirm p {
+  margin-top: 6px;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  line-height: 1.7;
+}
+.stop-plan-button {
+  padding: 13px 20px;
+  min-height: 45px;
+  border: 0;
+  border-radius: 12px;
+  background: #d9363e;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+@media (max-width: 560px) {
+  .stop-plan-confirm {
+    flex-wrap: wrap;
+    gap: 11px 22px;
+  }
+  .stop-plan-confirm > div {
+    flex-basis: 100%;
+  }
+  .stop-plan-confirm > button {
+    flex: 1;
+    justify-content: center;
+  }
+}

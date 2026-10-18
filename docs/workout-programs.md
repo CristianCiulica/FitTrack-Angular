@@ -14,11 +14,17 @@ Enrollment retries reuse one `pg_<uuid>` client ID. The underlying service suppo
 
 Completion derives from actual saved records, so deleting a session updates the block. Partial strength sessions remain partial; multiple shorter treadmill records can add toward a cardio day's planned duration. Duplicate client IDs/record IDs do not add duration twice. Rest days require no artificial completion. A plan only links records explicitly launched from that enrollment and day.
 
-## Indoor cardio
+## Treadmill in the workout player
 
-The treadmill logger is available from Workout, History and Run. It records an indoor walk/run after the activity using actual duration, distance and finish time. Incline, machine calories and measured steps are optional and remain unknown when blank. Metric/imperial distance input converts once to metres. No GPS route or fabricated readings are created.
+Cardio days launch the same live workout player as strength sessions. A treadmill exercise asks for a whole-number duration from 1 to 120 minutes and uses the existing countdown control pattern: start, pause/resume, reset and finish early. Treadmill blocks run after strength/isolation work and advance without a strength rest. Pauses do not add timer seconds. Background callbacks use elapsed wall time, clamped to the chosen target. After refresh the timer recovers paused, with its chosen duration and actual elapsed seconds.
 
-Indoor records use `kind: session`, an empty exercises array and the validated `FitTrack Indoor Cardio · ` notes envelope. History maps them into Cardio alongside outdoor sessions, with the correct deletion API and no empty map. Dashboard and Progress include their actual minutes, distance, entered steps and machine calories, while excluding them from strength workout goals. Plan enrollment and saved routines do not contribute activity.
+A validated `FitTrack Timed Session · ` notes envelope saves actual seconds, chosen targets and body weight captured at save, plus optional program context. Compact tuples stay within the existing API notes limit even for 50 blocks. Treadmill time is not stored as fake repetitions or strength sets. Pure treadmill sessions use actual walking time as duration. Mixed sessions retain normal strength exercises. Both appear in the regular workout history; the separate manual logger and its entry points have been removed. Old manual records remain readable.
+
+Calories are a gross energy estimate using 3.5 MET for level walking at 4.0–4.7 km/h, from the [2024 Adult Compendium, walking code 17352](https://pacompendium.com/walking/). The UI states the assumed pace and weight, with a 75 kg fallback if no profile weight exists. No actual speed, incline, distance, steps or GPS route is invented. Estimates use elapsed walking seconds; Dashboard/Progress exclude pure treadmill sessions from strength goals.
+
+## Stopping a block
+
+Stop plan is available on the active plan card and within plan details. An inline confirmation explains that logged workouts and progress are retained. The enrollment is updated with a validated `stoppedAt` timestamp. A stopped latest block does not reactivate an older one, remains accessible in My training and cannot launch new days. Start a new block creates a fresh enrollment. Failed saves stay retryable.
 
 ## Verification
 

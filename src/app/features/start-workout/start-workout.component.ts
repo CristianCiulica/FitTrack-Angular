@@ -1,5 +1,6 @@
 import { WorkoutLibraryComponent } from '../workout-library/workout-library.component';
-import { WorkoutRoutine as Routine, orderRoutineExercises } from '../../core/models/workout-routine.model';
+import { WorkoutRoutine as Routine, orderRoutineExercises, isTreadmillExercise } from '../../core/models/workout-routine.model';
+import { timedSessionNotes, estimateTreadmillCalories, TreadmillLog } from '../../core/utils/timed-cardio';
 import { programSessionNotes } from '../../core/utils/program-records';
 import { trainingRoutineDetails } from '../training-planner/training-plan-storage';
 import { Subscription } from 'rxjs';
@@ -749,7 +750,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
     AppMenuComponent,
   ],
   templateUrl: './start-workout.component.html',
-  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss', './gym-plan.scss', './create-workout-action.scss']
+  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss', './gym-plan.scss', './create-workout-action.scss', './treadmill-session.scss', './legends-collection.scss']
 })
 export class StartWorkoutComponent implements OnInit, OnDestroy {
   targetDate = signal<string>(localDateKey());
@@ -775,6 +776,11 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   // hub-ul Legends' Plans: drawer-ul + planul selectat in el (null = lista de staruri)
   legendsOpen = signal(false);
   activePlan = signal<OfficialPlan | null>(null);
+  readonly legendRoutineIndex = signal(0);
+  readonly legendRoutine = computed(() => {
+    const routine = this.activePlan()?.routines[this.legendRoutineIndex()];
+    return routine ? {...routine, exercises: orderRoutineExercises(routine.exercises)} : null;
+  });
 
   currentRoutine = signal<Routine>({ name: 'Custom Workout', exercises: [] });
 
@@ -798,7 +804,33 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   private holdAccumulatedMs = 0;
   private holdStartedAt = 0;
   private holdInterval: ReturnType<typeof setInterval> | null = null;
-  readonly holdTargetSeconds = computed(() => Math.max(1, Math.min(500, this.currentExercise()?.reps ?? 1)));
+  readonly treadmillActive = computed(() => !!this.currentExercise() && isTreadmillExercise(this.currentExercise()!));
+  readonly treadmillMinutes = computed(() => this.currentExercise()?.durationMinutes ?? 20);
+  readonly treadmillInputValid = signal(true);
+  readonly hasTreadmill = computed(() => this.currentRoutine().exercises.some(isTreadmillExercise));
+  readonly cardioOnly = computed(() => this.currentRoutine().exercises.length > 0 && this.currentRoutine().exercises.every(isTreadmillExercise));
+  readonly holdTargetSeconds = computed(() => this.treadmillActive() ? this.treadmillMinutes() * 60 : Math.max(1, Math.min(500, this.currentExercise()?.reps ?? 1)));
+  profileWeightAvailable(): boolean { return !!this.profileService.weightKg(); }
+  treadmillCalories(seconds: number): number { return estimateTreadmillCalories(seconds, this.treadmillBodyWeight()); }
+  private treadmillBodyWeight(): number { return Math.min(300, Math.max(30, this.profileService.weightKg() || 75)); }
+  updateTreadmillMinutes(value: string) {
+    const minutes = Number(value);
+    const valid = value.trim() !== '' && Number.isInteger(minutes) && minutes >= 1 && minutes <= 120;
+    this.treadmillInputValid.set(valid);
+    if (!valid || this.holdRunning() || this.holdElapsedMs() > 0) return;
+    const index = this.currentExerciseIndex();
+    this.currentRoutine.update(r => ({...r, exercises: r.exercises.map((e, i) => i === index ? {...e, durationMinutes: minutes} : e)}));
+    this.checkpointWorkout();
+  }
+  private treadmillLogs(): TreadmillLog[] {
+    return this.currentRoutine().exercises.flatMap((e, i) => {
+      const seconds = this.loggedReps[i]?.[0];
+      return isTreadmillExercise(e) && seconds != null && seconds > 0 ? [{exerciseIndex: i, seconds, targetSeconds: (e.durationMinutes ?? 20) * 60, weightKg: this.treadmillBodyWeight()}] : [];
+    });
+  }
+  private sessionComplete(): boolean {
+    return this.completedSets() === this.totalSets() && this.treadmillLogs().every(t => t.seconds >= t.targetSeconds);
+  }
   readonly holdRemainingSeconds = computed(() => Math.max(0, Math.ceil(this.holdTargetSeconds() - this.holdElapsedMs() / 1000)));
   readonly holdClock = computed(() => {
     const seconds = this.holdRemainingSeconds();
@@ -829,7 +861,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   finishedDelta = signal<number | null>(null);
   finishedDuration = signal(0);
   finishedPrevious = signal<Workout | null>(null);
-  finishedExercises = signal<{name:string;sets:number;volume:number}[]>([]);
+  finishedExercises = signal<{name:string;sets:number;volume:number;seconds?:number}[]>([]);
   savedLocally = signal(false);
   exporting = signal(false);
   summaryImage = signal<string | null>(null);
@@ -868,7 +900,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   finishedCalories(): number {
-    return estimateSessionCalories([{ sets: this.completedSets() }], this.profileService.weightKg());
+    const strengthSets = this.currentRoutine().exercises.reduce((sum, e, i) => sum + (isTreadmillExercise(e) ? 0 : this.loggedWeights[i]?.filter(v => v !== null).length ?? 0), 0);
+    return estimateSessionCalories([{sets: strengthSets}], this.profileService.weightKg()) + this.treadmillLogs().reduce((sum, t) => sum + estimateTreadmillCalories(t.seconds, t.weightKg), 0);
   }
 
   routineMinutes(routine: Routine): number {
@@ -953,7 +986,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     const exercises = routine.exercises.map(exercise => ({
         ...exercise,
         // Older saved routines allowed fractional/out-of-range set counts.
-        sets: Math.max(1, Math.min(50, Math.floor(Number(exercise.sets) || 1))),
+        sets: isTreadmillExercise(exercise) ? 1 : Math.max(1, Math.min(50, Math.floor(Number(exercise.sets) || 1))),
+        ...(isTreadmillExercise(exercise) ? {activity: 'treadmill' as const, durationMinutes: Math.min(120, Math.max(1, Math.round(exercise.durationMinutes ?? 20)))} : {}),
       }));
     this.currentRoutine.set({ ...routine, exercises: preserveOrder ? exercises : orderRoutineExercises(exercises) });
   }
@@ -1087,6 +1121,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   openPlan(plan: OfficialPlan) {
+    this.legendRoutineIndex.set(0);
     this.activePlan.set(plan);
   }
 
@@ -1212,7 +1247,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     }
     const ex = this.currentExercise();
     const lastTime = this.previousSetData()?.weight;
-    if (ex?.repUnit === 'seconds') { this.currentWeight.set(0); return; }
+    if (ex && (ex.repUnit === 'seconds' || isTreadmillExercise(ex))) { this.currentWeight.set(0); return; }
     const planned = ex?.weight ?? 0;
     this.currentWeight.set(lastTime ?? previous ?? planned);
   }
@@ -1244,10 +1279,18 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   // repetarile propuse pentru setul curent:
   // ultimul set logat in aceasta sesiune > cate ai facut data trecuta > planul
   private syncCurrentReps() {
+    if (this.treadmillActive()) {
+      this.stopHoldTimer();
+      const seconds = this.loggedReps[this.currentExerciseIndex()]?.[0] ?? 0;
+      this.holdAccumulatedMs = seconds * 1000; this.holdElapsedMs.set(seconds * 1000); this.currentReps.set(seconds);
+      this.treadmillInputValid.set(true);
+      return;
+    }
     if (this.currentExercise()?.repUnit === 'seconds') {
       this.resetHoldTimer();
       return;
     }
+    this.holdAccumulatedMs = 0; this.holdElapsedMs.set(0);
     const exIdx = this.currentExerciseIndex();
     const logged = this.loggedReps[exIdx];
     const saved = logged?.[this.currentSetIndex() - 1];
@@ -1282,7 +1325,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   readonly canGoBack = computed(() => this.state() === 'rest' || this.state() === 'review' || this.currentExerciseIndex() > 0 || this.currentSetIndex() > 1);
 
   toggleHoldTimer() {
-    if (this.state() !== 'active' || this.currentExercise()?.repUnit !== 'seconds') return;
+    if (this.state() !== 'active' || (!this.treadmillActive() && this.currentExercise()?.repUnit !== 'seconds') || (this.treadmillActive() && !this.treadmillInputValid())) return;
     this.inputsTouched = true;
     if (this.holdRunning()) {
       this.stopHoldTimer();
@@ -1298,7 +1341,13 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.stopHoldTimer();
     this.holdAccumulatedMs = 0;
     this.holdElapsedMs.set(0);
-    if (this.currentExercise()?.repUnit === 'seconds') this.currentReps.set(0);
+    if (this.currentExercise()?.repUnit === 'seconds' || this.treadmillActive()) this.currentReps.set(0);
+    if (this.treadmillActive()) {
+      this.loggedWeights[this.currentExerciseIndex()][0] = null;
+      this.loggedReps[this.currentExerciseIndex()][0] = null;
+      this.updateCompletedSets();
+      this.checkpointWorkout();
+    }
   }
 
   private sampleHoldTimer() {
@@ -1320,8 +1369,10 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.state() !== 'active' || !this.holdRunning()) return;
     this.sampleHoldTimer();
     if (this.holdRemainingSeconds() === 0) {
+      const wasTreadmill = this.treadmillActive();
       const completedAt = this.holdStartedAt + this.holdTargetSeconds() * 1000 - this.holdAccumulatedMs;
       this.finishSet();
+      if (wasTreadmill) return;
       // Preserve elapsed rest if the browser suspended timer callbacks.
       this.restDeadline = completedAt + this.exerciseRestSeconds() * 1000;
       this.updateRestTime();
@@ -1330,7 +1381,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   finishSet() {
     if (this.state() !== 'active' || !this.setInputsValid()) return;
-    if (this.currentExercise()?.repUnit === 'seconds') {
+    if (this.currentExercise()?.repUnit === 'seconds' || this.treadmillActive()) {
       this.stopHoldTimer();
       if (this.currentReps() < 1) return;
     }
@@ -1340,6 +1391,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.loggedWeights[exIdx][setIdx] = this.currentWeight();
     this.loggedReps[exIdx][setIdx] = this.currentReps();
     this.updateCompletedSets();
+    if (this.treadmillActive()) { this.advanceSet(); return; }
     this.state.set('rest');
     this.restTimeRemaining.set(this.exerciseRestSeconds());
     this.restDeadline = Date.now() + this.exerciseRestSeconds() * 1000;
@@ -1454,8 +1506,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     const previous = this.historyWorkouts.find(w => w.name.trim().toLowerCase() === name && w.exercises.map(ex => exerciseKey(ex.exerciseName)).sort().join('|') === exerciseNames);
     this.finishedPrevious.set(previous ?? null);
     this.sessionEndedAt ??= Date.now();
-    this.finishedDuration.set(Math.min(604800, Math.max(0, Math.floor((this.sessionEndedAt - this.sessionStartedAt) / 1000))));
-    this.finishedExercises.set(this.currentRoutine().exercises.map((ex,i) => ({name:ex.name, sets:this.loggedWeights[i].filter(v => v !== null).length, volume:Math.round(this.loggedWeights[i].reduce<number>((sum,w,j) => sum + (w ?? 0) * (this.loggedReps[i][j] ?? 0),0))})).filter(ex => ex.sets > 0));
+    this.finishedDuration.set(this.cardioOnly() ? this.treadmillLogs().reduce((sum, t) => sum + t.seconds, 0) : Math.min(604800, Math.max(0, Math.floor((this.sessionEndedAt - this.sessionStartedAt) / 1000))));
+    this.finishedExercises.set(this.currentRoutine().exercises.map((ex,i) => ({name:ex.name, ...(isTreadmillExercise(ex) ? {seconds: this.loggedReps[i]?.[0] ?? 0} : {}), sets:this.loggedWeights[i].filter(v => v !== null).length, volume:Math.round(this.loggedWeights[i].reduce<number>((sum,w,j) => sum + (w ?? 0) * (this.loggedReps[i][j] ?? 0),0))})).filter(ex => ex.sets > 0));
     this.finishedDelta.set(previous ? Math.round(volume - workoutVolume(previous)) : null);
 
     this.saveWorkout();
@@ -1481,11 +1533,12 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       clientId: this.sessionClientId,
       name: workout.name,
       date: dateStr,
-      notes: workout.program ? programSessionNotes(workout.program, this.completedSets() === this.totalSets()) : 'Auto-finished workout',
+      notes: this.hasTreadmill() ? timedSessionNotes({version: 1, ...(workout.program ? {program: workout.program} : {}), completed: this.sessionComplete(), treadmill: this.treadmillLogs()}) : workout.program ? programSessionNotes(workout.program, this.sessionComplete()) : 'Auto-finished workout',
       durationSeconds: this.finishedDuration(),
       isPredefined: false,
       kind: 'session',
-      exercises: workout.exercises.map((ex, i) => {
+      exercises: workout.exercises.flatMap((ex, i) => {
+        if (isTreadmillExercise(ex)) return [];
         const logged = (this.loggedWeights[i] ?? []).filter((value): value is number => value !== null);
         const reps = (this.loggedReps[i] ?? []).filter((value): value is number => value !== null);
         return {
@@ -1527,7 +1580,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.state() !== 'finished' || this.exporting()) return;
     this.exporting.set(true);
     try {
-      this.summaryImage.set(createWorkoutSummaryImage({name:this.currentRoutine().name,date:this.targetDate(),durationSeconds:this.finishedDuration(),sets:this.completedSets(),plannedSets:this.totalSets(),volume:this.displayLoad(this.finishedVolume()),weightUnit:this.weightUnit(),calories:this.finishedCalories(),delta:this.finishedDelta() == null ? null : this.displayLoad(this.finishedDelta()!)}));
+      this.summaryImage.set(createWorkoutSummaryImage({name:this.currentRoutine().name,date:this.targetDate(),durationSeconds:this.finishedDuration(),hasTimedCardio:this.hasTreadmill(),...(this.cardioOnly() ? {cardioTargetSeconds:this.currentRoutine().exercises.reduce((sum,e)=>sum+(e.durationMinutes ?? 20)*60,0)} : {}),sets:this.completedSets(),plannedSets:this.totalSets(),volume:this.displayLoad(this.finishedVolume()),weightUnit:this.weightUnit(),calories:this.finishedCalories(),delta:this.finishedDelta() == null ? null : this.displayLoad(this.finishedDelta()!)}));
     } catch { this.message.error('Could not save the image. Please try again.'); }
     finally { this.exporting.set(false); }
   }

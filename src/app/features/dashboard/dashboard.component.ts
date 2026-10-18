@@ -1,3 +1,4 @@
+import { isTimedCardioOnly, treadmillSeconds, timedSession } from '../../core/utils/timed-cardio';
 import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { TrainingPlannerComponent } from '../training-planner/training-planner.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -20,7 +21,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Workout } from '../../core/models/workout.model';
 import { isWorkoutSession, isStrengthWorkoutSession } from '../../core/utils/workout-kind';
-import { workoutActivityCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
+import { workoutActivityCalories, workoutActivityMinutes } from '../../core/utils/workout-calories';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import {
   ASSISTANT_OPTIONS,
@@ -230,14 +231,15 @@ export class DashboardComponent implements OnInit {
     return workoutActivityCalories(workout, this.profileService.weightKg());
   }
 
-  isIndoorWorkout(workout: Workout): boolean { return !!indoorCardio(workout); }
+  isIndoorWorkout(workout: Workout): boolean { return !!indoorCardio(workout) || isTimedCardioOnly(workout); }
   workoutMeta(workout: Workout): string {
     const cardio = indoorCardio(workout);
     if (cardio) {
       const distance = cardio.distanceMeters / (this.profileService.units() === 'imperial' ? 1609.344 : 1000);
       return `${Math.round((workout.durationSeconds ?? 0) / 60)} min · ${distance.toFixed(2)} ${this.activityDistanceUnit().toLowerCase()}`;
     }
-    return `${workout.exercises.length} exercises · ~${this.workoutKcal(workout)} kcal`;
+    if (isTimedCardioOnly(workout)) return `${Math.round(treadmillSeconds(workout) / 60)} min · ~${this.workoutKcal(workout)} kcal`;
+    return `${workout.exercises.length + (timedSession(workout)?.treadmill.length ?? 0)} exercises · ~${this.workoutKcal(workout)} kcal`;
   }
 
   // arse = alergari + antrenamentele de forta din ziua selectata
@@ -256,7 +258,7 @@ export class DashboardComponent implements OnInit {
   readonly exerciseGoal = this.profileService.exerciseGoal;
   readonly exerciseMinutes = computed(() => Math.round(
     this.sessionsForDay().reduce((sum, session) => sum + session.durationSeconds / 60, 0)
-    + this.workoutsForDay().reduce((sum, workout) => sum + (workout.durationSeconds != null ? workout.durationSeconds / 60 : estimateSessionMinutes(workout.exercises)), 0),
+    + this.workoutsForDay().reduce((sum, workout) => sum + workoutActivityMinutes(workout), 0),
   ));
   readonly activityWeekWorkouts = computed(() => {
     const start = new Date(this.selectedDate());

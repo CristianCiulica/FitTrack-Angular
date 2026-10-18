@@ -1,4 +1,5 @@
 import { Workout } from '../models/workout.model';
+import { treadmillCalories, treadmillSeconds, isTimedCardioOnly } from './timed-cardio';
 import { indoorCardio } from './indoor-cardio';
 // Estimare de calorii pentru antrenamentele de forta, pe baza volumului de seturi
 // si a greutatii corporale (MET ~5 pentru antrenament moderat cu greutati).
@@ -30,5 +31,9 @@ export function estimateSessionMinutes(
 /** Indoor cardio uses the user's machine reading, with unknown calories left unestimated. */
 export function workoutActivityCalories(workout: Workout, bodyWeightKg?: number | null): number {
   const cardio = indoorCardio(workout);
-  return cardio ? cardio.calories ?? 0 : estimateSessionCalories(workout.exercises, bodyWeightKg);
+  return cardio ? cardio.calories ?? 0 : estimateSessionCalories(workout.exercises, bodyWeightKg) + treadmillCalories(workout);
+}
+
+export function workoutActivityMinutes(workout: Workout): number {
+  return isTimedCardioOnly(workout) ? treadmillSeconds(workout) / 60 : workout.durationSeconds != null ? workout.durationSeconds / 60 : estimateSessionMinutes(workout.exercises);
 }

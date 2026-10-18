@@ -8,6 +8,7 @@ import {
   readProgramEnrollment,
   readProgramSession,
 } from '../../core/utils/program-records';
+import { timedSessionNotes } from '../../core/utils/timed-cardio';
 import { indoorCardioWorkout } from '../../core/utils/indoor-cardio';
 import { isWorkoutSession, personalWorkoutPlans } from '../../core/utils/workout-kind';
 import { workoutPrograms, programCalendar, programRoutine } from './workout-programs';
@@ -194,5 +195,38 @@ describe('30-day training programs', () => {
     expect(isCompoundExercise({ name: 'Rack Pull' })).toBe(true);
     expect(isCompoundExercise({ name: 'Straight Arm Pulldown' })).toBe(false);
     expect(isCompoundExercise({ name: 'Calf Press' })).toBe(false);
+  });
+  it('launches cardio in the normal workout player and counts actual timer seconds toward the day', () => {
+    const routine = programRoutine(programs[0], 2, enrollment);
+    expect(routine.exercises).toEqual([
+      expect.objectContaining({ activity: 'treadmill', durationMinutes: 20, sets: 1 }),
+    ]);
+    const log: Workout = {
+      userId: 'u',
+      clientId: 'w_timer1',
+      kind: 'session',
+      name: routine.name,
+      date: '2026-12-22',
+      exercises: [],
+      notes: timedSessionNotes({
+        version: 1,
+        program: routine.program,
+        completed: false,
+        treadmill: [{ exerciseIndex: 0, seconds: 600, targetSeconds: 1200, weightKg: 75 }],
+      }),
+    };
+    expect(programCalendar(programs[0], enrollment, [log], '2026-12-22')[2].partial).toBe(true);
+    expect(programCalendar(programs[0], enrollment, [log, log], '2026-12-22')[2].done).toBe(false);
+    expect(
+      programCalendar(
+        programs[0],
+        enrollment,
+        [log, { ...log, clientId: 'w_timer2' }],
+        '2026-12-22',
+      )[2].done,
+    ).toBe(true);
+    expect(() =>
+      programRoutine(programs[0], 0, { ...enrollment, stoppedAt: new Date().toISOString() }),
+    ).toThrow();
   });
 });

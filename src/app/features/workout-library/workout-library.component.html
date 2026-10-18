@@ -1,15 +1,9 @@
 <section class="library-hero">
   <div>
-    <span class="library-eyebrow">YOUR TRAINING SPACE</span>
     <h1>Your next<br /><span>30 days.</span></h1>
-    <p>A clear plan. A session you can find. A reason to come back.</p>
   </div>
   <div class="hero-actions">
-    <button type="button" class="library-text-button" (click)="logCardio()">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3 18h16l2-3H8L5 6H2m12-2h5v8M8 18v3m10-3v3" /></svg
-      >Log treadmill</button
-    ><button type="button" class="library-text-button" (click)="openLegends.emit()">
+    <button type="button" class="library-text-button" (click)="openLegends.emit()">
       Legends’ collection <span aria-hidden="true">↗</span>
     </button>
   </div>
@@ -34,13 +28,21 @@
       </div>
       <small>{{ completionText() }}</small>
     </div>
-    <button
-      type="button"
-      class="library-primary"
-      (click)="showProgram(active.program, active.enrollment)"
-    >
-      Continue plan <span aria-hidden="true">→</span>
-    </button>
+    <div class="active-program-actions">
+      <button
+        type="button"
+        class="library-primary"
+        (click)="showProgram(active.program, active.enrollment)"
+      >
+        Continue plan <span aria-hidden="true">→</span></button
+      ><button
+        type="button"
+        class="stop-plan-link"
+        (click)="requestStop(active.program, active.enrollment)"
+      >
+        Stop plan
+      </button>
+    </div>
   </section>
 }
 <div class="library-toolbar">
@@ -207,17 +209,20 @@
       </button>
     </div>
   }
-  @if (enrollments().length > 1) {
+  @if (previousBlocks().length) {
     <details class="previous-blocks">
       <summary>
-        Previous 30-day blocks <span>{{ enrollments().length - 1 }}</span>
+        Previous 30-day blocks <span>{{ previousBlocks().length }}</span>
       </summary>
       @for (enrollment of visibleBlocks(); track enrollment.id) {
         @for (program of programs(); track program.id) {
           @if (program.id === enrollment.programId) {
             <button type="button" (click)="showProgram(program, enrollment)">
               <span>{{ program.title }}</span
-              ><span>{{ dateLabel(enrollment.startDate) }} →</span>
+              ><span
+                >{{ dateLabel(enrollment.startDate) }} ·
+                {{ enrollment.stoppedAt ? 'Stopped' : 'Previous block' }} →</span
+              >
             </button>
           }
         }
@@ -336,7 +341,6 @@
     </div>
   }
 }
-<app-indoor-cardio [showLauncher]="false" />
 <dialog
   #detailDialog
   class="program-dialog"
@@ -432,6 +436,11 @@
                 Start a new 30-day block <span aria-hidden="true">↗</span>
               </button>
             }
+            @if (selectedEnrollment() && !selectedEnrollment()?.stoppedAt) {
+              <button type="button" class="stop-plan-link" (click)="stopRequested.set(true)">
+                Stop this plan
+              </button>
+            }
             <div class="program-phase">
               <span class="library-eyebrow">WEEK {{ currentWeek() + 1 }}</span>
               <h4>{{ phases[currentWeek()].title }}</h4>
@@ -507,8 +516,8 @@
                   ><span>{{ cardio.effort }}</span>
                   <p>{{ cardio.instructions }}</p>
                   <p>
-                    After your session, log the actual treadmill readings. Outdoor walks can be
-                    recorded from Run.
+                    Choose how many minutes you want to walk, then start your timer inside the
+                    workout. You can pause or finish early.
                   </p>
                 </div>
               } @else {
@@ -589,63 +598,100 @@
       }
     </div>
     <footer>
-      @if (error()) {
-        <p class="program-error" role="alert">{{ error() }}</p>
-      }
-      @if (status()) {
-        <p class="program-status" role="status">{{ status() }}</p>
-      }
-      <div class="program-footer-inner">
-        @if (selectedProgram()) {
-          @if (!selectedEnrollment()) {
-            <label
-              >Start date<input
-                type="date"
-                [ngModel]="startDate"
-                (ngModelChange)="updateStartDate($event)"
-                [min]="today()" /></label
-            ><button type="button" class="library-primary" [disabled]="saving()" (click)="enroll()">
-              {{ saving() ? 'Saving…' : 'Start this 30-day plan' }}
-              <span aria-hidden="true">→</span>
-            </button>
-          } @else {
-            <span class="program-footer-hint">{{
-              currentDay()?.future
-                ? 'Scheduled for ' + dateLabel(currentDay()!.date)
-                : currentDay()?.day?.type === 'rest'
-                  ? 'An easier day, on purpose.'
-                  : 'Warm up, then choose your working loads.'
-            }}</span>
-            @if (currentDay()?.day?.type !== 'rest') {
-              <button
+      @if (stopRequested()) {
+        <div class="stop-plan-confirm" role="group" aria-label="Stop this plan">
+          <div>
+            <strong>Stop this plan?</strong>
+            <p>
+              Your saved workouts and progress stay in History. You can start a new block whenever
+              you want.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="library-text-button"
+            [disabled]="saving()"
+            (click)="stopRequested.set(false)"
+          >
+            Keep plan
+          </button>
+          <button type="button" class="stop-plan-button" [disabled]="saving()" (click)="stopPlan()">
+            {{ saving() ? 'Stopping…' : 'Stop plan' }}
+          </button>
+        </div>
+        @if (error()) {
+          <p class="program-error" role="alert">{{ error() }}</p>
+        }
+      } @else {
+        @if (error()) {
+          <p class="program-error" role="alert">{{ error() }}</p>
+        }
+        @if (status()) {
+          <p class="program-status" role="status">{{ status() }}</p>
+        }
+        <div class="program-footer-inner">
+          @if (selectedProgram()) {
+            @if (!selectedEnrollment()) {
+              <label
+                >Start date<input
+                  type="date"
+                  [ngModel]="startDate"
+                  (ngModelChange)="updateStartDate($event)"
+                  [min]="today()" /></label
+              ><button
                 type="button"
                 class="library-primary"
-                [disabled]="currentDay()?.future"
-                (click)="startDay()"
+                [disabled]="saving()"
+                (click)="enroll()"
               >
-                {{
-                  currentDay()?.day?.type === 'cardio'
-                    ? 'Log treadmill session'
-                    : currentDay()?.done
-                      ? 'Train this session again'
-                      : 'Start this session'
-                }}
-                <span aria-hidden="true">↗</span>
+                {{ saving() ? 'Saving…' : 'Start this 30-day plan' }}
+                <span aria-hidden="true">→</span>
               </button>
+            } @else if (selectedEnrollment()?.stoppedAt) {
+              <span class="program-footer-hint"
+                >This plan is stopped. Your progress is preserved.</span
+              ><button type="button" class="library-primary" (click)="newBlock()">
+                Start a new block <span aria-hidden="true">→</span>
+              </button>
+            } @else {
+              <span class="program-footer-hint">{{
+                currentDay()?.future
+                  ? 'Scheduled for ' + dateLabel(currentDay()!.date)
+                  : currentDay()?.day?.type === 'rest'
+                    ? 'An easier day, on purpose.'
+                    : 'Warm up, then choose your working loads.'
+              }}</span>
+              @if (currentDay()?.day?.type !== 'rest') {
+                <button
+                  type="button"
+                  class="library-primary"
+                  [disabled]="currentDay()?.future"
+                  (click)="startDay()"
+                >
+                  {{
+                    currentDay()?.day?.type === 'cardio'
+                      ? 'Start this session'
+                      : currentDay()?.done
+                        ? 'Train this session again'
+                        : 'Start this session'
+                  }}
+                  <span aria-hidden="true">↗</span>
+                </button>
+              }
             }
+          } @else {
+            <span class="program-footer-hint">Choose your own starting loads during warm-up.</span
+            ><button
+              type="button"
+              class="library-primary"
+              [disabled]="!selectedRoutine()"
+              (click)="startSingle()"
+            >
+              Start this session <span aria-hidden="true">↗</span>
+            </button>
           }
-        } @else {
-          <span class="program-footer-hint">Choose your own starting loads during warm-up.</span
-          ><button
-            type="button"
-            class="library-primary"
-            [disabled]="!selectedRoutine()"
-            (click)="startSingle()"
-          >
-            Start this session <span aria-hidden="true">↗</span>
-          </button>
-        }
-      </div>
+        </div>
+      }
     </footer>
   </div>
 </dialog>

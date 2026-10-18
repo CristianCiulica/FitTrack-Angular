@@ -1,0 +1,529 @@
+::ng-deep .legend-collection-drawer .ant-drawer-content,
+::ng-deep .legend-collection-drawer .ant-drawer-body {
+  background: var(--bg) !important;
+  color: var(--ink);
+}
+::ng-deep .legend-collection-drawer .ant-drawer-header {
+  background: var(--surface-strong) !important;
+  border-bottom: 1px solid var(--hairline);
+}
+::ng-deep .legend-collection-drawer .ant-drawer-title,
+::ng-deep .legend-collection-drawer .ant-drawer-close {
+  color: var(--ink) !important;
+}
+.lc-index,
+.lc-detail {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 44px 32px 70px;
+  color: var(--ink);
+}
+.lc-index *,
+.lc-detail * {
+  box-sizing: border-box;
+}
+.lc-index h1,
+.lc-index h2,
+.lc-detail h1,
+.lc-detail h2,
+.lc-index p,
+.lc-detail p {
+  margin: 0;
+  color: inherit;
+}
+.lc-index button,
+.lc-detail button {
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.lc-index button:focus-visible,
+.lc-detail button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+.lc-eyebrow {
+  color: var(--ink-tertiary);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  font-weight: 650;
+}
+.lc-intro h1 {
+  font-size: clamp(44px, 6vw, 76px);
+  font-weight: 750;
+  line-height: 0.99;
+  letter-spacing: -0.06em;
+  margin: 17px 0 23px;
+}
+.lc-intro h1 > span,
+.lc-athlete-hero h1 > span {
+  color: var(--accent);
+}
+.lc-intro > p {
+  max-width: 480px;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.lc-index-meta,
+.lc-athlete-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 24px 0 35px;
+  font-size: 10px;
+  color: var(--ink-tertiary);
+}
+.lc-index-meta > span + span::before,
+.lc-athlete-meta > span + span::before {
+  content: '·';
+  margin-right: 18px;
+}
+.lc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.lc-athlete-card {
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  border: 1px solid var(--hairline);
+  border-radius: 22px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+.lc-portrait {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4/4.6;
+  background: #151515;
+}
+.lc-portrait::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0001 25%, #0003 50%, #000d 100%);
+}
+.lc-portrait > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  filter: grayscale(1);
+  transition: transform 0.45s ease;
+}
+.lc-portrait > div {
+  position: absolute;
+  z-index: 1;
+  bottom: 22px;
+  left: 22px;
+  right: 18px;
+  color: #fff;
+}
+.lc-portrait > div > span {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: #ddd;
+  margin-bottom: 9px;
+}
+.lc-portrait h2 {
+  color: #fff;
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  font-weight: 700;
+  max-width: 250px;
+}
+.lc-card-number {
+  position: absolute;
+  left: 19px;
+  top: 18px;
+  z-index: 1;
+  color: #fff;
+  font-size: 10px;
+  padding: 6px 9px;
+  border: 1px solid #ffffff50;
+  border-radius: 7px;
+  background: #0004;
+}
+.lc-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 19px 22px;
+  gap: 14px;
+  font-size: 12px;
+  font-weight: 550;
+}
+.lc-card-footer > span:first-child > span {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--ink-tertiary);
+}
+.lc-card-footer > span:last-child {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  color: var(--accent);
+  font-size: 20px;
+}
+.lc-note {
+  max-width: 650px;
+  color: var(--ink-tertiary) !important;
+  font-size: 11px;
+  line-height: 1.8;
+  margin-top: 30px !important;
+}
+.lc-back {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  color: var(--ink-secondary);
+  background: transparent;
+  font-size: 12px !important;
+  margin-bottom: 23px;
+}
+.lc-back span {
+  color: var(--accent);
+  font-size: 19px;
+}
+.lc-athlete-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: center;
+  gap: 42px;
+  padding-bottom: 34px;
+  border-bottom: 1px solid var(--hairline);
+}
+.lc-athlete-hero h1 {
+  font-size: clamp(35px, 5.6vw, 65px);
+  font-weight: 750;
+  line-height: 1.03;
+  letter-spacing: -0.055em;
+  margin: 14px 0;
+}
+.lc-athlete-hero p {
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.9;
+  max-width: 640px;
+}
+.lc-athlete-hero .lc-athlete-title {
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+.lc-athlete-hero img {
+  width: 100%;
+  height: 290px;
+  border-radius: 18px;
+  object-fit: cover;
+  object-position: center 20%;
+  filter: grayscale(1);
+}
+.lc-athlete-meta {
+  margin-bottom: 0;
+}
+.lc-session-section {
+  margin-top: 32px;
+}
+.lc-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 21px;
+}
+.lc-section-heading h2 {
+  margin-top: 8px;
+  font-size: 30px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+.lc-section-heading > span {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+}
+.lc-day-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 3px 3px 12px;
+  margin: 0 -3px 15px;
+}
+.lc-day-tabs button {
+  flex: 1;
+  min-width: 155px;
+  padding: 15px 19px;
+  border: 1px solid var(--hairline);
+  border-radius: 13px;
+  background: var(--surface-strong);
+  color: var(--ink-secondary);
+  text-align: left;
+}
+.lc-day-tabs small {
+  display: block;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.lc-day-tabs strong {
+  font-weight: 550;
+  font-size: 12px;
+}
+.lc-day-tabs button.active {
+  background: #0071e3;
+  color: #fff;
+  border-color: #0071e3;
+}
+.lc-session-card {
+  border: 1px solid var(--hairline);
+  background: var(--surface-strong);
+  border-radius: 21px;
+  overflow: hidden;
+}
+.lc-session-card > header {
+  padding: 27px 28px;
+  display: flex;
+  justify-content: space-between;
+  gap: 23px;
+  align-items: center;
+}
+.lc-session-card h2 {
+  font-size: 27px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  margin-top: 8px;
+}
+.lc-session-metrics {
+  display: flex;
+  gap: 22px;
+  font-size: 10px;
+  color: var(--ink-tertiary);
+}
+.lc-session-metrics strong {
+  display: block;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  margin-bottom: 4px;
+}
+.lc-exercises {
+  padding: 0 28px;
+  margin: 0;
+  list-style: none;
+}
+.lc-exercises li {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  padding: 18px 0;
+  border-top: 1px solid var(--hairline);
+}
+.lc-exercise-number {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+  flex: 0 0 20px;
+}
+.lc-exercises strong {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 550;
+}
+.lc-exercises li > span:last-child {
+  font-size: 14px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.lc-exercises small {
+  display: block;
+  font-size: 9px;
+  text-align: right;
+  color: var(--ink-tertiary);
+  margin-top: 3px;
+}
+.lc-session-card > footer {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 24px 28px;
+  border-top: 1px solid var(--hairline);
+}
+.lc-session-card footer p {
+  flex: 1;
+  color: var(--ink-secondary);
+  font-size: 11px;
+  line-height: 1.8;
+}
+.lc-start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  min-height: 48px;
+  padding: 13px 19px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: #0071e3;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  white-space: nowrap;
+}
+.lc-start span {
+  font-size: 18px;
+}
+@media (hover: hover) {
+  .lc-athlete-card:hover {
+    transform: translateY(-3px);
+  }
+  .lc-athlete-card:hover img {
+    transform: scale(1.035);
+  }
+}
+@media (max-width: 800px) {
+  .lc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .lc-athlete-hero {
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 24px;
+  }
+  .lc-athlete-hero img {
+    height: 250px;
+  }
+  .lc-session-card > header {
+    flex-direction: column;
+    align-items: start;
+  }
+}
+@media (max-width: 560px) {
+  .lc-index,
+  .lc-detail {
+    padding: 27px 18px 45px;
+  }
+  .lc-intro h1 {
+    font-size: 49px;
+    margin-bottom: 20px;
+  }
+  .lc-intro > p {
+    font-size: 12px;
+  }
+  .lc-index-meta {
+    gap: 10px;
+    font-size: 9px;
+    margin: 20px 0 26px;
+  }
+  .lc-index-meta > span + span::before {
+    margin-right: 10px;
+  }
+  .lc-grid {
+    gap: 11px;
+  }
+  .lc-athlete-card {
+    border-radius: 16px;
+  }
+  .lc-portrait {
+    aspect-ratio: 3/4.3;
+  }
+  .lc-portrait > div {
+    left: 13px;
+    right: 10px;
+    bottom: 16px;
+  }
+  .lc-portrait h2 {
+    font-size: clamp(17px, 5vw, 22px);
+    overflow-wrap: anywhere;
+  }
+  .lc-portrait > div > span {
+    font-size: 8px;
+    line-height: 1.5;
+  }
+  .lc-card-number {
+    top: 11px;
+    left: 11px;
+    font-size: 9px;
+    padding: 4px 7px;
+  }
+  .lc-card-footer {
+    padding: 14px 13px;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .lc-card-footer > span:first-child > span {
+    font-size: 8px;
+  }
+  .lc-card-footer > span:last-child {
+    width: 27px;
+    height: 27px;
+    font-size: 17px;
+  }
+  .lc-athlete-hero {
+    grid-template-columns: 1fr;
+    gap: 21px;
+  }
+  .lc-athlete-hero img {
+    display: none;
+  }
+  .lc-athlete-hero h1 {
+    font-size: 42px;
+  }
+  .lc-section-heading h2 {
+    font-size: 26px;
+  }
+  .lc-session-card > header {
+    padding: 22px 19px;
+  }
+  .lc-session-card h2 {
+    font-size: 25px;
+  }
+  .lc-session-metrics {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .lc-exercises {
+    padding-inline: 19px;
+  }
+  .lc-exercises li {
+    gap: 10px;
+    padding: 16px 0;
+  }
+  .lc-exercises strong {
+    font-size: 12px;
+  }
+  .lc-exercises li > span:last-child {
+    font-size: 13px;
+  }
+  .lc-session-card > footer {
+    padding: 20px 19px;
+    flex-direction: column;
+    gap: 17px;
+  }
+  .lc-start {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lc-athlete-card,
+  .lc-portrait > img {
+    transition: none;
+  }
+}
