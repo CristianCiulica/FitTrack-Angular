@@ -1102,12 +1102,27 @@ a:hover {
     display: none !important;
   }
 
+  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a[href='/start-workout']::before {
+    display: block !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    content: '';
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: var(--dock-accent);
+    pointer-events: none;
+  }
+
   html body .app-layout > .sidebar .sidebar-menu a[href='/start-workout']::after {
+    position: relative;
     content: '';
     width: 20px;
     height: 20px;
-    background: linear-gradient(currentColor, currentColor) center / 20px 2px no-repeat,
-                linear-gradient(currentColor, currentColor) center / 2px 20px no-repeat;
+    background: linear-gradient(#fff, #fff) center / 20px 2px no-repeat,
+                linear-gradient(#fff, #fff) center / 2px 20px no-repeat;
     pointer-events: none;
   }
 
