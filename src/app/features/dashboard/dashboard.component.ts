@@ -301,12 +301,12 @@ export class DashboardComponent implements OnInit {
       { clipPath: collapsed, backgroundColor: blue, offset: 0 },
       { backgroundColor: surface, offset: .45 },
       { clipPath: expanded, backgroundColor: surface, offset: 1 },
-    ], { duration: 520, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
+    ], { duration: 900, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
     const content = dialog.querySelector<HTMLElement>('.modern-chat');
     this.assistantContentMotion = content?.animate([
       { opacity: 0, transform: 'translateY(18px) scale(.985)' },
       { opacity: 1, transform: 'translateY(0) scale(1)' },
-    ], { duration: 320, delay: 110, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
+    ], { duration: 500, delay: 180, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
     void this.assistantContentMotion?.finished.catch(() => {});
     void this.assistantMotion.finished.then(() => {
       if (token !== this.assistantAnimationId || !dialog.open) return;
@@ -342,13 +342,13 @@ export class DashboardComponent implements OnInit {
     this.assistantContentMotion = content?.animate([
       { opacity: contentOpacity, transform: 'translateY(0) scale(1)' },
       { opacity: 0, transform: 'translateY(12px) scale(.985)' },
-    ], { duration: 140, fill: 'both' });
+    ], { duration: 240, fill: 'both' });
     void this.assistantContentMotion?.finished.catch(() => {});
     this.assistantMotion = dialog.animate([
       { clipPath: clip, backgroundColor: background, offset: 0 },
       { backgroundColor: background, offset: .55 },
       { clipPath: collapsed, backgroundColor: blue, offset: 1 },
-    ], { duration: 420, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'both' });
+    ], { duration: 750, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'both' });
     void this.assistantMotion.finished.then(finish, () => {});
   }
 
