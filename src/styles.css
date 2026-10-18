@@ -921,75 +921,71 @@ a:hover {
     display: none !important;
   }
 
-  /* The dock: a floating liquid-glass bar */
+  /* Full-width bottom navigation with a smooth raised centre, matching the app blue. */
   html body .app-layout > .sidebar {
+    --dock-surface: #0066cc;
+    --dock-action: #328ff0;
+    --dock-muted: #deedff;
     display: block !important;
     position: fixed !important;
     top: auto !important;
-    right: auto !important;
-    bottom: max(12px, env(safe-area-inset-bottom)) !important;
-    left: 50% !important;
-    transform: translateX(-50%) translateZ(0);
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    transform: none;
     z-index: 900 !important;
-    width: min(
-      430px,
-      calc(100dvw - max(24px, env(safe-area-inset-left)) - max(24px, env(safe-area-inset-right)))
-    ) !important;
+    width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
-    height: 66px !important;
+    height: calc(76px + env(safe-area-inset-bottom)) !important;
     min-height: 0 !important;
     max-height: none !important;
     flex: none !important;
     padding: 0;
     pointer-events: none;
     background: transparent !important;
-    border: 1px solid rgba(255, 255, 255, 0.74) !important;
-    border-radius: 36px !important;
-    box-shadow: 0 8px 32px rgba(25, 35, 55, 0.17), 0 2px 6px rgba(25, 35, 55, 0.05), var(--glass-edge);
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
-  /* The backdrop is refracted independently: labels and icons stay crisp. */
-  body .app-layout > .sidebar::before {
+  html[data-theme='dark'] body .app-layout > .sidebar {
+    --dock-surface: #073d73;
+    --dock-action: #0a84ff;
+    --dock-muted: #d0e3f7;
+  }
+
+  /* Two solid shapes meet without a seam; the contour remains a fixed size on tablets. */
+  html body .app-layout > .sidebar::before {
     position: absolute;
-    inset: 0;
+    inset: 12px 0 0;
     z-index: 0;
     content: '';
     pointer-events: none;
-    border-radius: inherit;
-    background: linear-gradient(150deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.28) 48%, rgba(255, 255, 255, 0.46));
-    backdrop-filter: blur(3px) saturate(145%);
-    -webkit-backdrop-filter: blur(3px) saturate(145%);
+    background: var(--dock-surface);
   }
 
-  body .app-layout > .sidebar.has-glass-lens::before {
-    -webkit-backdrop-filter: url('#ft-dock-lens') blur(2px) saturate(145%);
-    backdrop-filter: url('#ft-dock-lens') blur(2px) saturate(145%);
-    background: linear-gradient(150deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.42) 48%, rgba(255, 255, 255, 0.6));
-  }
-
-  /* Opposing highlights follow the rim, like light catching a polished lens. */
-  body .app-layout > .sidebar::after {
+  html body .app-layout > .sidebar::after {
     position: absolute;
-    inset: 0;
-    z-index: 2;
-    padding: 1px;
+    top: 0;
+    left: 50%;
+    z-index: 0;
+    width: 124px;
+    height: 13px;
     content: '';
+    transform: translateX(-50%);
     pointer-events: none;
-    border-radius: inherit;
-    background: radial-gradient(80% 140% at var(--glass-light-x, 24%) 0%, #fff 0%, rgba(255,255,255,.75) 25%, transparent 62%), linear-gradient(145deg, rgba(255,255,255,.9), transparent 40%, rgba(92,111,141,.2) 65%, rgba(255,255,255,.85));
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
+    background: var(--dock-surface);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 124 13'%3E%3Cpath d='M0 12C26 12 29 0 62 0S98 12 124 12V13H0Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 124 13'%3E%3Cpath d='M0 12C26 12 29 0 62 0S98 12 124 12V13H0Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
   }
 
   .app-layout > .sidebar .ant-layout-sider-children {
     position: relative;
     z-index: 1;
-    height: 66px !important;
+    height: 76px !important;
     overflow: visible;
     pointer-events: auto;
   }
@@ -1004,13 +1000,13 @@ a:hover {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: stretch;
     width: 100% !important;
-    height: 66px !important;
+    height: 76px !important;
     max-height: none !important;
     margin: 0 !important;
-    padding: 6px !important;
+    padding: 12px max(8px, env(safe-area-inset-left), env(safe-area-inset-right)) 0 !important;
     overflow: visible !important;
     background: transparent !important;
-    border-radius: inherit;
+    border: 0 !important;
     pointer-events: auto;
   }
 
@@ -1020,28 +1016,19 @@ a:hover {
     content: none !important;
   }
 
-  /* Account/Settings live in the sandwich menu on mobile, not the bottom dock */
-  html body .app-layout > .sidebar .sidebar-menu .sidebar-secondary-item {
+  html body .app-layout > .sidebar .sidebar-menu :is(.sidebar-secondary-item, .sidebar-logout-item) {
     display: none !important;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu .sidebar-logout-item {
-    display: none !important;
-  }
-
-  .app-layout > .sidebar .sidebar-menu.ant-menu-inline {
-    border-right: 0 !important;
   }
 
   body .app-layout > .sidebar .sidebar-menu .ant-menu-item {
     display: block !important;
     width: 100% !important;
-    height: 54px !important;
+    height: 64px !important;
     min-width: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     line-height: 1.1 !important;
-    border-radius: 27px !important;
+    border-radius: 0 !important;
     overflow: visible !important;
     pointer-events: auto;
     background: transparent !important;
@@ -1065,38 +1052,28 @@ a:hover {
     display: none !important;
   }
 
-  .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a {
+  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a {
     position: relative;
     z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 4px;
     width: 100%;
     height: 100%;
-    padding: 5px 2px;
-    color: #42444a;
+    padding: 4px 2px 8px;
+    color: var(--dock-muted) !important;
     line-height: 1.1;
-    border-radius: inherit;
+    border-radius: 14px;
     pointer-events: auto;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+    transition: color 180ms var(--ease-out), transform 180ms var(--spring);
   }
 
-  .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a::before {
-    position: absolute;
-    inset: 4px 3px;
-    z-index: -1;
-    content: '';
-    background: transparent;
-    border-radius: 22px;
-    transition: background 180ms var(--ease-out), transform 180ms var(--spring);
-  }
-
-  .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a:active::before {
-    background: rgba(0, 0, 0, 0.05);
-    transform: scale(0.92);
+  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a::before {
+    display: none !important;
   }
 
   .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a .anticon {
@@ -1108,7 +1085,6 @@ a:hover {
     margin: 0 !important;
     font-size: 21px !important;
     line-height: 1 !important;
-    transition: transform 200ms var(--spring);
   }
 
   .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a > span:last-child {
@@ -1119,7 +1095,7 @@ a:hover {
     overflow: hidden !important;
     color: inherit;
     font-size: 10px !important;
-    font-weight: 620;
+    font-weight: 500;
     letter-spacing: -0.01em;
     line-height: 1.15 !important;
     text-align: center;
@@ -1128,44 +1104,34 @@ a:hover {
     opacity: 1 !important;
   }
 
-  /* Selected dock item: tinted glass pill */
   html body .app-layout > .sidebar .sidebar-menu.ant-menu .ant-menu-item.ant-menu-item-selected {
     background: transparent !important;
-    background-color: transparent !important;
-    color: var(--accent-deep) !important;
+    color: #fff !important;
   }
 
-  body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a {
-    color: var(--accent-deep) !important;
+  html body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a {
+    color: #fff !important;
   }
 
-  body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a::before {
-    background: rgba(225, 229, 235, 0.72) !important;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.94), 0 1px 4px rgba(25,35,55,.06);
+  .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a > span:last-child {
+    font-weight: 750;
   }
 
-  body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a .anticon {
-    transform: translateY(-1px);
-  }
-
-  /* A raised central action stays inside the same five-column navigation grid. */
   html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a[href='/start-workout'] {
     position: absolute;
-    top: 0;
+    top: -8px;
     left: 50%;
-    width: 62px;
-    height: 62px;
+    width: 56px;
+    height: 56px;
     padding: 0;
-    transform: translate(-50%, -9px);
-    border: 4px solid var(--theme-surface, #fff);
+    transform: translateX(-50%);
+    border: 0;
     border-radius: 50%;
     color: #fff !important;
-    background: linear-gradient(160deg, #2495ff, #0071e3 80%);
-    box-shadow: 0 4px 12px #0071e338, inset 0 1px 1px #ffffff45;
-    transition: transform 180ms var(--spring), box-shadow 180ms var(--ease-out);
+    background: var(--dock-action);
+    box-shadow: inset 0 1px 0 #ffffff24, 0 3px 8px #0028521a;
   }
 
-  html body .app-layout > .sidebar .sidebar-menu a[href='/start-workout']::before,
   html body .app-layout > .sidebar .sidebar-menu a[href='/start-workout'] .anticon {
     display: none !important;
   }
@@ -1174,8 +1140,8 @@ a:hover {
     content: '';
     width: 24px;
     height: 24px;
-    background: linear-gradient(#fff, #fff) center / 24px 2.5px no-repeat,
-                linear-gradient(#fff, #fff) center / 2.5px 24px no-repeat;
+    background: linear-gradient(#fff, #fff) center / 24px 2px no-repeat,
+                linear-gradient(#fff, #fff) center / 2px 24px no-repeat;
     pointer-events: none;
   }
 
@@ -1187,14 +1153,17 @@ a:hover {
     white-space: nowrap;
   }
 
+  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: -3px;
+  }
+
   html body .app-layout > .sidebar .sidebar-menu a[href='/start-workout']:focus-visible {
-    outline: 3px solid var(--accent);
     outline-offset: 3px;
   }
 
   html body .app-layout > .sidebar .sidebar-menu a[href='/start-workout']:active {
-    transform: translate(-50%, -7px) scale(.96);
-    box-shadow: 0 2px 6px #0071e330;
+    transform: translateX(-50%) scale(.94);
   }
 
   html body .app-layout > .main-layout {
@@ -1284,17 +1253,10 @@ html body .app-layout .app-header .header-actions .logout-button {
 /* Accessibility keeps navigation legible without relying on transparency. */
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   :root { --glass-bg: #f9fafc; --glass-blur: none; --glass-border: #c7c9ce; }
-  html body .app-layout > .sidebar::before,
-  html body .app-layout > .sidebar.has-glass-lens::before {
-    background: #f9fafc;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   :root { --glass-bg: #f9fafc; }
-  body .app-layout > .sidebar::before { background: #f9fafc; }
 }
 
 /* Centred confirmations stay inside small screens and above active sessions. */
