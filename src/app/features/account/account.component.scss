@@ -161,26 +161,7 @@ h2 {
   color: var(--accent);
   cursor: pointer;
 }
-.edit-indicator {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  border: 1px solid var(--hairline);
-  border-radius: 7px;
-  padding: 6px 8px;
-  font-size: 9px;
-  color: var(--ink-tertiary);
-  white-space: nowrap;
-}
-.edit-indicator i {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--ink-tertiary);
-}
-.edit-indicator.unsaved i {
-  background: var(--accent);
-}
+
 .profile-form {
   margin-top: 26px;
 }
@@ -381,8 +362,5 @@ fieldset {
   }
   .save-buttons {
     margin-left: auto;
-  }
-  .edit-indicator {
-    font-size: 8px;
   }
 }

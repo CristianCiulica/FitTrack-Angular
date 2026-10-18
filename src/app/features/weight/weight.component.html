@@ -65,7 +65,7 @@
 
     <nz-content class="app-content">
       <div class="weight-page">
-        <header class="weight-heading"><span class="eyebrow">YOUR PROGRESS</span><h1>Every day adds up.</h1><p>A simple place to follow your weight over time.</p></header>
+        <header class="weight-heading"><h1>Every day adds up.</h1><p>A simple place to follow your weight over time.</p></header>
         @if (error()) { <div class="weight-error" role="alert">{{ error() }} @if (!loaded()) { <button type="button" (click)="load()" [disabled]="loading()">Try again</button> }</div> }
         <section class="weight-card" aria-labelledby="weight-chart-title" [attr.aria-busy]="loading()">
           <div class="weight-chart-head"><div><h2 id="weight-chart-title">Weight</h2>@if (latest(); as entry) { <strong class="current-weight">{{ displayWeight(entry.weightKg) | number:'1.1-1' }} <small>{{ unit() }}</small></strong><span class="weight-asof">Latest · {{ entry.date | date:'MMM d, y' }}</span> } @else { <strong class="current-weight">— <small>{{ unit() }}</small></strong> }</div><div class="weight-change">@if (chart().change !== null) { <strong>{{ chart().change! > 0 ? '+' : '' }}{{ chart().change | number:'1.1-1' }} {{ unit() }}</strong><span>in selected period</span> }</div></div>

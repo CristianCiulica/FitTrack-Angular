@@ -1,4 +1,3 @@
-import { ActivityGoalsComponent } from '../../shared/components/activity-goals/activity-goals.component';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +26,6 @@ import { finalize } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    ActivityGoalsComponent,
     FormsModule,
     RouterLink,
     RouterLinkActive,

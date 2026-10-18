@@ -155,9 +155,6 @@
             <div>
               <h2 id="profile-form-title">Personal details</h2>
             </div>
-            <span class="edit-indicator" [class.unsaved]="dirty()"
-              ><i></i>{{ dirty() ? 'Unsaved changes' : 'Your details' }}</span
-            >
           </div>
 
           @if (error()) {
@@ -279,7 +276,7 @@
               }
               <div class="save-row">
                 <div class="save-status" aria-live="polite">
-                  {{ notice() || (dirty() ? 'Ready when you are.' : 'All set. All you.') }}
+                  {{ notice() }}
                 </div>
                 <div class="save-buttons">
                   @if (dirty()) {
@@ -297,7 +294,7 @@
                     type="submit"
                     [disabled]="!valid() || !dirty() || saving() || uploading()"
                   >
-                    {{ saving() ? 'Saving…' : 'Save changes' }}<span aria-hidden="true">↗</span>
+                    {{ saving() ? 'Saving…' : 'Save changes' }}
                   </button>
                 </div>
               </div>
