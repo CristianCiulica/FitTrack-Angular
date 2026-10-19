@@ -69,7 +69,6 @@ export class WorkoutNavigationService {
     const circle = w.getComputedStyle(link, '::before');
     const collapsed = `circle(${(parseFloat(circle.width) || 44) / 2}px at ${x}px ${y}px)`;
     const expanded = `circle(${Math.ceil(Math.hypot(Math.max(x, w.innerWidth - x), Math.max(y, w.innerHeight - y)))}px at ${x}px ${y}px)`;
-    const blue = circle.backgroundColor || '#007aff';
     try {
       if (
         w.matchMedia('(prefers-reduced-motion: reduce)').matches ||
@@ -79,7 +78,7 @@ export class WorkoutNavigationService {
         return;
       }
       if (!this.document.startViewTransition) {
-        await this.fallback(collapsed, expanded, blue, token);
+        await this.fallback(collapsed, expanded, token);
         return;
       }
       this.document.documentElement.classList.add('workout-route-motion');
@@ -90,7 +89,7 @@ export class WorkoutNavigationService {
           this.transition?.skipTransition();
           return;
         }
-        this.createCover(blue, true);
+        this.createCover(true);
       });
       this.transition = transition;
       void transition.updateCallbackDone.catch(() => {});
@@ -139,11 +138,16 @@ export class WorkoutNavigationService {
     const result = await this.router.navigateByUrl(WORKOUT);
     return result && this.router.url.split(/[?#]/)[0] === WORKOUT;
   }
-  private createCover(blue: string, named = false) {
+  private createCover(named = false) {
     const cover = this.document.createElement('div');
     cover.className = 'workout-route-cover';
     cover.setAttribute('aria-hidden', 'true');
-    cover.style.backgroundColor = blue;
+    // iOS retains the tint of fixed overlays in its system bars after the reveal.
+    // Use the opaque header surface, never the blue launch button, for this layer.
+    const header = this.document.querySelector<HTMLElement>('.app-header');
+    cover.style.backgroundColor = this.window!.getComputedStyle(
+      header ?? this.document.documentElement,
+    ).backgroundColor;
     if (named) cover.style.viewTransitionName = 'workout-launch-cover';
     this.document.body.append(cover);
     this.cover = cover;
@@ -155,13 +159,13 @@ export class WorkoutNavigationService {
     void animation.finished.catch(() => {});
     return animation;
   }
-  private async fallback(collapsed: string, expanded: string, blue: string, token: number) {
+  private async fallback(collapsed: string, expanded: string, token: number) {
     const shell = this.document.querySelector<HTMLElement>('.route-shell');
     if (shell) {
       this.lockedShell = { element: shell, inert: shell.inert };
       shell.inert = true;
     }
-    const cover = this.createCover(blue);
+    const cover = this.createCover();
     await this.animate(cover, [{ clipPath: collapsed }, { clipPath: expanded }], {
       duration: REVEAL_DURATION,
       easing: EASING,

@@ -9,6 +9,7 @@ describe('Mobile dock reveal navigation', () => {
   let link: HTMLAnchorElement;
   let mobile: boolean;
   let reduced: boolean;
+  let headerColor: string;
   let transitionDescriptor: PropertyDescriptor | undefined;
   let animateDescriptor: PropertyDescriptor | undefined;
   const tick = async () => {
@@ -16,6 +17,7 @@ describe('Mobile dock reveal navigation', () => {
   };
   beforeEach(() => {
     animateDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'animate');
+    headerColor = 'rgb(255, 255, 255)';
     mobile = true;
     reduced = true;
     vi.stubGlobal('matchMedia', (query: string) => ({
@@ -25,11 +27,14 @@ describe('Mobile dock reveal navigation', () => {
       callback(0);
       return 1;
     });
-    vi.spyOn(window, 'getComputedStyle').mockReturnValue({
-      width: '44px',
-      backgroundColor: 'rgb(0, 122, 255)',
-      getPropertyValue: () => '#007aff',
-    } as unknown as CSSStyleDeclaration);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(
+      (_element, pseudo) =>
+        ({
+          width: '44px',
+          backgroundColor: pseudo ? 'rgb(0, 122, 255)' : headerColor,
+          getPropertyValue: () => '#007aff',
+        }) as unknown as CSSStyleDeclaration,
+    );
     router = {
       url: '/dashboard',
       navigateByUrl: vi.fn(async (destination: string) => {
@@ -42,7 +47,7 @@ describe('Mobile dock reveal navigation', () => {
     node = document.createElement('div');
     node.className = 'route-shell';
     node.innerHTML =
-      '<ul class="sidebar-menu"><li><a href="/start-workout"><span>+</span></a></li></ul><div class="library-hero"><h1>Your next 30 days</h1></div>';
+      '<header class="app-header"></header><ul class="sidebar-menu"><li><a href="/start-workout"><span>+</span></a></li></ul><div class="library-hero"><h1>Your next 30 days</h1></div>';
     document.body.append(node);
     link = node.querySelector('a')!;
     vi.spyOn(link, 'getClientRects').mockReturnValue([{}] as any);
@@ -147,55 +152,82 @@ describe('Mobile dock reveal navigation', () => {
     await tick();
     expect(document.querySelector('.workout-route-cover')).toBeNull();
   });
-  it('keeps the circular fallback and restores interaction without native snapshots', async () => {
-    reduced = false;
-    const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel: vi.fn() }));
-    Object.defineProperty(HTMLElement.prototype, 'animate', { configurable: true, value: animate });
-    Object.defineProperty(document, 'startViewTransition', {
-      configurable: true,
-      value: undefined,
-    });
-    click();
-    await tick();
-    expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith('/start-workout');
-    expect(animate).toHaveBeenCalledTimes(2);
-    expect(animate.mock.calls[0]).toEqual([
-      [
-        { clipPath: 'circle(22px at 195px 812px)' },
-        { clipPath: expect.stringMatching(/^circle\(/) },
-      ],
-      expect.objectContaining({ duration: 1600 }),
-    ]);
-    expect(node.inert).toBeFalsy();
-    expect(document.querySelector('.workout-route-cover')).toBeNull();
-  });
-  it('reveals the actual route from the blue 44px circle for 1600ms and removes temporary layers', async () => {
-    reduced = false;
-    const cancel = vi.fn();
-    const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel }));
-    Object.defineProperty(document.documentElement, 'animate', {
-      configurable: true,
-      value: animate,
-    });
-    const skip = vi.fn();
-    const start = vi.fn((update: () => Promise<void>) => {
-      const done = Promise.resolve().then(update);
-      return { ready: done, finished: done, updateCallbackDone: done, skipTransition: skip };
-    });
-    Object.defineProperty(document, 'startViewTransition', { configurable: true, value: start });
-    click();
-    await tick();
-    expect(start).toHaveBeenCalledTimes(1);
-    expect(animate).toHaveBeenCalledTimes(2);
-    expect(animate.mock.calls[0]).toEqual([
-      [
-        { clipPath: 'circle(22px at 195px 812px)' },
-        { clipPath: expect.stringMatching(/^circle\(/) },
-      ],
-      expect.objectContaining({ duration: 1600, pseudoElement: '::view-transition-new(root)' }),
-    ]);
-    expect(document.querySelector('.workout-route-cover')).toBeNull();
-    expect(document.documentElement.classList.contains('workout-route-motion')).toBe(false);
-    delete (document.documentElement as any).animate;
-  });
+  it.each(['rgb(255, 255, 255)', 'rgb(28, 28, 30)'])(
+    'keeps the circular fallback with neutral system-bar tint %s',
+    async (surface) => {
+      reduced = false;
+      headerColor = surface;
+      const append = vi.spyOn(document.body, 'append');
+      const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel: vi.fn() }));
+      Object.defineProperty(HTMLElement.prototype, 'animate', {
+        configurable: true,
+        value: animate,
+      });
+      Object.defineProperty(document, 'startViewTransition', {
+        configurable: true,
+        value: undefined,
+      });
+      click();
+      await tick();
+      expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith('/start-workout');
+      expect(animate).toHaveBeenCalledTimes(2);
+      const cover = append.mock.calls
+        .flat()
+        .find(
+          (node) => node instanceof HTMLElement && node.classList.contains('workout-route-cover'),
+        ) as HTMLElement;
+      expect(cover.style.backgroundColor).toBe(surface);
+      expect(cover.style.backgroundColor).not.toBe('rgb(0, 122, 255)');
+      expect(animate.mock.calls[0]).toEqual([
+        [
+          { clipPath: 'circle(22px at 195px 812px)' },
+          { clipPath: expect.stringMatching(/^circle\(/) },
+        ],
+        expect.objectContaining({ duration: 1600 }),
+      ]);
+      expect(node.inert).toBeFalsy();
+      expect(document.querySelector('.workout-route-cover')).toBeNull();
+    },
+  );
+  it.each(['rgb(255, 255, 255)', 'rgb(28, 28, 30)'])(
+    'reveals the route from the 44px circle for 1600ms without tinting system bars blue (%s)',
+    async (surface) => {
+      reduced = false;
+      headerColor = surface;
+      const append = vi.spyOn(document.body, 'append');
+      const cancel = vi.fn();
+      const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel }));
+      Object.defineProperty(document.documentElement, 'animate', {
+        configurable: true,
+        value: animate,
+      });
+      const skip = vi.fn();
+      const start = vi.fn((update: () => Promise<void>) => {
+        const done = Promise.resolve().then(update);
+        return { ready: done, finished: done, updateCallbackDone: done, skipTransition: skip };
+      });
+      Object.defineProperty(document, 'startViewTransition', { configurable: true, value: start });
+      click();
+      await tick();
+      expect(start).toHaveBeenCalledTimes(1);
+      expect(animate).toHaveBeenCalledTimes(2);
+      const cover = append.mock.calls
+        .flat()
+        .find(
+          (node) => node instanceof HTMLElement && node.classList.contains('workout-route-cover'),
+        ) as HTMLElement;
+      expect(cover.style.backgroundColor).toBe(surface);
+      expect(cover.style.backgroundColor).not.toBe('rgb(0, 122, 255)');
+      expect(animate.mock.calls[0]).toEqual([
+        [
+          { clipPath: 'circle(22px at 195px 812px)' },
+          { clipPath: expect.stringMatching(/^circle\(/) },
+        ],
+        expect.objectContaining({ duration: 1600, pseudoElement: '::view-transition-new(root)' }),
+      ]);
+      expect(document.querySelector('.workout-route-cover')).toBeNull();
+      expect(document.documentElement.classList.contains('workout-route-motion')).toBe(false);
+      delete (document.documentElement as any).animate;
+    },
+  );
 });
