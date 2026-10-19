@@ -102,7 +102,7 @@ export class WorkoutNavigationService {
         this.document.documentElement,
         [{ clipPath: collapsed }, { clipPath: expanded }],
         {
-          duration: 900,
+          duration: 1100,
           easing: EASING,
           fill: 'both',
           pseudoElement: '::view-transition-new(root)',
@@ -116,7 +116,7 @@ export class WorkoutNavigationService {
           { clipPath: expanded, opacity: 0 },
         ],
         {
-          duration: 900,
+          duration: 1100,
           easing: EASING,
           fill: 'both',
           pseudoElement: '::view-transition-new(workout-launch-cover)',
@@ -161,7 +161,7 @@ export class WorkoutNavigationService {
     }
     const cover = this.createCover(blue);
     await this.animate(cover, [{ clipPath: collapsed }, { clipPath: expanded }], {
-      duration: 900,
+      duration: 1100,
       easing: EASING,
       fill: 'both',
     }).finished;

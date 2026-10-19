@@ -316,12 +316,12 @@ export class DashboardComponent implements OnInit {
       { clipPath: collapsed, backgroundColor: blue, offset: 0 },
       { backgroundColor: surface, offset: .45 },
       { clipPath: expanded, backgroundColor: surface, offset: 1 },
-    ], { duration: 900, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
+    ], { duration: 1100, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
     const content = dialog.querySelector<HTMLElement>('.modern-chat');
     this.assistantContentMotion = content?.animate([
       { opacity: 0, transform: 'translateY(18px) scale(.985)' },
       { opacity: 1, transform: 'translateY(0) scale(1)' },
-    ], { duration: 500, delay: 180, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
+    ], { duration: 600, delay: 220, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
     void this.assistantContentMotion?.finished.catch(() => {});
     void this.assistantMotion.finished.then(() => {
       if (token !== this.assistantAnimationId || !dialog.open) return;

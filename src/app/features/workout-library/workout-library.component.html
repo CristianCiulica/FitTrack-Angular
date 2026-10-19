@@ -2,11 +2,6 @@
   <div>
     <h1>Your next<br /><span>30 days.</span></h1>
   </div>
-  <div class="hero-actions">
-    <button type="button" class="library-text-button" (click)="openLegends.emit()">
-      Legends’ collection <span aria-hidden="true">↗</span>
-    </button>
-  </div>
 </section>
 @if (activeSummary(); as active) {
   <section class="active-program">
@@ -103,8 +98,7 @@
   </div>
   <div class="library-section-heading">
     <div>
-      <h2>A plan for your kind of week.</h2>
-      <p>Choose by goal, time and experience. Each block lasts 30 days.</p>
+      <h2>Training plans</h2>
     </div>
     <span>{{ filteredPrograms().length }} plans</span>
   </div>
@@ -141,7 +135,6 @@
         </div>
         <span class="library-eyebrow">{{ program.eyebrow }}</span>
         <h3>{{ program.title }}</h3>
-        <p class="program-tile-description">{{ program.description }}</p>
         <div class="program-tile-facts">
           <span
             ><strong>{{ program.gymDays }}</strong> lifting days / week</span
@@ -162,18 +155,10 @@
       </div>
     }
   </div>
-  <div class="library-footnote">
-    <span aria-hidden="true">↗</span>
-    <p>
-      Every plan includes a weekly structure, progression guidance and recovery days. Choose your
-      own working loads during warm-up.
-    </p>
-  </div>
 } @else if (tab() === 'mine') {
   <div class="library-section-heading">
     <div>
-      <h2>Built around you.</h2>
-      <p>Your personalised plans and custom sessions, kept together.</p>
+      <h2>Your plans</h2>
     </div>
     <button type="button" class="library-text-button" (click)="createWorkout.emit()">
       + New session
@@ -295,8 +280,7 @@
 } @else {
   <div class="library-section-heading">
     <div>
-      <h2>One session. Easy to find.</h2>
-      <p>Useful when you want to train without starting a full block.</p>
+      <h2>Single sessions</h2>
     </div>
     <span>{{ filteredSessions().length }} sessions</span>
   </div>
@@ -305,11 +289,6 @@
       <article class="session-tile">
         <span class="library-eyebrow">{{ routine.category || 'STRENGTH' }}</span>
         <h3>{{ routine.name }}</h3>
-        <p>
-          {{
-            routine.description || routine.exercises.length + ' exercises for a focused session.'
-          }}
-        </p>
         <div class="session-facts">
           <span>{{ routine.exercises.length }} exercises</span
           ><span>~{{ minuteEstimate(routine) }} min</span>
@@ -341,6 +320,21 @@
     </div>
   }
 }
+<div class="collection-grid">
+  <button type="button" class="legends-collection-card" (click)="openLegends.emit()">
+    <span class="collection-copy"
+      ><span class="library-eyebrow">CLASSIC BODYBUILDING</span><strong>Legends collection</strong
+      ><span>5 athletes · Advanced training</span></span
+    >
+    <span class="collection-portraits" aria-hidden="true"
+      ><img src="legends/arnold.jpg" alt="" loading="lazy" /><img
+        src="legends/mentzer.jpg"
+        alt=""
+        loading="lazy" /><img src="legends/cbum.jpg" alt="" loading="lazy"
+    /></span>
+    <span class="collection-arrow" aria-hidden="true">↗</span>
+  </button>
+</div>
 <dialog
   #detailDialog
   class="program-dialog"
@@ -374,7 +368,6 @@
         <section class="program-detail-intro">
           <span class="library-eyebrow">{{ program.eyebrow }}</span>
           <h2 id="program-detail-title">{{ program.title }}<span>.</span></h2>
-          <p>{{ program.description }}</p>
           <div class="program-detail-facts">
             <span><strong>30</strong> days</span
             ><span
@@ -383,7 +376,6 @@
               ><strong>{{ program.minutes }}</strong> min</span
             >
           </div>
-          <p class="program-audience">{{ program.audience }}</p>
           <div class="program-equipment">
             <span>Equipment</span><strong>{{ program.equipment }}</strong>
           </div>
@@ -391,7 +383,7 @@
         <div class="program-detail-columns">
           <section class="program-calendar-column">
             <div class="detail-section-heading">
-              <h3>Your month, mapped out.</h3>
+              <h3>30-day schedule</h3>
               <span>{{ completed() }} / {{ totalSessions() }} sessions</span>
             </div>
             <div class="month-map" role="group" aria-label="30-day plan calendar">
@@ -441,22 +433,6 @@
                 Stop this plan
               </button>
             }
-            <div class="program-phase">
-              <span class="library-eyebrow">WEEK {{ currentWeek() + 1 }}</span>
-              <h4>{{ phases[currentWeek()].title }}</h4>
-              <p>{{ phases[currentWeek()].detail }}</p>
-            </div>
-            <details class="program-guidance">
-              <summary>What makes this plan work <span>+</span></summary>
-              <ul>
-                @for (highlight of program.highlights; track highlight) {
-                  <li>{{ highlight }}</li>
-                }
-              </ul>
-              @for (note of program.guidance; track note) {
-                <p>{{ note }}</p>
-              }
-            </details>
           </section>
           <section class="program-session-column">
             @if (currentDay(); as entry) {
@@ -477,7 +453,6 @@
                 }}</span>
               </div>
               <h3>{{ entry.day.title }}</h3>
-              <p class="selected-day-copy">{{ entry.day.subtitle }}</p>
               @if (entry.day.routine; as routine) {
                 <p class="session-prescription-note">
                   {{ routine.exercises.length }} exercises · {{ totalSets(routine) }} working sets ·
@@ -495,7 +470,10 @@
                           <p>
                             {{ exercise.sets }} × {{ exercise.repRange || exercise.reps
                             }}{{ exercise.repUnit === 'seconds' ? ' sec' : ' reps' }}
-                            <span>· {{ exercise.restSeconds || 90 }} sec rest</span>
+                            <span
+                              >· {{ exercise.restSeconds || 90 }} sec rest ·
+                              {{ entry.index < 7 ? 3 : 2 }} reps in reserve</span
+                            >
                           </p>
                         </div>
                       </div>
@@ -514,21 +492,11 @@
                     <path d="M6 35h32l4-6H16L10 12H4m24-4h10v18M16 35v7m20-7v7" /></svg
                   ><strong>{{ cardio.minutes }}<small> minutes</small></strong
                   ><span>{{ cardio.effort }}</span>
-                  <p>{{ cardio.instructions }}</p>
-                  <p>
-                    Choose how many minutes you want to walk, then start your timer inside the
-                    workout. You can pause or finish early.
-                  </p>
                 </div>
               } @else {
                 <div class="program-recovery">
                   <span aria-hidden="true">↗</span>
-                  <h4>Recovery is part of the plan.</h4>
-                  <p>
-                    Take a break from structured lifting. Eat normally, get enough sleep and enjoy
-                    easy movement if you feel like it.
-                  </p>
-                  <p>There is nothing to check off on a rest day.</p>
+                  <h4>Recovery day</h4>
                 </div>
               }
             }
@@ -540,7 +508,6 @@
             {{ selectedSavedPlan()?.split || selectedRoutine()?.name || 'Your session' }}
           </h2>
           @if (selectedSavedPlan(); as plan) {
-            <p>{{ plan.rationale }}</p>
             <div class="saved-day-tabs" role="group" aria-label="Personal plan sessions">
               @for (day of plan.days; track day.index) {
                 <button
@@ -658,8 +625,8 @@
                 currentDay()?.future
                   ? 'Scheduled for ' + dateLabel(currentDay()!.date)
                   : currentDay()?.day?.type === 'rest'
-                    ? 'An easier day, on purpose.'
-                    : 'Warm up, then choose your working loads.'
+                    ? 'Recovery day'
+                    : 'Day ' + ((currentDay()?.index ?? 0) + 1)
               }}</span>
               @if (currentDay()?.day?.type !== 'rest') {
                 <button
@@ -680,7 +647,7 @@
               }
             }
           } @else {
-            <span class="program-footer-hint">Choose your own starting loads during warm-up.</span
+            <span class="program-footer-hint">Compounds first · Isolations last</span
             ><button
               type="button"
               class="library-primary"

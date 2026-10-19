@@ -43,14 +43,14 @@ export class CircularDialogMotion {
         { backgroundColor: background, offset: 0.45 },
         { clipPath: g.expanded, backgroundColor: background },
       ],
-      { duration: 900, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' },
+      { duration: 1100, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' },
     );
     this.content = this.body.animate(
       [
         { opacity: 0, transform: 'translateY(18px) scale(.985)' },
         { opacity: 1, transform: 'none' },
       ],
-      { duration: 500, delay: 180, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' },
+      { duration: 600, delay: 220, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' },
     );
     void this.content.finished.catch(() => {});
     try {

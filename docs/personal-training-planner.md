@@ -1,6 +1,6 @@
 # Personal training planner
 
-The Training Assistant opens from the left floating action on Home. Its native, full-screen dialog uses the same 900 ms circular reveal and 750 ms collapse as Nutrition Assistant. Both support reduced motion, keyboard navigation and restored launcher focus.
+The Training Assistant opens from the floating action above Nutrition Assistant on Home. Its native, full-screen dialog uses the same 1100 ms circular reveal and 750 ms collapse as Nutrition Assistant. Both support reduced motion, keyboard navigation and restored launcher focus.
 
 ## Programming
 

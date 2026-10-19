@@ -117,7 +117,7 @@ describe('Mobile Workout + navigation', () => {
     await tick();
     expect(document.querySelector('.workout-route-cover')).toBeNull();
   });
-  it('reveals the actual route from the blue 44px circle for 900ms and removes temporary layers', async () => {
+  it('reveals the actual route from the blue 44px circle for 1100ms and removes temporary layers', async () => {
     reduced = false;
     const cancel = vi.fn();
     const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel }));
@@ -140,7 +140,7 @@ describe('Mobile Workout + navigation', () => {
         { clipPath: 'circle(22px at 195px 812px)' },
         { clipPath: expect.stringMatching(/^circle\(/) },
       ],
-      expect.objectContaining({ duration: 900, pseudoElement: '::view-transition-new(root)' }),
+      expect.objectContaining({ duration: 1100, pseudoElement: '::view-transition-new(root)' }),
     ]);
     expect(document.querySelector('.workout-route-cover')).toBeNull();
     expect(document.documentElement.classList.contains('workout-route-motion')).toBe(false);

@@ -265,3 +265,11 @@
     }
   }
 }
+
+.result-grid .metric .bmi-category {
+  margin-inline-end: 0;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  color: var(--ink-secondary);
+}

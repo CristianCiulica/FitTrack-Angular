@@ -76,13 +76,6 @@ svg {
     color: var(--ink-secondary);
   }
 }
-.hero-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 11px;
-  padding-bottom: 3px;
-}
 .library-text-button {
   display: flex;
   align-items: center;
@@ -353,19 +346,12 @@ svg {
     font-weight: 450;
   }
 }
-.program-tile-description {
-  flex: 1;
-  margin-top: 12px;
-  color: var(--ink-secondary);
-  font-size: 11px;
-  line-height: 1.8;
-}
 .program-tile-facts {
   display: flex;
   flex-wrap: wrap;
   gap: 7px 13px;
   padding: 17px 0;
-  margin-top: 6px;
+  margin-top: auto;
   font-size: 10px;
   color: var(--ink-secondary);
   strong {
@@ -389,21 +375,6 @@ svg {
   .tile-arrow {
     font-size: 18px;
     color: var(--accent);
-  }
-}
-.library-footnote {
-  display: flex;
-  gap: 11px;
-  padding: 25px 4px;
-  max-width: 680px;
-  > span {
-    font-size: 20px;
-    color: var(--accent);
-  }
-  p {
-    font-size: 11px;
-    line-height: 1.8;
-    color: var(--ink-tertiary);
   }
 }
 .session-grid {
@@ -619,15 +590,6 @@ svg {
       max-width: 290px;
     }
   }
-  .hero-actions {
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 20px;
-    width: 100%;
-    .library-text-button {
-      font-size: 10px;
-    }
-  }
   .library-tabs {
     width: 100%;
     button {
@@ -689,9 +651,6 @@ svg {
       font-size: 8px;
     }
   }
-  .program-tile-description {
-    display: none;
-  }
   .program-tile-facts {
     flex-direction: column;
     gap: 7px;
@@ -750,12 +709,6 @@ svg {
       font-size: 21px;
     }
   }
-  .hero-actions {
-    gap: 10px;
-    .library-text-button {
-      font-size: 9px;
-    }
-  }
   .session-grid {
     grid-template-columns: 1fr;
   }
@@ -783,4 +736,129 @@ svg {
 }
 .stop-plan-link:hover {
   color: #df5050;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.legends-collection-card {
+  grid-column: span 2;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+  min-height: 172px;
+  overflow: hidden;
+  padding: 26px;
+  text-align: left;
+  border: 1px solid var(--hairline);
+  border-radius: 21px;
+  background: var(--library-card);
+  color: var(--ink);
+  transition:
+    border-color 180ms,
+    transform 180ms;
+  &:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline));
+    transform: translateY(-2px);
+  }
+}
+.collection-copy {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  strong {
+    display: block;
+    margin: 8px 0 10px;
+    font-size: clamp(23px, 2.6vw, 31px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.045em;
+  }
+  > span:last-child {
+    font-size: 10px;
+    color: var(--ink-secondary);
+  }
+}
+.collection-portraits {
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  padding-left: 12px;
+  img {
+    width: 64px;
+    height: 98px;
+    margin-left: -12px;
+    border: 3px solid var(--library-card);
+    border-radius: 12px;
+    object-fit: cover;
+    object-position: center 20%;
+    filter: grayscale(1);
+    transform: rotate(-7deg);
+    &:nth-child(2) {
+      transform: translateY(-4px);
+    }
+    &:nth-child(3) {
+      transform: rotate(7deg);
+    }
+  }
+}
+.collection-arrow {
+  align-self: end;
+  color: var(--accent);
+  font-size: 24px;
+}
+@media (max-width: 1100px) {
+  .collection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .collection-grid {
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .legends-collection-card {
+    padding: 20px 17px;
+    min-height: 154px;
+    border-radius: 17px;
+    gap: 10px;
+  }
+  .collection-copy {
+    .library-eyebrow {
+      font-size: 7px;
+      letter-spacing: 0.08em;
+    }
+    strong {
+      font-size: 26px;
+    }
+    > span:last-child {
+      display: block;
+      max-width: 130px;
+      font-size: 9px;
+    }
+  }
+  .collection-portraits img {
+    width: 42px;
+    height: 78px;
+    margin-left: -16px;
+    border-width: 2px;
+    border-radius: 9px;
+  }
+  .collection-arrow {
+    position: absolute;
+    right: 16px;
+    bottom: 12px;
+    font-size: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .legends-collection-card {
+    transition: none;
+  }
 }

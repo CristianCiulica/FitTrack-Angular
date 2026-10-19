@@ -168,25 +168,24 @@
       <div class="lc-detail">
         <button type="button" class="lc-back" (click)="backToLegends()"><span aria-hidden="true">←</span> All legends</button>
         <section class="lc-athlete-hero">
-          <div><span class="lc-eyebrow">THE LEGENDS COLLECTION</span><h1>{{ plan.athlete }}<span>.</span></h1><p class="lc-athlete-title">{{ plan.title }}</p><p>{{ plan.description }}</p><div class="lc-athlete-meta"><span>{{ plan.routines.length }} sessions to explore</span><span>Advanced training</span></div></div>
+          <div><span class="lc-eyebrow">THE LEGENDS COLLECTION</span><h1>{{ plan.athlete }}<span>.</span></h1><p class="lc-athlete-title">{{ plan.title }}</p><div class="lc-athlete-meta"><span>{{ plan.routines.length }} sessions to explore</span><span>Advanced training</span></div></div>
           <img [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" />
         </section>
         <section class="lc-session-section">
-          <div class="lc-section-heading"><div><span class="lc-eyebrow">PICK YOUR SESSION</span><h2>One day. Full focus.</h2></div><span>{{ legendRoutineIndex() + 1 }} / {{ plan.routines.length }}</span></div>
+          <div class="lc-section-heading"><div><span class="lc-eyebrow">PICK YOUR SESSION</span><h2>Sessions</h2></div><span>{{ legendRoutineIndex() + 1 }} / {{ plan.routines.length }}</span></div>
           <div class="lc-day-tabs" role="group" aria-label="Legend plan sessions">@for (routine of plan.routines; track $index) {<button type="button" [class.active]="legendRoutineIndex() === $index" [attr.aria-pressed]="legendRoutineIndex() === $index" (click)="legendRoutineIndex.set($index)"><small>SESSION {{ $index + 1 }}</small><strong>{{ routine.name }}</strong></button>}</div>
           @if (legendRoutine(); as routine) {
             <div class="lc-session-card"><header><div><span class="lc-eyebrow">YOUR SELECTED SESSION</span><h2>{{ routine.name }}</h2></div><div class="lc-session-metrics"><span><strong>{{ routine.exercises.length }}</strong> exercises</span><span><strong>{{ routineSets(routine) }}</strong> working sets</span><span><strong>~{{ routineMinutes(routine) }}</strong> min</span></div></header>
               <ol class="lc-exercises">@for (exercise of routine.exercises; track $index) {<li><span class="lc-exercise-number">{{ ($index + 1).toString().padStart(2, '0') }}</span><strong>{{ exercise.name }}</strong><span>{{ exercise.sets }} × {{ exercise.repRange || exercise.reps }}<small>{{ exercise.repUnit === 'seconds' ? 'sec' : 'reps' }}</small></span></li>}</ol>
-              <footer><p>Compounds first. Choose working loads that suit you during warm-up. These high-volume sessions are intended for experienced lifters.</p><button type="button" class="lc-start" (click)="startFromPlan(routine, plan.id, legendRoutineIndex())">Start this session <span aria-hidden="true">↗</span></button></footer>
+              <footer><p>Advanced training · Compounds first</p><button type="button" class="lc-start" (click)="startFromPlan(routine, plan.id, legendRoutineIndex())">Start this session <span aria-hidden="true">↗</span></button></footer>
             </div>
           }
         </section>
       </div>
     } @else {
       <div class="lc-index">
-        <header class="lc-intro"><span class="lc-eyebrow">THE LEGENDS COLLECTION</span><h1>Train like<br />the greats<span>.</span></h1><p>Explore classic bodybuilding splits. Choose an athlete, find your session and bring your own intensity.</p><div class="lc-index-meta"><span>{{ officialPlans.length }} icons of bodybuilding</span><span>One session at a time</span></div></header>
+        <header class="lc-intro"><span class="lc-eyebrow">THE LEGENDS COLLECTION</span><h1>Train like<br />the greats<span>.</span></h1><div class="lc-index-meta"><span>{{ officialPlans.length }} icons of bodybuilding</span></div></header>
         <div class="lc-grid">@for (plan of officialPlans; track plan.id) {<button type="button" class="lc-athlete-card" (click)="openPlan(plan)"><div class="lc-portrait"><img [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" loading="lazy" /><span class="lc-card-number">{{ ($index + 1).toString().padStart(2, '0') }}</span><div><span>{{ plan.title }}</span><h2>{{ plan.athlete }}</h2></div></div><div class="lc-card-footer"><span>{{ plan.routines.length }} sessions<span>Explore the split</span></span><span aria-hidden="true">↗</span></div></button>}</div>
-        <p class="lc-note">Classic training styles, adapted to your logging flow. Select exercises and loads you can perform with control, and allow enough recovery between sessions.</p>
       </div>
     }
   </ng-container>
@@ -205,7 +204,6 @@
       <div class="gym-plan-intro">
         <span class="section-eyebrow">{{ homePlanSelected() ? 'YOUR HOME PLAN' : 'YOUR GYM PLAN' }}</span>
         <h2>{{ homePlanSelected() ? 'Upper. Lower. Home.' : 'Push. Pull. Legs.' }}</h2>
-        <p>{{ homePlanSelected() ? 'Your two home sessions, all in one place. Choose a workout to start.' : 'Your three gym sessions, all in one place. Choose a workout to start.' }}</p>
         <div class="gym-plan-facts"><span>{{ collectionRoutines().length }} workouts</span><span>{{ collectionTotalSets() }} sets</span><span>1:30 rest</span></div>
       </div>
       <div class="plan-list gym-plan-list">
