@@ -248,7 +248,7 @@
 
     <div class="live-stats" *ngIf="!treadmillActive()">
       <div class="live-stat">
-        <label>Set</label>
+        <label>{{ activeDrop() ? 'Drop set' : 'Set' }}</label>
         <div class="value">{{ currentSetIndex() }} / {{ ex.sets }}</div>
       </div>
       <div class="live-stat">
@@ -330,7 +330,7 @@
           </div>
         </div>
       }
-      <div class="previous-performance" *ngIf="!treadmillActive()">
+      <div class="previous-performance" *ngIf="!treadmillActive() && !activeDrop()">
         <p *ngIf="!setInputsValid()" role="alert">Enter valid reps and weight before finishing this set.</p>
         @if (previousSetData(); as previous) {
           <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}<ng-container *ngIf="ex.repUnit !== 'seconds'"> <i>·</i> {{ displayLoad(previous.weight) }} {{ weightUnit() }}</ng-container></strong></div>
@@ -340,6 +340,16 @@
       </div>
     </div>
 
+    @if (supportsDropSet()) {
+      <div class="drop-set-controls">
+        @if (activeDrop()) {
+          <p aria-live="polite">Drop set · reduce the weight and continue without rest.</p>
+          @if (!dropInputValid()) { <p role="alert">Use less weight than the main set and record at least one rep.</p> }
+        } @else {
+          <button type="button" (click)="startDropSet()" [disabled]="!setInputsValid() || currentWeight() <= 0 || currentReps() < 1">+ Add drop set</button>
+        }
+      </div>
+    }
     <div class="up-next" *ngIf="currentExerciseIndex() + 1 < currentRoutine().exercises.length">
       <p>Up next: <strong>{{ currentRoutine().exercises[currentExerciseIndex() + 1].name }}</strong></p>
     </div>
@@ -363,9 +373,9 @@
   </div>
 
   <div class="set-navigation">
-    <button type="button" class="set-back" [disabled]="!canGoBack() || saving()" (click)="previousSet()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>{{ state() === 'rest' ? 'Edit this set' : treadmillActive() ? 'Previous exercise' : 'Previous set' }}</button>
+    <button type="button" class="set-back" [disabled]="(!canGoBack() && !activeDrop()) || saving()" (click)="previousSet()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>{{ activeDrop() ? 'Edit main set' : state() === 'rest' ? 'Edit this set' : treadmillActive() ? 'Previous exercise' : 'Previous set' }}</button>
     <span *ngIf="currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} <ng-container *ngIf="!treadmillActive()"> · Set {{ currentSetIndex() }} of {{ exercise.sets }}</ng-container></span>
-    <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">{{ treadmillActive() ? 'Skip treadmill' : 'Skip set' }} <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg></button>
+    <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">{{ activeDrop() ? 'Skip drop' : treadmillActive() ? 'Skip treadmill' : 'Skip set' }} <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg></button>
   </div>
   <!-- Actiuni, fixate jos -->
   <div class="live-actions">
@@ -383,9 +393,9 @@
       nzSize="large"
       class="live-primary"
       (click)="finishSet()"
-      [disabled]="!setInputsValid()"
+      [disabled]="!setInputsValid() || !dropInputValid()"
     >
-      <span nz-icon nzType="check"></span> Finish set
+      <span nz-icon nzType="check"></span> {{ activeDrop() ? 'Finish drop set' : 'Finish set' }}
     </button>
     <button
       *ngIf="state() === 'rest'"

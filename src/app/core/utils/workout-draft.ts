@@ -1,8 +1,10 @@
 import { ProgramSessionContext, isTreadmillExercise } from '../models/workout-routine.model';
 import { validProgramContext } from './program-records';
-import { MuscleGroup, MUSCLE_GROUPS } from '../models/workout.model';
+import { DropSetLog, MuscleGroup, MUSCLE_GROUPS } from '../models/workout.model';
 
 export interface WorkoutDraft {
+  dropSets?: DropSetLog[][];
+  activeDrop?: boolean;
   version: 1;
   owner: string;
   clientId: string;
@@ -136,6 +138,14 @@ export function readWorkoutDraft(owner: string): WorkoutDraft | null {
       )
         return null;
     }
+    if (value.activeDrop != null && typeof value.activeDrop !== 'boolean') return null;
+    if (value.dropSets != null && (!Array.isArray(value.dropSets) || value.dropSets.length !== value.weights.length ||
+      value.dropSets.some((drops, i) => !Array.isArray(drops) || drops.length > 50 || drops.some((drop, j) =>
+        !drop || !Number.isInteger(drop.setIndex) || drop.setIndex < 0 || drop.setIndex >= value.weights[i].length ||
+        value.weights[i][drop.setIndex] == null || !bounded(drop.weight, 1000) ||
+        drop.weight >= value.weights[i][drop.setIndex]! || !Number.isInteger(drop.reps) || drop.reps < 1 || drop.reps > 500 ||
+        drops.findIndex(d => d.setIndex === drop.setIndex) !== j)))) return null;
+    if (value.activeDrop && (value.state !== 'active' || value.weights[value.exerciseIndex][value.setIndex - 1] == null)) return null;
     const current = value.routine.exercises[value.exerciseIndex];
     const maximum = isTreadmillExercise(current) ? (current.durationMinutes ?? 20) * 60 : 500;
     if (value.currentReps > maximum || value.holdElapsedMs > maximum * 1000) return null;

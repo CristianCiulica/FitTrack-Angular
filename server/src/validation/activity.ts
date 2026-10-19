@@ -25,10 +25,21 @@ export const exerciseSchema = z
     reps: z.number().int().min(0).max(500),
     repUnit: z.literal('seconds').optional(),
     weight: z.number().finite().min(0).max(1000),
+    dropSets: z.array(z.object({
+      setIndex: z.number().int().min(0).max(49),
+      weight: z.number().finite().min(0).max(1000),
+      reps: z.number().int().min(1).max(500),
+    })).max(50).optional(),
     setWeights: z.array(z.number().finite().min(0).max(1000)).max(50).optional(),
     setReps: z.array(z.number().int().min(0).max(500)).max(50).optional(),
   })
   .superRefine((exercise, ctx) => {
+    if (exercise.dropSets?.some((drop, i, drops) =>
+      exercise.repUnit === 'seconds' || drop.setIndex >= exercise.sets ||
+      drops.findIndex(d => d.setIndex === drop.setIndex) !== i ||
+      drop.weight >= (exercise.setWeights?.[drop.setIndex] ?? exercise.weight))) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['dropSets'], message: 'Drop sets require a unique parent set and a lower weight' });
+    }
     for (const field of ['setWeights', 'setReps'] as const) {
       if (exercise[field] && exercise[field]!.length !== exercise.sets) {
         ctx.addIssue({

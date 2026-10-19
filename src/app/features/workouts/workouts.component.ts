@@ -127,6 +127,7 @@ export class WorkoutsComponent implements OnInit {
   getWorkoutVolume(workout: Workout): number {
     return workout.exercises?.reduce((total, exercise) => {
       if (exercise.repUnit === 'seconds') return total;
+      total += (exercise.dropSets ?? []).reduce((sum, d) => sum + d.weight * d.reps, 0);
       const weights = exercise.setWeights;
       const reps = exercise.setReps;
       // perechi reale reps×kg pe set, cand au fost logate amandoua

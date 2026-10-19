@@ -19,6 +19,11 @@ const exerciseLogSchema = new Schema(
     reps: { type: Number, required: true, min: 0 },
     repUnit: { type: String, enum: ['seconds'], default: undefined },
     weight: { type: Number, required: true, min: 0 },
+    dropSets: { type: [new Schema({
+      setIndex: { type: Number, required: true, min: 0, max: 49 },
+      weight: { type: Number, required: true, min: 0, max: 1000 },
+      reps: { type: Number, required: true, min: 1, max: 500 },
+    }, { _id: false })], default: undefined },
     setWeights: { type: [Number], default: undefined },
     setReps: { type: [Number], default: undefined },
   },

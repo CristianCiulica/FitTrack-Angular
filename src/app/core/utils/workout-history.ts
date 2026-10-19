@@ -39,7 +39,7 @@ export function previousExercises(
 export function workoutVolume(workout: Workout): number {
   return workout.exercises.reduce(
     (sum, ex) =>
-      sum +
+      sum + (ex.dropSets ?? []).reduce((s, d) => s + d.weight * d.reps, 0) +
       Array.from(
         { length: ex.repUnit === 'seconds' ? 0 : ex.sets },
         (_, i) => (ex.setWeights?.[i] ?? ex.weight) * (ex.setReps?.[i] ?? ex.reps),

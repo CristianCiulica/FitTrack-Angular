@@ -135,6 +135,7 @@ export class WorkoutModalComponent implements OnChanges {
         return {
           ...value, exerciseName: value.exerciseName.trim(),
           ...(original?.repUnit ? { repUnit: original.repUnit } : {}),
+          ...(sameCount && original?.dropSets ? { dropSets: original.dropSets.filter(d => d.weight < (original.setWeights?.[d.setIndex] ?? value.weight)).map(d => ({...d})) } : {}),
           ...(sameCount && original?.setWeights ? { setWeights: [...original.setWeights] } : {}),
           ...(sameCount && original?.setReps ? {
             setReps: original.reps === value.reps ? [...original.setReps] : Array(value.sets).fill(value.reps),

@@ -177,3 +177,11 @@ button:disabled { cursor: default; opacity: .45; }
   .hold-status { margin-top: 8px; font-size: 11px; }
   .timed-exercise .previous-performance p { font-size: 10px; }
 }
+
+.drop-set-controls {
+  margin: 12px auto 0; text-align: center;
+  button { min-height: 44px; padding: 10px 20px; border: 1px solid var(--hairline); border-radius: 14px; background: var(--surface); color: var(--ink); font: inherit; cursor: pointer; }
+  button:disabled { opacity: .4; }
+  p { color: var(--muted); font-size: 13px; }
+  p[role="alert"] { color: #ff453a; }
+}

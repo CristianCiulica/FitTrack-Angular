@@ -25,7 +25,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../core/services/auth.service';
 import { WorkoutService } from '../../core/services/workout.service';
 import { ProfileService } from '../../core/services/profile.service';
-import { MuscleGroup, Workout } from '../../core/models/workout.model';
+import { DropSetLog, MuscleGroup, Workout } from '../../core/models/workout.model';
 import { estimateSessionCalories, estimateSessionMinutes } from '../../core/utils/workout-calories';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
@@ -839,6 +839,28 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   });
   readonly holdProgress = computed(() => Math.min(100, this.holdElapsedMs() / (this.holdTargetSeconds() * 10)));
   private loggedWeights: (number | null)[][] = [];
+  readonly activeDrop = signal(false);
+  private loggedDrops: DropSetLog[][] = [];
+  readonly supportsDropSet = computed(() => {
+    const ex = this.currentExercise();
+    return !!ex && !ex.repUnit && !this.treadmillActive() &&
+      /(?:\btriceps?\b.*\bpush[ -]?down\b|\blateral\s+raises?\b)/i.test(ex.name);
+  });
+  readonly dropInputValid = computed(() => !this.activeDrop() ||
+    (this.currentReps() > 0 && this.currentWeight() < (this.loggedWeights[this.currentExerciseIndex()]?.[this.currentSetIndex() - 1] ?? 0)));
+  startDropSet(): void {
+    if (this.state() !== 'active' || !this.supportsDropSet() || this.activeDrop() || !this.setInputsValid() || this.currentWeight() <= 0 || this.currentReps() < 1) return;
+    const i = this.currentExerciseIndex(), set = this.currentSetIndex() - 1;
+    this.loggedWeights[i][set] = this.currentWeight();
+    this.loggedReps[i][set] = this.currentReps();
+    this.loggedDrops[i] = this.loggedDrops[i].filter(d => d.setIndex !== set);
+    const suggestion = Math.floor(this.currentWeight() * .75 * 2) / 2;
+    this.currentWeight.set(suggestion);
+    this.activeDrop.set(true);
+    this.inputsTouched = true;
+    this.updateCompletedSets();
+    this.checkpointWorkout();
+  }
   private loggedReps: (number | null)[][] = [];
   private previousByExercise = signal(new Map<string, PreviousExercise>());
   private historyWorkouts: Workout[] = [];
@@ -1202,6 +1224,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.currentSetIndex.set(1);
     this.stopTimer();
     this.completedSets.set(0);
+    this.activeDrop.set(false);
+    this.loggedDrops = this.currentRoutine().exercises.map(() => []);
     this.loggedWeights = this.currentRoutine().exercises.map(ex => Array(ex.sets).fill(null));
     this.loggedReps = this.currentRoutine().exercises.map(ex => Array(ex.sets).fill(null));
     this.sessionStartedAt = Date.now();
@@ -1381,7 +1405,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   finishSet() {
-    if (this.state() !== 'active' || !this.setInputsValid()) return;
+    if (this.state() !== 'active' || !this.setInputsValid() || !this.dropInputValid()) return;
     if (this.currentExercise()?.repUnit === 'seconds' || this.treadmillActive()) {
       this.stopHoldTimer();
       if (this.currentReps() < 1) return;
@@ -1389,10 +1413,21 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.stopTimer();
     const exIdx = this.currentExerciseIndex();
     const setIdx = this.currentSetIndex() - 1;
-    this.loggedWeights[exIdx][setIdx] = this.currentWeight();
-    this.loggedReps[exIdx][setIdx] = this.currentReps();
+    if (this.activeDrop()) {
+      this.loggedDrops[exIdx] = [...this.loggedDrops[exIdx].filter(d => d.setIndex !== setIdx),
+        {setIndex: setIdx, weight: this.currentWeight(), reps: this.currentReps()}];
+      this.activeDrop.set(false);
+    } else {
+      this.loggedWeights[exIdx][setIdx] = this.currentWeight();
+      this.loggedReps[exIdx][setIdx] = this.currentReps();
+      this.loggedDrops[exIdx] = this.loggedDrops[exIdx].filter(d => d.setIndex !== setIdx || d.weight < this.currentWeight());
+    }
     this.updateCompletedSets();
     if (this.treadmillActive()) { this.advanceSet(); return; }
+    this.beginSetRest();
+  }
+
+  private beginSetRest(): void {
     this.state.set('rest');
     this.restTimeRemaining.set(this.exerciseRestSeconds());
     this.restDeadline = Date.now() + this.exerciseRestSeconds() * 1000;
@@ -1411,10 +1446,12 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   previousSet() {
     this.weightInputValid.set(true); this.repsInputValid.set(true);
-    if (!this.canGoBack() || !this.workoutInProgress()) return;
+    if ((!this.canGoBack() && !this.activeDrop()) || !this.workoutInProgress()) return;
+    const wasDrop = this.activeDrop();
+    this.activeDrop.set(false);
     this.stopTimer();
     // During rest/review return to the set just completed or skipped.
-    if (this.state() === 'active') {
+    if (this.state() === 'active' && !wasDrop) {
       if (this.currentSetIndex() > 1) {
         this.currentSetIndex.update(index => index - 1);
       } else {
@@ -1434,6 +1471,12 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.state() !== 'active') return;
     const exIdx = this.currentExerciseIndex();
     const setIdx = this.currentSetIndex() - 1;
+    if (this.activeDrop()) {
+      this.activeDrop.set(false);
+      this.beginSetRest();
+      return;
+    }
+    this.loggedDrops[exIdx] = this.loggedDrops[exIdx].filter(d => d.setIndex !== setIdx);
     this.loggedWeights[exIdx][setIdx] = null;
     this.loggedReps[exIdx][setIdx] = null;
     this.updateCompletedSets();
@@ -1488,7 +1531,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   // volumul total al sesiunii curente: suma reps×kg pe fiecare set logat
   private sessionVolume(): number {
-    return this.loggedWeights.reduce(
+    return this.loggedDrops.flat().reduce((sum, d) => sum + d.weight * d.reps, 0) + this.loggedWeights.reduce(
       (total, weights, i) =>
         total + weights.reduce<number>((s, w, setIdx) => s + (w ?? 0) * (this.loggedReps[i]?.[setIdx] ?? 0), 0),
       0,
@@ -1508,7 +1551,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.finishedPrevious.set(previous ?? null);
     this.sessionEndedAt ??= Date.now();
     this.finishedDuration.set(this.cardioOnly() ? this.treadmillLogs().reduce((sum, t) => sum + t.seconds, 0) : Math.min(604800, Math.max(0, Math.floor((this.sessionEndedAt - this.sessionStartedAt) / 1000))));
-    this.finishedExercises.set(this.currentRoutine().exercises.map((ex,i) => ({name:ex.name, ...(isTreadmillExercise(ex) ? {seconds: this.loggedReps[i]?.[0] ?? 0} : {}), sets:this.loggedWeights[i].filter(v => v !== null).length, volume:Math.round(this.loggedWeights[i].reduce<number>((sum,w,j) => sum + (w ?? 0) * (this.loggedReps[i][j] ?? 0),0))})).filter(ex => ex.sets > 0));
+    this.finishedExercises.set(this.currentRoutine().exercises.map((ex,i) => ({name:ex.name, ...(isTreadmillExercise(ex) ? {seconds: this.loggedReps[i]?.[0] ?? 0} : {}), sets:this.loggedWeights[i].filter(v => v !== null).length, volume:Math.round(this.loggedDrops[i].reduce((sum,d) => sum + d.weight*d.reps,0) + this.loggedWeights[i].reduce<number>((sum,w,j) => sum + (w ?? 0) * (this.loggedReps[i][j] ?? 0),0))})).filter(ex => ex.sets > 0));
     this.finishedDelta.set(previous ? Math.round(volume - workoutVolume(previous)) : null);
 
     this.saveWorkout();
@@ -1543,6 +1586,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         const logged = (this.loggedWeights[i] ?? []).filter((value): value is number => value !== null);
         const reps = (this.loggedReps[i] ?? []).filter((value): value is number => value !== null);
         return {
+          ...(this.loggedDrops[i]?.length ? {dropSets: this.loggedDrops[i].map(d => ({...d, setIndex: this.loggedWeights[i].slice(0, d.setIndex).filter(w => w !== null).length}))} : {}),
           exerciseName: ex.name,
           muscleGroup: ex.muscleGroup,
           sets: logged.length,
@@ -1608,6 +1652,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (state !== 'active' && state !== 'rest' && state !== 'review') return;
     const stored = writeWorkoutDraft({ version: 1, owner: this.authService.currentUserId, clientId: this.sessionClientId,
       date: this.targetDate(), routine: this.currentRoutine(), state, exerciseIndex: this.currentExerciseIndex(), setIndex: this.currentSetIndex(),
+      dropSets: this.loggedDrops, activeDrop: this.activeDrop(),
       weights: this.loggedWeights, reps: this.loggedReps, currentWeight: this.currentWeight(), currentReps: this.currentReps(),
       startedAt: this.sessionStartedAt, endedAt: this.sessionEndedAt, restDeadline: this.restDeadline, restSeconds: this.restTimeTarget(),
       holdElapsedMs: Math.min(this.holdTargetSeconds() * 1000, this.holdRunning() ? this.holdAccumulatedMs + Math.max(0, Date.now() - this.holdStartedAt) : this.holdElapsedMs()),
@@ -1631,6 +1676,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.sessionClientId = draft.clientId;
     this.targetDate.set(draft.date);
     this.currentExerciseIndex.set(draft.exerciseIndex); this.currentSetIndex.set(draft.setIndex);
+    this.loggedDrops = draft.dropSets ?? draft.weights.map(() => []); this.activeDrop.set(draft.activeDrop ?? false);
     this.loggedWeights = draft.weights; this.loggedReps = draft.reps;
     this.currentWeight.set(draft.currentWeight); this.currentReps.set(draft.currentReps);
     this.sessionStartedAt = draft.startedAt; this.sessionEndedAt = draft.endedAt;

@@ -1,4 +1,12 @@
+export interface DropSetLog {
+  /** Zero-based index of the parent working set. */
+  setIndex: number;
+  weight: number;
+  reps: number;
+}
+
 export interface ExerciseLog {
+  dropSets?: DropSetLog[];
   exerciseName: string;
   muscleGroup: MuscleGroup;
   sets: number;

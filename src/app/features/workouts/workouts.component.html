@@ -327,6 +327,7 @@
                             <span class="set-weights" *ngIf="ex.setReps?.length">{{ formatSetReps(ex.setReps!, ex.repUnit) }}</span>
                             <span *ngIf="!ex.setWeights?.length">{{ displayLoad(ex.weight) }} {{ weightUnit }}</span>
                             <span class="set-weights" *ngIf="ex.setWeights?.length">{{ formatSetWeights(ex.setWeights!) }}</span>
+                            <span class="set-weights" *ngFor="let drop of ex.dropSets">Drop · set {{ drop.setIndex + 1 }}: {{ drop.reps }} reps × {{ displayLoad(drop.weight) }} {{ weightUnit }}</span>
                           </div>
                         </div>
                       </div>
@@ -392,6 +393,7 @@
                     <span class="set-weights" *ngIf="ex.setReps?.length">{{ formatSetReps(ex.setReps!, ex.repUnit) }}</span>
                     <span *ngIf="!ex.setWeights?.length">{{ displayLoad(ex.weight) }} {{ weightUnit }}</span>
                     <span class="set-weights" *ngIf="ex.setWeights?.length">{{ formatSetWeights(ex.setWeights!) }}</span>
+                            <span class="set-weights" *ngFor="let drop of ex.dropSets">Drop · set {{ drop.setIndex + 1 }}: {{ drop.reps }} reps × {{ displayLoad(drop.weight) }} {{ weightUnit }}</span>
                   </div>
                 </div>
               </div>
