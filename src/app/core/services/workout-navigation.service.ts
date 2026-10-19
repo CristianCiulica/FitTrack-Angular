@@ -3,7 +3,7 @@ import { DestroyRef, Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 const WORKOUT = '/start-workout';
-const REVEAL_ROUTES = new Set([WORKOUT, '/dashboard', '/running', '/bmi']);
+const REVEAL_ROUTES = new Set([WORKOUT, '/dashboard', '/workouts', '/running', '/bmi']);
 const REVEAL_DURATION = 1600;
 const EASING = 'cubic-bezier(.22, .8, .25, 1)';
 
@@ -64,16 +64,21 @@ export class WorkoutNavigationService {
     this.busy = true;
     const token = ++this.generation;
     const w = this.window!;
+    const circular = destination === WORKOUT;
     const rect = link.getBoundingClientRect();
     const x = rect.x + rect.width / 2,
       y = rect.y + rect.height / 2;
     const circle = w.getComputedStyle(link, '::before');
-    const collapsed = `circle(${(parseFloat(circle.width) || 44) / 2}px at ${x}px ${y}px)`;
-    const expanded = `circle(${Math.ceil(Math.hypot(Math.max(x, w.innerWidth - x), Math.max(y, w.innerHeight - y)))}px at ${x}px ${y}px)`;
-    const blue =
-      destination === WORKOUT
-        ? circle.backgroundColor || '#007aff'
-        : w.getComputedStyle(link).getPropertyValue('--dock-accent').trim() || '#007aff';
+    const collapsed = circular
+      ? `circle(${(parseFloat(circle.width) || 44) / 2}px at ${x}px ${y}px)`
+      : 'inset(100% 0 0 0)';
+    const expanded = circular
+      ? `circle(${Math.ceil(Math.hypot(Math.max(x, w.innerWidth - x), Math.max(y, w.innerHeight - y)))}px at ${x}px ${y}px)`
+      : 'inset(0% 0 0 0)';
+    const blue = circular
+      ? circle.backgroundColor || '#007aff'
+      : w.getComputedStyle(this.document.documentElement).getPropertyValue('--bg').trim() ||
+        '#f5f5f7';
     try {
       if (
         w.matchMedia('(prefers-reduced-motion: reduce)').matches ||
@@ -87,19 +92,21 @@ export class WorkoutNavigationService {
         return;
       }
       this.document.documentElement.classList.add('workout-route-motion');
+      let navigated = false;
       const transition = this.document.startViewTransition(async () => {
-        if (!(await this.navigate(destination)) || token !== this.generation) {
+        navigated = await this.navigate(destination);
+        if (!navigated || token !== this.generation) {
           this.transition?.skipTransition();
           return;
         }
-        // A named blue layer is captured separately from the new page. It fades like the assistant surface.
-        this.createCover(blue, true);
+        // Only Workout expands a blue circle. Other destinations reveal the stationary page from below.
+        if (circular) this.createCover(blue, true);
       });
       this.transition = transition;
       void transition.updateCallbackDone.catch(() => {});
       void transition.finished.catch(() => {});
       await transition.ready;
-      if (token !== this.generation || !this.cover) {
+      if (!navigated || token !== this.generation || (circular && !this.cover)) {
         transition.skipTransition();
         return;
       }
@@ -113,20 +120,21 @@ export class WorkoutNavigationService {
           pseudoElement: '::view-transition-new(root)',
         },
       );
-      this.animate(
-        this.document.documentElement,
-        [
-          { clipPath: collapsed, opacity: 1 },
-          { opacity: 0, offset: 0.45 },
-          { clipPath: expanded, opacity: 0 },
-        ],
-        {
-          duration: REVEAL_DURATION,
-          easing: EASING,
-          fill: 'both',
-          pseudoElement: '::view-transition-new(workout-launch-cover)',
-        },
-      );
+      if (circular)
+        this.animate(
+          this.document.documentElement,
+          [
+            { clipPath: collapsed, opacity: 1 },
+            { opacity: 0, offset: 0.45 },
+            { clipPath: expanded, opacity: 0 },
+          ],
+          {
+            duration: REVEAL_DURATION,
+            easing: EASING,
+            fill: 'both',
+            pseudoElement: '::view-transition-new(workout-launch-cover)',
+          },
+        );
       await transition.finished;
       this.cover?.remove();
       this.cover = undefined;
@@ -171,14 +179,24 @@ export class WorkoutNavigationService {
       shell.inert = true;
     }
     const cover = this.createCover(blue);
-    await this.animate(cover, [{ clipPath: collapsed }, { clipPath: expanded }], {
-      duration: REVEAL_DURATION,
-      easing: EASING,
-      fill: 'both',
-    }).finished;
-    if (token !== this.generation || !(await this.navigate(destination))) return;
-    await this.animate(cover, [{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'both' })
-      .finished;
+    if (destination === WORKOUT) {
+      await this.animate(cover, [{ clipPath: collapsed }, { clipPath: expanded }], {
+        duration: REVEAL_DURATION,
+        easing: EASING,
+        fill: 'both',
+      }).finished;
+      if (token !== this.generation || !(await this.navigate(destination))) return;
+      await this.animate(cover, [{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'both' })
+        .finished;
+    } else {
+      if (token !== this.generation || !(await this.navigate(destination))) return;
+      // Without native snapshots, uncover the new page from its bottom edge with a neutral curtain.
+      await this.animate(cover, [{ clipPath: expanded }, { clipPath: 'inset(0 0 100% 0)' }], {
+        duration: REVEAL_DURATION,
+        easing: EASING,
+        fill: 'both',
+      }).finished;
+    }
     this.unlockShell();
     await this.focusHeading(token);
   }
