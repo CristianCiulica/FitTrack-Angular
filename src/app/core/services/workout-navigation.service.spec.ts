@@ -58,7 +58,8 @@ describe('Mobile dock reveal navigation', () => {
     delete (document.documentElement as any).animate;
     TestBed.resetTestingModule();
     node.remove();
-    if (animateDescriptor) Object.defineProperty(HTMLElement.prototype, 'animate', animateDescriptor);
+    if (animateDescriptor)
+      Object.defineProperty(HTMLElement.prototype, 'animate', animateDescriptor);
     else delete (HTMLElement.prototype as any).animate;
     if (transitionDescriptor)
       Object.defineProperty(document, 'startViewTransition', transitionDescriptor);
@@ -88,16 +89,25 @@ describe('Mobile dock reveal navigation', () => {
     expect(document.documentElement.classList.contains('workout-route-motion')).toBe(false);
   });
   it.each(['/dashboard', '/workouts', '/running', '/bmi'])(
-    'navigates to %s with reduced motion and keeps route history',
-    async (destination) => {
+    'leaves %s to RouterLink without animation or interception',
+    (destination) => {
+      reduced = false;
       router.url = '/start-workout';
       link.href = destination;
       const targetHandler = vi.fn();
+      const start = vi.fn();
+      const animate = vi.fn();
+      Object.defineProperty(document, 'startViewTransition', { configurable: true, value: start });
+      Object.defineProperty(document.documentElement, 'animate', {
+        configurable: true,
+        value: animate,
+      });
       link.addEventListener('click', targetHandler);
-      expect(click().defaultPrevented).toBe(true);
-      await tick();
-      expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith(destination);
-      expect(targetHandler).not.toHaveBeenCalled();
+      expect(click().defaultPrevented).toBe(false);
+      expect(targetHandler).toHaveBeenCalledOnce();
+      expect(router.navigateByUrl).not.toHaveBeenCalled();
+      expect(start).not.toHaveBeenCalled();
+      expect(animate).not.toHaveBeenCalled();
       expect(document.querySelector('.workout-route-cover')).toBeNull();
     },
   );
@@ -137,36 +147,8 @@ describe('Mobile dock reveal navigation', () => {
     await tick();
     expect(document.querySelector('.workout-route-cover')).toBeNull();
   });
-  it.each(['/dashboard', '/workouts', '/running', '/bmi'])(
-    'reveals %s upward with stationary text and no colored circle',
-    async (destination) => {
-      reduced = false;
-      router.url = '/start-workout';
-      link.href = destination;
-      const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel: vi.fn() }));
-      Object.defineProperty(document.documentElement, 'animate', {
-        configurable: true,
-        value: animate,
-      });
-      const start = vi.fn((update: () => Promise<void>) => {
-        const done = Promise.resolve().then(update);
-        return { ready: done, finished: done, updateCallbackDone: done, skipTransition: vi.fn() };
-      });
-      Object.defineProperty(document, 'startViewTransition', { configurable: true, value: start });
-      click();
-      await tick();
-      expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith(destination);
-      expect(animate).toHaveBeenCalledExactlyOnceWith(
-        [{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)' }],
-        expect.objectContaining({ duration: 1600, pseudoElement: '::view-transition-new(root)' }),
-      );
-      expect(document.querySelector('.workout-route-cover')).toBeNull();
-      expect(document.documentElement.classList.contains('workout-route-motion')).toBe(false);
-    },
-  );
-  it('uncovers History upward without native snapshots and restores interaction', async () => {
+  it('keeps the circular fallback and restores interaction without native snapshots', async () => {
     reduced = false;
-    link.href = '/workouts';
     const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel: vi.fn() }));
     Object.defineProperty(HTMLElement.prototype, 'animate', { configurable: true, value: animate });
     Object.defineProperty(document, 'startViewTransition', {
@@ -175,11 +157,15 @@ describe('Mobile dock reveal navigation', () => {
     });
     click();
     await tick();
-    expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith('/workouts');
-    expect(animate).toHaveBeenCalledExactlyOnceWith(
-      [{ clipPath: 'inset(0% 0 0 0)' }, { clipPath: 'inset(0 0 100% 0)' }],
+    expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith('/start-workout');
+    expect(animate).toHaveBeenCalledTimes(2);
+    expect(animate.mock.calls[0]).toEqual([
+      [
+        { clipPath: 'circle(22px at 195px 812px)' },
+        { clipPath: expect.stringMatching(/^circle\(/) },
+      ],
       expect.objectContaining({ duration: 1600 }),
-    );
+    ]);
     expect(node.inert).toBeFalsy();
     expect(document.querySelector('.workout-route-cover')).toBeNull();
   });

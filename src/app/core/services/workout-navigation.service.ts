@@ -3,11 +3,10 @@ import { DestroyRef, Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 const WORKOUT = '/start-workout';
-const REVEAL_ROUTES = new Set([WORKOUT, '/dashboard', '/workouts', '/running', '/bmi']);
 const REVEAL_DURATION = 1600;
 const EASING = 'cubic-bezier(.22, .8, .25, 1)';
 
-/** Reveals mobile dock destinations, keeping Router guards and browser history intact. */
+/** Expands only the mobile Workout +, preserving Router guards and browser history. */
 @Injectable({ providedIn: 'root' })
 export class WorkoutNavigationService {
   private readonly document = inject(DOCUMENT);
@@ -42,10 +41,11 @@ export class WorkoutNavigationService {
       return;
     const target = event.target;
     const link =
-      target instanceof Element ? target.closest<HTMLAnchorElement>('.sidebar-menu a[href]') : null;
+      target instanceof Element
+        ? target.closest<HTMLAnchorElement>('.sidebar-menu a[href="/start-workout"]')
+        : null;
     if (
       !link ||
-      !REVEAL_ROUTES.has(link.getAttribute('href') ?? '') ||
       (link.target && link.target !== '_self') ||
       link.hasAttribute('download') ||
       link.getAttribute('aria-disabled') === 'true' ||
@@ -53,60 +53,50 @@ export class WorkoutNavigationService {
       !link.getClientRects().length
     )
       return;
-    const destination = link.getAttribute('href')!;
-    if (!this.busy && this.router.url.split(/[?#]/)[0] === destination) return;
+    if (!this.busy && this.router.url.split(/[?#]/)[0] === WORKOUT) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    if (!this.busy) void this.open(link, destination);
+    if (!this.busy) void this.open(link);
   };
 
-  private async open(link: HTMLAnchorElement, destination: string) {
+  private async open(link: HTMLAnchorElement) {
     this.busy = true;
     const token = ++this.generation;
     const w = this.window!;
-    const circular = destination === WORKOUT;
     const rect = link.getBoundingClientRect();
     const x = rect.x + rect.width / 2,
       y = rect.y + rect.height / 2;
     const circle = w.getComputedStyle(link, '::before');
-    const collapsed = circular
-      ? `circle(${(parseFloat(circle.width) || 44) / 2}px at ${x}px ${y}px)`
-      : 'inset(100% 0 0 0)';
-    const expanded = circular
-      ? `circle(${Math.ceil(Math.hypot(Math.max(x, w.innerWidth - x), Math.max(y, w.innerHeight - y)))}px at ${x}px ${y}px)`
-      : 'inset(0% 0 0 0)';
-    const blue = circular
-      ? circle.backgroundColor || '#007aff'
-      : w.getComputedStyle(this.document.documentElement).getPropertyValue('--bg').trim() ||
-        '#f5f5f7';
+    const collapsed = `circle(${(parseFloat(circle.width) || 44) / 2}px at ${x}px ${y}px)`;
+    const expanded = `circle(${Math.ceil(Math.hypot(Math.max(x, w.innerWidth - x), Math.max(y, w.innerHeight - y)))}px at ${x}px ${y}px)`;
+    const blue = circle.backgroundColor || '#007aff';
     try {
       if (
         w.matchMedia('(prefers-reduced-motion: reduce)').matches ||
         !this.document.documentElement.animate
       ) {
-        if (await this.navigate(destination)) await this.focusHeading(token);
+        if (await this.navigate()) await this.focusHeading(token);
         return;
       }
       if (!this.document.startViewTransition) {
-        await this.fallback(collapsed, expanded, blue, token, destination);
+        await this.fallback(collapsed, expanded, blue, token);
         return;
       }
       this.document.documentElement.classList.add('workout-route-motion');
       let navigated = false;
       const transition = this.document.startViewTransition(async () => {
-        navigated = await this.navigate(destination);
+        navigated = await this.navigate();
         if (!navigated || token !== this.generation) {
           this.transition?.skipTransition();
           return;
         }
-        // Only Workout expands a blue circle. Other destinations reveal the stationary page from below.
-        if (circular) this.createCover(blue, true);
+        this.createCover(blue, true);
       });
       this.transition = transition;
       void transition.updateCallbackDone.catch(() => {});
       void transition.finished.catch(() => {});
       await transition.ready;
-      if (!navigated || token !== this.generation || (circular && !this.cover)) {
+      if (!navigated || token !== this.generation || !this.cover) {
         transition.skipTransition();
         return;
       }
@@ -120,21 +110,20 @@ export class WorkoutNavigationService {
           pseudoElement: '::view-transition-new(root)',
         },
       );
-      if (circular)
-        this.animate(
-          this.document.documentElement,
-          [
-            { clipPath: collapsed, opacity: 1 },
-            { opacity: 0, offset: 0.45 },
-            { clipPath: expanded, opacity: 0 },
-          ],
-          {
-            duration: REVEAL_DURATION,
-            easing: EASING,
-            fill: 'both',
-            pseudoElement: '::view-transition-new(workout-launch-cover)',
-          },
-        );
+      this.animate(
+        this.document.documentElement,
+        [
+          { clipPath: collapsed, opacity: 1 },
+          { opacity: 0, offset: 0.45 },
+          { clipPath: expanded, opacity: 0 },
+        ],
+        {
+          duration: REVEAL_DURATION,
+          easing: EASING,
+          fill: 'both',
+          pseudoElement: '::view-transition-new(workout-launch-cover)',
+        },
+      );
       await transition.finished;
       this.cover?.remove();
       this.cover = undefined;
@@ -146,9 +135,9 @@ export class WorkoutNavigationService {
     }
   }
 
-  private async navigate(destination: string): Promise<boolean> {
-    const result = await this.router.navigateByUrl(destination);
-    return result && this.router.url.split(/[?#]/)[0] === destination;
+  private async navigate(): Promise<boolean> {
+    const result = await this.router.navigateByUrl(WORKOUT);
+    return result && this.router.url.split(/[?#]/)[0] === WORKOUT;
   }
   private createCover(blue: string, named = false) {
     const cover = this.document.createElement('div');
@@ -166,37 +155,21 @@ export class WorkoutNavigationService {
     void animation.finished.catch(() => {});
     return animation;
   }
-  private async fallback(
-    collapsed: string,
-    expanded: string,
-    blue: string,
-    token: number,
-    destination: string,
-  ) {
+  private async fallback(collapsed: string, expanded: string, blue: string, token: number) {
     const shell = this.document.querySelector<HTMLElement>('.route-shell');
     if (shell) {
       this.lockedShell = { element: shell, inert: shell.inert };
       shell.inert = true;
     }
     const cover = this.createCover(blue);
-    if (destination === WORKOUT) {
-      await this.animate(cover, [{ clipPath: collapsed }, { clipPath: expanded }], {
-        duration: REVEAL_DURATION,
-        easing: EASING,
-        fill: 'both',
-      }).finished;
-      if (token !== this.generation || !(await this.navigate(destination))) return;
-      await this.animate(cover, [{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'both' })
-        .finished;
-    } else {
-      if (token !== this.generation || !(await this.navigate(destination))) return;
-      // Without native snapshots, uncover the new page from its bottom edge with a neutral curtain.
-      await this.animate(cover, [{ clipPath: expanded }, { clipPath: 'inset(0 0 100% 0)' }], {
-        duration: REVEAL_DURATION,
-        easing: EASING,
-        fill: 'both',
-      }).finished;
-    }
+    await this.animate(cover, [{ clipPath: collapsed }, { clipPath: expanded }], {
+      duration: REVEAL_DURATION,
+      easing: EASING,
+      fill: 'both',
+    }).finished;
+    if (token !== this.generation || !(await this.navigate())) return;
+    await this.animate(cover, [{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'both' })
+      .finished;
     this.unlockShell();
     await this.focusHeading(token);
   }
