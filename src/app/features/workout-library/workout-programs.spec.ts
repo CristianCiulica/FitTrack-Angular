@@ -74,14 +74,69 @@ describe('30-day training programs', () => {
           .sort((a, b) => a.name.localeCompare(b.name)),
       ),
     );
-    expect(sessions[0].routine!.exercises.slice(0, 2).map((e) => e.name)).toEqual([
-      'Incline Dumbbell Press',
-      'Chest Dip',
+    expect(
+      sessions[0].routine!.exercises.map(({ name, sets, reps }) => ({ name, sets, reps })),
+    ).toEqual([
+      { name: 'Dumbbell Bench Press', sets: 3, reps: 10 },
+      { name: 'Incline Chest Press (Machine)', sets: 4, reps: 10 },
+      { name: 'Chest Dip', sets: 1, reps: 15 },
+      { name: 'Shoulder Press', sets: 3, reps: 12 },
+      { name: 'Triceps Rope Pushdown', sets: 3, reps: 12 },
+      { name: 'Overhead Triceps Extension', sets: 3, reps: 12 },
+      { name: 'Lateral Raise (Dumbbell)', sets: 6, reps: 15 },
     ]);
     expect(sessions[1].routine!.exercises.slice(0, 2).map((e) => e.name)).toEqual([
       'Pull Up',
       'Bent Over Row (Machine)',
     ]);
+  });
+  it('keeps Aesthetics lifting days in place and replaces cardio with recovery', () => {
+    const p = programs.find((p) => p.id === 'aesthetics-30')!;
+    const days = programCalendar(p, { ...enrollment, programId: p.id }, [], enrollment.startDate);
+    expect(p.week.map((d) => d.type)).toEqual([
+      'strength',
+      'rest',
+      'strength',
+      'rest',
+      'strength',
+      'rest',
+      'rest',
+    ]);
+    expect(p.week.filter((d) => d.type === 'strength').map((d) => d.id)).toEqual([
+      'push',
+      'pull',
+      'legs',
+    ]);
+    expect(days.filter((d) => d.day.type !== 'rest')).toHaveLength(13);
+    const context = programRoutine(p, 2, { ...enrollment, programId: p.id }).program!;
+    const log: Workout = {
+      userId: 'u',
+      kind: 'session',
+      name: 'PULL',
+      date: enrollment.startDate,
+      exercises: [],
+      notes: programSessionNotes(context, true),
+    };
+    expect(
+      programCalendar(p, { ...enrollment, programId: p.id }, [log], enrollment.startDate)[2].done,
+    ).toBe(true);
+    expect(isWorkoutSession(log)).toBe(true);
+  });
+  it('links an early workout to the chosen future plan day using its actual logged date', () => {
+    const routine = programRoutine(programs[0], 8, enrollment);
+    const log: Workout = {
+      userId: 'u',
+      kind: 'session',
+      name: routine.name,
+      date: enrollment.startDate,
+      exercises: [],
+      notes: programSessionNotes(routine.program!, true),
+    };
+    const days = programCalendar(programs[0], enrollment, [log], enrollment.startDate);
+    expect(days[8].future).toBe(true);
+    expect(days[8].done).toBe(true);
+    expect(days.filter((d) => d.done)).toHaveLength(1);
+    expect(log.date).toBe(enrollment.startDate);
   });
   it('maps exactly 30 actual calendar days across year boundaries and creates linked sessions', () => {
     const program = programs[0],

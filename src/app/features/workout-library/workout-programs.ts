@@ -385,7 +385,7 @@ export function workoutPrograms(
       icon: 'aesthetic',
       highlights: [
         'Your Push / Pull / Legs split',
-        'Extra upper-chest & biceps work',
+        'Your seven-exercise Push session',
         'Your existing sets are preserved',
       ],
       guidance: [
@@ -400,7 +400,7 @@ export function workoutPrograms(
           'Chest, shoulders and triceps.',
           aesthetics[0]?.exercises ?? upperA.routine!.exercises,
         ),
-        cardio('cardio-a', 20),
+        rest('rest-cardio-a'),
         strength(
           'pull',
           'PULL',
@@ -414,7 +414,7 @@ export function workoutPrograms(
           'Legs, calves and core.',
           aesthetics[2]?.exercises ?? lowerA.routine!.exercises,
         ),
-        cardio('cardio-b', 20),
+        rest('rest-cardio-b'),
         rest('rest-b'),
       ],
     },

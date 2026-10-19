@@ -63,12 +63,13 @@ const PREDEFINED_ROUTINES: Routine[] = [
     description: 'Your main push session. Chest, triceps and shoulders.',
     restSeconds: 90,
     exercises: [
-      { name: 'Incline Dumbbell Press', sets: 4, reps: 10, weight: 0, muscleGroup: 'Chest' },
-      { name: 'Triceps Pushdown', sets: 3, reps: 12, weight: 0, muscleGroup: 'Arms' },
+      { name: 'Dumbbell Bench Press', sets: 3, reps: 10, weight: 0, muscleGroup: 'Chest' },
+      { name: 'Incline Chest Press (Machine)', sets: 4, reps: 10, weight: 0, muscleGroup: 'Chest' },
+      { name: 'Chest Dip', sets: 1, reps: 15, weight: 0, muscleGroup: 'Chest' },
+      { name: 'Shoulder Press', sets: 3, reps: 12, weight: 0, muscleGroup: 'Shoulders' },
+      { name: 'Triceps Rope Pushdown', sets: 3, reps: 12, weight: 0, muscleGroup: 'Arms' },
       { name: 'Overhead Triceps Extension', sets: 3, reps: 12, weight: 0, muscleGroup: 'Arms' },
-      { name: 'Chest Dip', sets: 3, reps: 10, weight: 0, muscleGroup: 'Chest' },
       { name: 'Lateral Raise (Dumbbell)', sets: 6, reps: 15, weight: 0, muscleGroup: 'Shoulders' },
-      { name: 'Upper Chest Fly (Cable)', sets: 5, reps: 12, weight: 0, muscleGroup: 'Chest' },
     ],
   },
   {

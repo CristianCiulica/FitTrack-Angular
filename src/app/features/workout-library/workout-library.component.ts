@@ -169,6 +169,14 @@ export class WorkoutLibraryComponent {
   readonly currentDay = computed<ReturnType<typeof programCalendar>[number] | null>(
     () => this.calendar()[this.selectedDay()] ?? null,
   );
+  readonly previewTitle = computed(
+    () => this.selectedSavedPlan()?.split || this.selectedRoutine()?.name || 'Your session',
+  );
+  readonly showSessionTitle = computed(
+    () =>
+      this.selectedRoutine()?.name.trim().toLowerCase() !==
+      this.previewTitle().trim().toLowerCase(),
+  );
   readonly currentRoutine = computed(
     () => this.currentDay()?.day.routine ?? this.selectedRoutine(),
   );
@@ -374,7 +382,7 @@ export class WorkoutLibraryComponent {
     const p = this.selectedProgram(),
       e = this.selectedEnrollment(),
       day = this.currentDay();
-    if (!p || !e || !day || day.future) return;
+    if (!p || !e || !day) return;
     if (e.stoppedAt || day.day.type === 'rest') return;
     const routine = programRoutine(p, day.index, e);
     this.close();

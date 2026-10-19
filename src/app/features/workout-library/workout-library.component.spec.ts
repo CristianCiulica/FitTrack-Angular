@@ -85,7 +85,7 @@ describe('Workout library navigation', () => {
     component.search('glute');
     expect(component.filteredPrograms().some((p) => p.id === 'glutes-30')).toBe(true);
   });
-  it('retries enrollment with one stable identity and refuses a session from a future day', async () => {
+  it('retries enrollment with one stable identity and launches a future scheduled session', async () => {
     const component = TestBed.createComponent(WorkoutLibraryComponent).componentInstance;
     const service = TestBed.inject(WorkoutService);
     const durable = vi.spyOn(service, 'isDurablySaved').mockReturnValue(false);
@@ -100,9 +100,33 @@ describe('Workout library navigation', () => {
     expect(calls[0][0].clientId).toBe(calls[1][0].clientId);
     expect(component.selectedEnrollment()?.id).toBe(calls[0][0].clientId);
     component.selectedDay.set(1);
+    expect(component.currentDay()?.future).toBe(true);
+    vi.spyOn(component, 'close').mockImplementation(() => {});
     const launch = vi.spyOn(component.startRoutine, 'emit');
     component.startDay();
+    expect(launch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        routine: expect.objectContaining({ program: expect.objectContaining({ dayIndex: 1 }) }),
+      }),
+    );
+    launch.mockClear();
+    component.selectDay(6);
+    component.startDay();
     expect(launch).not.toHaveBeenCalled();
+    component.selectDay(1);
+    component.selectedEnrollment.update((e) => ({ ...e!, stoppedAt: new Date().toISOString() }));
+    component.startDay();
+    expect(launch).not.toHaveBeenCalled();
+  });
+  it('shows a session title once while retaining distinct saved-plan day names', () => {
+    const component = TestBed.createComponent(WorkoutLibraryComponent).componentInstance;
+    component.selectedRoutine.set({ name: 'PUSH', exercises: [] });
+    expect(component.previewTitle()).toBe('PUSH');
+    expect(component.showSessionTitle()).toBe(false);
+    vi.spyOn(component, 'selectedSavedPlan').mockReturnValue({ split: 'Upper / Lower' } as any);
+    component.selectedRoutine.set({ name: 'Upper A', exercises: [] });
+    expect(component.previewTitle()).toBe('Upper / Lower');
+    expect(component.showSessionTitle()).toBe(true);
   });
   it('stops the active block without deleting progress or reviving an older block', async () => {
     const component = TestBed.createComponent(WorkoutLibraryComponent).componentInstance;

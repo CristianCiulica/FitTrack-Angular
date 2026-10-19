@@ -177,7 +177,7 @@
           @if (legendRoutine(); as routine) {
             <div class="lc-session-card"><header><div><span class="lc-eyebrow">YOUR SELECTED SESSION</span><h2>{{ routine.name }}</h2></div><div class="lc-session-metrics"><span><strong>{{ routine.exercises.length }}</strong> exercises</span><span><strong>{{ routineSets(routine) }}</strong> working sets</span><span><strong>~{{ routineMinutes(routine) }}</strong> min</span></div></header>
               <ol class="lc-exercises">@for (exercise of routine.exercises; track $index) {<li><span class="lc-exercise-number">{{ ($index + 1).toString().padStart(2, '0') }}</span><strong>{{ exercise.name }}</strong><span>{{ exercise.sets }} × {{ exercise.repRange || exercise.reps }}<small>{{ exercise.repUnit === 'seconds' ? 'sec' : 'reps' }}</small></span></li>}</ol>
-              <footer><p>Advanced training · Compounds first</p><button type="button" class="lc-start" (click)="startFromPlan(routine, plan.id, legendRoutineIndex())">Start this session <span aria-hidden="true">↗</span></button></footer>
+              <footer><p>Advanced training · Compounds first</p><button type="button" class="lc-start" (click)="startFromPlan(routine, plan.id, legendRoutineIndex())">Start this session</button></footer>
             </div>
           }
         </section>

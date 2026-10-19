@@ -417,7 +417,9 @@
                   <strong>{{ entry.index + 1 }}</strong
                   ><small>{{
                     entry.day.type === 'strength'
-                      ? 'Lift'
+                      ? program.id === 'aesthetics-30'
+                        ? entry.day.title
+                        : 'Lift'
                       : entry.day.type === 'cardio'
                         ? 'Cardio'
                         : 'Rest'
@@ -515,8 +517,14 @@
                 </div>
               } @else if (entry.day.cardio; as cardio) {
                 <div class="program-cardio">
-                  <svg viewBox="0 0 48 48" aria-hidden="true">
-                    <path d="M6 35h32l4-6H16L10 12H4m24-4h10v18M16 35v7m20-7v7" /></svg
+                  <!-- Tabler treadmill (MIT): /third-party/tabler-icons-LICENSE.txt -->
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 3a1 1 0 1 0 2 0a1 1 0 0 0 -2 0" />
+                    <path d="M3 14l4 1l.5 -.5" />
+                    <path d="M12 18v-3l-3 -2.923l.75 -5.077" />
+                    <path d="M6 10v-2l4 -1l2.5 2.5l2.5 .5" />
+                    <path d="M21 22a1 1 0 0 0 -1 -1h-16a1 1 0 0 0 -1 1" />
+                    <path d="M18 21l1 -11l2 -1" /></svg
                   ><strong>{{ cardio.minutes }}<small> minutes</small></strong
                   ><span>{{ cardio.effort }}</span>
                 </div>
@@ -532,7 +540,7 @@
       } @else {
         <section class="single-session-intro">
           <h2 id="program-detail-title">
-            {{ selectedSavedPlan()?.split || selectedRoutine()?.name || 'Your session' }}
+            {{ previewTitle() }}
           </h2>
           @if (selectedSavedPlan(); as plan) {
             <div class="saved-day-tabs" role="group" aria-label="Personal plan sessions">
@@ -551,7 +559,9 @@
         </section>
         @if (selectedRoutine(); as routine) {
           <section class="single-session-content">
-            <h3>{{ routine.name }}</h3>
+            @if (showSessionTitle()) {
+              <h3>{{ routine.name }}</h3>
+            }
             <p>
               {{ routine.exercises.length }} exercises · {{ totalSets(routine) }} working sets · ~{{
                 minuteEstimate(routine)
@@ -671,19 +681,15 @@
               </button>
             } @else {
               <span class="program-footer-hint">{{
-                currentDay()?.future
-                  ? 'Scheduled for ' + dateLabel(currentDay()!.date)
-                  : currentDay()?.day?.type === 'rest'
-                    ? 'Recovery day'
-                    : 'Day ' + ((currentDay()?.index ?? 0) + 1)
+                currentDay()?.day?.type === 'rest'
+                  ? 'Recovery day'
+                  : 'Day ' +
+                    ((currentDay()?.index ?? 0) + 1) +
+                    ' · ' +
+                    dateLabel(currentDay()!.date)
               }}</span>
               @if (currentDay()?.day?.type !== 'rest') {
-                <button
-                  type="button"
-                  class="library-primary"
-                  [disabled]="currentDay()?.future"
-                  (click)="startDay()"
-                >
+                <button type="button" class="library-primary" (click)="startDay()">
                   {{
                     currentDay()?.day?.type === 'cardio'
                       ? 'Start this session'
@@ -691,7 +697,6 @@
                         ? 'Train this session again'
                         : 'Start this session'
                   }}
-                  <span aria-hidden="true">↗</span>
                 </button>
               }
             }
@@ -703,7 +708,7 @@
               [disabled]="!selectedRoutine()"
               (click)="startSingle()"
             >
-              Start this session <span aria-hidden="true">↗</span>
+              Start this session
             </button>
           }
         </div>

@@ -2,7 +2,7 @@
 
 Workout (the centre + action) groups training into Discover plans, My training and Single sessions. History remains a separate destination. Search and six-item pagination keep individual sessions manageable; old PPL/Home launch links and Legends remain available.
 
-Six curated blocks cover hypertrophy, resistance training plus cardio, two-day training, the user's existing Aesthetics PPL, glute priority and home upper/lower. Each repeats a seven-day structure across exactly 30 calendar dates, including dates across month/year boundaries. The Aesthetics block preserves the user's exercises and sets. All new session launches put compound movements before isolation work. Existing in-progress drafts retain their original order so logged arrays remain aligned.
+Six curated blocks cover hypertrophy, resistance training plus cardio, two-day training, the user's existing Aesthetics PPL, glute priority and home upper/lower. Each repeats a seven-day structure across exactly 30 calendar dates, including dates across month/year boundaries. The Aesthetics block uses the user's updated seven-exercise Push session alongside Pull and Legs, with recovery days instead of cardio. Strength days keep their original day indices and session IDs so existing lifting progress remains linked. All new session launches put compound movements before isolation work. Existing in-progress drafts retain their original order so logged arrays remain aligned.
 
 Progression guidance uses controlled reps, reserve, small load changes and optional easier work when fatigue persists. Working loads are chosen during warm-up. These are general training templates, not injury rehabilitation or guaranteed fat-loss outcomes.
 
@@ -10,7 +10,7 @@ Progression guidance uses controlled reps, reserve, small load changes and optio
 
 A block enrollment is one `kind: routine` record with an empty exercises array and a validated versioned `FitTrack Program · ` notes envelope. Completed/partial strength sessions retain actual exercises and sets, with a `FitTrack Program Session · ` context linking enrollment, program, day and session. Both fit the existing 2,000-character notes limit. No server migration or model API key is required.
 
-Enrollment retries reuse one `pg_<uuid>` client ID. The underlying service supports authenticated sync, offline durable storage and idempotent retries. Enrollments never count as activity or custom workouts. Starting another block retains the previous enrollment; individual logged sessions remain in History. Future scheduled days can be previewed but not launched.
+Enrollment retries reuse one `pg_<uuid>` client ID. The underlying service supports authenticated sync, offline durable storage and idempotent retries. Enrollments never count as activity or custom workouts. Starting another block retains the previous enrollment; individual logged sessions remain in History. Scheduled dates are advisory: any strength or cardio session in an active block can be launched, including future or previously completed days. Rest days and stopped blocks cannot launch sessions. Saved records use the actual workout date while retaining the selected plan day.
 
 Completion derives from actual saved records, so deleting a session updates the block. Partial strength sessions remain partial; multiple shorter treadmill records can add toward a cardio day's planned duration. Duplicate client IDs/record IDs do not add duration twice. Rest days require no artificial completion. A plan only links records explicitly launched from that enrollment and day.
 
@@ -29,3 +29,5 @@ Stop plan is available on the active plan card and within plan details. An inlin
 ## Verification
 
 Unit coverage includes program calendars, boundaries, compounds-first ordering, preserved Aesthetics sets, linked partial/full sessions, metadata validation, repeat enrollment saves, duration accumulation, pagination/search, treadmill units/readings, Dashboard metrics and History refresh/deletion. Browser checks use production components with isolated mock account data, never a real user's workouts.
+
+The treadmill preview uses the [Tabler treadmill SVG](https://github.com/tabler/tabler-icons/blob/main/icons/outline/treadmill.svg); its MIT notice is included in `public/third-party/tabler-icons-LICENSE.txt`.
