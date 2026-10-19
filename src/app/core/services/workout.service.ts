@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { Workout } from '../models/workout.model';
-import { Observable, of, defer } from 'rxjs';
+import { Observable, of, defer, forkJoin, throwError } from 'rxjs';
 import { isWorkoutSession } from '../utils/workout-kind';
 import { workoutVolume } from '../utils/workout-history';
 import { ReadCache } from '../utils/read-cache';
@@ -268,6 +268,30 @@ export class WorkoutService {
         ),
       ),
     );
+  }
+
+  /** Remove a library template without deleting performed sessions or reviving legacy copies. */
+  deleteRoutine(id: string): Observable<void> {
+    return defer(() => {
+      const records = this.loadLocal();
+      const resolvedId = this.uploadedIds.get(id) ?? id;
+      const routine = records.find(item => item.id === resolvedId);
+      if (!routine || routine.isPredefined || routine.kind === 'session') {
+        return throwError(() => new Error('This routine is no longer available.'));
+      }
+      const name = routine.name.trim().toLowerCase();
+      // Older logs doubled as templates. Make their historical role explicit
+      // before deleting the template, otherwise the next load picks one again.
+      const legacy = records.filter(item => item.id !== resolvedId && item.kind == null && !item.isPredefined && item.name.trim().toLowerCase() === name);
+      const preserveHistory = legacy.length
+        ? forkJoin(legacy.map(item => this.updateWorkout(item.id!, { kind: 'session' })))
+        : of([]);
+      return preserveHistory.pipe(
+        switchMap(() => routine.kind === 'routine'
+          ? this.deleteWorkout(resolvedId)
+          : this.updateWorkout(resolvedId, { kind: 'session' }).pipe(map(() => void 0))),
+      );
+    });
   }
 
   deleteWorkout(id: string): Observable<void> {

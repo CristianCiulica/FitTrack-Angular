@@ -76,6 +76,14 @@
       <div class="progress-page">
         <header class="progress-intro">
           <h1>See your progress</h1>
+        </header>
+        @if (error()) {
+          <div class="progress-error" role="alert">
+            {{ error() }} <button type="button" (click)="load()">Try again</button>
+          </div>
+        }
+        <app-activity-calendar [(period)]="period" />
+        <div class="progress-information">
           <section class="weekly-focus" aria-label="This week's workout goal">
             <div>
               <span class="focus-eyebrow">Weekly goal</span
@@ -93,54 +101,119 @@
               <span>{{ loading() ? '—' : (goalPercent() | number: '1.0-0') + '%' }}</span>
             </div>
           </section>
-        </header>
-        @if (error()) {
-          <div class="progress-error" role="alert">
-            {{ error() }} <button type="button" (click)="load()">Try again</button>
-          </div>
-        }
-        <section class="month-overview" aria-labelledby="month-overview-title">
-          <div class="section-caption">
-            <h2 id="month-overview-title">The month at a glance</h2>
-            <span>{{ monthLabel() }}</span>
-          </div>
-          <div class="progress-stats" [attr.aria-busy]="loading()">
-            <div class="stat-card">
-              <span>Training days</span><strong>{{ loading() ? '—' : summary().activeDays }}</strong
-              ><small>{{ summary().elapsedDays }} days so far</small>
+          <section class="month-overview" aria-labelledby="month-overview-title">
+            <div class="section-caption">
+              <h2 id="month-overview-title">The month at a glance</h2>
+              <span>{{ monthLabel() }}</span>
             </div>
-            <div class="stat-card">
-              <span>Sessions</span><strong>{{ loading() ? '—' : summary().totalSessions }}</strong
-              ><small>Completed this month</small>
-            </div>
-            <div class="stat-card">
-              <span>Consistency</span
-              ><strong>{{ loading() ? '—' : summary().consistency }}<small>%</small></strong
-              ><small>Active / elapsed days</small>
-            </div>
-          </div>
-        </section>
-        <app-activity-calendar [(period)]="period" />
-        <section class="achievements-card" aria-labelledby="achievements-title">
-          <h2 id="achievements-title">Achievements</h2>
-          <div class="milestones">
-            @for (milestone of summary().milestones; track milestone.label) {
-              <div class="milestone" [class.earned]="!loading() && milestone.earned">
-                <span class="milestone-mark" aria-hidden="true">{{ milestone.mark }}</span>
-                <div>
-                  <strong>{{ milestone.label }}</strong
-                  ><span>{{ milestone.detail }}</span>
-                </div>
-                <span
-                  class="earned-check"
-                  [attr.aria-label]="!loading() && milestone.earned ? 'Earned' : 'Not yet earned'"
-                  >{{ !loading() && milestone.earned ? '✓' : '○' }}</span
-                >
+            <div class="progress-stats" [attr.aria-busy]="loading()">
+              <div class="stat-card">
+                <span>Training days</span
+                ><strong>{{ loading() ? '—' : summary().activeDays }}</strong
+                ><small>{{ summary().elapsedDays }} days so far</small>
               </div>
-            }
-          </div>
-        </section>
+              <div class="stat-card">
+                <span>Sessions</span><strong>{{ loading() ? '—' : summary().totalSessions }}</strong
+                ><small>Completed this month</small>
+              </div>
+              <div class="stat-card">
+                <span>Consistency</span
+                ><strong>{{ loading() ? '—' : summary().consistency }}<small>%</small></strong
+                ><small>Active / elapsed days</small>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </nz-content>
   </nz-layout>
 </nz-layout>
+
+<button
+  #achievementsLauncher
+  type="button"
+  class="achievements-fab"
+  aria-label="Achievements"
+  aria-haspopup="dialog"
+  aria-controls="achievements-screen"
+  [attr.aria-expanded]="achievementsOpen()"
+  (click)="openAchievements()"
+>
+  <span nz-icon nzType="trophy" aria-hidden="true"></span
+  ><span class="achievements-tooltip" aria-hidden="true">Achievements</span>
+</button>
+<dialog
+  #achievementsDialog
+  id="achievements-screen"
+  class="achievements-dialog"
+  aria-modal="true"
+  aria-labelledby="achievements-title"
+  (cancel)="cancelAchievements($event)"
+  (keydown)="trapAchievementsFocus($event)"
+  (close)="achievementsOpen.set(false)"
+>
+  <div #achievementsBody class="achievements-screen">
+    <header class="achievements-header">
+      <span nz-icon nzType="trophy" aria-hidden="true"></span>
+      <h2 id="achievements-title">Achievements</h2>
+      <button
+        type="button"
+        class="achievements-close"
+        aria-label="Close achievements"
+        autofocus
+        (click)="closeAchievements()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
+      </button>
+    </header>
+    <div class="achievements-scroll">
+      @if (error()) {
+        <div class="progress-error" role="alert">
+          {{ error() }} <button type="button" (click)="load()">Try again</button>
+        </div>
+      }
+      <section
+        class="achievements-summary"
+        aria-label="Achievements earned"
+        [attr.aria-busy]="loading()"
+      >
+        <div class="achievements-emblem">
+          <span nz-icon nzType="trophy" aria-hidden="true"></span>
+        </div>
+        <h3>Your milestones</h3>
+        <p>
+          <strong>{{ loading() || error() ? '—' : earnedAchievements() }}</strong> /
+          {{ summary().milestones.length }} unlocked
+        </p>
+        <div
+          class="achievements-meter"
+          role="progressbar"
+          aria-label="Unlocked achievements"
+          aria-valuemin="0"
+          [attr.aria-valuemax]="summary().milestones.length"
+          [attr.aria-valuenow]="loading() || error() ? null : earnedAchievements()"
+        >
+          <span
+            [style.width.%]="
+              loading() || error() ? 0 : (earnedAchievements() / summary().milestones.length) * 100
+            "
+          ></span>
+        </div>
+      </section>
+      <div class="milestones" [attr.aria-busy]="loading()">
+        @for (milestone of summary().milestones; track milestone.label) {
+          <article class="milestone" [class.earned]="!loading() && !error() && milestone.earned">
+            <span class="milestone-mark" aria-hidden="true">{{ milestone.mark }}</span>
+            <div>
+              <h3>{{ milestone.label }}</h3>
+              <p>{{ milestone.detail }}</p>
+            </div>
+            <span class="earned-check">{{
+              loading() || error() ? '—' : milestone.earned ? 'Unlocked' : 'Locked'
+            }}</span>
+          </article>
+        }
+      </div>
+    </div>
+  </div>
+</dialog>

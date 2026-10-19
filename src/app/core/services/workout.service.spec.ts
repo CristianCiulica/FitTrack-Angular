@@ -4,6 +4,7 @@ import { vi } from 'vitest';
 import { of, Subject, throwError } from 'rxjs';
 import { ApiService } from './api.service';
 import { WorkoutService } from './workout.service';
+import { personalWorkoutPlans } from '../utils/workout-kind';
 
 describe('Workout persistence', () => {
   const record = {
@@ -49,6 +50,62 @@ describe('Workout persistence', () => {
     service.deleteWorkout(record.id).subscribe();
     expect(service.workouts()).toEqual([]);
     expect(JSON.parse(localStorage.getItem('fittrack_cache_workouts:test')!)).toEqual([]);
+  });
+  it('removes a custom template without bringing an older logged copy back into the library', () => {
+    const routine = { ...record, id: 'routine', kind: 'routine' as const };
+    const legacy = { ...record, id: 'legacy', date: '2026-09-30' };
+    const session = { ...record, id: 'completed', kind: 'session' as const };
+    let server = [routine, legacy, session];
+    api.get.mockImplementation(() => of({ workouts: server }));
+    api.put.mockImplementation((url: string, patch: any) => {
+      const id = url.split('/').at(-1);
+      server = server.map(w => w.id === id ? { ...w, ...patch } : w);
+      return of({ workout: server.find(w => w.id === id) });
+    });
+    api.delete.mockImplementation((url: string) => {
+      server = server.filter(w => w.id !== url.split('/').at(-1));
+      return of({ deleted: true });
+    });
+    service.getWorkouts(true).subscribe();
+    service.deleteRoutine(routine.id).subscribe();
+    service.getWorkouts(true).subscribe();
+    expect(personalWorkoutPlans(service.workouts())).toEqual([]);
+    expect(service.workouts().map(w => w.id).sort()).toEqual(['completed', 'legacy']);
+    expect(service.workouts().find(w => w.id === 'legacy')?.exercises).toEqual(legacy.exercises);
+  });
+  it('removes all legacy copies from the library while preserving their logged activity', () => {
+    const old = { ...record, id: 'older', date: '2026-09-01' };
+    api.get.mockReturnValue(of({ workouts: [record, old] }));
+    service.getWorkouts(true).subscribe();
+    api.put.mockImplementation((url: string, patch: any) => of({ workout: { ...(url.endsWith('older') ? old : record), ...patch } }));
+    service.deleteRoutine(record.id).subscribe();
+    expect(personalWorkoutPlans(service.workouts())).toEqual([]);
+    expect(service.workouts()).toHaveLength(2);
+    expect(service.workouts().every(w => w.kind === 'session')).toBe(true);
+    expect(api.delete).not.toHaveBeenCalled();
+  });
+  it('keeps the template available when preserving an older session fails', () => {
+    const routine = { ...record, id: 'routine', kind: 'routine' as const };
+    api.get.mockReturnValue(of({ workouts: [routine, record] }));
+    service.getWorkouts(true).subscribe();
+    api.put.mockReturnValue(throwError(() => new Error('Offline')));
+    const failure = vi.fn();
+    service.deleteRoutine(routine.id).subscribe({ error: failure });
+    expect(failure).toHaveBeenCalledOnce();
+    expect(api.delete).not.toHaveBeenCalled();
+    expect(personalWorkoutPlans(service.workouts())).toEqual([routine]);
+  });
+  it('keeps the selected legacy template retryable if another old copy cannot be updated', () => {
+    const old = { ...record, id: 'older', date: '2026-09-01' };
+    api.get.mockReturnValue(of({ workouts: [record, old] }));
+    service.getWorkouts(true).subscribe();
+    api.put.mockReturnValue(throwError(() => new Error('Offline')));
+    service.deleteRoutine(record.id).subscribe({ error: () => {} });
+    expect(service.workouts().find(w => w.id === record.id)?.kind).toBeUndefined();
+    api.put.mockImplementation((url: string, patch: any) => of({ workout: { ...(url.endsWith('older') ? old : record), ...patch } }));
+    service.deleteRoutine(record.id).subscribe();
+    expect(personalWorkoutPlans(service.workouts())).toEqual([]);
+    expect(service.workouts()).toHaveLength(2);
   });
   it('does not erase the saved version when an edit fails', () => {
     api.put.mockReturnValue(throwError(() => new Error('Offline')));

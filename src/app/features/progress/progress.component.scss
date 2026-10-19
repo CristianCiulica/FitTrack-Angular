@@ -4,10 +4,6 @@
   color: var(--ink);
 }
 .progress-intro {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 30px;
   margin: 0 0 26px;
 }
 h1 {
@@ -19,8 +15,7 @@ h1 {
   line-height: 1.1;
 }
 .weekly-focus,
-.month-overview,
-.achievements-card {
+.month-overview {
   border: 1px solid var(--hairline);
   background: var(--surface-strong);
   border-radius: 24px;
@@ -32,6 +27,7 @@ h1 {
   align-items: center;
   gap: 20px;
   padding: 22px 26px;
+  margin-bottom: 22px;
 }
 .focus-eyebrow {
   display: block;
@@ -137,67 +133,6 @@ h1 {
   font-size: 14px;
   margin-left: 2px;
 }
-.achievements-card {
-  margin-top: 22px;
-  padding: 26px;
-}
-.achievements-card > h2 {
-  font-size: 23px;
-  letter-spacing: -0.035em;
-  margin: 0 0 22px;
-  color: var(--ink);
-}
-.milestones {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 28px;
-}
-.milestone {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 17px 0;
-  border-top: 1px solid var(--hairline);
-  min-width: 0;
-}
-.milestone-mark {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
-  font-size: 13px;
-  color: var(--ink-tertiary);
-}
-.milestone.earned .milestone-mark {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 9%, transparent);
-  border-color: color-mix(in srgb, var(--accent) 20%, transparent);
-}
-.milestone > div {
-  flex: 1;
-  min-width: 0;
-}
-.milestone strong {
-  display: block;
-  font-size: 12px;
-  font-weight: 550;
-}
-.milestone > div > span {
-  display: block;
-  font-size: 10px;
-  color: var(--ink-tertiary);
-  margin-top: 4px;
-}
-.earned-check {
-  color: var(--ink-tertiary);
-  font-size: 13px;
-}
-.earned .earned-check {
-  color: var(--accent);
-}
 .progress-error {
   padding: 14px;
   color: var(--red);
@@ -215,8 +150,6 @@ h1 {
 }
 @media (max-width: 600px) {
   .progress-intro {
-    grid-template-columns: 1fr;
-    gap: 24px;
     margin-bottom: 18px;
   }
   h1 {
@@ -258,16 +191,317 @@ h1 {
     font-size: 8px;
     line-height: 1.5;
   }
-  .achievements-card {
-    padding: 22px 20px;
+}
+
+.progress-information {
+  margin-top: 24px;
+}
+.achievements-fab {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  z-index: 850;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: white;
+  background: #007aff;
+  box-shadow:
+    0 6px 20px #00000024,
+    0 2px 5px #00000012;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 180ms ease;
+  > [nz-icon] {
+    font-size: 25px;
+  }
+  &:active {
+    transform: scale(0.94);
+  }
+  &:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
+  }
+}
+:host-context(html[data-theme='dark']) .achievements-fab {
+  background: #0a84ff;
+}
+.achievements-tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  padding: 9px 13px;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(6px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+.achievements-fab:focus-visible .achievements-tooltip {
+  opacity: 1;
+  transform: none;
+}
+@media (hover: hover) {
+  .achievements-fab:hover {
+    transform: translateY(-2px);
+    .achievements-tooltip {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+.achievements-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: none;
+  &::backdrop {
+    background: transparent;
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  h2,
+  h3,
+  p {
+    margin: 0;
+    color: inherit;
+  }
+  button {
+    font: inherit;
+    cursor: pointer;
+  }
+  button:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 4px;
+  }
+}
+.achievements-screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.achievements-header {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  flex-shrink: 0;
+  padding: max(22px, env(safe-area-inset-top)) max(28px, calc((100vw - 1080px) / 2)) 22px;
+  border-bottom: 1px solid var(--hairline);
+  background: var(--surface-strong);
+  > [nz-icon] {
+    font-size: 25px;
+  }
+  h2 {
+    font-size: 23px;
+    font-weight: 650;
+    letter-spacing: -0.035em;
+  }
+}
+.achievements-close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  margin-left: auto;
+  padding: 10px;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-secondary);
+  svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+  }
+}
+.achievements-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 40px max(28px, calc((100vw - 1080px) / 2)) max(40px, env(safe-area-inset-bottom));
+}
+.achievements-summary {
+  text-align: center;
+  margin: 4px auto 36px;
+  h3 {
+    margin-top: 20px;
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 650;
+    letter-spacing: -0.05em;
+  }
+  p {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--ink-tertiary);
+  }
+  strong {
+    color: var(--ink);
+    font-weight: 650;
+  }
+}
+.achievements-emblem {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  margin: auto;
+  border: 1px solid var(--hairline);
+  border-radius: 28px;
+  background: var(--surface-strong);
+  color: var(--accent);
+  font-size: 40px;
+}
+.achievements-meter {
+  max-width: 220px;
+  height: 4px;
+  overflow: hidden;
+  margin: 18px auto 0;
+  border-radius: 4px;
+  background: var(--hairline);
+  span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: inherit;
+  }
+}
+.milestones {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.milestone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  min-width: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 20px;
+  background: var(--surface-strong);
+  > div {
+    flex: 1;
+    min-width: 0;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+  p {
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--ink-secondary);
+  }
+}
+.milestone-mark {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--hairline);
+  border-radius: 15px;
+  color: var(--ink-tertiary);
+  font-size: 17px;
+  font-weight: 600;
+}
+.earned .milestone-mark {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.earned-check {
+  color: var(--ink-tertiary);
+  font-size: 10px;
+}
+.earned .earned-check {
+  color: var(--accent);
+}
+@media (max-width: 900px) {
+  .achievements-fab {
+    right: max(20px, env(safe-area-inset-right));
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
+@media (max-width: 600px) {
+  .progress-information {
     margin-top: 18px;
-    border-radius: 22px;
+  }
+  .achievements-header {
+    padding: max(17px, env(safe-area-inset-top)) 20px 17px;
+    gap: 11px;
+    h2 {
+      font-size: 20px;
+    }
+  }
+  .achievements-close {
+    width: 40px;
+    height: 40px;
+  }
+  .achievements-scroll {
+    padding: 28px 20px max(28px, env(safe-area-inset-bottom));
   }
   .milestones {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
-  .achievements-card > h2 {
-    font-size: 22px;
-    margin-bottom: 17px;
+  .milestone {
+    padding: 20px 17px;
+    gap: 12px;
+    h3 {
+      font-size: 16px;
+    }
+    p {
+      font-size: 11px;
+    }
+  }
+  .milestone-mark {
+    width: 44px;
+    height: 44px;
+    font-size: 15px;
+  }
+  .earned-check {
+    width: 100%;
+    padding-left: 56px;
+    margin-top: -6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .achievements-fab,
+  .achievements-tooltip {
+    transition: none;
   }
 }

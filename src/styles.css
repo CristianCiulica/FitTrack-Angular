@@ -1325,3 +1325,5 @@ html.workout-route-motion::view-transition-new(root) {
   from { opacity: 1; }
   to { opacity: 1; }
 }
+
+body:has(.achievements-dialog[open]) { overflow: hidden; }

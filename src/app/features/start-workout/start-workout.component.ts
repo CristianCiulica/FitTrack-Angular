@@ -3,7 +3,7 @@ import { WorkoutRoutine as Routine, orderRoutineExercises, isTreadmillExercise }
 import { timedSessionNotes, estimateTreadmillCalories, TreadmillLog } from '../../core/utils/timed-cardio';
 import { programSessionNotes } from '../../core/utils/program-records';
 import { trainingRoutineDetails } from '../training-planner/training-plan-storage';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { isWorkoutSession, personalWorkoutPlans } from '../../core/utils/workout-kind';
 import { readWorkoutDraft, writeWorkoutDraft, clearWorkoutDraft } from '../../core/utils/workout-draft';
 import { displayWeight, toCanonicalWeight, weightUnitLabel } from '../../core/utils/units';
@@ -1045,8 +1045,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   confirmDeleteWorkout(id?: string): void {
     if (!id) return;
     this.modalService.confirm({
-      nzTitle: 'Delete workout?',
-      nzContent: 'This workout will be removed from your library and history.',
+      nzTitle: 'Remove this session?',
+      nzContent: 'The template will be removed from your library. Completed workouts stay in History.',
       nzOkText: 'Delete', nzCancelText: 'Keep workout', nzOkDanger: true,
       nzCentered: true, nzWidth: 'min(400px, calc(100vw - 32px))',
       nzClassName: 'solid-modal workout-confirm',
@@ -1065,25 +1065,25 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteWorkout(id: string | undefined) {
-    if (!id || this.deletingIds().has(id)) return;
+  async deleteWorkout(id: string | undefined): Promise<boolean> {
+    if (!id || this.deletingIds().has(id)) return false;
     this.deletingIds.update(ids => new Set(ids).add(id));
-    this.workoutService.deleteWorkout(id).subscribe({
-      next: () => {
-        this.deletingIds.update(ids => { const next = new Set(ids); next.delete(id); return next; });
-        this.personalRoutines.update(routines => routines.filter(routine => routine.id !== id));
-        this.message.success('Workout deleted.');
-        // Re-select first predefined routine if we deleted the selected one
-        if (this.selectedRoutineKey() === 'personal-' + id) {
-          this.selectRoutine(this.routines[0], 'predefined-0');
-        }
-        this.loadPersonalRoutines();
-      },
-      error: () => {
-        this.deletingIds.update(ids => { const next = new Set(ids); next.delete(id); return next; });
-        this.message.error('Could not delete this workout. Please try again.');
+    try {
+      await firstValueFrom(this.workoutService.deleteRoutine(id));
+      if (this.componentDestroyed) return true;
+      this.personalRoutines.update(routines => routines.filter(routine => routine.id !== id));
+      this.message.success('Session removed from your library.');
+      if (this.selectedRoutineKey() === 'personal-' + id) {
+        this.selectRoutine(this.routines[0], 'predefined-0');
       }
-    });
+      this.loadPersonalRoutines();
+      return true;
+    } catch {
+      if (!this.componentDestroyed) this.message.error('Could not remove this session. Please try again.');
+      return false;
+    } finally {
+      this.deletingIds.update(ids => { const next = new Set(ids); next.delete(id); return next; });
+    }
   }
 
   onModalCancel() {
