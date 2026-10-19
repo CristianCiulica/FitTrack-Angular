@@ -60,6 +60,21 @@ describe('Workout library navigation', () => {
     expect(component.visibleCustom().length).toBe(1);
     expect(component.minePage()).toBe(0);
   });
+  it('collapses the exercise preview without truncating the session and resets it for another day', () => {
+    const component = TestBed.createComponent(WorkoutLibraryComponent).componentInstance;
+    component.selectedProgram.set(component.programs()[0]);
+    const allExercises = component.currentRoutine()!.exercises;
+    expect(allExercises.length).toBeGreaterThan(3);
+    expect(component.visibleExercises()).toEqual(allExercises.slice(0, 3));
+    component.expandedExercises.set(true);
+    expect(component.visibleExercises()).toEqual(allExercises);
+    component.selectDay(1);
+    expect(component.expandedExercises()).toBe(false);
+    expect(component.visibleExercises().length).toBe(3);
+    expect(component.currentRoutine()!.exercises.length).toBeGreaterThan(3);
+    component.selectDay(6);
+    expect(component.visibleExercises()).toEqual([]);
+  });
   it('filters programs by goal and keeps custom sessions out of the discovery grid', () => {
     const fixture = TestBed.createComponent(WorkoutLibraryComponent),
       component = fixture.componentInstance;

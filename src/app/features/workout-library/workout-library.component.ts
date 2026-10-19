@@ -75,6 +75,7 @@ export class WorkoutLibraryComponent {
   readonly selectedSavedId = signal<string | null>(null);
   readonly selectedEnrollment = signal<ProgramEnrollment | null>(null);
   readonly selectedDay = signal(0);
+  readonly expandedExercises = signal(false);
   readonly saving = signal(false);
   readonly error = signal('');
   readonly status = signal('');
@@ -171,6 +172,10 @@ export class WorkoutLibraryComponent {
   readonly currentRoutine = computed(
     () => this.currentDay()?.day.routine ?? this.selectedRoutine(),
   );
+  readonly visibleExercises = computed(() => {
+    const exercises = this.currentRoutine()?.exercises ?? [];
+    return this.expandedExercises() ? exercises : exercises.slice(0, 3);
+  });
   readonly completed = computed(
     () => this.calendar().filter((d) => d.day.type !== 'rest' && d.done).length,
   );
@@ -223,6 +228,7 @@ export class WorkoutLibraryComponent {
     this.savedPage.set(0);
   }
   showProgram(program: WorkoutProgram, enrollment?: ProgramEnrollment) {
+    this.expandedExercises.set(false);
     this.today.set(localDateKey());
     this.stopRequested.set(false);
     this.selectedProgram.set(program);
@@ -247,6 +253,7 @@ export class WorkoutLibraryComponent {
     this.showDialog();
   }
   viewRoutine(routine: WorkoutRoutine) {
+    this.expandedExercises.set(false);
     this.selectedProgram.set(null);
     this.selectedSavedId.set(null);
     this.selectedRoutine.set({ ...routine, exercises: orderRoutineExercises(routine.exercises) });
@@ -263,6 +270,7 @@ export class WorkoutLibraryComponent {
     this.showDialog();
   }
   chooseSavedDay(index: number) {
+    this.expandedExercises.set(false);
     const id = this.selectedSavedId();
     const routine = this.personalRoutines().find((r) => r.clientId === `${id}.${index}`);
     this.selectedRoutine.set(
@@ -303,6 +311,7 @@ export class WorkoutLibraryComponent {
     this.today.set(localDateKey());
   }
   selectDay(index: number) {
+    this.expandedExercises.set(false);
     this.selectedDay.set(index);
     this.error.set('');
   }
@@ -352,6 +361,7 @@ export class WorkoutLibraryComponent {
   }
   newBlock() {
     if (this.saving()) return;
+    this.expandedExercises.set(false);
     this.selectedEnrollment.set(null);
     this.updateStartDate(localDateKey());
     this.selectedDay.set(0);

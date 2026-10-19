@@ -336,7 +336,7 @@
     <header>
       <span class="library-eyebrow">{{
         selectedProgram()
-          ? 'YOUR 30-DAY BLOCK'
+          ? '30-DAY BLOCK'
           : selectedSavedPlan()
             ? 'YOUR PERSONALISED PLAN'
             : 'SESSION PREVIEW'
@@ -349,30 +349,51 @@
         autofocus
         (click)="close()"
       >
-        ×
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" /></svg>
       </button>
     </header>
     <div #detailBody class="program-detail-scroll">
       @if (selectedProgram(); as program) {
-        <section class="program-detail-intro">
-          <span class="library-eyebrow">{{ program.eyebrow }}</span>
-          <h2 id="program-detail-title">{{ program.title }}<span>.</span></h2>
-          <div class="program-detail-facts">
-            <span><strong>30</strong> days</span
-            ><span
-              ><strong>{{ program.gymDays }}</strong> lifting days / week</span
-            ><span
-              ><strong>{{ program.minutes }}</strong> min</span
-            >
-          </div>
-          <div class="program-equipment">
-            <span>Equipment</span><strong>{{ program.equipment }}</strong>
-          </div>
-        </section>
         <div class="program-detail-columns">
           <section class="program-calendar-column">
+            <section class="program-detail-intro" aria-labelledby="program-detail-title">
+              <div class="program-detail-top">
+                <span class="program-category">{{ program.eyebrow }}</span>
+                <h2 id="program-detail-title">{{ program.title }}</h2>
+              </div>
+              <div class="program-detail-facts">
+                <span><strong>30</strong><small>days</small></span>
+                <span
+                  ><strong>{{ program.gymDays }}</strong
+                  ><small>days / week</small></span
+                >
+                <span
+                  ><strong>{{ program.minutes }}</strong
+                  ><small>minutes</small></span
+                >
+              </div>
+              <div class="program-detail-band">
+                <div class="detail-difficulty">
+                  <span>Difficulty</span><strong>{{ program.level }}</strong
+                  ><span class="difficulty-track" aria-hidden="true"
+                    ><span
+                      [style.width.%]="
+                        program.level === 'Advanced'
+                          ? 100
+                          : program.level === 'Intermediate'
+                            ? 66
+                            : 33
+                      "
+                    ></span
+                  ></span>
+                </div>
+                <div class="detail-equipment">
+                  <span>Equipment</span><strong>{{ program.equipment }}</strong>
+                </div>
+              </div>
+            </section>
             <div class="detail-section-heading">
-              <h3>30-day schedule</h3>
+              <h3>Your month</h3>
               <span>{{ completed() }} / {{ totalSessions() }} sessions</span>
             </div>
             <div class="month-map" role="group" aria-label="30-day plan calendar">
@@ -393,7 +414,7 @@
                   "
                   (click)="selectDay(entry.index)"
                 >
-                  <strong>{{ entry.done ? '✓' : entry.index + 1 }}</strong
+                  <strong>{{ entry.index + 1 }}</strong
                   ><small>{{
                     entry.day.type === 'strength'
                       ? 'Lift'
@@ -401,12 +422,11 @@
                         ? 'Cardio'
                         : 'Rest'
                   }}</small>
+                  @if (entry.done) {
+                    <span class="day-check" aria-hidden="true">✓</span>
+                  }
                 </button>
               }
-            </div>
-            <div class="month-map-legend">
-              <span><i></i>Strength</span><span><i class="cardio"></i>Cardio</span
-              ><span><i class="rest"></i>Recovery</span>
             </div>
             @if (selectedEnrollment()) {
               <button
@@ -444,11 +464,10 @@
               <h3>{{ entry.day.title }}</h3>
               @if (entry.day.routine; as routine) {
                 <p class="session-prescription-note">
-                  {{ routine.exercises.length }} exercises · {{ totalSets(routine) }} working sets ·
-                  Compounds first
+                  {{ routine.exercises.length }} exercises · {{ totalSets(routine) }} sets
                 </p>
                 <div class="program-exercises">
-                  @for (exercise of routine.exercises; track $index) {
+                  @for (exercise of visibleExercises(); track $index) {
                     <article>
                       <div>
                         <span class="exercise-order">{{
@@ -459,10 +478,7 @@
                           <p>
                             {{ exercise.sets }} × {{ exercise.repRange || exercise.reps
                             }}{{ exercise.repUnit === 'seconds' ? ' sec' : ' reps' }}
-                            <span
-                              >· {{ exercise.restSeconds || 90 }} sec rest ·
-                              {{ entry.index < 7 ? 3 : 2 }} reps in reserve</span
-                            >
+                            <span>· {{ exercise.restSeconds || 90 }} s rest</span>
                           </p>
                         </div>
                       </div>
@@ -470,9 +486,31 @@
                         <details>
                           <summary>Technique <span>+</span></summary>
                           <p>{{ exercise.cue }}</p>
+                          <p>Keep about {{ entry.index < 7 ? 3 : 2 }} good reps in reserve.</p>
                         </details>
                       }
                     </article>
+                  }
+                  @if (routine.exercises.length > 3) {
+                    <button
+                      type="button"
+                      class="more-exercises"
+                      [attr.aria-expanded]="expandedExercises()"
+                      (click)="expandedExercises.set(!expandedExercises())"
+                    >
+                      <span>{{
+                        expandedExercises()
+                          ? 'Show fewer exercises'
+                          : routine.exercises.length - 3 + ' more exercises'
+                      }}</span
+                      ><svg
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                        [class.expanded]="expandedExercises()"
+                      >
+                        <path d="m8 5 5 5-5 5" />
+                      </svg>
+                    </button>
                   }
                 </div>
               } @else if (entry.day.cardio; as cardio) {
@@ -521,7 +559,7 @@
               min
             </p>
             <div class="program-exercises">
-              @for (exercise of routine.exercises; track $index) {
+              @for (exercise of visibleExercises(); track $index) {
                 <article>
                   <div>
                     <span class="exercise-order">{{
@@ -532,6 +570,7 @@
                       <p>
                         {{ exercise.sets }} × {{ exercise.repRange || exercise.reps
                         }}{{ exercise.repUnit === 'seconds' ? ' sec' : ' reps' }}
+                        <span>· {{ exercise.restSeconds || 90 }} s rest</span>
                       </p>
                     </div>
                   </div>
@@ -542,6 +581,27 @@
                     </details>
                   }
                 </article>
+              }
+              @if (routine.exercises.length > 3) {
+                <button
+                  type="button"
+                  class="more-exercises"
+                  [attr.aria-expanded]="expandedExercises()"
+                  (click)="expandedExercises.set(!expandedExercises())"
+                >
+                  <span>{{
+                    expandedExercises()
+                      ? 'Show fewer exercises'
+                      : routine.exercises.length - 3 + ' more exercises'
+                  }}</span
+                  ><svg
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                    [class.expanded]="expandedExercises()"
+                  >
+                    <path d="m8 5 5 5-5 5" />
+                  </svg>
+                </button>
               }
             </div>
           </section>
@@ -600,7 +660,7 @@
                 [disabled]="saving()"
                 (click)="enroll()"
               >
-                {{ saving() ? 'Saving…' : 'Start this 30-day plan' }}
+                {{ saving() ? 'Saving…' : 'Start this plan' }}
                 <span aria-hidden="true">→</span>
               </button>
             } @else if (selectedEnrollment()?.stoppedAt) {
