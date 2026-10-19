@@ -97,6 +97,15 @@
           <div>
             <h1>{{ displayName() || 'Your profile' }}</h1>
             <p>{{ email() }}</p>
+            @if (achievements.featured().length) {
+              <div class="featured-badges" aria-label="Featured achievements">
+                @for (badge of achievements.featured(); track badge.id) {
+                  <span [attr.aria-label]="badge.label" [title]="badge.label" role="img">
+                    <app-achievement-badge [badge]="badge.id" />
+                  </span>
+                }
+              </div>
+            }
             @if (avatar()) {
               <button
                 type="button"
@@ -109,6 +118,76 @@
             }
           </div>
         </header>
+        <details class="profile-badges" aria-labelledby="profile-badges-title">
+          <summary class="badge-heading">
+            <h2 id="profile-badges-title">Your badges</h2>
+            <span
+              >{{ achievements.featured().length }} / 3
+              <span class="badge-manage">Manage <span nz-icon nzType="down"></span></span
+            ></span>
+          </summary>
+          <p class="badge-description">Choose earned badges to display on your profile.</p>
+          @if (achievements.loading()) {
+            <p class="badge-message" role="status">Loading your achievements…</p>
+          } @else if (achievements.ready()) {
+            <div class="badge-picker">
+              @for (badge of achievements.badges(); track badge.id) {
+                <button
+                  type="button"
+                  class="badge-choice"
+                  [class.selected]="achievements.isFeatured(badge.id)"
+                  [attr.aria-pressed]="achievements.isFeatured(badge.id)"
+                  [attr.aria-label]="
+                    badge.label + ': ' + badge.detail + (badge.earned ? '' : '. Locked')
+                  "
+                  [disabled]="
+                    !badge.earned ||
+                    !loaded() ||
+                    achievements.saving() ||
+                    saving() ||
+                    uploading() ||
+                    (!achievements.isFeatured(badge.id) && achievements.featured().length >= 3)
+                  "
+                  (click)="achievements.toggle(badge.id)"
+                >
+                  <app-achievement-badge [badge]="badge.id" [earned]="badge.earned" />
+                  <strong>{{ badge.label }}</strong>
+                  <small>{{ badge.detail }}</small>
+                  <span class="badge-selection">
+                    <span
+                      nz-icon
+                      [nzType]="
+                        badge.earned
+                          ? achievements.isFeatured(badge.id)
+                            ? 'check'
+                            : 'plus'
+                          : 'lock'
+                      "
+                    ></span>
+                    {{
+                      badge.earned
+                        ? achievements.isFeatured(badge.id)
+                          ? 'On profile'
+                          : 'Show on profile'
+                        : 'Locked'
+                    }}
+                  </span>
+                </button>
+              }
+            </div>
+          }
+          @if (achievements.error()) {
+            <p class="badge-message badge-error" role="alert">
+              {{ achievements.error() }}
+              @if (!achievements.ready()) {
+                <button type="button" (click)="loadBadges()">Try again</button>
+              }
+            </p>
+          }
+          <span class="sr-only" aria-live="polite">{{
+            achievements.saving() ? 'Saving badges…' : ''
+          }}</span>
+        </details>
         <section class="weight-journey" aria-labelledby="weight-journey-title">
           <div class="journey-heading">
             <h2 id="weight-journey-title">Weight progress</h2>

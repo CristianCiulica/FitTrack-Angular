@@ -1,3 +1,4 @@
+import { AchievementId } from './achievement.model';
 export type Sex = 'male' | 'female' | '';
 export type Units = 'metric' | 'imperial';
 export type ThemePreference = 'light' | 'dark' | 'system';
@@ -23,6 +24,7 @@ export interface UserProfile {
   strengthTrainingDays?: number;
   moveGoal?: number;
   exerciseGoal?: number;
+  featuredBadgeIds?: AchievementId[];
   migratedFromLocalStorage?: boolean;
 }
 
@@ -44,5 +46,6 @@ export type ProfileUpdate = Partial<
     | 'strengthTrainingDays'
     | 'moveGoal'
     | 'exerciseGoal'
+    | 'featuredBadgeIds'
   >
 >;

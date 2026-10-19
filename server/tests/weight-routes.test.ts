@@ -44,3 +44,20 @@ test('one entry per day, latest weight wins, and users remain isolated',async()=
 test('rejects impossible dates, future dates, and invalid weights',async()=>{
   for(const [date,weight] of [['2026-02-30',75],['2999-01-01',75],['2026-01-01',0],['2026-01-01',501]] as [string,number][]) assert.equal((await put(date,weight)).status,400);
 });
+test('profile badges persist per account and reject duplicate, unknown or excessive selections', async () => {
+  const profileUrl = base.replace('/weight-entries', '');
+  const save = (ids: string[], user = 'alice') => fetch(profileUrl, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json', 'x-test-user': user },
+    body: JSON.stringify({ featuredBadgeIds: ids }),
+  });
+  const ids = ['first-session', 'ten-sessions', 'seven-day-streak'];
+  assert.equal((await save(ids)).status, 200);
+  assert.equal((await save(['twenty-five-days'], 'bob')).status, 200);
+  assert.deepEqual((await (await fetch(profileUrl)).json() as any).profile.featuredBadgeIds, ids);
+  assert.deepEqual((await (await fetch(profileUrl, { headers: { 'x-test-user': 'bob' } })).json() as any).profile.featuredBadgeIds, ['twenty-five-days']);
+  for (const invalid of [['first-session', 'first-session'], ['unknown'], [...ids, 'twenty-five-days']])
+    assert.equal((await save(invalid)).status, 400);
+  assert.deepEqual((await (await fetch(profileUrl)).json() as any).profile.featuredBadgeIds, ids);
+  assert.equal((await save([])).status, 200);
+  assert.deepEqual((await (await fetch(profileUrl)).json() as any).profile.featuredBadgeIds, []);
+});

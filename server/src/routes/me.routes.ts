@@ -11,6 +11,11 @@ import { weightDateSchema, weightBodySchema } from '../validation/weight-entry';
 const router = Router();
 
 const updateProfileSchema = z.object({
+  featuredBadgeIds: z
+    .array(z.enum(['first-session', 'ten-sessions', 'twenty-five-days', 'seven-day-streak']))
+    .max(3)
+    .refine((ids) => new Set(ids).size === ids.length, 'Badge IDs must be unique')
+    .optional(),
   displayName: z.string().trim().max(80).optional(),
   avatar: z
     .string()

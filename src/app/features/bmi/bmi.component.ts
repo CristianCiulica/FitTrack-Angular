@@ -8,7 +8,6 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
-import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
@@ -35,7 +34,6 @@ import {
     NzIconModule,
     NzCardModule,
     NzInputNumberModule,
-    NzTagModule,
     AppMenuComponent,
   ],
   templateUrl: './bmi.component.html',
@@ -104,9 +102,9 @@ export class BmiComponent implements OnDestroy {
 
   bmiCategory = computed(() => {
     const value = parseFloat(this.bmi());
-    if (value < 18.5) return { text: 'Underweight', color: 'blue' };
+    if (value < 18.5) return { text: 'Underweight', color: 'gold' };
     if (value < 25) return { text: 'Healthy weight', color: 'green' };
-    if (value < 30) return { text: 'Overweight', color: 'red' };
+    if (value < 30) return { text: 'Overweight', color: 'gold' };
     return { text: 'Obesity', color: 'red' };
   });
 

@@ -267,9 +267,33 @@
 }
 
 .result-grid .metric .bmi-category {
-  margin-inline-end: 0;
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
-  color: var(--ink-secondary);
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  &[data-tone='green'] {
+    color: #248a3d;
+  }
+  &[data-tone='gold'] {
+    color: #946200;
+  }
+  &[data-tone='red'] {
+    color: #c62828;
+  }
+}
+:host-context(html[data-theme='dark']) .result-grid .metric .bmi-category {
+  &[data-tone='green'] {
+    color: #32d74b;
+  }
+  &[data-tone='gold'] {
+    color: #ffd60a;
+  }
+  &[data-tone='red'] {
+    color: #ff6961;
+  }
 }

@@ -26,7 +26,12 @@
 >
   <div #screen class="training-screen">
     <header class="planner-header">
-      <span class="planner-mark" nz-icon nzType="ft:workout" aria-hidden="true"></span>
+      <span
+        class="planner-mark assistant-header-symbol"
+        nz-icon
+        nzType="ft:workout"
+        aria-hidden="true"
+      ></span>
       <div>
         <h2 id="training-planner-title">Training Assistant</h2>
       </div>
@@ -375,9 +380,9 @@
                 type="button"
                 class="quiet-action"
                 [disabled]="saving()"
-                (click)="editPreferences()"
+                (click)="startAgain()"
               >
-                Edit preferences
+                Start again
               </button>
             </div>
             <h1 #heading tabindex="-1">{{ p.split }}<span class="title-dot">.</span></h1>
@@ -544,22 +549,6 @@
               }
             </div>
             <aside class="plan-sidebar">
-              <section class="coach-card">
-                <span class="eyebrow">YOUR PROGRESSION RULE</span>
-                <h3>Reps first.<br />Then resistance.</h3>
-                <ol>
-                  <li>Choose a load that leaves the planned good reps in reserve.</li>
-                  <li>Build reps inside the range while keeping technique and range consistent.</li>
-                  <li>
-                    When every set reaches the top with the planned reserve, try the smallest
-                    available load increase. Return toward the lower end.
-                  </li>
-                </ol>
-                <p>
-                  If you miss the lower end, reduce the load or take more rest. With bodyweight,
-                  adjust assistance or leverage instead.
-                </p>
-              </section>
               <details class="plan-guidance">
                 <summary>Make the plan work for you <span aria-hidden="true">+</span></summary>
                 <p>
@@ -616,16 +605,6 @@
             }}<span aria-hidden="true">{{ step() === 5 ? '↗' : '→' }}</span>
           </button>
         } @else {
-          <div class="footer-status">
-            <span class="status-dot" [class.is-saved]="saved()"></span
-            ><span>{{
-              saving()
-                ? 'Saving your routines…'
-                : saved()
-                  ? 'Ready in My training'
-                  : 'Preview your plan, then make it yours.'
-            }}</span>
-          </div>
           <div class="result-actions">
             <button
               type="button"

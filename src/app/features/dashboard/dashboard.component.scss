@@ -429,7 +429,7 @@
 
   &:active { transform: scale(0.99); }
 
-  /* iconita tintata in tonul grupei musculare, stil iOS Settings */
+  /* Neutral workout symbols in both themes. */
   .recent-icon {
     display: grid;
     place-items: center;
@@ -440,14 +440,8 @@
     border-radius: 13px;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 
-    &[data-tone='blue'] { color: #0066cc; background: rgba(0, 113, 227, 0.13); }
-    &[data-tone='green'] { color: #248a3d; background: rgba(52, 199, 89, 0.15); }
-    &[data-tone='purple'] { color: #8e3bb5; background: rgba(175, 82, 222, 0.15); }
-    &[data-tone='cyan'] { color: #2596a6; background: rgba(48, 176, 199, 0.17); }
-    &[data-tone='indigo'] { color: #4745c9; background: rgba(94, 92, 230, 0.15); }
-    &[data-tone='pink'] { color: #d70041; background: rgba(255, 45, 85, 0.14); }
-    &[data-tone='red'] { color: #d70015; background: rgba(255, 59, 48, 0.13); }
-    &[data-tone='graphite'] { color: #515154; background: rgba(0, 0, 0, 0.07); }
+    color: var(--ink-secondary);
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
   }
 
   .recent-copy {

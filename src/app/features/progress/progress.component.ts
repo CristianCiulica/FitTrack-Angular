@@ -24,6 +24,7 @@ import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
 import { localDateKey } from '../../core/utils/weight-progress';
 import { CircularDialogMotion } from '../../shared/components/circular-dialog-motion';
+import { AchievementBadgeComponent } from '../../shared/components/achievement-badge/achievement-badge.component';
 import { trainingProgress } from '../../core/utils/training-progress';
 
 @Component({
@@ -39,6 +40,7 @@ import { trainingProgress } from '../../core/utils/training-progress';
     AppMenuComponent,
     ActivityCalendarComponent,
     ActivityGoalsComponent,
+    AchievementBadgeComponent,
   ],
   templateUrl: './progress.component.html',
   styleUrl: './progress.component.scss',

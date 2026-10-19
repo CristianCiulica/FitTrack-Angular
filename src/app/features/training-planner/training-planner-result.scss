@@ -25,10 +25,12 @@
   gap: 14px;
 }
 .quiet-action {
-  border: 0;
-  padding: 6px 0;
-  color: var(--accent);
-  background: transparent;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  min-height: 44px;
+  padding: 10px 16px;
+  color: var(--ink);
+  background: var(--planner-card);
   font-size: 12px !important;
   font-weight: 600 !important;
 }
@@ -374,46 +376,12 @@ details[open] > summary > span {
   display: grid;
   gap: 18px;
 }
-.coach-card,
 .plan-guidance,
 .plan-sources {
   padding: 22px;
   border: 1px solid var(--hairline);
   border-radius: 20px;
   background: var(--planner-card);
-}
-.coach-card {
-  h3 {
-    font-size: 29px;
-    line-height: 1.15;
-    font-weight: 700;
-    letter-spacing: -0.045em;
-    margin-top: 15px;
-  }
-  ol {
-    padding-left: 17px;
-    margin: 22px 0 16px;
-    li {
-      padding-left: 3px;
-      font-size: 12px;
-      line-height: 1.85;
-      color: var(--ink-secondary);
-      + li {
-        margin-top: 12px;
-      }
-      &::marker {
-        font-weight: 650;
-        color: var(--accent);
-      }
-    }
-  }
-  > p {
-    border-top: 1px solid var(--hairline);
-    padding-top: 15px;
-    font-size: 11px;
-    color: var(--ink-tertiary);
-    line-height: 1.8;
-  }
 }
 .plan-guidance,
 .plan-sources {

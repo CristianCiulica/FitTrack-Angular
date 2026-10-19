@@ -1327,3 +1327,8 @@ html.workout-route-motion::view-transition-new(root) {
 }
 
 body:has(.achievements-dialog[open]) { overflow: hidden; }
+
+.assistant-header-symbol {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, var(--surface-strong));
+}

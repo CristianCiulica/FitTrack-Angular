@@ -176,7 +176,14 @@ export class TrainingPlannerComponent {
   async open() {
     if (this.opened()) return;
     if (!this.plan()) {
-      const existing = savedTrainingPlans(this.workouts.workouts()).at(0);
+      let restart = false;
+      try {
+        const draft = JSON.parse(localStorage.getItem(this.draftKey) ?? 'null');
+        restart = draft?.version === 1 && draft.restart === true;
+      } catch {
+        /* Optional draft cache. */
+      }
+      const existing = restart ? null : savedTrainingPlans(this.workouts.workouts()).at(0);
       if (existing) {
         this.plan.set(existing.plan);
         this.answers.set(existing.plan.preferences);
@@ -279,10 +286,14 @@ export class TrainingPlannerComponent {
     this.persistDraft();
     this.scrollTop();
   }
-  editPreferences() {
+  startAgain() {
     if (this.saving()) return;
-    this.answers.set({ ...this.plan()!.preferences });
+    this.plan.set(null);
+    this.answers.set({ equipment: [], days: [], minutes: 45, focus: 'balanced' });
     this.step.set(0);
+    this.activeDay.set(0);
+    this.saved.set(false);
+    this.swapIndex.set(null);
     this.error.set('');
     this.saveMessage.set('');
     this.persistDraft();
@@ -422,6 +433,7 @@ export class TrainingPlannerComponent {
         this.draftKey,
         JSON.stringify({
           version: 1,
+          restart: !plan,
           answers: this.answers(),
           step: this.step(),
           records: plan
@@ -458,10 +470,8 @@ export class TrainingPlannerComponent {
       const restored = Array.isArray(draft.records)
         ? savedTrainingPlans(draft.records)[0]?.plan
         : null;
-      if (restored) {
-        this.plan.set(restored);
-        this.saved.set(false);
-      }
+      this.plan.set(restored ?? null);
+      this.saved.set(false);
       this.answers.set(draft.answers);
       this.step.set(draft.step === 6 && !restored ? 0 : draft.step);
     } catch {

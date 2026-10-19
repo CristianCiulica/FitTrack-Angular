@@ -52,7 +52,7 @@ html[data-theme='dark'] body :is(
   .weather-detail span, .run-card-eyebrow, .mode-picker > span, .status-text,
   .live-status-text, .live-map .live-stats span, .gps-calibration-overlay > span,
   .account-heading p, .identity-details p, .avatar-remove,
-  .calorie-target span, .calorie-target small, .result-grid .metric span,
+  .calorie-target span, .calorie-target small, .result-grid .metric span:not(.bmi-category),
   .result-grid .metric small, .settings-header, .settings-footer,
   .menu-hero .hero-email, .link-copy small, .menu-section-label,
   .wm-title-copy small, .wm-field-label, .wm-subfield-label, .wm-summary span,

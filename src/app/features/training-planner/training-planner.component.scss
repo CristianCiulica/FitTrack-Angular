@@ -167,8 +167,6 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  color: var(--ink);
-  background: color-mix(in srgb, var(--ink) 6%, var(--planner-card));
   font-size: 26px;
 }
 .eyebrow {
@@ -633,26 +631,9 @@ fieldset {
   color: var(--ink);
 }
 .result-actions {
+  margin-left: auto;
   display: flex;
   gap: 10px;
-}
-.footer-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--ink-secondary);
-  font-size: 11px;
-  line-height: 1.6;
-}
-.status-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--ink-tertiary);
-  flex-shrink: 0;
-  &.is-saved {
-    background: var(--accent);
-  }
 }
 @media (max-width: 900px) {
   .training-fab {
@@ -678,9 +659,6 @@ fieldset {
   }
   .planner-scroll {
     padding-top: 30px;
-  }
-  .footer-status {
-    max-width: 220px;
   }
 }
 @media (max-width: 560px) {
@@ -865,14 +843,6 @@ fieldset {
   .plan-sidebar {
     grid-template-columns: 1fr;
   }
-  .coach-card {
-    h3 br {
-      display: none;
-    }
-    h3 {
-      font-size: 27px;
-    }
-  }
   .planner-footer {
     padding: 13px 20px max(13px, env(safe-area-inset-bottom));
   }
@@ -886,10 +856,6 @@ fieldset {
   }
   .footer-inner {
     gap: 10px;
-  }
-  .footer-status {
-    max-width: 140px;
-    font-size: 9px;
   }
   .result-actions {
     flex: 1;
@@ -906,10 +872,6 @@ fieldset {
   }
   .footer-inner:has(.result-actions button:nth-child(2)) {
     flex-wrap: wrap;
-    .footer-status {
-      max-width: none;
-      width: 100%;
-    }
     .result-actions {
       width: 100%;
       > button {

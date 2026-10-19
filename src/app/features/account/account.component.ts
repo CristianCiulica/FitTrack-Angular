@@ -14,6 +14,8 @@ import { Sex } from '../../core/models/user-profile.model';
 import { WeightService } from '../../core/services/weight.service';
 import { WeightEntry } from '../../core/models/weight-entry.model';
 import { weightJourney } from '../../core/utils/weight-journey';
+import { AchievementsService } from '../../core/services/achievements.service';
+import { AchievementBadgeComponent } from '../../shared/components/achievement-badge/achievement-badge.component';
 import {
   cmToFeetInches,
   displayWeight,
@@ -34,11 +36,13 @@ import {
     NzMenuModule,
     NzIconModule,
     AppMenuComponent,
+    AchievementBadgeComponent,
   ],
   templateUrl: './account.component.html',
   styleUrls: ['./account.component.scss'],
 })
 export class AccountComponent implements OnInit {
+  readonly achievements = inject(AchievementsService);
   private readonly profileService = inject(ProfileService);
   private readonly auth = inject(AuthService);
   private readonly weights = inject(WeightService);
@@ -109,6 +113,13 @@ export class AccountComponent implements OnInit {
   ngOnInit(): void {
     this.loadProfile();
     this.loadWeightHistory();
+    this.loadBadges();
+  }
+  loadBadges(): void {
+    this.achievements
+      .load()
+      .pipe(takeUntilDestroyed(this.destroy))
+      .subscribe({ error: () => {} });
   }
   loadWeightHistory(): void {
     this.weightHistoryLoading.set(true);

@@ -89,7 +89,7 @@
               <div class="metric">
                 <span>BMI</span>
                 <strong>{{ bmi() }}</strong>
-                <nz-tag nzBorderless class="bmi-category">{{ bmiCategory().text }}</nz-tag>
+                <span class="bmi-category" [attr.data-tone]="bmiCategory().color">{{ bmiCategory().text }}</span>
               </div>
               <div class="metric">
                 <span>Maintenance</span>

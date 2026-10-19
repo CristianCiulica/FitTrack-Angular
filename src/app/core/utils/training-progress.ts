@@ -1,3 +1,4 @@
+import { Achievement } from '../models/achievement.model';
 import { isTimedCardioOnly } from './timed-cardio';
 import { indoorCardio } from './indoor-cardio';
 import { Workout } from '../models/workout.model';
@@ -92,29 +93,29 @@ export function trainingProgress(
     ].map((item) => ({ ...item, percent: total ? (item.count / total) * 100 : 0 })),
     milestones: [
       {
+        id: 'first-session',
         label: 'The first step',
         detail: 'Log your first session',
         earned: allDates.length > 0,
-        mark: '01',
       },
       {
+        id: 'ten-sessions',
         label: 'Finding your rhythm',
         detail: '10 sessions completed',
         earned: completed.length + finishedRuns.length >= 10,
-        mark: '10',
       },
       {
+        id: 'twenty-five-days',
         label: 'A habit in motion',
         detail: '25 active days',
         earned: allDates.length >= 25,
-        mark: '25',
       },
       {
+        id: 'seven-day-streak',
         label: 'Seven in a row',
         detail: 'A 7-day training streak',
         earned: allTimeBest >= 7,
-        mark: '07',
       },
-    ],
+    ] satisfies Achievement[],
   };
 }

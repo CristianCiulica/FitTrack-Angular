@@ -114,6 +114,30 @@ describe('Training planner save and recovery', () => {
     (other as any).restoreDraft();
     expect(other.answers().goal).toBeUndefined();
   });
+  it('starts again from empty preferences without deleting saved routines, including after reopening', async () => {
+    await component.save();
+    const originalIds = records().map((record) => record.clientId);
+    (component as any).scrollBody = { nativeElement: { scrollTop: 0 } };
+    component.startAgain();
+    expect(component.plan()).toBeNull();
+    expect(component.step()).toBe(0);
+    expect(component.saved()).toBe(false);
+    expect(component.answers().goal).toBeUndefined();
+    expect(component.answers().days).toEqual([]);
+    expect(records().map((record) => record.clientId)).toEqual(originalIds);
+    const next = TestBed.runInInjectionContext(() => new TrainingPlannerComponent());
+    (next as any).motion = { open: async () => {}, destroy: () => {} };
+    (next as any).dialog = { nativeElement: { open: true } };
+    await next.open();
+    expect(next.plan()).toBeNull();
+    expect(next.step()).toBe(0);
+    expect(next.answers().goal).toBeUndefined();
+    next.answers.set(preferences);
+    next.plan.set(buildTrainingPlan(preferences));
+    expect(await next.save()).toBe(true);
+    expect(records()).toHaveLength(8);
+    expect(new Set(records().map((record) => record.clientId)).size).toBe(8);
+  });
   it('stops a multi-day save if the signed-in account changes', async () => {
     const response = new Subject<Workout>();
     service.addWorkout.mockReturnValueOnce(response);

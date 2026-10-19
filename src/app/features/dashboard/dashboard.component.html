@@ -207,7 +207,7 @@
             class="recent-item"
             routerLink="/workouts"
           >
-            <span class="recent-icon" [attr.data-tone]="muscleTone(getPrimaryMuscle(w))">
+            <span class="recent-icon">
               <span nz-icon [nzType]="isIndoorWorkout(w) ? 'ft:run' : 'ft:workout'"></span>
             </span>
             <span class="recent-copy">
@@ -257,7 +257,7 @@
       >
           <div class="chat-container modern-chat">
             <div class="chat-header-modern">
-              <span class="assistant-mark" nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
+              <span class="assistant-mark assistant-header-symbol" nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
               <div class="chat-title-info">
                 <span class="chat-brand">MEAL PLANNER</span>
                 <h3 id="nutrition-assistant-title">Nutrition Assistant</h3>

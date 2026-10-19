@@ -19,6 +19,11 @@ const userProfileSchema = new Schema(
     exerciseGoal: { type: Number, default: 30 },
     weeklyWorkoutGoal: { type: Number, default: 4 },
     strengthTrainingDays: { type: Number, min: 0, max: 7, default: undefined },
+    featuredBadgeIds: {
+      type: [String],
+      enum: ['first-session', 'ten-sessions', 'twenty-five-days', 'seven-day-streak'],
+      default: [],
+    },
     migratedFromLocalStorage: { type: Boolean, default: false },
   },
   { timestamps: true },

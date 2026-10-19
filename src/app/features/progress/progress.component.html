@@ -201,9 +201,12 @@
         </div>
       </section>
       <div class="milestones" [attr.aria-busy]="loading()">
-        @for (milestone of summary().milestones; track milestone.label) {
+        @for (milestone of summary().milestones; track milestone.id) {
           <article class="milestone" [class.earned]="!loading() && !error() && milestone.earned">
-            <span class="milestone-mark" aria-hidden="true">{{ milestone.mark }}</span>
+            <app-achievement-badge
+              [badge]="milestone.id"
+              [earned]="!loading() && !error() && milestone.earned"
+            />
             <div>
               <h3>{{ milestone.label }}</h3>
               <p>{{ milestone.detail }}</p>
