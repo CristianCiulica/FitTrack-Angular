@@ -114,22 +114,6 @@ export class WorkoutsComponent implements OnInit {
     return workout.exercises?.[0]?.muscleGroup ?? (this.treadmillRecords(workout).length ? 'Cardio' : 'Mixed');
   }
 
-  // ton de culoare distinct pentru fiecare grupa musculara, in loc de tag-ul gri implicit
-  private readonly muscleTones: Record<string, string> = {
-    Chest: 'blue',
-    Back: 'green',
-    Shoulders: 'purple',
-    Arms: 'cyan',
-    Legs: 'indigo',
-    Core: 'pink',
-    Cardio: 'red',
-    'Full Body': 'graphite',
-  };
-
-  muscleTone(muscleGroup: string): string {
-    return this.muscleTones[muscleGroup] ?? 'graphite';
-  }
-
   // greutatile reale pe seturi, ex. "60 / 62.5 / 65 kg"
   formatSetWeights(setWeights: number[]): string {
     return setWeights.map(weight => this.displayLoad(weight)).join(' / ') + ' ' + this.weightUnit;

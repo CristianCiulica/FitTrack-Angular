@@ -136,7 +136,6 @@ html[data-theme='dark'] body :is(.exercise-preview, .plan-exercise-list li, .liv
   .chat-header-modern, .assistant-footer) { border-color: var(--theme-line) !important; }
 html[data-theme='dark'] body :is(.progress-track, .live-progress-track, app-bmi .divider) { background: rgba(255, 255, 255, .12) !important; }
 html[data-theme='dark'] body .workout-live { background: #111113 !important; }
-html[data-theme='dark'] body .live-primary { background: #087bea !important; border-color: #087bea !important; color: #fff !important; }
 html[data-theme='dark'] body .live-exercise-head .ant-tag { background: rgba(10,132,255,.14) !important; }
 html[data-theme='dark'] body :is(.mobile-workout-actions-clean, .desktop-exercise-list) { background: rgba(255,255,255,.025) !important; }
 html[data-theme='dark'] body .desktop-exercise-row { background: var(--theme-raised) !important; border-color: var(--theme-line) !important; }

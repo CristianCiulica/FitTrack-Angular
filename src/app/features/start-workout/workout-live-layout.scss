@@ -17,11 +17,23 @@
 .previous-performance p { font-size: 11px; line-height: 1.35; }
 .previous-performance strong { margin-top: 2px; font-size: 14px; }
 .up-next, .timed-exercise .up-next { margin-top: 0; }
-.set-navigation { padding: 0 0 6px; gap: 0 8px; }
-.set-navigation button { min-height: 44px; }
-.set-navigation > span { line-height: 14px; }
-.live-actions { position: relative; bottom: auto; padding: 7px; gap: 8px; }
-.live-actions button { height: 46px; }.live-stop { width: 90px; }
+/* Session controls share the reference's quiet labels and separate rounded rectangles. */
+.set-navigation { display: grid; grid-template-columns: 1fr 1fr; padding: 0 0 12px; gap: 4px 12px; }
+.set-navigation > span { grid-column: 1 / -1; grid-row: 1; order: initial; width: 100%; text-align: center; line-height: 1.4; color: var(--ink-tertiary); }
+.set-navigation button { grid-row: 2; min-height: 44px; color: var(--ink-tertiary); }
+.set-navigation button:disabled { opacity: .38; cursor: default; }
+.set-navigation button:not(:disabled):hover { color: var(--ink); }
+.set-back { grid-column: 1; justify-self: start; }
+.set-skip { grid-column: 2; justify-self: end; }
+.set-navigation svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.live-actions { position: relative; bottom: auto; padding: 0; gap: 10px; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.live-actions .ant-btn { display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 18px; border-radius: 16px !important; font-size: 14px; font-weight: 600; box-shadow: none; }
+.live-actions .live-stop { flex: 0 0 56px; width: 56px; padding: 0; color: #ff5c60; background: var(--surface); border: 1px solid var(--hairline); border-color: var(--hairline) !important; }
+.live-actions .live-stop .anticon { margin: 0; font-size: 18px; }
+.live-actions .live-primary { flex: 1; min-width: 0; background: #4b78f6 !important; border-color: transparent !important; color: #fff !important; }
+.live-actions .live-primary:hover:not(:disabled), .live-actions .live-primary:focus-visible { background: #416ce5 !important; box-shadow: none; }
+.live-actions .live-primary:disabled { opacity: .45; }
+.live-actions button:focus-visible, .set-navigation button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .hold-countdown { width: clamp(104px, 20dvh, 160px); }
 .hold-status { margin: 6px 0 0; }.hold-controls { margin-top: 0; }
 @media (max-height: 620px) {
@@ -37,14 +49,7 @@
   .review-symbol { margin-bottom: 8px; }.review h1 { margin: 8px 0; }.review p { margin-bottom: 6px; }
 }
 
-.live-plan-guidance { width: min(100%, 500px); text-align: left; padding: 10px 14px; border: 1px solid var(--hairline); border-radius: 12px; background: var(--surface-strong); }
-.live-plan-guidance summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; cursor: pointer; font-size: 11px; font-weight: 600; color: var(--ink); }
-.live-plan-guidance summary span { color: var(--ink-secondary); font-size: 10px; font-weight: 450; }
-.live-plan-guidance p { margin: 10px 0 0; font-size: 11px; color: var(--ink-secondary); line-height: 1.65; }
-
-.live-body:has(.live-plan-guidance[open]) { justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; }
-.live-body:has(.live-plan-guidance[open]) > * { flex-shrink: 0; }
-@media (max-height: 700px) {
-  .live-body:has(.live-plan-guidance) { justify-content: flex-start; overflow-y: auto; overscroll-behavior: contain; }
-  .live-body:has(.live-plan-guidance) > * { flex-shrink: 0; }
-}
+/* Long exercise names and small screens scroll inside the session, above the controls. */
+.live-body { overflow-y: auto; overscroll-behavior: contain; }
+.live-body > * { flex-shrink: 0; }
+@media (max-height: 700px) { .live-body { justify-content: flex-start; } }

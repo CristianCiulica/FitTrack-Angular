@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { vi } from 'vitest';
 import { WorkoutNavigationService } from './workout-navigation.service';
 
-describe('Mobile Workout + navigation', () => {
+describe('Mobile dock reveal navigation', () => {
   let router: { url: string; navigateByUrl: ReturnType<typeof vi.fn> };
   let node: HTMLElement;
   let link: HTMLAnchorElement;
@@ -26,11 +26,12 @@ describe('Mobile Workout + navigation', () => {
     vi.spyOn(window, 'getComputedStyle').mockReturnValue({
       width: '44px',
       backgroundColor: 'rgb(0, 122, 255)',
-    } as CSSStyleDeclaration);
+      getPropertyValue: () => '#007aff',
+    } as unknown as CSSStyleDeclaration);
     router = {
       url: '/dashboard',
-      navigateByUrl: vi.fn(async () => {
-        router.url = '/start-workout';
+      navigateByUrl: vi.fn(async (destination: string) => {
+        router.url = destination;
         return true;
       }),
     };
@@ -81,6 +82,25 @@ describe('Mobile Workout + navigation', () => {
     expect(document.querySelector('.workout-route-cover')).toBeNull();
     expect(document.documentElement.classList.contains('workout-route-motion')).toBe(false);
   });
+  it.each(['/dashboard', '/running', '/bmi'])(
+    'reveals %s from its dock icon and keeps route history',
+    async (destination) => {
+      router.url = '/start-workout';
+      link.href = destination;
+      const targetHandler = vi.fn();
+      link.addEventListener('click', targetHandler);
+      expect(click().defaultPrevented).toBe(true);
+      await tick();
+      expect(router.navigateByUrl).toHaveBeenCalledExactlyOnceWith(destination);
+      expect(targetHandler).not.toHaveBeenCalled();
+      expect(document.querySelector('.workout-route-cover')).toBeNull();
+    },
+  );
+  it('leaves History navigation immediate', () => {
+    link.href = '/workouts';
+    expect(click().defaultPrevented).toBe(false);
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+  });
   it('leaves desktop links, modified clicks, active Workout links and locked sessions alone', () => {
     for (const options of [
       { ctrlKey: true },
@@ -117,7 +137,7 @@ describe('Mobile Workout + navigation', () => {
     await tick();
     expect(document.querySelector('.workout-route-cover')).toBeNull();
   });
-  it('reveals the actual route from the blue 44px circle for 1100ms and removes temporary layers', async () => {
+  it('reveals the actual route from the blue 44px circle for 1600ms and removes temporary layers', async () => {
     reduced = false;
     const cancel = vi.fn();
     const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel }));
@@ -140,7 +160,7 @@ describe('Mobile Workout + navigation', () => {
         { clipPath: 'circle(22px at 195px 812px)' },
         { clipPath: expect.stringMatching(/^circle\(/) },
       ],
-      expect.objectContaining({ duration: 1100, pseudoElement: '::view-transition-new(root)' }),
+      expect.objectContaining({ duration: 1600, pseudoElement: '::view-transition-new(root)' }),
     ]);
     expect(document.querySelector('.workout-route-cover')).toBeNull();
     expect(document.documentElement.classList.contains('workout-route-motion')).toBe(false);

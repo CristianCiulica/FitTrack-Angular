@@ -257,12 +257,6 @@
       </div>
     </div>
 
-    <details class="live-plan-guidance" *ngIf="ex.cue && !treadmillActive()">
-      <summary>Technique & effort <span>{{ ex.rir }} reps left · {{ exerciseRestSeconds() }} sec rest</span></summary>
-      <p>{{ ex.cue }}</p>
-      <p>Finish with about {{ ex.rir }} good repetitions left. Use a comfortable range and adjust the load during warm-up.</p>
-    </details>
-
     <!-- logheaza ce ai facut efectiv la setul curent: repetari + greutate -->
     <div class="live-weight">
       @if (treadmillActive()) {
@@ -369,14 +363,14 @@
   </div>
 
   <div class="set-navigation">
-    <button type="button" class="set-back" [disabled]="!canGoBack() || saving()" (click)="previousSet()"><span nz-icon nzType="arrow-left"></span>{{ state() === 'rest' ? 'Edit this set' : treadmillActive() ? 'Previous exercise' : 'Previous set' }}</button>
+    <button type="button" class="set-back" [disabled]="!canGoBack() || saving()" (click)="previousSet()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>{{ state() === 'rest' ? 'Edit this set' : treadmillActive() ? 'Previous exercise' : 'Previous set' }}</button>
     <span *ngIf="currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} <ng-container *ngIf="!treadmillActive()"> · Set {{ currentSetIndex() }} of {{ exercise.sets }}</ng-container></span>
-    <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">{{ treadmillActive() ? 'Skip treadmill' : 'Skip set' }} <span nz-icon nzType="arrow-right"></span></button>
+    <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">{{ treadmillActive() ? 'Skip treadmill' : 'Skip set' }} <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg></button>
   </div>
   <!-- Actiuni, fixate jos -->
   <div class="live-actions">
-    <button nz-button nzDanger nzSize="large" class="live-stop" [disabled]="saving()" (click)="confirmStopWorkout()">
-      <span nz-icon nzType="close"></span> Stop
+    <button nz-button nzDanger nzSize="large" class="live-stop" aria-label="Stop workout" title="Stop workout" [disabled]="saving()" (click)="confirmStopWorkout()">
+      <span nz-icon nzType="close" aria-hidden="true"></span>
     </button>
     <button *ngIf="state() === 'active' && (currentExercise()?.repUnit === 'seconds' || treadmillActive())" nz-button nzType="primary" nzSize="large" class="live-primary" [disabled]="treadmillActive() && !treadmillInputValid()" (click)="toggleHoldTimer()">
       <svg class="hold-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path [attr.d]="holdRunning() ? 'M9 8v8m6-8v8' : 'm10 8 6 4-6 4V8Z'"/></svg>

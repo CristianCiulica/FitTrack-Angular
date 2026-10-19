@@ -3,9 +3,11 @@ import { DestroyRef, Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 
 const WORKOUT = '/start-workout';
-const EASING = 'cubic-bezier(.16, 1, .3, 1)';
+const REVEAL_ROUTES = new Set([WORKOUT, '/dashboard', '/running', '/bmi']);
+const REVEAL_DURATION = 1600;
+const EASING = 'cubic-bezier(.22, .8, .25, 1)';
 
-/** Expands the mobile + into the real route, keeping Router guards and browser history intact. */
+/** Reveals mobile dock destinations, keeping Router guards and browser history intact. */
 @Injectable({ providedIn: 'root' })
 export class WorkoutNavigationService {
   private readonly document = inject(DOCUMENT);
@@ -40,11 +42,10 @@ export class WorkoutNavigationService {
       return;
     const target = event.target;
     const link =
-      target instanceof Element
-        ? target.closest<HTMLAnchorElement>('.sidebar-menu a[href="/start-workout"]')
-        : null;
+      target instanceof Element ? target.closest<HTMLAnchorElement>('.sidebar-menu a[href]') : null;
     if (
       !link ||
+      !REVEAL_ROUTES.has(link.getAttribute('href') ?? '') ||
       (link.target && link.target !== '_self') ||
       link.hasAttribute('download') ||
       link.getAttribute('aria-disabled') === 'true' ||
@@ -52,13 +53,14 @@ export class WorkoutNavigationService {
       !link.getClientRects().length
     )
       return;
-    if (!this.busy && this.router.url.split(/[?#]/)[0] === WORKOUT) return;
+    const destination = link.getAttribute('href')!;
+    if (!this.busy && this.router.url.split(/[?#]/)[0] === destination) return;
     event.preventDefault();
     event.stopImmediatePropagation();
-    if (!this.busy) void this.open(link);
+    if (!this.busy) void this.open(link, destination);
   };
 
-  private async open(link: HTMLAnchorElement) {
+  private async open(link: HTMLAnchorElement, destination: string) {
     this.busy = true;
     const token = ++this.generation;
     const w = this.window!;
@@ -68,22 +70,25 @@ export class WorkoutNavigationService {
     const circle = w.getComputedStyle(link, '::before');
     const collapsed = `circle(${(parseFloat(circle.width) || 44) / 2}px at ${x}px ${y}px)`;
     const expanded = `circle(${Math.ceil(Math.hypot(Math.max(x, w.innerWidth - x), Math.max(y, w.innerHeight - y)))}px at ${x}px ${y}px)`;
-    const blue = circle.backgroundColor || '#007aff';
+    const blue =
+      destination === WORKOUT
+        ? circle.backgroundColor || '#007aff'
+        : w.getComputedStyle(link).getPropertyValue('--dock-accent').trim() || '#007aff';
     try {
       if (
         w.matchMedia('(prefers-reduced-motion: reduce)').matches ||
         !this.document.documentElement.animate
       ) {
-        if (await this.navigate()) await this.focusHeading(token);
+        if (await this.navigate(destination)) await this.focusHeading(token);
         return;
       }
       if (!this.document.startViewTransition) {
-        await this.fallback(collapsed, expanded, blue, token);
+        await this.fallback(collapsed, expanded, blue, token, destination);
         return;
       }
       this.document.documentElement.classList.add('workout-route-motion');
       const transition = this.document.startViewTransition(async () => {
-        if (!(await this.navigate()) || token !== this.generation) {
+        if (!(await this.navigate(destination)) || token !== this.generation) {
           this.transition?.skipTransition();
           return;
         }
@@ -102,7 +107,7 @@ export class WorkoutNavigationService {
         this.document.documentElement,
         [{ clipPath: collapsed }, { clipPath: expanded }],
         {
-          duration: 1100,
+          duration: REVEAL_DURATION,
           easing: EASING,
           fill: 'both',
           pseudoElement: '::view-transition-new(root)',
@@ -116,7 +121,7 @@ export class WorkoutNavigationService {
           { clipPath: expanded, opacity: 0 },
         ],
         {
-          duration: 1100,
+          duration: REVEAL_DURATION,
           easing: EASING,
           fill: 'both',
           pseudoElement: '::view-transition-new(workout-launch-cover)',
@@ -133,9 +138,9 @@ export class WorkoutNavigationService {
     }
   }
 
-  private async navigate(): Promise<boolean> {
-    const result = await this.router.navigateByUrl(WORKOUT);
-    return result && this.router.url.split(/[?#]/)[0] === WORKOUT;
+  private async navigate(destination: string): Promise<boolean> {
+    const result = await this.router.navigateByUrl(destination);
+    return result && this.router.url.split(/[?#]/)[0] === destination;
   }
   private createCover(blue: string, named = false) {
     const cover = this.document.createElement('div');
@@ -153,7 +158,13 @@ export class WorkoutNavigationService {
     void animation.finished.catch(() => {});
     return animation;
   }
-  private async fallback(collapsed: string, expanded: string, blue: string, token: number) {
+  private async fallback(
+    collapsed: string,
+    expanded: string,
+    blue: string,
+    token: number,
+    destination: string,
+  ) {
     const shell = this.document.querySelector<HTMLElement>('.route-shell');
     if (shell) {
       this.lockedShell = { element: shell, inert: shell.inert };
@@ -161,11 +172,11 @@ export class WorkoutNavigationService {
     }
     const cover = this.createCover(blue);
     await this.animate(cover, [{ clipPath: collapsed }, { clipPath: expanded }], {
-      duration: 1100,
+      duration: REVEAL_DURATION,
       easing: EASING,
       fill: 'both',
     }).finished;
-    if (token !== this.generation || !(await this.navigate())) return;
+    if (token !== this.generation || !(await this.navigate(destination))) return;
     await this.animate(cover, [{ opacity: 1 }, { opacity: 0 }], { duration: 180, fill: 'both' })
       .finished;
     this.unlockShell();
@@ -176,7 +187,9 @@ export class WorkoutNavigationService {
     if (token !== this.generation) return;
     const heading =
       this.document.querySelector<HTMLElement>('.workout-live h1') ??
-      this.document.querySelector<HTMLElement>('.library-hero h1');
+      this.document.querySelector<HTMLElement>('.library-hero h1') ??
+      this.document.querySelector<HTMLElement>('.app-content h1, .app-content h2') ??
+      this.document.querySelector<HTMLElement>('.app-content');
     if (heading) {
       if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
       heading.focus({ preventScroll: true });
