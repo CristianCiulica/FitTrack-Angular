@@ -40,7 +40,7 @@ export interface WorkoutProgram {
   goal: 'muscle' | 'fat-loss' | 'busy' | 'glutes' | 'home';
   gymDays: number;
   minutes: string;
-  level: string;
+  level: 'Beginner' | 'Intermediate' | 'Advanced';
   equipment: string;
   accent: string;
   icon: 'build' | 'lean' | 'busy' | 'aesthetic' | 'glutes' | 'home';
@@ -270,7 +270,7 @@ export function workoutPrograms(
       goal: 'muscle',
       gymDays: 4,
       minutes: '45–60',
-      level: 'Consistent lifter',
+      level: 'Intermediate',
       equipment: 'Full gym',
       accent: 'build',
       icon: 'build',
@@ -300,7 +300,7 @@ export function workoutPrograms(
       goal: 'fat-loss',
       gymDays: 3,
       minutes: '35–55',
-      level: 'Foundation / consistent',
+      level: 'Beginner',
       equipment: 'Full gym + treadmill',
       accent: 'lean',
       icon: 'lean',
@@ -334,7 +334,7 @@ export function workoutPrograms(
       goal: 'busy',
       gymDays: 2,
       minutes: '30–40',
-      level: 'Foundation',
+      level: 'Beginner',
       equipment: 'Gym',
       accent: 'busy',
       icon: 'busy',
@@ -371,7 +371,7 @@ export function workoutPrograms(
     {
       id: 'aesthetics-30',
       title: 'Aesthetics',
-      eyebrow: 'YOUR PUSH / PULL / LEGS',
+      eyebrow: 'PUSH / PULL / LEGS',
       description:
         'Your familiar sessions, organised into a month. Compounds lead; detail work finishes.',
       audience:
@@ -379,7 +379,7 @@ export function workoutPrograms(
       goal: 'muscle',
       gymDays: 3,
       minutes: '50–75',
-      level: 'Experienced',
+      level: 'Advanced',
       equipment: 'Full gym',
       accent: 'aesthetic',
       icon: 'aesthetic',
@@ -429,7 +429,7 @@ export function workoutPrograms(
       goal: 'glutes',
       gymDays: 3,
       minutes: '45–60',
-      level: 'Foundation / consistent',
+      level: 'Beginner',
       equipment: 'Full gym',
       accent: 'glutes',
       icon: 'glutes',
@@ -474,7 +474,7 @@ export function workoutPrograms(
       goal: 'home',
       gymDays: 4,
       minutes: '35–55',
-      level: 'Foundation / consistent',
+      level: 'Beginner',
       equipment: 'Dumbbells + pull-up bar or bands',
       accent: 'home',
       icon: 'home',
