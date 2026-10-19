@@ -1,0 +1,12 @@
+.load-change {
+  margin: 8px 0 0; color: var(--ink-tertiary); font-size: 12px; font-weight: 600;
+  font-variant-numeric: tabular-nums; line-height: 1.5;
+  span { color: var(--ink-tertiary); font-size: 11px; font-weight: 400; }
+  &.load-up { color: #238344; }
+  &.load-down { color: #c62828; }
+}
+.summary-exercises .load-change { margin: 2px 0 0; }
+:host-context(html[data-theme='dark']) .load-change {
+  &.load-up { color: #6cdd8d; }
+  &.load-down { color: #ff827c; }
+}

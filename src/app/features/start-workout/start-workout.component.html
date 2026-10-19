@@ -142,7 +142,11 @@
             @if (finishedPrevious(); as previous) {
               <div class="summary-comparison"><span>Compared with {{ previous.date | date:'MMM d' }}</span><strong>{{ finishedDelta()! > 0 ? '+' : '' }}{{ displayLoad(finishedDelta()!) | number:'1.0-0' }} {{ weightUnit() }} <small>volume</small></strong>@if (previous.durationSeconds != null) { <small>Previous duration · {{ durationLabel(previous.durationSeconds) }}</small> }</div>
             }
-            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><strong>{{ exercise.name }}</strong><span>{{ exercise.seconds != null ? durationLabel(exercise.seconds) + ' · treadmill' : exercise.sets + (exercise.sets === 1 ? ' set' : ' sets') + ' · ' + displayLoad(exercise.volume) + ' ' + weightUnit() }}</span></div> }</div>
+            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><strong>{{ exercise.name }}</strong><span>{{ exercise.seconds != null ? durationLabel(exercise.seconds) + ' · treadmill' : exercise.sets + (exercise.sets === 1 ? ' set' : ' sets') + ' · ' + displayLoad(exercise.volume) + ' ' + weightUnit() }}</span>
+              @for (change of exercise.loadChanges; track change.set) {
+                <small class="load-change" [class.load-up]="change.delta > 0" [class.load-down]="change.delta < 0">Set {{ change.set }} · {{ change.delta > 0 ? '+' : '' }}{{ change.delta | number:'1.0-1' }} {{ weightUnit() }} <span>vs {{ change.date | date:'MMM d' }}</span></small>
+              }
+            </div> }</div>
             <p class="summary-saved" role="status">{{ savedLocally() ? 'Saved on this device. It will sync when you reconnect and open your history.' : 'Saved to your workout history.' }}</p>
             <div class="summary-actions"><button type="button" (click)="exportSummary()" [disabled]="exporting()">{{ exporting() ? 'Preparing image…' : 'Save as image' }}</button><a routerLink="/dashboard" class="summary-primary" (click)="reset()">Back to Home</a></div>
           </section>
@@ -327,6 +331,11 @@
               />
               <button type="button" class="stepper-btn" aria-label="Increase weight" (click)="adjustWeight(2.5)">+</button>
             </div>
+            @if (currentLoadChange(); as change) {
+              <p class="load-change" [class.load-up]="change.delta > 0" [class.load-down]="change.delta < 0" aria-live="polite">
+                {{ change.delta > 0 ? '+' : '' }}{{ change.delta | number:'1.0-1' }} {{ weightUnit() }} <span>vs last time · {{ change.date | date:'MMM d' }}</span>
+              </p>
+            }
           </div>
         </div>
       }

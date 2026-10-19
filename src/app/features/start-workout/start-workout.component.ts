@@ -751,7 +751,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
     AppMenuComponent,
   ],
   templateUrl: './start-workout.component.html',
-  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss', './gym-plan.scss', './create-workout-action.scss', './treadmill-session.scss', './legends-collection.scss']
+  styleUrls: ['./start-workout.component.scss', './workout-live-layout.scss', './gym-plan.scss', './create-workout-action.scss', './treadmill-session.scss', './legends-collection.scss', './load-comparison.scss']
 })
 export class StartWorkoutComponent implements OnInit, OnDestroy {
   targetDate = signal<string>(localDateKey());
@@ -878,13 +878,35 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     const index = Math.min(this.currentSetIndex() - 1, previous.pairs.length - 1);
     return {...previous.pairs[index], date: previous.date, set: index + 1};
   });
+  readonly currentLoadChange = computed(() => {
+    const exercise = this.currentExercise();
+    if (!exercise || exercise.repUnit || this.treadmillActive() || this.activeDrop() || !this.weightInputValid()) return null;
+    return this.weightChange(exercise.name, this.currentSetIndex() - 1, this.currentWeight());
+  });
+
+  private weightChange(name: string, setIndex: number, weight: number): {delta: number; date: string} | null {
+    const previous = this.previousByExercise().get(exerciseKey(name));
+    const pair = previous?.pairs[setIndex];
+    if (!pair) return null;
+    // Compare displayed loads so rounding never produces a green/red zero.
+    return {delta: Math.round((this.displayLoad(weight) - this.displayLoad(pair.weight)) * 10) / 10, date: previous!.date};
+  }
+
+  private completedLoadChanges(exerciseIndex: number) {
+    const exercise = this.currentRoutine().exercises[exerciseIndex];
+    if (exercise.repUnit || isTreadmillExercise(exercise)) return [];
+    return this.loggedWeights[exerciseIndex].flatMap((weight, index) => {
+      const change = weight == null ? null : this.weightChange(exercise.name, index, weight);
+      return change ? [{set: index + 1, ...change}] : [];
+    });
+  }
   readonly lastTimeWeight = computed(() => this.previousSetData()?.weight ?? null);
   readonly lastTimeReps = computed(() => this.previousSetData()?.reps ?? null);
   finishedVolume = signal(0);
   finishedDelta = signal<number | null>(null);
   finishedDuration = signal(0);
   finishedPrevious = signal<Workout | null>(null);
-  finishedExercises = signal<{name:string;sets:number;volume:number;seconds?:number}[]>([]);
+  finishedExercises = signal<{name:string;sets:number;volume:number;seconds?:number;loadChanges:{set:number;delta:number;date:string}[]}[]>([]);
   savedLocally = signal(false);
   exporting = signal(false);
   summaryImage = signal<string | null>(null);
@@ -1551,7 +1573,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.finishedPrevious.set(previous ?? null);
     this.sessionEndedAt ??= Date.now();
     this.finishedDuration.set(this.cardioOnly() ? this.treadmillLogs().reduce((sum, t) => sum + t.seconds, 0) : Math.min(604800, Math.max(0, Math.floor((this.sessionEndedAt - this.sessionStartedAt) / 1000))));
-    this.finishedExercises.set(this.currentRoutine().exercises.map((ex,i) => ({name:ex.name, ...(isTreadmillExercise(ex) ? {seconds: this.loggedReps[i]?.[0] ?? 0} : {}), sets:this.loggedWeights[i].filter(v => v !== null).length, volume:Math.round(this.loggedDrops[i].reduce((sum,d) => sum + d.weight*d.reps,0) + this.loggedWeights[i].reduce<number>((sum,w,j) => sum + (w ?? 0) * (this.loggedReps[i][j] ?? 0),0))})).filter(ex => ex.sets > 0));
+    this.finishedExercises.set(this.currentRoutine().exercises.map((ex,i) => ({name:ex.name, loadChanges: this.completedLoadChanges(i), ...(isTreadmillExercise(ex) ? {seconds: this.loggedReps[i]?.[0] ?? 0} : {}), sets:this.loggedWeights[i].filter(v => v !== null).length, volume:Math.round(this.loggedDrops[i].reduce((sum,d) => sum + d.weight*d.reps,0) + this.loggedWeights[i].reduce<number>((sum,w,j) => sum + (w ?? 0) * (this.loggedReps[i][j] ?? 0),0))})).filter(ex => ex.sets > 0));
     this.finishedDelta.set(previous ? Math.round(volume - workoutVolume(previous)) : null);
 
     this.saveWorkout();
