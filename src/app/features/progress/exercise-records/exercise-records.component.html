@@ -1,0 +1,120 @@
+<section aria-label="Exercise records">
+  <div class="records-toolbar">
+    <div>
+      <h2>Your exercises</h2>
+      <span>{{ records().length }} recorded</span>
+    </div>
+    <label class="records-search"
+      ><svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="10" cy="10" r="6" />
+        <path d="m15 15 5 5" /></svg
+      ><input
+        type="search"
+        aria-label="Find an exercise"
+        placeholder="Find an exercise"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+    /></label>
+  </div>
+  @if (!records().length && !loading()) {
+    <div class="records-empty">
+      <h3>No exercises recorded yet</h3>
+      <p>Your completed workouts will appear here from History.</p>
+    </div>
+  } @else if (records().length && !filtered().length) {
+    <div class="records-empty">
+      <p>No exercises match your search.</p>
+      <button type="button" (click)="search.set('')">Clear search</button>
+    </div>
+  }
+  <div class="records-grid">
+    @for (record of filtered(); track record.key) {
+      <article class="record-card">
+        <header>
+          <h3>{{ record.name }}</h3>
+          <span
+            >{{ record.sessions.length }}
+            {{ record.sessions.length === 1 ? 'session' : 'sessions' }}</span
+          >
+        </header>
+        <div class="record-metrics">
+          <div>
+            <span>Starting point</span
+            ><strong>
+              @if (!record.timed) {
+                {{ load(record.initial.weight) | number: '1.0-1' }} <small>{{ unit() }}</small>
+              } @else {
+                {{ record.initial.reps }} <small>sec</small>
+              }
+            </strong>
+            <p>
+              @if (!record.timed) {
+                {{ record.initial.reps }} reps
+              } @else {
+                Timed hold
+              }
+            </p>
+            <time>{{ record.initial.date | date: 'MMM d, y' }}</time>
+          </div>
+          <div class="record-best">
+            <span>{{ record.timed ? 'Longest hold' : 'Weight PR' }}</span
+            ><strong>
+              @if (!record.timed) {
+                {{ load(record.bestWeight.weight) | number: '1.0-1' }} <small>{{ unit() }}</small>
+              } @else {
+                {{ record.bestReps.reps }} <small>sec</small>
+              }
+            </strong>
+            <p>
+              @if (!record.timed) {
+                {{ record.bestWeight.reps }} reps at this weight
+              } @else {
+                Personal best
+              }
+            </p>
+            <time>{{
+              (record.timed ? record.bestReps.date : record.bestWeight.date) | date: 'MMM d, y'
+            }}</time>
+          </div>
+        </div>
+        @if (!record.timed) {
+          <div class="rep-record">
+            <span>Reps PR</span
+            ><strong
+              >{{ record.bestReps.reps }} reps
+              <small
+                >at {{ load(record.bestReps.weight) | number: '1.0-1' }} {{ unit()
+                }}{{ record.bestReps.drop ? ' · drop set' : '' }}</small
+              ></strong
+            ><time>{{ record.bestReps.date | date: 'MMM d, y' }}</time>
+          </div>
+        }
+        <details (toggle)="toggleHistory(record.key, $any($event.target).open)">
+          <summary>
+            Session history
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 8 4 4 4-4" /></svg>
+          </summary>
+          @if (expanded().has(record.key)) {
+            <div class="record-history">
+              @for (session of record.sessions.slice().reverse(); track $index) {
+                <div>
+                  <span
+                    ><time>{{ session.date | date: 'MMM d, y' }}</time
+                    ><small>{{ session.workout }}</small></span
+                  ><strong>
+                    @if (!record.timed) {
+                      {{ load(session.best.weight) | number: '1.0-1' }} {{ unit() }} ·
+                      {{ session.best.reps }} reps
+                    } @else {
+                      {{ session.best.reps }} sec
+                    }
+                  </strong>
+                </div>
+              }
+            </div>
+          }
+        </details>
+      </article>
+    }
+  </div>
+</section>

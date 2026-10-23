@@ -36,7 +36,9 @@ describe('Workout session recovery', () => {
     expect(component.gymPlanOpen()).toBe(false);
     expect(component.state()).toBe('active');
     expect(component.currentExercise()?.name).toBe('Leg Press');
-    expect(component.totalSets()).toBe(21);
+    expect(component.totalSets()).toBe(24);
+    expect(component.currentRoutine().exercises.at(-1)).toMatchObject({name: 'Machine Calf Raise', sets: 3, reps: 12});
+    expect(component.currentRoutine().exercises.at(-2)?.name).toBe('Leg Raises');
     component.finishSet();
     expect(component.restClock()).toBe('1:30');
     component.skipRest();

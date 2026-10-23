@@ -1,3 +1,4 @@
+import { ExerciseRecordsComponent } from './exercise-records/exercise-records.component';
 import {
   Component,
   computed,
@@ -32,6 +33,7 @@ import { trainingProgress } from '../../core/utils/training-progress';
   standalone: true,
   imports: [
     CommonModule,
+    ExerciseRecordsComponent,
     RouterLink,
     RouterLinkActive,
     NzLayoutModule,
@@ -99,6 +101,7 @@ export class ProgressComponent implements OnInit {
       (event.shiftKey ? last : first).focus();
     }
   }
+  readonly tab = signal<'overview' | 'exercises'>('overview');
   readonly period = signal(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   readonly today = signal(new Date());
   readonly loading = signal(true);

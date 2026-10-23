@@ -1,0 +1,242 @@
+:host {
+  display: block;
+  color: var(--ink);
+}
+.records-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 24px 0;
+  h2 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    letter-spacing: -0.04em;
+  }
+  span {
+    color: var(--ink-tertiary);
+    font-size: 12px;
+  }
+}
+.records-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  background: var(--surface-strong);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: var(--ink-tertiary);
+    stroke-width: 1.6;
+    flex-shrink: 0;
+  }
+  input {
+    width: 100%;
+    min-width: 0;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    outline: 0;
+    font: inherit;
+    font-size: 14px;
+  }
+  &:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  padding-bottom: 70px;
+  align-items: start;
+}
+.record-card {
+  min-width: 0;
+  background: var(--surface-strong);
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  overflow: hidden;
+  header {
+    padding: 22px 22px 16px;
+    h3 {
+      margin: 0 0 6px;
+      font-size: 19px;
+      letter-spacing: -0.03em;
+      overflow-wrap: anywhere;
+    }
+    > span {
+      font-size: 11px;
+      color: var(--ink-tertiary);
+    }
+  }
+  time {
+    font-size: 10px;
+    color: var(--ink-tertiary);
+  }
+}
+.record-metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0 22px 18px;
+  > div {
+    padding: 8px 14px 6px 0;
+    min-width: 0;
+  }
+  > div + div {
+    border-left: 1px solid var(--hairline);
+    padding-left: 18px;
+    padding-right: 0;
+  }
+  span {
+    font-size: 11px;
+    color: var(--ink-secondary);
+  }
+  strong {
+    display: block;
+    margin: 8px 0 5px;
+    font-size: 28px;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    small {
+      font-size: 12px;
+      font-weight: 450;
+      color: var(--ink-secondary);
+    }
+  }
+  p {
+    font-size: 11px;
+    color: var(--ink-secondary);
+    margin: 0 0 6px;
+  }
+}
+.record-best strong {
+  color: var(--accent);
+}
+.rep-record {
+  border-top: 1px solid var(--hairline);
+  margin: 0 22px;
+  padding: 14px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 12px;
+  > span {
+    font-size: 11px;
+    color: var(--ink-secondary);
+  }
+  strong {
+    font-size: 14px;
+    small {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--ink-secondary);
+    }
+  }
+  time {
+    width: 100%;
+  }
+}
+details {
+  border-top: 1px solid var(--hairline);
+}
+summary {
+  padding: 15px 22px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+  font-size: 12px;
+  font-weight: 550;
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+  }
+  &::-webkit-details-marker {
+    display: none;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -4px;
+  }
+}
+details[open] summary svg {
+  transform: rotate(180deg);
+}
+.record-history {
+  padding: 0 22px 12px;
+  max-height: 320px;
+  overflow: auto;
+  > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  span {
+    min-width: 0;
+  }
+  small {
+    display: block;
+    font-size: 10px;
+    color: var(--ink-secondary);
+    overflow-wrap: anywhere;
+  }
+  strong {
+    font-size: 11px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+}
+.records-empty {
+  padding: 40px 20px;
+  text-align: center;
+  border: 1px solid var(--hairline);
+  border-radius: 24px;
+  background: var(--surface-strong);
+  h3 {
+    font-size: 20px;
+  }
+  p {
+    color: var(--ink-secondary);
+    font-size: 13px;
+  }
+  button {
+    background: none;
+    border: 0;
+    color: var(--accent);
+    min-height: 44px;
+    cursor: pointer;
+  }
+}
+@media (max-width: 650px) {
+  .records-grid {
+    grid-template-columns: 1fr;
+  }
+  .records-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .record-card header {
+    padding: 20px 20px 16px;
+  }
+  .record-metrics {
+    margin: 0 20px 18px;
+  }
+  .records-search {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

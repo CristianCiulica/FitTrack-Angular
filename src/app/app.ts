@@ -1,4 +1,3 @@
-import { WorkoutNavigationService } from './core/services/workout-navigation.service';
 import { ThemeService } from './core/services/theme.service';
 import { Component, OnInit, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -41,7 +40,6 @@ const FT_ICONS: Record<string, string> = {
   styleUrls: ['./app.css'],
 })
 export class App implements OnInit {
-  private readonly workoutNavigation = inject(WorkoutNavigationService);
   private readonly themeService = inject(ThemeService);
   private readonly profileService = inject(ProfileService);
 

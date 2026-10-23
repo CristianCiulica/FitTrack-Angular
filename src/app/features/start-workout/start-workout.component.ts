@@ -99,6 +99,7 @@ const PREDEFINED_ROUTINES: Routine[] = [
       { name: 'Hamstring Curl', sets: 3, reps: 12, weight: 0, muscleGroup: 'Legs' },
       { name: 'Abdominal Crunches', sets: 3, reps: 15, weight: 0, muscleGroup: 'Core' },
       { name: 'Leg Raises', sets: 3, reps: 15, weight: 0, muscleGroup: 'Core' },
+      { name: 'Machine Calf Raise', sets: 3, reps: 12, weight: 0, muscleGroup: 'Legs' },
     ],
   },
   {

@@ -82,6 +82,11 @@
             {{ error() }} <button type="button" (click)="load()">Try again</button>
           </div>
         }
+        <nav class="progress-tabs" aria-label="Progress sections">
+          <button type="button" [attr.aria-pressed]="tab() === 'overview'" (click)="tab.set('overview')">Overview</button>
+          <button type="button" [attr.aria-pressed]="tab() === 'exercises'" (click)="tab.set('exercises')">Exercises</button>
+        </nav>
+        @if (tab() === 'overview') {
         <app-activity-calendar [(period)]="period" />
         <div class="progress-information">
           <section class="weekly-focus" aria-label="This week's workout goal">
@@ -124,6 +129,10 @@
             </div>
           </section>
         </div>
+        } @else {
+          @if (loading()) { <p role="status">Loading your exercise history…</p> }
+          <app-exercise-records [loading]="loading()" />
+        }
       </div>
     </nz-content>
   </nz-layout>
