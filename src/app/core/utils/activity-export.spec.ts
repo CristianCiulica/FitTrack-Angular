@@ -62,8 +62,10 @@ describe('Activity exports', () => {
   it('includes badges, personal records, activity and weight progress while escaping user text', () => {
     const html = achievementReportHtml(data);
     expect(html).toContain('The first step');
-    expect(html).toContain('Press');
-    expect(html).toContain('40 kg');
+    expect(html).not.toContain('Press');
+    expect(html).not.toContain('<table>');
+    expect(html).toContain('exercises tracked');
+    expect(html).toContain('400 kg');
     expect(html).toContain('78 kg');
     expect(html).toContain('75 kg');
     expect(html).toContain('Longest session');
