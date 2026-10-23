@@ -1,3 +1,4 @@
+import { ActivityExport, downloadActivityJson } from '../utils/activity-export';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { defer, EMPTY, Observable, of, Subject, throwError } from 'rxjs';
 import { concatMap, map, tap, catchError, filter, finalize, shareReplay } from 'rxjs/operators';
@@ -217,18 +218,12 @@ export class ProfileService {
     });
   }
 
+  getExportData(): Observable<ActivityExport> {
+    return this.api.get<ActivityExport>('/me/export');
+  }
   exportData(): Observable<void> {
-    return this.api.get('/me/export', { responseType: 'blob' }).pipe(
-      tap((blob) => {
-        const url = window.URL.createObjectURL(blob as Blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'fittrack_export.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      }),
+    return this.getExportData().pipe(
+      tap(downloadActivityJson),
       map(() => void 0),
     );
   }

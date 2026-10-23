@@ -73,7 +73,7 @@ describe('Workout library navigation', () => {
     expect(component.visibleExercises().length).toBe(3);
     expect(component.currentRoutine()!.exercises.length).toBeGreaterThan(3);
     component.selectDay(6);
-    expect(component.visibleExercises()).toEqual([]);
+    expect(component.visibleExercises().length).toBeGreaterThan(0);
   });
   it('filters programs by goal and keeps custom sessions out of the discovery grid', () => {
     const fixture = TestBed.createComponent(WorkoutLibraryComponent),
@@ -112,7 +112,8 @@ describe('Workout library navigation', () => {
     launch.mockClear();
     component.selectDay(6);
     component.startDay();
-    expect(launch).not.toHaveBeenCalled();
+    expect(launch).toHaveBeenCalled();
+    launch.mockClear();
     component.selectDay(1);
     component.selectedEnrollment.update((e) => ({ ...e!, stoppedAt: new Date().toISOString() }));
     component.startDay();

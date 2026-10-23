@@ -22,6 +22,7 @@ const component = new StartWorkoutComponent(
   {} as any,
 );
 const programs = workoutPrograms(component.gymRoutines, component.homeRoutines);
+const build = programs.find((p) => p.id === 'build-30')!;
 const enrollment: ProgramEnrollment = {
   version: 1,
   id: 'pg_test',
@@ -29,13 +30,41 @@ const enrollment: ProgramEnrollment = {
   startDate: '2026-12-20',
   createdAt: '2026-12-20T08:00:00Z',
 };
-describe('30-day training programs', () => {
+describe('30-session training programs', () => {
+  it('provides 30 trainable sessions for every program and repeats Push Pull Legs without recovery slots', () => {
+    expect(programs[0].id).toBe('aesthetics-30');
+    for (const p of programs) {
+      const e = { ...enrollment, programId: p.id };
+      const calendar = programCalendar(p, e, [], enrollment.startDate);
+      expect(calendar).toHaveLength(30);
+      expect(calendar.every((d) => d.day.type !== 'rest')).toBe(true);
+      for (let i = 0; i < 30; i++)
+        expect(programRoutine(p, i, e).program?.schedule).toBe('sessions');
+    }
+    const p = programs[0],
+      e = { ...enrollment, programId: p.id };
+    expect(programCalendar(p, e, [], e.startDate).map((d) => d.day.id)).toEqual(
+      Array.from({ length: 30 }, (_, i) => ['push', 'pull', 'legs'][i % 3]),
+    );
+    const oldLog: Workout = {
+      kind: 'session',
+      userId: 'u',
+      date: e.startDate,
+      name: 'Pull',
+      exercises: [],
+      notes: programSessionNotes(
+        { enrollmentId: e.id, programId: p.id, dayIndex: 2, sessionId: 'pull' },
+        true,
+      ),
+    };
+    expect(programCalendar(p, e, [oldLog], e.startDate)[1].done).toBe(true);
+  });
   it('provides six distinct blocks with honest weekly requirements and recovery', () => {
     expect(programs.map((p) => p.id)).toEqual([
+      'aesthetics-30',
       'build-30',
       'lean-30',
       'busy-30',
-      'aesthetics-30',
       'glutes-30',
       'home-30',
     ]);
@@ -107,7 +136,7 @@ describe('30-day training programs', () => {
       'pull',
       'legs',
     ]);
-    expect(days.filter((d) => d.day.type !== 'rest')).toHaveLength(13);
+    expect(days.filter((d) => d.day.type !== 'rest')).toHaveLength(30);
     const context = programRoutine(p, 2, { ...enrollment, programId: p.id }).program!;
     const log: Workout = {
       userId: 'u',
@@ -123,7 +152,7 @@ describe('30-day training programs', () => {
     expect(isWorkoutSession(log)).toBe(true);
   });
   it('links an early workout to the chosen future plan day using its actual logged date', () => {
-    const routine = programRoutine(programs[0], 8, enrollment);
+    const routine = programRoutine(build, 7, enrollment);
     const log: Workout = {
       userId: 'u',
       kind: 'session',
@@ -132,14 +161,14 @@ describe('30-day training programs', () => {
       exercises: [],
       notes: programSessionNotes(routine.program!, true),
     };
-    const days = programCalendar(programs[0], enrollment, [log], enrollment.startDate);
-    expect(days[8].future).toBe(true);
-    expect(days[8].done).toBe(true);
+    const days = programCalendar(build, enrollment, [log], enrollment.startDate);
+    expect(days[7].future).toBe(true);
+    expect(days[7].done).toBe(true);
     expect(days.filter((d) => d.done)).toHaveLength(1);
     expect(log.date).toBe(enrollment.startDate);
   });
   it('maps exactly 30 actual calendar days across year boundaries and creates linked sessions', () => {
-    const program = programs[0],
+    const program = build,
       days = programCalendar(program, enrollment, [], '2026-12-20');
     expect(days.length).toBe(30);
     expect(days[0].date).toBe('2026-12-20');
@@ -154,17 +183,19 @@ describe('30-day training programs', () => {
     });
     expect(routine.exercises.every((e) => e.rir === 3)).toBe(true);
     expect(programRoutine(program, 7, enrollment).exercises.every((e) => e.rir === 2)).toBe(true);
-    expect(() => programRoutine(program, 6, enrollment)).toThrow();
+    expect(() => programRoutine(program, 6, enrollment)).not.toThrow();
     expect(() => programRoutine(program, 30, enrollment)).toThrow();
     expect(() => programRoutine(program, -1, enrollment)).toThrow();
-    expect(() => programRoutine(programs[1], 0, enrollment)).toThrow();
+    expect(() =>
+      programRoutine(programs.find((p) => p.id === 'lean-30')!, 0, enrollment),
+    ).toThrow();
   });
   it('does not count enrollment as exercise and retains complete vs partial logs', () => {
-    const marker = enrollmentWorkout(enrollment, programs[0].title, 'user');
+    const marker = enrollmentWorkout(enrollment, build.title, 'user');
     expect(readProgramEnrollment(marker)).toEqual(enrollment);
     expect(isWorkoutSession(marker)).toBe(false);
     expect(personalWorkoutPlans([marker])).toEqual([]);
-    const context = programRoutine(programs[0], 0, enrollment).program!;
+    const context = programRoutine(build, 0, enrollment).program!;
     const log: Workout = {
       userId: 'user',
       kind: 'session',
@@ -174,11 +205,11 @@ describe('30-day training programs', () => {
       exercises: [],
     };
     expect(readProgramSession(log)?.completed).toBe(false);
-    let days = programCalendar(programs[0], enrollment, [log], '2026-12-20');
+    let days = programCalendar(build, enrollment, [log], '2026-12-20');
     expect(days[0].partial).toBe(true);
     expect(days[0].done).toBe(false);
     days = programCalendar(
-      programs[0],
+      build,
       enrollment,
       [log, { ...log, notes: programSessionNotes(context, true) }],
       '2026-12-20',
@@ -211,21 +242,19 @@ describe('30-day training programs', () => {
       'user',
       'indoor_one',
     );
-    let days = programCalendar(programs[0], enrollment, [record], '2026-12-22');
+    let days = programCalendar(build, enrollment, [record], '2026-12-22');
     expect(days[2].partial).toBe(true);
     expect(days[2].done).toBe(false);
-    expect(programCalendar(programs[0], enrollment, [record, record], '2026-12-22')[2].done).toBe(
-      false,
-    );
+    expect(programCalendar(build, enrollment, [record, record], '2026-12-22')[2].done).toBe(false);
     days = programCalendar(
-      programs[0],
+      build,
       enrollment,
       [record, { ...record, clientId: 'indoor_two' }],
       '2026-12-22',
     );
     expect(days[2].done).toBe(true);
     expect(
-      programCalendar(programs[0], { ...enrollment, id: 'pg_other' }, [record], '2026-12-22').some(
+      programCalendar(build, { ...enrollment, id: 'pg_other' }, [record], '2026-12-22').some(
         (d) => d.done,
       ),
     ).toBe(false);
@@ -252,7 +281,7 @@ describe('30-day training programs', () => {
     expect(isCompoundExercise({ name: 'Calf Press' })).toBe(false);
   });
   it('launches cardio in the normal workout player and counts actual timer seconds toward the day', () => {
-    const routine = programRoutine(programs[0], 2, enrollment);
+    const routine = programRoutine(build, 2, enrollment);
     expect(routine.exercises).toEqual([
       expect.objectContaining({ activity: 'treadmill', durationMinutes: 20, sets: 1 }),
     ]);
@@ -270,18 +299,14 @@ describe('30-day training programs', () => {
         treadmill: [{ exerciseIndex: 0, seconds: 600, targetSeconds: 1200, weightKg: 75 }],
       }),
     };
-    expect(programCalendar(programs[0], enrollment, [log], '2026-12-22')[2].partial).toBe(true);
-    expect(programCalendar(programs[0], enrollment, [log, log], '2026-12-22')[2].done).toBe(false);
+    expect(programCalendar(build, enrollment, [log], '2026-12-22')[2].partial).toBe(true);
+    expect(programCalendar(build, enrollment, [log, log], '2026-12-22')[2].done).toBe(false);
     expect(
-      programCalendar(
-        programs[0],
-        enrollment,
-        [log, { ...log, clientId: 'w_timer2' }],
-        '2026-12-22',
-      )[2].done,
+      programCalendar(build, enrollment, [log, { ...log, clientId: 'w_timer2' }], '2026-12-22')[2]
+        .done,
     ).toBe(true);
     expect(() =>
-      programRoutine(programs[0], 0, { ...enrollment, stoppedAt: new Date().toISOString() }),
+      programRoutine(build, 0, { ...enrollment, stoppedAt: new Date().toISOString() }),
     ).toThrow();
   });
 });

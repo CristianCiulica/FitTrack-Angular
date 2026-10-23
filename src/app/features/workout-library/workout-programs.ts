@@ -542,8 +542,12 @@ export function workoutPrograms(
         rest('rest-b'),
       ],
     },
-  ];
+  ].sort(
+    (a, b) => Number(b.id === 'aesthetics-30') - Number(a.id === 'aesthetics-30'),
+  ) as WorkoutProgram[];
 }
+export const programSequence = (program: WorkoutProgram) =>
+  program.week.filter((day) => day.type !== 'rest');
 export function programRoutine(
   program: WorkoutProgram,
   dayIndex: number,
@@ -552,6 +556,7 @@ export function programRoutine(
   if (
     enrollment.programId !== program.id ||
     !validProgramContext({
+      schedule: 'sessions',
       enrollmentId: enrollment.id,
       programId: program.id,
       dayIndex,
@@ -559,7 +564,8 @@ export function programRoutine(
     })
   )
     throw new Error('Invalid plan session.');
-  const day = program.week[dayIndex % 7];
+  const sequence = programSequence(program);
+  const day = sequence[dayIndex % sequence.length];
   if (enrollment.stoppedAt || day.type === 'rest')
     throw new Error('This day is not available to train.');
   const routine = day.routine ?? {
@@ -577,6 +583,7 @@ export function programRoutine(
     ],
   };
   const context: ProgramSessionContext = {
+    schedule: 'sessions',
     enrollmentId: enrollment.id,
     programId: program.id,
     dayIndex,
@@ -617,7 +624,19 @@ export function programCompletions(
       context.programId !== enrollment.programId
     )
       continue;
-    const planned = program?.week[context.dayIndex % 7];
+    const modern = context.schedule === 'sessions' || enrollment.schedule === 'sessions';
+    const sequence = program ? programSequence(program) : [];
+    const planned = program
+      ? modern
+        ? sequence[context.dayIndex % sequence.length]
+        : program.week[context.dayIndex % 7]
+      : undefined;
+    // Keep performed sessions from the earlier calendar, compacting only its recovery slots.
+    const targetIndex =
+      !modern && program
+        ? Math.floor(context.dayIndex / 7) * sequence.length +
+          program.week.slice(0, context.dayIndex % 7).filter((d) => d.type !== 'rest').length
+        : context.dayIndex;
     if (
       planned &&
       (planned.id !== context.sessionId ||
@@ -625,21 +644,21 @@ export function programCompletions(
     )
       continue;
     if (isTimedCardioOnly(workout)) {
-      const seconds = (cardioSeconds.get(context.dayIndex) ?? 0) + treadmillSeconds(workout);
-      cardioSeconds.set(context.dayIndex, seconds);
-      result.set(context.dayIndex, {
+      const seconds = (cardioSeconds.get(targetIndex) ?? 0) + treadmillSeconds(workout);
+      cardioSeconds.set(targetIndex, seconds);
+      result.set(targetIndex, {
         complete: seconds >= (planned?.cardio?.minutes ?? 1) * 60,
         date: workout.date,
       });
     } else if (strength) {
-      if (!result.get(context.dayIndex)?.complete)
-        result.set(context.dayIndex, { complete: strength.completed, date: workout.date });
+      if (!result.get(targetIndex)?.complete)
+        result.set(targetIndex, { complete: strength.completed, date: workout.date });
     } else if (cardio) {
       const seconds =
-        (cardioSeconds.get(context.dayIndex) ?? 0) +
+        (cardioSeconds.get(targetIndex) ?? 0) +
         (Date.parse(cardio.endedAt) - Date.parse(cardio.startedAt)) / 1000;
-      cardioSeconds.set(context.dayIndex, seconds);
-      result.set(context.dayIndex, {
+      cardioSeconds.set(targetIndex, seconds);
+      result.set(targetIndex, {
         complete: seconds >= (planned?.cardio?.minutes ?? 0) * 60,
         date: workout.date,
       });
@@ -655,7 +674,8 @@ export function programCalendar(
 ) {
   const completions = programCompletions(enrollment, workouts, program);
   return Array.from({ length: 30 }, (_, index) => {
-    const day = program.week[index % 7],
+    const sequence = programSequence(program);
+    const day = sequence[index % sequence.length],
       date = offsetDay(enrollment.startDate, index),
       log = completions.get(index);
     return {

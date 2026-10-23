@@ -13,6 +13,7 @@ export interface ProgramEnrollment {
   startDate: string;
   createdAt: string;
   stoppedAt?: string;
+  schedule?: 'sessions';
 }
 export interface ProgramSessionLog extends ProgramSessionContext {
   version: 1;
@@ -36,7 +37,8 @@ export function readProgramEnrollment(
     const m = JSON.parse(
       workout.notes.slice(PROGRAM_ENROLLMENT_PREFIX.length),
     ) as ProgramEnrollment;
-    return m.version === 1 &&
+    return (m.schedule === undefined || m.schedule === 'sessions') &&
+      m.version === 1 &&
       /^pg_[a-zA-Z0-9-]{1,80}$/.test(m.id) &&
       slug(m.programId) &&
       validDayKey(m.startDate) &&

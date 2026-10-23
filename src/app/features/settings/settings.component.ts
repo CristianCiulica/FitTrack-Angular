@@ -1,3 +1,4 @@
+import { achievementReportHtml } from '../../core/utils/activity-export';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -52,6 +53,7 @@ export class SettingsComponent implements OnInit {
   readonly units = this.profileService.units;
   readonly deleting = signal(false);
   readonly exporting = signal(false);
+  readonly exportingPdf = signal(false);
   private readonly workouts = inject(WorkoutService);
   private readonly runs = inject(RunningSessionService);
   private readonly weights = inject(WeightService);
@@ -71,9 +73,46 @@ export class SettingsComponent implements OnInit {
   exportData(): void {
     if (this.exporting()) return;
     this.exporting.set(true);
-    this.profileService.exportData().pipe(finalize(() => this.exporting.set(false))).subscribe({
-      error: () => this.message.error('Could not export your data. Check your connection and try again.'),
-    });
+    this.profileService
+      .exportData()
+      .pipe(finalize(() => this.exporting.set(false)))
+      .subscribe({
+        error: () =>
+          this.message.error('Could not export your data. Check your connection and try again.'),
+      });
+  }
+
+  exportPdf(): void {
+    if (this.exportingPdf()) return;
+    const report = window.open('', '_blank');
+    if (!report) {
+      this.message.error('Allow pop-ups to open your PDF report.');
+      return;
+    }
+    report.opener = null;
+    report.document.body.textContent = 'Preparing your FitTrack achievements…';
+    this.exportingPdf.set(true);
+    this.profileService
+      .getExportData()
+      .pipe(finalize(() => this.exportingPdf.set(false)))
+      .subscribe({
+        next: (data) => {
+          if (report.closed) return;
+          report.document.open();
+          report.document.write(achievementReportHtml(data));
+          report.document.close();
+          void report.document.fonts.ready.then(() => {
+            if (!report.closed) {
+              report.focus();
+              report.print();
+            }
+          });
+        },
+        error: () => {
+          report.close();
+          this.message.error('Could not export your achievements. Please try again.');
+        },
+      });
   }
 
   deleteAccount(): void {
@@ -85,7 +124,9 @@ export class SettingsComponent implements OnInit {
     this.profileService.deleteAccount().subscribe({
       next: () => {
         void this.nativeRun.clear(uid);
-        this.workouts.eraseCache(uid); this.runs.eraseCache(uid); this.weights.eraseCache(uid);
+        this.workouts.eraseCache(uid);
+        this.runs.eraseCache(uid);
+        this.weights.eraseCache(uid);
         this.profileService.clear();
         signOut(this.firebaseAuth).finally(() => {
           this.deleting.set(false);

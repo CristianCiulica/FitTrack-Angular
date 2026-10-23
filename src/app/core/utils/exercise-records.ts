@@ -24,6 +24,7 @@ export interface ExerciseRecord {
 export function exerciseRecords(
   workouts: Workout[],
   today = localDateKey(new Date()),
+  includeZero = false,
 ): ExerciseRecord[] {
   const records = new Map<string, ExerciseRecord>();
   const history = workouts
@@ -54,7 +55,7 @@ export function exerciseRecords(
       ).filter(
         (p) =>
           Number.isFinite(p.weight) &&
-          p.weight >= 0 &&
+          (includeZero ? p.weight >= 0 : p.weight > 0) &&
           p.weight <= 1000 &&
           Number.isInteger(p.reps) &&
           p.reps > 0 &&
@@ -87,7 +88,7 @@ export function exerciseRecords(
           drop.setIndex >= 0 &&
           drop.setIndex < exercise.sets &&
           Number.isFinite(drop.weight) &&
-          drop.weight >= 0 &&
+          (includeZero ? drop.weight >= 0 : drop.weight > 0) &&
           drop.weight < (exercise.setWeights?.[drop.setIndex] ?? exercise.weight) &&
           Number.isInteger(drop.reps) &&
           drop.reps > 0 &&

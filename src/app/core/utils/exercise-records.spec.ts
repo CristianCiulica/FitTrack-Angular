@@ -59,7 +59,8 @@ describe('Exercise records from performed history', () => {
     ]);
     const later = session('2026-10-02', [exercise({ setWeights: [80, 80] })]);
     expect(exerciseRecords([old, later])[0].bestWeight.weight).toBe(80);
-    expect(exerciseRecords([old])[0].bestWeight.weight).toBe(0);
+    expect(exerciseRecords([old])).toEqual([]);
+    expect(exerciseRecords([old, later])[0].initial.weight).toBe(80);
   });
   it('uses performed timestamp to order same-day sessions and retains earliest record on ties', () => {
     const later = session('2026-10-01', [exercise({ setWeights: [70, 70] })], {
@@ -89,7 +90,7 @@ describe('Exercise records from performed history', () => {
         exercise(),
         exercise(),
       ]),
-    ]);
+    ], undefined, true);
     expect(result).toHaveLength(2);
     expect(result.find((r) => r.timed)?.bestReps.reps).toBe(30);
     expect(result.find((r) => !r.timed)?.sessions).toHaveLength(1);

@@ -29,9 +29,19 @@
           <span nz-icon nzType="ft:nutrition"></span><span>Nutrition</span>
         </a>
       </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav sidebar-secondary-item"><a routerLink="/progress" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
+      <li
+        nz-menu-item
+        routerLinkActive="ant-menu-item-selected"
+        class="progress-nav sidebar-secondary-item"
+      >
+        <a routerLink="/progress" aria-label="Progress"
+          ><span nz-icon nzType="line-chart"></span><span>Progress</span></a
+        >
+      </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
+        <a routerLink="/weight" aria-label="Weight"
+          ><span nz-icon nzType="line-chart"></span><span>Weight</span></a
+        >
       </li>
       <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
         <a routerLink="/account" aria-label="Profile">
@@ -60,7 +70,6 @@
           <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
         </h2>
       </div>
-
     </nz-header>
 
     <nz-content class="app-content">
@@ -78,21 +87,38 @@
             </div>
             <div class="appearance-options" role="group" aria-label="Appearance">
               @for (option of appearanceOptions; track option) {
-                <button type="button" class="appearance-option"
+                <button
+                  type="button"
+                  class="appearance-option"
                   [class.selected]="appearance.preference() === option"
                   [attr.aria-pressed]="appearance.preference() === option"
-                  (click)="appearance.setPreference(option)">
-                  <span class="appearance-preview" [class]="'appearance-preview preview-' + option" aria-hidden="true">
+                  (click)="appearance.setPreference(option)"
+                >
+                  <span
+                    class="appearance-preview"
+                    [class]="'appearance-preview preview-' + option"
+                    aria-hidden="true"
+                  >
                     <span class="preview-header"></span>
                     <span class="preview-card"><i></i><i></i></span>
                     <span class="preview-dock"><i></i><i></i><i></i></span>
                   </span>
-                  <span class="appearance-label">{{ option === 'system' ? 'Auto' : (option | titlecase) }}</span>
-                  <span class="appearance-check" aria-hidden="true">{{ appearance.preference() === option ? '✓' : '' }}</span>
+                  <span class="appearance-label">{{
+                    option === 'system' ? 'Auto' : (option | titlecase)
+                  }}</span>
+                  <span class="appearance-check" aria-hidden="true">{{
+                    appearance.preference() === option ? '✓' : ''
+                  }}</span>
                 </button>
               }
             </div>
-            <p class="appearance-note">{{ appearance.preference() === 'system' ? 'Auto follows your device’s appearance.' : 'Saved on this device.' }}</p>
+            <p class="appearance-note">
+              {{
+                appearance.preference() === 'system'
+                  ? 'Auto follows your device’s appearance.'
+                  : 'Saved on this device.'
+              }}
+            </p>
           </section>
 
           <div class="setting-row">
@@ -101,30 +127,44 @@
               <small>How weight and height are shown across the app.</small>
             </div>
             <div class="segmented">
-              <button type="button" [class.selected]="units() === 'metric'" (click)="setUnits('metric')">
+              <button
+                type="button"
+                [class.selected]="units() === 'metric'"
+                (click)="setUnits('metric')"
+              >
                 Metric
               </button>
-              <button type="button" [class.selected]="units() === 'imperial'" (click)="setUnits('imperial')">
+              <button
+                type="button"
+                [class.selected]="units() === 'imperial'"
+                (click)="setUnits('imperial')"
+              >
                 Imperial
               </button>
             </div>
           </div>
-
         </nz-card>
 
-        <nz-card class="settings-card info-card" style="margin-bottom: 24px;">
+        <nz-card class="settings-card info-card" style="margin-bottom: 24px">
           <div class="setting-row">
             <div class="setting-copy">
               <strong>Export data</strong>
-              <small>Download a copy of your personal data, workouts, and running sessions as a JSON file.</small>
+              <small>Compact workout, running and body-weight data.</small>
             </div>
-            <button
-              nz-button
-              nzType="default"
-              (click)="exportData()"
-              [nzLoading]="exporting()"
-            >
-              <span nz-icon nzType="download"></span> Export
+            <button nz-button nzType="default" (click)="exportData()" [nzLoading]="exporting()">
+              <span nz-icon nzType="download"></span> Export to JSON
+            </button>
+          </div>
+          <div class="setting-row">
+            <div class="setting-copy">
+              <strong>Achievements report</strong
+              ><small
+                >Activity, badges and personal records. Choose Save as PDF in the print
+                dialog.</small
+              >
+            </div>
+            <button nz-button nzType="default" (click)="exportPdf()" [nzLoading]="exportingPdf()">
+              <span nz-icon nzType="download"></span> Export to PDF
             </button>
           </div>
         </nz-card>
@@ -133,7 +173,9 @@
           <div class="setting-row">
             <div class="setting-copy">
               <strong>Delete account</strong>
-              <small>Permanently removes your profile, workouts and runs. This can't be undone.</small>
+              <small
+                >Permanently removes your profile, workouts and runs. This can't be undone.</small
+              >
             </div>
             <button
               nz-button

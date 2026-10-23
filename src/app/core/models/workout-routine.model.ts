@@ -1,6 +1,7 @@
 import { MuscleGroup } from './workout.model';
 
 export interface ProgramSessionContext {
+  schedule?: 'sessions';
   enrollmentId: string;
   programId: string;
   dayIndex: number;
@@ -39,6 +40,7 @@ export function validProgramContext(value: unknown): value is ProgramSessionCont
   if (!value || typeof value !== 'object') return false;
   const c = value as ProgramSessionContext;
   return (
+    (c.schedule === undefined || c.schedule === 'sessions') &&
     typeof c.enrollmentId === 'string' &&
     /^pg_[a-zA-Z0-9-]{1,80}$/.test(c.enrollmentId) &&
     typeof c.programId === 'string' &&

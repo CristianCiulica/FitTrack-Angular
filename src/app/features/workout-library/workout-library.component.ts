@@ -204,7 +204,7 @@ export class WorkoutLibraryComponent {
       done,
       total,
       next,
-      day: Math.min(30, Math.max(1, programDayIndex(e.startDate, this.today()) + 1)),
+      day: next ? next.index + 1 : 30,
       percent: total ? (done / total) * 100 : 0,
     };
   });
@@ -309,6 +309,7 @@ export class WorkoutLibraryComponent {
         programId: this.selectedProgram()?.id ?? 'preview',
         startDate: validDayKey(this.startDate) ? this.startDate : this.today(),
         createdAt: new Date().toISOString(),
+        schedule: 'sessions',
       }
     );
   }
@@ -345,6 +346,7 @@ export class WorkoutLibraryComponent {
       programId: program.id,
       startDate: validDayKey(this.startDate) ? this.startDate : this.today(),
       createdAt: new Date().toISOString(),
+      schedule: 'sessions',
     };
     this.saving.set(true);
     this.error.set('');
@@ -359,7 +361,7 @@ export class WorkoutLibraryComponent {
       this.status.set(
         result.id?.startsWith('w_')
           ? 'Plan saved on this device. It syncs when you reconnect.'
-          : 'Your 30-day plan is ready. Choose a day to get started.',
+          : 'Your 30-session plan is ready. Choose a session to get started.',
       );
     } catch (e) {
       this.error.set(e instanceof Error ? e.message : 'Could not save the plan. Please retry.');

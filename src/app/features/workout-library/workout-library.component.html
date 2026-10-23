@@ -1,7 +1,7 @@
 @if (activeSummary(); as active) {
   <section class="active-program">
     <div class="active-program-copy">
-      <span class="library-eyebrow">YOUR CURRENT PLAN · DAY {{ active.day }} / 30</span>
+      <span class="library-eyebrow">YOUR CURRENT PLAN · SESSION {{ active.day }} / 30</span>
       <h2>{{ active.program.title }}</h2>
       <p>
         Next up: <strong>{{ nextSession() }}</strong>
@@ -93,7 +93,7 @@
   </div>
   <header class="library-hero">
     <h1>Programs</h1>
-    <p>30-day plans</p>
+    <p>30-session plans</p>
   </header>
   <div class="program-grid">
     @for (program of filteredPrograms(); track program.id) {
@@ -115,7 +115,7 @@
               ><strong>{{ program.minutes }}</strong
               ><small>minutes</small></span
             >
-            <span><strong>30</strong><small>days</small></span>
+            <span><strong>30</strong><small>sessions</small></span>
           </div>
         </div>
         <div class="program-tile-bottom">
@@ -186,7 +186,7 @@
   @if (previousBlocks().length) {
     <details class="previous-blocks">
       <summary>
-        Previous 30-day blocks <span>{{ previousBlocks().length }}</span>
+        Previous 30-session blocks <span>{{ previousBlocks().length }}</span>
       </summary>
       @for (enrollment of visibleBlocks(); track enrollment.id) {
         @for (program of programs(); track program.id) {
@@ -336,7 +336,7 @@
     <header>
       <span class="library-eyebrow">{{
         selectedProgram()
-          ? '30-DAY BLOCK'
+          ? '30-SESSION BLOCK'
           : selectedSavedPlan()
             ? 'YOUR PERSONALISED PLAN'
             : 'SESSION PREVIEW'
@@ -362,7 +362,7 @@
                 <h2 id="program-detail-title">{{ program.title }}</h2>
               </div>
               <div class="program-detail-facts">
-                <span><strong>30</strong><small>days</small></span>
+                <span><strong>30</strong><small>sessions</small></span>
                 <span
                   ><strong>{{ program.gymDays }}</strong
                   ><small>days / week</small></span
@@ -393,10 +393,10 @@
               </div>
             </section>
             <div class="detail-section-heading">
-              <h3>Your month</h3>
+              <h3>Your sessions</h3>
               <span>{{ completed() }} / {{ totalSessions() }} sessions</span>
             </div>
-            <div class="month-map" role="group" aria-label="30-day plan calendar">
+            <div class="month-map" role="group" aria-label="30-session plan calendar">
               @for (entry of calendar(); track entry.index) {
                 <button
                   type="button"
@@ -406,7 +406,7 @@
                   [class.today]="entry.today"
                   [attr.aria-pressed]="selectedDay() === entry.index"
                   [attr.aria-label]="
-                    'Day ' +
+                    'Session ' +
                     (entry.index + 1) +
                     ': ' +
                     entry.day.title +
@@ -436,7 +436,7 @@
                 class="library-text-button new-block-action"
                 (click)="newBlock()"
               >
-                Start a new 30-day block <span aria-hidden="true">↗</span>
+                Start a new 30-session block <span aria-hidden="true">↗</span>
               </button>
             }
             @if (selectedEnrollment() && !selectedEnrollment()?.stoppedAt) {
@@ -683,10 +683,7 @@
               <span class="program-footer-hint">{{
                 currentDay()?.day?.type === 'rest'
                   ? 'Recovery day'
-                  : 'Day ' +
-                    ((currentDay()?.index ?? 0) + 1) +
-                    ' · ' +
-                    dateLabel(currentDay()!.date)
+                  : 'Session ' + ((currentDay()?.index ?? 0) + 1) + ''
               }}</span>
               @if (currentDay()?.day?.type !== 'rest') {
                 <button type="button" class="library-primary" (click)="startDay()">
