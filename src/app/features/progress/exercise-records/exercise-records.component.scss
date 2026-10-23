@@ -240,3 +240,73 @@ details[open] summary svg {
     box-sizing: border-box;
   }
 }
+
+.groups-back {
+  display: block;
+  padding: 0 0 12px;
+  min-height: 36px;
+  color: var(--accent);
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.muscle-groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding-bottom: 40px;
+  button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 110px;
+    padding: 20px;
+    text-align: left;
+    border: 1px solid var(--hairline);
+    border-radius: 22px;
+    background: var(--surface-strong);
+    color: var(--ink);
+    cursor: pointer;
+    font: inherit;
+    strong {
+      display: block;
+      font-size: 18px;
+      letter-spacing: -0.025em;
+    }
+    small {
+      display: block;
+      color: var(--ink-tertiary);
+      font-size: 12px;
+      margin-top: 6px;
+    }
+    svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: var(--ink-tertiary);
+      stroke-width: 1.6;
+      flex-shrink: 0;
+    }
+    &:hover {
+      border-color: var(--accent);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+  }
+}
+@media (max-width: 650px) {
+  .muscle-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    button {
+      padding: 17px;
+      strong {
+        font-size: 16px;
+      }
+    }
+  }
+}

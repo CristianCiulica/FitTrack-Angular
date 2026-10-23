@@ -1,27 +1,48 @@
 <section aria-label="Exercise records">
   <div class="records-toolbar">
     <div>
-      <h2>Your exercises</h2>
-      <span>{{ records().length }} recorded</span>
+      @if (activeGroup()) {
+        <button type="button" class="groups-back" (click)="chooseGroup(null)">
+          ‹ Muscle groups
+        </button>
+      }
+      <h2>{{ activeGroup() || 'Muscle groups' }}</h2>
+      <span>{{ activeGroup() ? filtered().length : records().length }} exercises</span>
     </div>
-    <label class="records-search"
-      ><svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="10" cy="10" r="6" />
-        <path d="m15 15 5 5" /></svg
-      ><input
-        type="search"
-        aria-label="Find an exercise"
-        placeholder="Find an exercise"
-        [value]="search()"
-        (input)="search.set($any($event.target).value)"
-    /></label>
+    @if (activeGroup()) {
+      <label class="records-search"
+        ><svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="10" cy="10" r="6" />
+          <path d="m15 15 5 5" /></svg
+        ><input
+          type="search"
+          aria-label="Find an exercise"
+          placeholder="Find an exercise"
+          [value]="search()"
+          (input)="search.set($any($event.target).value)"
+      /></label>
+    }
   </div>
+  @if (!activeGroup()) {
+    <div class="muscle-groups">
+      @for (group of groups(); track group.name) {
+        <button type="button" (click)="chooseGroup(group.name)">
+          <span
+            ><strong>{{ group.name }}</strong
+            ><small
+              >{{ group.count }} {{ group.count === 1 ? 'exercise' : 'exercises' }}</small
+            ></span
+          ><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg>
+        </button>
+      }
+    </div>
+  }
   @if (!records().length && !loading()) {
     <div class="records-empty">
       <h3>No exercises recorded yet</h3>
       <p>Your completed workouts will appear here from History.</p>
     </div>
-  } @else if (records().length && !filtered().length) {
+  } @else if (activeGroup() && records().length && !filtered().length) {
     <div class="records-empty">
       <p>No exercises match your search.</p>
       <button type="button" (click)="search.set('')">Clear search</button>

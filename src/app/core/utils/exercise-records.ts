@@ -1,4 +1,4 @@
-import { Workout } from '../models/workout.model';
+import { Workout, MuscleGroup, MUSCLE_GROUPS } from '../models/workout.model';
 import { isWorkoutSession } from './workout-kind';
 import { exerciseKey } from './workout-history';
 import { localDateKey } from './weight-progress';
@@ -13,6 +13,7 @@ export interface ExerciseRecord {
   key: string;
   name: string;
   timed: boolean;
+  muscleGroup: MuscleGroup;
   initial: ExercisePerformance;
   bestWeight: ExercisePerformance;
   bestReps: ExercisePerformance;
@@ -66,6 +67,9 @@ export function exerciseRecords(
           key,
           name: exercise.exerciseName.trim().replace(/\s+/g, ' '),
           timed,
+          muscleGroup: MUSCLE_GROUPS.includes(exercise.muscleGroup)
+            ? exercise.muscleGroup
+            : 'Full Body',
           initial: pairs[0],
           bestWeight: pairs[0],
           bestReps: pairs[0],
@@ -73,6 +77,9 @@ export function exerciseRecords(
         };
         records.set(key, record);
       }
+      record.muscleGroup = MUSCLE_GROUPS.includes(exercise.muscleGroup)
+        ? exercise.muscleGroup
+        : record.muscleGroup;
       for (const drop of exercise.dropSets ?? []) {
         if (
           !timed &&

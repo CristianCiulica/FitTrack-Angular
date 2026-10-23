@@ -1,3 +1,4 @@
+import { MuscleGroup, MUSCLE_GROUPS } from '../../../core/models/workout.model';
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WorkoutService } from '../../../core/services/workout.service';
@@ -27,8 +28,27 @@ export class ExerciseRecordsComponent {
   readonly loading = input(false);
   readonly search = signal('');
   readonly records = computed(() => exerciseRecords(this.workouts.workouts()));
+  readonly selectedGroup = signal<MuscleGroup | null>(null);
+  readonly groups = computed(() =>
+    MUSCLE_GROUPS.map((name) => ({
+      name,
+      count: this.records().filter((r) => r.muscleGroup === name).length,
+    })).filter((g) => g.count > 0),
+  );
+  readonly activeGroup = computed(() =>
+    this.groups().some((g) => g.name === this.selectedGroup()) ? this.selectedGroup() : null,
+  );
+  chooseGroup(group: MuscleGroup | null) {
+    this.selectedGroup.set(group);
+    this.search.set('');
+    this.expanded.set(new Set());
+  }
   readonly filtered = computed(() =>
-    this.records().filter((r) => r.name.toLowerCase().includes(this.search().trim().toLowerCase())),
+    this.records().filter(
+      (r) =>
+        r.muscleGroup === this.activeGroup() &&
+        r.name.toLowerCase().includes(this.search().trim().toLowerCase()),
+    ),
   );
   readonly unit = computed(() => weightUnitLabel(this.profile.units()));
   load(kg: number) {
