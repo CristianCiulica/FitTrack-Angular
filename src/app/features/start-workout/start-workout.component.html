@@ -314,7 +314,7 @@
               <button type="button" class="stepper-btn" aria-label="Increase reps" (click)="adjustReps(1)">+</button>
             </div>
           </div>
-          <div class="live-adjust">
+          <div class="live-adjust" *ngIf="!bodyweightActive()">
             <label for="live-weight">Weight ({{ weightUnit() }})</label>
             <div class="weight-stepper">
               <button type="button" class="stepper-btn" aria-label="Decrease weight" (click)="adjustWeight(-2.5)">−</button>
@@ -340,11 +340,11 @@
         </div>
       }
       <div class="previous-performance" *ngIf="!treadmillActive() && !activeDrop()">
-        <p *ngIf="!setInputsValid()" role="alert">Enter valid reps and weight before finishing this set.</p>
+        <p *ngIf="!setInputsValid()" role="alert">{{ bodyweightActive() ? 'Enter valid reps before finishing this set.' : 'Enter valid reps and weight before finishing this set.' }}</p>
         @if (previousSetData(); as previous) {
-          <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}<ng-container *ngIf="ex.repUnit !== 'seconds'"> <i>·</i> {{ displayLoad(previous.weight) }} {{ weightUnit() }}</ng-container></strong></div>
+          <div><span>LAST TIME · {{ previous.date | date:'MMM d' }} · SET {{ previous.set }}</span><strong>{{ previous.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}<ng-container *ngIf="ex.repUnit !== 'seconds' && !bodyweightActive()"> <i>·</i> {{ displayLoad(previous.weight) }} {{ weightUnit() }}</ng-container></strong></div>
           <button type="button" *ngIf="ex.repUnit !== 'seconds'" (click)="usePreviousValues(previous.weight, previous.reps)">Use these values</button>
-        } @else if (ex.repUnit !== 'seconds') { <p>{{ historyLoading() ? 'Loading your previous session…' : historyUnavailable() ? 'Previous session unavailable. You can enter your values.' : 'First time logging this exercise. Start with your own values.' }}</p> }
+        } @else if (ex.repUnit !== 'seconds') { <p>{{ historyLoading() ? 'Loading your previous session…' : historyUnavailable() ? 'Previous session unavailable. You can enter your values.' : bodyweightActive() ? 'Bodyweight · log your completed reps.' : 'First time logging this exercise. Start with your own values.' }}</p> }
         @if (ex.repUnit === 'seconds') { <p>Rest starts automatically when the timer ends.</p> }
       </div>
     </div>

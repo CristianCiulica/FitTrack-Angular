@@ -56,6 +56,8 @@ const HOME_ROUTINES: Routine[] = [
 ];
 
 // General-purpose templates; users choose loads appropriate to their experience.
+const isBodyweightAbs = (name: string) => /^(?:leg raises?|(?:abdominal )?crunch(?:es)?)$/i.test(name.trim());
+
 const PREDEFINED_ROUTINES: Routine[] = [
   {
     name: 'PUSH',
@@ -793,7 +795,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   currentWeight = signal(0);
   readonly weightInputValid = signal(true);
   readonly repsInputValid = signal(true);
-  readonly setInputsValid = computed(() => this.weightInputValid() && this.repsInputValid());
+  readonly bodyweightActive = computed(() => isBodyweightAbs(this.currentExercise()?.name ?? '') && !this.currentExercise()?.repUnit);
+  readonly setInputsValid = computed(() => (this.bodyweightActive() || this.weightInputValid()) && this.repsInputValid());
   readonly weightUnit = computed(() => weightUnitLabel(this.profileService.units?.() ?? 'metric'));
   readonly weightInput = computed(() => this.displayLoad(this.currentWeight()));
   displayLoad(kg: number): number { return displayWeight(kg, this.profileService.units?.() ?? 'metric'); }
@@ -881,7 +884,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   });
   readonly currentLoadChange = computed(() => {
     const exercise = this.currentExercise();
-    if (!exercise || exercise.repUnit || this.treadmillActive() || this.activeDrop() || !this.weightInputValid()) return null;
+    if (!exercise || exercise.repUnit || this.bodyweightActive() || this.treadmillActive() || this.activeDrop() || !this.weightInputValid()) return null;
     return this.weightChange(exercise.name, this.currentSetIndex() - 1, this.currentWeight());
   });
 
@@ -895,7 +898,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   private completedLoadChanges(exerciseIndex: number) {
     const exercise = this.currentRoutine().exercises[exerciseIndex];
-    if (exercise.repUnit || isTreadmillExercise(exercise)) return [];
+    if (exercise.repUnit || isTreadmillExercise(exercise) || isBodyweightAbs(exercise.name)) return [];
     return this.loggedWeights[exerciseIndex].flatMap((weight, index) => {
       const change = weight == null ? null : this.weightChange(exercise.name, index, weight);
       return change ? [{set: index + 1, ...change}] : [];
@@ -1285,6 +1288,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   // greutatea propusa pentru setul curent:
   // ultimul set logat in aceasta sesiune > ultima greutate din istoric > planul
   private syncCurrentWeight() {
+    if (this.bodyweightActive()) { this.currentWeight.set(0); return; }
     const exIdx = this.currentExerciseIndex();
     const logged = this.loggedWeights[exIdx];
     const saved = logged?.[this.currentSetIndex() - 1];
@@ -1301,7 +1305,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   usePreviousValues(weight: number, reps: number): void {
-    this.currentWeight.set(weight); this.currentReps.set(reps);
+    this.currentWeight.set(this.bodyweightActive() ? 0 : weight); this.currentReps.set(reps);
     this.weightInputValid.set(true); this.repsInputValid.set(true);
     this.checkpointWorkout();
   }
@@ -1428,6 +1432,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   finishSet() {
+    if (this.bodyweightActive()) this.currentWeight.set(0);
     if (this.state() !== 'active' || !this.setInputsValid() || !this.dropInputValid()) return;
     if (this.currentExercise()?.repUnit === 'seconds' || this.treadmillActive()) {
       this.stopHoldTimer();
@@ -1701,7 +1706,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.currentExerciseIndex.set(draft.exerciseIndex); this.currentSetIndex.set(draft.setIndex);
     this.loggedDrops = draft.dropSets ?? draft.weights.map(() => []); this.activeDrop.set(draft.activeDrop ?? false);
     this.loggedWeights = draft.weights; this.loggedReps = draft.reps;
-    this.currentWeight.set(draft.currentWeight); this.currentReps.set(draft.currentReps);
+    this.currentWeight.set(this.bodyweightActive() ? 0 : draft.currentWeight); this.currentReps.set(draft.currentReps);
     this.sessionStartedAt = draft.startedAt; this.sessionEndedAt = draft.endedAt;
     this.restDeadline = draft.restDeadline; this.restTimeTarget.set(draft.restSeconds);
     this.holdAccumulatedMs = draft.holdElapsedMs; this.holdElapsedMs.set(draft.holdElapsedMs); this.holdRunning.set(false);
