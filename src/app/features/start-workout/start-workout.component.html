@@ -89,6 +89,7 @@
           </a>
         </li>
       </ul>
+  <ft-tab-bar />
   </nz-sider>
 
   <nz-layout class="main-layout">
@@ -235,7 +236,7 @@
 <div class="workout-live" *ngIf="workoutInProgress()">
   <div class="live-top">
     <div class="live-routine">
-      <span class="live-eyebrow">Workout in progress</span>
+      <span class="live-eyebrow">Elapsed <span role="timer" style="font-variant-numeric: tabular-nums">{{ elapsedClock() }}</span></span>
       <h2>{{ currentRoutine().name }}</h2>
     </div>
     <div class="live-progress-ring"><strong>{{ completedSets() }}</strong><span>/ {{ totalSets() }} {{ hasTreadmill() ? 'steps' : 'sets' }}</span></div>
@@ -369,8 +370,8 @@
     <span class="rest-label">Rest</span>
     <div class="timer-display">{{ restClock() }}</div>
     <div class="timer-adjust">
-      <button nz-button (click)="addTime(-10)">-10s</button>
-      <button nz-button (click)="addTime(10)">+10s</button>
+      <ft-action (activated)="addTime(-10)">-10s</ft-action>
+      <ft-action (activated)="addTime(10)">+10s</ft-action>
     </div>
   </div>
 
@@ -388,35 +389,29 @@
   </div>
   <!-- Actiuni, fixate jos -->
   <div class="live-actions">
-    <button nz-button nzDanger nzSize="large" class="live-stop" aria-label="Stop workout" title="Stop workout" [disabled]="saving()" (click)="confirmStopWorkout()">
+    <ft-action [destructive]="true" class="live-stop" label="Stop workout" title="Stop workout" [disabled]="saving()" (activated)="confirmStopWorkout()">
       <span nz-icon nzType="close" aria-hidden="true"></span>
-    </button>
-    <button *ngIf="state() === 'active' && (currentExercise()?.repUnit === 'seconds' || treadmillActive())" nz-button nzType="primary" nzSize="large" class="live-primary" [disabled]="treadmillActive() && !treadmillInputValid()" (click)="toggleHoldTimer()">
+    </ft-action>
+    <ft-action *ngIf="state() === 'active' && (currentExercise()?.repUnit === 'seconds' || treadmillActive())" class="live-primary" [disabled]="treadmillActive() && !treadmillInputValid()" (activated)="toggleHoldTimer()">
       <svg class="hold-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path [attr.d]="holdRunning() ? 'M9 8v8m6-8v8' : 'm10 8 6 4-6 4V8Z'"/></svg>
       {{ holdRunning() ? 'Pause timer' : holdElapsedMs() > 0 ? 'Resume timer' : 'Start timer' }}
-    </button>
-    <button
+    </ft-action>
+    <ft-action
       *ngIf="state() === 'active' && currentExercise()?.repUnit !== 'seconds' && !treadmillActive()"
-      nz-button
-      nzType="primary"
-      nzSize="large"
-      class="live-primary"
-      (click)="finishSet()"
+     class="live-primary"
+      (activated)="finishSet()"
       [disabled]="!setInputsValid() || !dropInputValid()"
     >
       <span nz-icon nzType="check"></span> {{ activeDrop() ? 'Finish drop set' : 'Finish set' }}
-    </button>
-    <button
+    </ft-action>
+    <ft-action
       *ngIf="state() === 'rest'"
-      nz-button
-      nzType="primary"
-      nzSize="large"
-      class="live-primary"
-      (click)="skipRest()"
+     class="live-primary"
+      (activated)="skipRest()"
     >
       <span nz-icon nzType="forward"></span> Skip rest
-    </button>
-    <button *ngIf="state() === 'review'" nz-button nzType="primary" nzSize="large" class="live-primary" [disabled]="completedSets() === 0" [nzLoading]="saving()" (click)="finishWorkout()"><span nz-icon nzType="check"></span> Save workout</button>
+    </ft-action>
+    <ft-action *ngIf="state() === 'review'" class="live-primary" [disabled]="completedSets() === 0" [busy]="saving()" (activated)="finishWorkout()"><span nz-icon nzType="check"></span> Save workout</ft-action>
   </div>
 </div>
 

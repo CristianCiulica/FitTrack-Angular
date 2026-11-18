@@ -1,3 +1,4 @@
+import { FitTabBar, FitAction } from '../../shared/glisse/controls';
 import { timedSession, TreadmillLog, estimateTreadmillCalories } from '../../core/utils/timed-cardio';
 import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { CardioHistorySession, indoorHistorySession } from '../../core/utils/indoor-cardio';
@@ -35,6 +36,7 @@ type SortDirection = 'ascend' | 'descend' | null;
   selector: 'app-workouts',
   standalone: true,
   imports: [
+    FitTabBar, FitAction,
     CommonModule,
     RouterLink,
     RouterLinkActive,

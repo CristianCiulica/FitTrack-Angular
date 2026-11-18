@@ -4,20 +4,19 @@
       <span class="brand-logo" aria-label="FitTrack">FitTrack<span class="brand-dot">.</span></span>
     </div>
     <div class="auth-hero">
-      <h1>Build better<br>habits,<br>one workout<br>at a time.</h1>
-      <p>Create your account and keep every workout, run and nutrition goal in one place.</p>
+      <h1>Start your training log</h1>
     </div>
   </div>
 
   <div class="auth-right">
     <div class="mobile-brand">
       <span class="brand-logo" aria-label="FitTrack">FitTrack<span class="brand-dot">.</span></span>
-      <small>Train. Track. Progress.</small>
+
     </div>
     <div class="auth-card">
       <div class="card-header">
         <h2>Create account</h2>
-        <p>Start tracking your workouts today</p>
+
       </div>
 
       <form nz-form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
@@ -90,21 +89,19 @@
           </nz-form-item>
         </div>
 
-        <button nz-button nzType="primary" nzBlock [nzLoading]="loading" type="submit" class="submit-btn">
+        <ft-action [busy]="loading" kind="submit" class="submit-btn">
           Create account
-        </button>
+        </ft-action>
 
         <div class="divider">
           <span>or</span>
         </div>
 
-        <button
-          nz-button
-          nzBlock
-          type="button"
-          class="google-btn"
-          [nzLoading]="googleLoading"
-          (click)="signInWithGoogle()"
+        <ft-action
+
+         class="google-btn"
+          [busy]="googleLoading"
+          (activated)="signInWithGoogle()"
         >
           <span class="google-icon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -115,7 +112,7 @@
             </svg>
           </span>
           Continue with Google
-        </button>
+        </ft-action>
       </form>
 
       <div class="auth-footer">

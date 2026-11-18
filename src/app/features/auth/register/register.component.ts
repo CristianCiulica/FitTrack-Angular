@@ -1,3 +1,4 @@
+import { FitAction } from '../../../shared/glisse/controls';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,6 +15,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
   selector: 'app-register',
   standalone: true,
   imports: [
+    FitAction,
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
@@ -50,7 +52,10 @@ export class RegisterComponent {
 
   submit() {
     if (this.form.invalid) {
-      Object.values(this.form.controls).forEach(c => c.markAsDirty());
+      for (const control of Object.values(this.form.controls)) {
+        control.markAsDirty();
+        control.updateValueAndValidity({ onlySelf: true });
+      }
       return;
     }
     this.loading = true;

@@ -24,11 +24,11 @@ describe('App shell', () => {
     }).compileComponents();
   });
 
-  it('keeps one lens definition outside route transitions', () => {
+  it('keeps one filter container outside route transitions', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelectorAll('#ft-dock-lens').length).toBe(1);
-    expect(fixture.nativeElement.querySelector('.route-shell #ft-dock-lens')).toBeNull();
+    expect(fixture.nativeElement.querySelectorAll('app-liquid-glass svg defs').length).toBe(1);
+    expect(fixture.nativeElement.querySelector('.route-shell app-liquid-glass svg defs')).toBeNull();
   });
 
   it('only blocks content while loading', () => {

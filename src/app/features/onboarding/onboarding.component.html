@@ -17,17 +17,17 @@
       @switch (step()) {
         @case ('name') {
           <section class="step" animate.enter="step-enter">
-            <span class="eyebrow">Made for you</span>
-            <h1 #stepTitle tabindex="-1">A little about you.<br>A better place to start.</h1>
-            <p class="lead">What should we call you?</p>
+
+            <h1 #stepTitle tabindex="-1">What’s your name?</h1>
+
             <label class="field-label" for="onboarding-name">Your name</label>
             <input id="onboarding-name" class="glass-input" type="text" placeholder="First name" maxlength="80" [ngModel]="name()" (ngModelChange)="name.set($event)" autocomplete="given-name" (keydown.enter)="next()" />
           </section>
         }
         @case ('appearance') {
           <section class="step" animate.enter="step-enter">
-            <span class="eyebrow">Your space</span>
-            <h1 #stepTitle tabindex="-1">Make yourself at home.</h1>
+
+            <h1 #stepTitle tabindex="-1">Appearance</h1>
             <p class="lead">Choose the look you love. You can change it anytime in Settings.</p>
             <div class="theme-options" role="group" aria-label="Appearance">
               @for (option of themes; track option.value) {
@@ -46,7 +46,7 @@
         }
         @case ('age') {
           <section class="step" animate.enter="step-enter">
-            <span class="eyebrow">About you</span>
+
             <h1 #stepTitle tabindex="-1">How old are you, {{ firstName }}?</h1>
             <p class="lead">We use this to estimate your energy needs.</p>
             <label class="field-label" for="onboarding-age">Age</label>
@@ -58,7 +58,7 @@
         }
         @case ('body') {
           <section class="step" animate.enter="step-enter">
-            <span class="eyebrow">Your starting point</span>
+
             <h1 #stepTitle tabindex="-1">Your height &amp; weight.</h1>
             <p class="lead">A starting point for your calorie targets and progress.</p>
             <div class="dual-field">
@@ -74,25 +74,25 @@
         }
         @case ('goal') {
           <section class="step goal-step" animate.enter="step-enter">
-            <span class="eyebrow">Your direction</span>
+
             <h1 #stepTitle tabindex="-1">What are you aiming for?</h1>
             <p class="lead">Choose what matters to you right now.</p>
             <div class="goal-options" role="group" aria-label="Your goal">
-              <button type="button" [class.selected]="goal() === 'lose'" [attr.aria-pressed]="goal() === 'lose'" (click)="setGoal('lose')"><span><strong>Lose weight</strong><small>Build a steady rhythm</small></span><span class="selection-dot" aria-hidden="true"></span></button>
-              <button type="button" [class.selected]="goal() === 'maintain'" [attr.aria-pressed]="goal() === 'maintain'" (click)="setGoal('maintain')"><span><strong>Maintain</strong><small>Stay balanced. Get stronger.</small></span><span class="selection-dot" aria-hidden="true"></span></button>
-              <button type="button" [class.selected]="goal() === 'gain'" [attr.aria-pressed]="goal() === 'gain'" (click)="setGoal('gain')"><span><strong>Build muscle</strong><small>Fuel your strength and growth</small></span><span class="selection-dot" aria-hidden="true"></span></button>
+              <button type="button" [class.selected]="goal() === 'lose'" [attr.aria-pressed]="goal() === 'lose'" (click)="setGoal('lose')"><span><strong>Lose weight</strong></span><span class="selection-dot" aria-hidden="true"></span></button>
+              <button type="button" [class.selected]="goal() === 'maintain'" [attr.aria-pressed]="goal() === 'maintain'" (click)="setGoal('maintain')"><span><strong>Maintain</strong></span><span class="selection-dot" aria-hidden="true"></span></button>
+              <button type="button" [class.selected]="goal() === 'gain'" [attr.aria-pressed]="goal() === 'gain'" (click)="setGoal('gain')"><span><strong>Build muscle</strong></span><span class="selection-dot" aria-hidden="true"></span></button>
             </div>
             @if (goal() !== 'maintain') {
               <div class="pace-field">
                 <div class="pace-head"><label for="onboarding-pace">Weekly pace</label><strong>{{ goalRate() | number: '1.1-1' }} kg/week</strong></div>
-                <input id="onboarding-pace" type="range" min="0.1" [max]="goal() === 'lose' ? 1 : 0.5" step="0.1" [ngModel]="goalRate()" (ngModelChange)="goalRate.set(+$event)" />
+                <ft-slider inputId="onboarding-pace" label="Weekly weight change pace" [max]="goal() === 'lose' ? 1 : 0.5" [value]="goalRate()" (changed)="goalRate.set(+$event)" />
               </div>
             }
           </section>
         }
         @case ('training') {
           <section class="step" animate.enter="step-enter">
-            <span class="eyebrow">Your routine</span>
+
             <h1 #stepTitle tabindex="-1">How many workouts per week?</h1>
             <div class="workout-count-picker" role="group" aria-label="Weekly workout goal">
               @for (n of workoutOptions; track n) {
@@ -104,7 +104,7 @@
         }
         @case ('result') {
           <section class="step result" animate.enter="step-enter">
-            <span class="eyebrow">Your profile, in focus</span>
+
             <h1 #stepTitle tabindex="-1">Your starting point,<br>{{ firstName }}.</h1>
             <div class="bmi-hero">
               <div><span class="bmi-label">Body mass index</span><strong>{{ bmiLabel() }}</strong></div>
@@ -122,7 +122,7 @@
         }
         @case ('plan') {
           <section class="step plan-step" animate.enter="step-enter">
-            <span class="eyebrow">A place to begin</span>
+
             <h1 #stepTitle tabindex="-1">Your next chapter.<span class="plan-title-detail"><br>A little stronger.</span></h1>
             <p class="lead">Meet your gym plan. Three focused sessions, ready when you are.</p>
             <div class="recommended-plan">
@@ -138,9 +138,9 @@
 
     <footer class="onboarding-foot">
       @if (step() !== 'plan') {
-        <button nz-button nzType="primary" nzSize="large" type="button" class="next-btn" [disabled]="!canAdvance()" (click)="next()">{{ step() === 'result' ? 'Find your first workout' : 'Continue' }}<span nz-icon nzType="arrow-right" aria-hidden="true"></span></button>
+        <ft-action class="next-btn" [disabled]="!canAdvance()" (activated)="next()">{{ step() === 'result' ? 'Find your first workout' : 'Continue' }}<span nz-icon nzType="arrow-right" aria-hidden="true"></span></ft-action>
       } @else {
-        <button nz-button nzType="primary" nzSize="large" type="button" class="next-btn" [nzLoading]="saving()" (click)="finish(true)">Explore the plan<span nz-icon nzType="arrow-right" aria-hidden="true"></span></button>
+        <ft-action class="next-btn" [busy]="saving()" (activated)="finish(true)">Explore the plan<span nz-icon nzType="arrow-right" aria-hidden="true"></span></ft-action>
         <button type="button" class="later-button" [disabled]="saving()" (click)="finish(false)">Later</button>
       }
     </footer>

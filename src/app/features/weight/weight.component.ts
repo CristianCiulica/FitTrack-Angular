@@ -1,3 +1,4 @@
+import { FitTabBar } from '../../shared/glisse/controls';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -17,7 +18,7 @@ import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.comp
 
 @Component({
   selector: 'app-weight', standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, NzLayoutModule, NzMenuModule, NzIconModule, NzModalModule, AppMenuComponent],
+  imports: [FitTabBar, CommonModule, FormsModule, RouterLink, RouterLinkActive, NzLayoutModule, NzMenuModule, NzIconModule, NzModalModule, AppMenuComponent],
   templateUrl: './weight.component.html', styleUrl: './weight.component.scss',
 })
 export class WeightComponent implements OnInit {

@@ -1,3 +1,4 @@
+import { FitTabBar } from '../../shared/glisse/controls';
 import { isTimedCardioOnly, treadmillSeconds, timedSession } from '../../core/utils/timed-cardio';
 import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { TrainingPlannerComponent } from '../training-planner/training-planner.component';
@@ -36,6 +37,7 @@ import {
   selector: 'app-dashboard',
   standalone: true,
   imports: [
+    FitTabBar,
     CommonModule,
     TrainingPlannerComponent,
     ActivityGoalsComponent,

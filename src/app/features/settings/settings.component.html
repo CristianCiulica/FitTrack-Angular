@@ -59,6 +59,7 @@
         </a>
       </li>
     </ul>
+  <ft-tab-bar />
   </nz-sider>
 
   <nz-layout class="main-layout">
@@ -151,9 +152,9 @@
               <strong>Export data</strong>
               <small>Compact workout, running and body-weight data.</small>
             </div>
-            <button nz-button nzType="default" (click)="exportData()" [nzLoading]="exporting()">
+            <ft-action (activated)="exportData()" [busy]="exporting()">
               <span nz-icon nzType="download"></span> Export to JSON
-            </button>
+            </ft-action>
           </div>
           <div class="setting-row">
             <div class="setting-copy">
@@ -163,13 +164,14 @@
                 dialog.</small
               >
             </div>
-            <button nz-button nzType="default" (click)="exportPdf()" [nzLoading]="exportingPdf()">
+            <ft-action (activated)="exportPdf()" [busy]="exportingPdf()">
               <span nz-icon nzType="download"></span> Export to PDF
-            </button>
+            </ft-action>
           </div>
         </nz-card>
 
         <nz-card class="settings-card danger-card">
+          <div class="setting-row"><a href="privacy-policy.html">Privacy policy</a></div>
           <div class="setting-row">
             <div class="setting-copy">
               <strong>Delete account</strong>

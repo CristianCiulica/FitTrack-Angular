@@ -918,225 +918,8 @@ html[data-theme='dark'] .app-header { --header-surface: #1c1c1e; }
   body { min-width: 320px; }
 
   html body .app-layout { display: block !important; min-height: 100dvh !important; }
-  /* In timpul antrenamentului fullscreen ascundem dock-ul de jos ca sa nu intre
-     peste butoanele Stop / Finish set din overlay */
-  html body:has(.workout-live) .app-layout > .sidebar {
-    display: none !important;
-  }
-
-  /* Flat, quiet bottom navigation: the active destination carries the blue accent. */
-  html body .app-layout > .sidebar {
-    --dock-surface: #fff;
-    --dock-accent: #007aff;
-    --dock-muted: #8e8e93;
-    --dock-line: #e5e5ea;
-    display: block !important;
-    position: fixed !important;
-    top: auto !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    transform: none;
-    z-index: 900 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    height: calc(64px + env(safe-area-inset-bottom)) !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    flex: none !important;
-    padding: 0;
-    pointer-events: none;
-    background: transparent !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
-  html[data-theme='dark'] body .app-layout > .sidebar {
-    --dock-surface: #1c1c1e;
-    --dock-accent: #0a84ff;
-    --dock-muted: #98989f;
-    --dock-line: #ffffff14;
-  }
-
-  html body .app-layout > .sidebar::before {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    content: '';
-    pointer-events: none;
-    background: var(--dock-surface);
-    border-top: 1px solid var(--dock-line);
-  }
-
-  html body .app-layout > .sidebar::after {
-    display: none;
-    content: none;
-  }
-
-  .app-layout > .sidebar .ant-layout-sider-children {
-    position: relative;
-    z-index: 1;
-    height: 64px !important;
-    overflow: visible;
-    pointer-events: auto;
-  }
-
-  .app-layout > .sidebar .sidebar-logo,
-  .app-layout > .sidebar .ant-layout-sider-trigger {
-    display: none !important;
-  }
-
-  .app-layout > .sidebar .sidebar-menu {
-    display: grid !important;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    align-items: stretch;
-    width: 100% !important;
-    height: 64px !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding: 0 max(8px, env(safe-area-inset-left), env(safe-area-inset-right)) !important;
-    overflow: visible !important;
-    background: transparent !important;
-    border: 0 !important;
-    pointer-events: auto;
-  }
-
-  body .app-layout > .sidebar .sidebar-menu::before,
-  body .app-layout > .sidebar .sidebar-menu::after {
-    display: none !important;
-    content: none !important;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu :is(.sidebar-secondary-item, .sidebar-logout-item) {
-    display: none !important;
-  }
-
-  body .app-layout > .sidebar .sidebar-menu .ant-menu-item {
-    display: block !important;
-    width: 100% !important;
-    height: 64px !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 1.1 !important;
-    border-radius: 0 !important;
-    overflow: visible !important;
-    pointer-events: auto;
-    background: transparent !important;
-  }
-
-  html body .app-layout > .sidebar .ant-layout-sider-children .sidebar-menu.ant-menu.ant-menu-inline .ant-menu-item {
-    width: 100% !important;
-    margin: 0 !important;
-  }
-
-  .app-layout > .sidebar .sidebar-menu .ant-menu-title-content {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    margin: 0 !important;
-    overflow: visible !important;
-    opacity: 1 !important;
-  }
-
-  .app-layout > .sidebar .sidebar-menu .ant-menu-item::after {
-    display: none !important;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    color: var(--dock-muted) !important;
-    line-height: 1.1;
-    border-radius: 14px;
-    pointer-events: auto;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    transition: color 180ms var(--ease-out), transform 180ms var(--spring);
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a::before {
-    display: none !important;
-  }
-
-  .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a .anticon {
-    display: grid !important;
-    place-items: center;
-    width: 22px !important;
-    height: 22px !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    font-size: 21px !important;
-    line-height: 1 !important;
-  }
-
-  /* Keep each destination's accessible name while matching the icon-only reference. */
-  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a > span:last-child {
-    position: absolute;
-    width: 1px !important;
-    height: 1px !important;
-    overflow: hidden !important;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu.ant-menu .ant-menu-item:is(.ant-menu-item-selected, :hover) {
-    background: transparent !important;
-    color: var(--dock-accent) !important;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu .ant-menu-item-selected .ant-menu-title-content > a {
-    color: var(--dock-accent) !important;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu a[href='/start-workout'] .anticon {
-    display: none !important;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a[href='/start-workout']::before {
-    display: block !important;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 44px;
-    height: 44px;
-    content: '';
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: var(--dock-accent);
-    pointer-events: none;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu a[href='/start-workout']::after {
-    position: relative;
-    content: '';
-    width: 20px;
-    height: 20px;
-    background: linear-gradient(#fff, #fff) center / 20px 2px no-repeat,
-                linear-gradient(#fff, #fff) center / 2px 20px no-repeat;
-    pointer-events: none;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a:focus-visible {
-    outline: 2px solid var(--dock-accent);
-    outline-offset: -6px;
-  }
-
-  html body .app-layout > .sidebar .sidebar-menu .ant-menu-title-content > a:active {
-    transform: scale(.92);
-  }
+  html body .app-layout > .sidebar { display: contents !important; }
+  .app-layout > .sidebar :is(.sidebar-logo, .sidebar-menu, .ant-layout-sider-trigger) { display:none !important; }
 
   html body .app-layout > .main-layout {
     display: flex !important;
@@ -1301,4 +1084,34 @@ body:has(.achievements-dialog[open]) { overflow: hidden; }
 .assistant-header-symbol {
   color: var(--ink);
   background: color-mix(in srgb, var(--ink) 6%, var(--surface-strong));
+}
+
+ft-tab-bar { display: none; }
+ft-action .lg-button { width: 100%; }
+ft-slider .lg-slider { width: 100%; }
+@media (max-width: 900px) {
+  html body .app-layout > .sidebar:has(ft-tab-bar) { display: contents !important; }
+  html body .app-layout > .sidebar:has(ft-tab-bar) .sidebar-menu,
+  html body .app-layout > .sidebar:has(ft-tab-bar)::before,
+  html body .app-layout > .sidebar:has(ft-tab-bar)::after { display: none !important; }
+  .sidebar ft-tab-bar {
+    display: block; position: fixed; z-index: 900; pointer-events: auto;
+    left: 50%; transform: translateX(-50%); bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+  .sidebar ft-tab-bar .lg-tab-bar { --lg-tab-width: min(18vw, 80px); }
+  ft-tab-bar svg { width: 22px; height: 22px; }
+  body:has(.workout-live) ft-tab-bar { display: none; }
+}
+html body ft-action[class] {
+  padding: 0 !important; background: transparent !important; border: 0 !important;
+  box-shadow: none !important; backdrop-filter: none !important;
+}
+ft-action > span:not([hidden]) { display: block; width: 100%; }
+ft-action .lg-button > span > span { display: inline-flex; align-items: center; gap: 8px; }
+@media (min-width: 901px) {
+  .sidebar ft-tab-bar { display:block; position:fixed; left:calc(50% + 104px); transform:translateX(-50%); bottom:16px; z-index:900; }
+  ft-tab-bar svg { width: 22px; height: 22px; }
+  .app-layout:has(ft-tab-bar) .app-content { padding-bottom:90px; }
+  .sidebar:has(ft-tab-bar) .sidebar-menu > li:nth-child(-n+5) { display:none; }
+  body:has(.workout-live) ft-tab-bar { display:none; }
 }

@@ -1,3 +1,4 @@
+import { FitTabBar, FitAction } from '../../shared/glisse/controls';
 import { WorkoutLibraryComponent } from '../workout-library/workout-library.component';
 import { WorkoutRoutine as Routine, orderRoutineExercises, isTreadmillExercise } from '../../core/models/workout-routine.model';
 import { timedSessionNotes, estimateTreadmillCalories, TreadmillLog } from '../../core/utils/timed-cardio';
@@ -737,6 +738,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
   selector: 'app-start-workout',
   standalone: true,
   imports: [
+    FitTabBar, FitAction,
     CommonModule,
     WorkoutLibraryComponent,
     RouterLink,
@@ -1667,9 +1669,20 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.state.set('setup');
   }
 
+  readonly elapsedClock = signal('0:00');
+
   private startCheckpoints(): void {
     if (this.draftInterval) clearInterval(this.draftInterval);
-    this.draftInterval = setInterval(() => this.checkpointWorkout(), 5000);
+    let ticks = 0;
+    const updateClock = () => {
+      const seconds = Math.max(0, Math.floor(((this.sessionEndedAt ?? Date.now()) - this.sessionStartedAt) / 1000));
+      this.elapsedClock.set(Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'));
+    };
+    updateClock();
+    this.draftInterval = setInterval(() => {
+      updateClock();
+      if (++ticks % 5 === 0) this.checkpointWorkout();
+    }, 1000);
     this.checkpointWorkout();
   }
 

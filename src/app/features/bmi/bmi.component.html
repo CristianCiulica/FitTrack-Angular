@@ -60,6 +60,7 @@
       </li>
     </ul>
 
+  <ft-tab-bar />
   </nz-sider>
 
   <nz-layout class="main-layout">
@@ -179,7 +180,7 @@
                   <span>Pace</span>
                   <strong>{{ goalRateDisplay() | number: '1.1-1' }} {{ weightUnit() }}/wk</strong>
                 </div>
-                <input aria-label="Weekly weight change pace" type="range" min="0.1" [max]="goal() === 'lose' ? 1 : 0.5" step="0.1" [ngModel]="goalRate()" (ngModelChange)="onGoalRate(+$event)" />
+                <ft-slider inputId="onboarding-pace" label="Weekly weight change pace" [max]="goal() === 'lose' ? 1 : 0.5" [value]="goalRate()" (changed)="onGoalRate(+$event)" />
               </div>
             </div>
             <p class="settings-footer">Calculated using the Mifflin-St Jeor equation combined with your weekly weight-training frequency.</p>

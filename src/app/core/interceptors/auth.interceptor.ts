@@ -6,7 +6,7 @@ import { getApiBaseUrl } from '../config/runtime-config';
 
 export const firebaseAuthInterceptor: HttpInterceptorFn = (req, next) => {
   const baseUrl = getApiBaseUrl();
-  if (!req.url.startsWith(baseUrl)) {
+  if (req.url !== baseUrl && !req.url.startsWith(baseUrl + '/')) {
     return next(req);
   }
 

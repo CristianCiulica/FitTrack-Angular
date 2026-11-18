@@ -11,14 +11,13 @@ import {
   user,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
   getRedirectResult,
   sendPasswordResetEmail,
   User,
 } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { from, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import { inject } from '@angular/core';
 import { MigrationService } from './migration.service';
 import { ProfileService } from './profile.service';
@@ -40,19 +39,14 @@ export class AuthService {
     }),
   );
 
-  // clear profile on logout so next user doesn't see old data
-  private readonly sessionSub = user(this.auth).subscribe((u) => {
-    if (!u) this.profileService.clear();
-  });
-
-  // migrate old local storage data and load profile on first login
-  private readonly migrationSub = user(this.auth)
-    .pipe(
-      filter((u): u is NonNullable<typeof u> => !!u),
-      map((u) => u.uid),
-      distinctUntilChanged(),
-    )
-    .subscribe((uid) => {
+  // Include sign-out in the sequence so signing back into the same account reloads it.
+  private readonly sessionSub = user(this.auth)
+    .pipe(map(account => account?.uid ?? null), distinctUntilChanged())
+    .subscribe(uid => {
+      if (!uid) {
+        this.profileService.clear();
+        return;
+      }
       this.migration.migrateIfNeeded(uid);
       this.profileService
         .load(true)

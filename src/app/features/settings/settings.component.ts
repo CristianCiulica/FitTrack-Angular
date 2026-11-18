@@ -1,3 +1,4 @@
+import { FitTabBar, FitAction } from '../../shared/glisse/controls';
 import { achievementReportHtml } from '../../core/utils/activity-export';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -26,6 +27,7 @@ import { finalize } from 'rxjs';
   selector: 'app-settings',
   standalone: true,
   imports: [
+    FitTabBar, FitAction,
     CommonModule,
     FormsModule,
     RouterLink,

@@ -1,3 +1,4 @@
+import { FitSlider, FitAction } from '../../shared/glisse/controls';
 import { Component, ElementRef, Injector, OnInit, afterNextRender, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,7 +19,7 @@ const STEP_ORDER: Step[] = ['name', 'appearance', 'age', 'body', 'goal', 'traini
 @Component({
   selector: 'app-onboarding',
   standalone: true,
-  imports: [CommonModule, FormsModule, NzButtonModule, NzInputNumberModule, NzIconModule],
+  imports: [FitSlider, FitAction, CommonModule, FormsModule, NzButtonModule, NzInputNumberModule, NzIconModule],
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss'],
 })

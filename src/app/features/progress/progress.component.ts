@@ -1,3 +1,4 @@
+import { FitTabBar } from '../../shared/glisse/controls';
 import { ExerciseRecordsComponent } from './exercise-records/exercise-records.component';
 import {
   Component,
@@ -32,6 +33,7 @@ import { trainingProgress } from '../../core/utils/training-progress';
   selector: 'app-progress',
   standalone: true,
   imports: [
+    FitTabBar,
     CommonModule,
     ExerciseRecordsComponent,
     RouterLink,

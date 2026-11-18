@@ -57,6 +57,7 @@
         </a>
       </li>
     </ul>
+  <ft-tab-bar [locked]="isTracking" />
   </nz-sider>
 
   <nz-layout class="main-layout">
@@ -135,17 +136,16 @@
                 <span class="gps-badge">GPS active</span>
               </div>
             </div>
-            <div class="run-recovery" *ngIf="recoveredRun"><strong>Run recovered</strong><p>{{ elapsedDisplay }} · {{ distanceKm }} {{ distanceUnit }} recorded</p><div><button nz-button nzType="primary" (click)="resumeRecoveredRun()">Resume run</button><button nz-button (click)="saveRecoveredRun()">Save to History</button></div></div>
-            <button *ngIf="!recoveredRun"
-              nz-button
-              type="button"
-              class="quick-run-button"
+            <div class="run-recovery" *ngIf="recoveredRun"><strong>Run recovered</strong><p>{{ elapsedDisplay }} · {{ distanceKm }} {{ distanceUnit }} recorded</p><div><ft-action (activated)="resumeRecoveredRun()">Resume run</ft-action><ft-action (activated)="saveRecoveredRun()">Save to History</ft-action></div></div>
+            <ft-action *ngIf="!recoveredRun"
+
+             class="quick-run-button"
               [class.stop]="isTracking"
-              (click)="isTracking ? stopTracking() : quickStartRun()"
+              (activated)="isTracking ? stopTracking() : quickStartRun()"
             >
               <span nz-icon [nzType]="isTracking ? 'close' : 'play-circle'"></span>
               {{ isTracking ? 'Stop' : 'Quick Run' }}
-            </button>
+            </ft-action>
           </div>
         </nz-card>
       </div>

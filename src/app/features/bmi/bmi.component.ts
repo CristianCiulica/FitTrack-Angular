@@ -1,3 +1,4 @@
+import { FitTabBar, FitSlider } from '../../shared/glisse/controls';
 import { Component, computed, effect, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -24,6 +25,7 @@ import {
   selector: 'app-bmi',
   standalone: true,
   imports: [
+    FitTabBar, FitSlider,
     CommonModule,
     FormsModule,
     RouterLink,

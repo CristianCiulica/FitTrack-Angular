@@ -57,6 +57,7 @@
         </a>
       </li>
     </ul>
+  <ft-tab-bar />
   </nz-sider>
 
   <nz-layout class="main-layout">
@@ -280,35 +281,26 @@
                       ~{{ getWorkoutCalories(w) }} kcal
                     </td>
                     <td class="workout-actions-cell">
-                      <button
-                        nz-button
-                        nzType="text"
-                        nzSize="small"
-                        class="details-button"
-                        (click)="onExpandChange(w.id!, !expandSet.has(w.id!))"
+                      <ft-action
+                       class="details-button"
+                        (activated)="onExpandChange(w.id!, !expandSet.has(w.id!))"
                       >
                         <span>{{ expandSet.has(w.id!) ? 'Hide' : 'Details' }}</span>
                         <span nz-icon [nzType]="expandSet.has(w.id!) ? 'up' : 'down'"></span>
-                      </button>
-                      <button
-                        nz-button
-                        nzType="text"
-                        nzSize="small"
-                        *ngIf="!treadmillRecords(w).length" (click)="openEdit(w)"
+                      </ft-action>
+                      <ft-action
+                        *ngIf="!treadmillRecords(w).length" (activated)="openEdit(w)"
                         style="margin-right: 4px"
                       >
                         <span nz-icon nzType="edit"></span>
-                      </button>
-                      <button
-                        nz-button
-                        nzType="text"
-                        nzSize="small"
-                        nzDanger
-                        (click)="deleteWorkout(w.id!)"
+                      </ft-action>
+                      <ft-action
+                        [destructive]="true"
+                        (activated)="deleteWorkout(w.id!)"
                       >
                         <span nz-icon nzType="delete"></span>
                         Delete
-                      </button>
+                      </ft-action>
                     </td>
                   </tr>
                   <tr class="workout-details-row" *ngIf="expandSet.has(w.id!)">

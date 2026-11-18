@@ -1,3 +1,4 @@
+import { FitTabBar } from '../../shared/glisse/controls';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -28,6 +29,7 @@ import {
   selector: 'app-account',
   standalone: true,
   imports: [
+    FitTabBar,
     CommonModule,
     FormsModule,
     RouterLink,

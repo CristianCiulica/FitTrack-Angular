@@ -27,6 +27,14 @@ describe('Workout session recovery', () => {
   });
   afterEach(() => { component.ngOnDestroy(); vi.useRealTimers(); });
 
+  it('counts session time across exercise and rest, including a suspended clock', () => {
+    vi.advanceTimersByTime(12_000);
+    component.finishSet();
+    vi.setSystemTime(Date.now() + 60_000);
+    vi.advanceTimersByTime(1_000);
+    expect(component.elapsedClock()).toBe('1:13');
+  });
+
   it('opens the gym collection and closes it when starting the selected leg session', () => {
     component.cancelWorkout();
     component.openGymPlan();

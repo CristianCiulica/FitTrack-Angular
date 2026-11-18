@@ -1,3 +1,4 @@
+import { FitTabBar, FitAction } from '../../shared/glisse/controls';
 import { Subscription } from 'rxjs';
 import { NativeRunService, NativeRunSnapshot } from '../../core/services/native-run.service';
 import { ProfileService } from '../../core/services/profile.service';
@@ -39,6 +40,7 @@ interface AcceptedPosition {
   selector: 'app-running',
   standalone: true,
   imports: [
+    FitTabBar, FitAction,
     LiquidGlassDirective,
     CommonModule,
     RouterLink,
