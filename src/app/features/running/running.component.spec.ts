@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { WeatherService } from '../../core/services/weather.service';
-import { NzModalService } from 'ng-zorro-antd/modal';
+import { ConfirmationService } from '../../shared/components/confirmation';
 
 function fix(accuracy = 8): GeolocationPosition {
   return {
@@ -16,6 +16,7 @@ function fix(accuracy = 8): GeolocationPosition {
 
 describe('Running GPS lifecycle', () => {
   let component: RunningComponent;
+  const confirmation = { confirm: vi.fn() };
   let persistence: { checkpointRun: ReturnType<typeof vi.fn>; recoverRun: ReturnType<typeof vi.fn>; clearRunDraft: ReturnType<typeof vi.fn>; setTrackingActive: ReturnType<typeof vi.fn>; saveSession: ReturnType<typeof vi.fn> };
   const geo = { getCurrentPosition: vi.fn(), watchPosition: vi.fn((_success: PositionCallback, _error?: PositionErrorCallback | null, _options?: PositionOptions) => 7), clearWatch: vi.fn() };
 
@@ -31,7 +32,7 @@ describe('Running GPS lifecycle', () => {
       { error: vi.fn(), success: vi.fn(), warning: vi.fn() } as unknown as NzMessageService,
       persistence as unknown as RunningSessionService,
       {} as WeatherService,
-      {} as NzModalService,
+      confirmation as unknown as ConfirmationService,
     );
   });
 
@@ -94,6 +95,45 @@ describe('Running GPS lifecycle', () => {
     expect(persistence.checkpointRun.mock.calls.at(-1)![0].route).toEqual([[44.4268, 26.1025]]);
     expect(persistence.clearRunDraft).not.toHaveBeenCalled();
     expect(persistence.saveSession).not.toHaveBeenCalled();
+  });
+
+  it('freezes metrics and ignores queued positions while paused, then saves only active time', async () => {
+    component.startTracking();
+    geo.getCurrentPosition.mock.calls[0][0](fix());
+    vi.advanceTimersByTime(18000);
+    const previousWatch = geo.watchPosition.mock.calls[0][0];
+    await component.togglePause();
+    expect(component.isPaused()).toBe(true);
+    expect(geo.clearWatch).toHaveBeenCalledWith(7);
+    vi.advanceTimersByTime(60000);
+    previousWatch(fix(2));
+    expect(component.elapsedSeconds).toBe(10);
+    expect(component.gpsAccuracy).toBe(8);
+    await component.togglePause();
+    vi.advanceTimersByTime(3000);
+    component.confirmStopTracking();
+    const options = confirmation.confirm.mock.calls.at(-1)![0];
+    expect(options.stats[1].value).toBe('00:13');
+    await options.onSecondary();
+    expect(persistence.saveSession.mock.calls[0][0].durationSeconds).toBe(13);
+  });
+
+  it('requires a complete hold, then can discard the checkpoint without creating a history entry', async () => {
+    component.startTracking();
+    geo.getCurrentPosition.mock.calls[0][0](fix());
+    vi.advanceTimersByTime(10000);
+    component.startHold();
+    vi.advanceTimersByTime(400);
+    component.cancelHold();
+    vi.advanceTimersByTime(1000);
+    expect(confirmation.confirm).not.toHaveBeenCalled();
+    component.startHold();
+    vi.advanceTimersByTime(component.holdDurationMs);
+    expect(confirmation.confirm).toHaveBeenCalledTimes(1);
+    await confirmation.confirm.mock.calls[0][0].nzOnOk();
+    expect(component.isTracking).toBe(false);
+    expect(persistence.saveSession).not.toHaveBeenCalled();
+    expect(persistence.clearRunDraft).toHaveBeenCalledOnce();
   });
 
   const recovered = { version: 1, updatedAt: Date.now(), session: { userId: 'runner', mode: 'running', startedAt: '2026-10-03T09:00:00Z', endedAt: '2026-10-03T09:10:00Z', durationSeconds: 600, distanceMeters: 1000, steps: 833, averageSpeedKmh: 6, calories: 60, route: [[44.4268, 26.1025]] } };

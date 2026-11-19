@@ -1,4 +1,4 @@
-/** Native dialog reveal anchored to the launcher, with interruptible reverse and reduced-motion support. */
+/** Native dialog transition anchored to the launcher, with interruptible reverse and reduced-motion support. */
 export class CircularDialogMotion {
   private surface?: Animation;
   private content?: Animation;
@@ -10,13 +10,14 @@ export class CircularDialogMotion {
     private body: HTMLElement,
   ) {}
   private geometry() {
-    const r = this.launcher.getBoundingClientRect(),
-      x = r.x + r.width / 2,
-      y = r.y + r.height / 2;
+    const button = this.launcher.getBoundingClientRect();
+    const panel = this.dialog.getBoundingClientRect();
+    const style = getComputedStyle(this.launcher);
+    const inset = [button.top - panel.top, panel.right - button.right, panel.bottom - button.bottom, button.left - panel.left];
     return {
-      collapsed: `circle(${r.width / 2}px at ${x}px ${y}px)`,
-      expanded: `circle(${Math.ceil(Math.hypot(Math.max(x, this.dialog.clientWidth - x), Math.max(y, this.dialog.clientHeight - y)))}px at ${x}px ${y}px)`,
-      blue: getComputedStyle(this.launcher).backgroundColor,
+      collapsed: `inset(${inset.map(value => value + 'px').join(' ')} round ${style.borderRadius})`,
+      expanded: 'inset(0px 0px 0px 0px round 0px)',
+      launcherColor: style.backgroundColor,
     };
   }
   private cancel() {
@@ -39,18 +40,18 @@ export class CircularDialogMotion {
       background = getComputedStyle(this.dialog).backgroundColor;
     this.surface = this.dialog.animate(
       [
-        { clipPath: g.collapsed, backgroundColor: g.blue },
+        { clipPath: g.collapsed, backgroundColor: g.launcherColor },
         { backgroundColor: background, offset: 0.45 },
         { clipPath: g.expanded, backgroundColor: background },
       ],
-      { duration: 1100, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' },
+      { duration: 430, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' },
     );
     this.content = this.body.animate(
       [
         { opacity: 0, transform: 'translateY(18px) scale(.985)' },
         { opacity: 1, transform: 'none' },
       ],
-      { duration: 600, delay: 220, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' },
+      { duration: 280, delay: 75, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' },
     );
     void this.content.finished.catch(() => {});
     try {
@@ -76,16 +77,16 @@ export class CircularDialogMotion {
           { opacity, transform: 'none' },
           { opacity: 0, transform: 'translateY(12px) scale(.985)' },
         ],
-        { duration: 240, fill: 'both' },
+        { duration: 150, fill: 'both' },
       );
       void this.content.finished.catch(() => {});
       this.surface = this.dialog.animate(
         [
           { clipPath: clip, backgroundColor: background },
           { backgroundColor: background, offset: 0.55 },
-          { clipPath: g.collapsed, backgroundColor: g.blue },
+          { clipPath: g.collapsed, backgroundColor: g.launcherColor },
         ],
-        { duration: 750, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'both' },
+        { duration: 360, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'both' },
       );
       try {
         await this.surface.finished;
@@ -94,8 +95,8 @@ export class CircularDialogMotion {
       }
     }
     if (token !== this.token) return;
-    this.cancel();
     this.dialog.close();
+    this.cancel();
     this.closing = false;
     this.launcher.focus({ preventScroll: true });
   }

@@ -1,11 +1,11 @@
-import { NavigationComponent } from '../../shared/navigation/navigation.component';
+import { ConfirmationService } from '../../shared/components/confirmation';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { WeightService } from '../../core/services/weight.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -16,7 +16,7 @@ import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.comp
 
 @Component({
   selector: 'app-weight', standalone: true,
-  imports: [NavigationComponent, CommonModule, FormsModule, NzLayoutModule, NzIconModule, NzModalModule, AppMenuComponent],
+  imports: [CommonModule, FormsModule, NzLayoutModule, NzIconModule, NzModalModule, AppMenuComponent],
   templateUrl: './weight.component.html', styleUrl: './weight.component.scss',
 })
 export class WeightComponent implements OnInit {
@@ -24,7 +24,7 @@ export class WeightComponent implements OnInit {
   private readonly destroy = inject(DestroyRef);
   private readonly profile = inject(ProfileService);
   private readonly auth = inject(AuthService);
-  private readonly modal = inject(NzModalService);
+  private readonly modal = inject(ConfirmationService);
   readonly entries = signal<WeightEntry[]>([]);
   readonly loading = signal(true);
   readonly loaded = signal(false);
@@ -90,7 +90,7 @@ export class WeightComponent implements OnInit {
   }
   remove(entry: WeightEntry) {
     if (this.busy()) return;
-    this.modal.confirm({nzTitle:'Delete this weigh-in?',nzContent:`Remove the entry for ${entry.date}?`,nzOkText:'Delete',nzCancelText:'Keep entry',nzOkDanger:true,nzCentered:true,nzWidth:'min(400px, calc(100vw - 32px))',nzClassName:'solid-modal',
+    this.modal.confirm({nzTitle:'Delete this weigh-in?',nzContent:`Remove the entry for ${entry.date}?`,nzOkText:'Delete',nzCancelText:'Keep entry',nzOkDanger:true,
       nzOnOk: () => { this.busy.set(true); this.error.set(''); this.weights.remove(entry.date).subscribe({
         next: response => { this.accept(response); this.selectFormDate(); this.notice.set('Entry deleted.'); },
         error: () => { this.busy.set(false); this.error.set('Could not delete this entry. Please try again.'); },

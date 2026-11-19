@@ -1,5 +1,12 @@
-<main class="access-page">
+<main class="access-page login-page">
   <div class="track-photo" role="img" aria-label="FitTrack">
+    <svg class="login-rings" viewBox="0 0 108 108" fill="none" aria-hidden="true">
+      <g stroke-width="8" transform="rotate(-90 54 54)">
+        <circle cx="54" cy="54" r="47" stroke="#ff326b" opacity=".17"/><circle cx="54" cy="54" r="47" pathLength="100" stroke="#ff326b" stroke-dasharray="72 100" stroke-linecap="round"/>
+        <circle cx="54" cy="54" r="36" stroke="#b6ef28" opacity=".17"/><circle cx="54" cy="54" r="36" pathLength="100" stroke="#b6ef28" stroke-dasharray="64 100" stroke-linecap="round"/>
+        <circle cx="54" cy="54" r="25" stroke="#30baf5" opacity=".17"/><circle cx="54" cy="54" r="25" pathLength="100" stroke="#30baf5" stroke-dasharray="56 100" stroke-linecap="round"/>
+      </g>
+    </svg>
     <span class="track-wordmark" aria-hidden="true">FitTrack<span>.</span></span>
   </div>
   <section class="access-panel" aria-labelledby="access-title">
@@ -53,13 +60,13 @@
         </ft-action>
 
         <div class="divider">
-          <span>or</span>
+          <span>or continue with</span>
         </div>
 
-        <ft-action
+        <div class="providers"><ft-action
           class="auth-google"
           [busy]="googleLoading"
-          (activated)="signInWithGoogle()"
+          (activated)="signInWithProvider('Google')"
         >
           <span class="google-icon" aria-hidden="true">
             <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -69,8 +76,10 @@
               <path d="M12.2 28.5C11.8 27.4 11.5 26.3 11.5 24C11.5 21.7 11.8 20.6 12.2 19.5L5.5 14.7C4 17.6 3 20.7 3 24C3 27.3 4 30.4 5.5 33.3L12.2 28.5Z" fill="#EA4335"/>
             </svg>
           </span>
-          Continue with Google
+          Google
         </ft-action>
+          <ft-action class="auth-google" [busy]="googleLoading" (activated)="signInWithProvider('Apple')"><svg width="17" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.1 1c.1 1.3-.4 2.5-1.2 3.4-.9 1-2.1 1.6-3.3 1.5-.2-1.3.4-2.5 1.2-3.4C14.6 1.6 16 1 17.1 1ZM20.9 17.7c-.5 1.2-.8 1.7-1.4 2.7-.9 1.3-2.1 2.9-3.6 2.9-1.3 0-1.7-.9-3.5-.9s-2.2.9-3.6.9-2.6-1.5-3.5-2.8c-2.5-3.7-2.8-8-.9-10.7 1.3-1.9 3.3-2.9 5.1-2.9 1.5 0 2.5.9 3.7.9s2-.9 3.8-.9c1.5 0 3.1.8 4.2 2.1-3.7 2.1-3.2 7.2-.3 8.7Z"/></svg> Apple</ft-action>
+        </div>
       </form>
       <p class="access-footer">New to FitTrack? <a routerLink="/auth/register">Create an account</a></p>
     </div>

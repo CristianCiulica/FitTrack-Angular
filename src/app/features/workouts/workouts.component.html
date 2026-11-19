@@ -1,364 +1,101 @@
 <nz-layout class="app-layout">
-  <!-- Sidebar -->
-  <ft-navigation (signOut)="logout()" />
-
   <nz-layout class="main-layout">
-    <nz-header class="app-header workouts-header">
-      <div class="header-left">
-        <app-menu></app-menu>
-        <h2>
-          <span class="desktop-page-title">History</span>
-          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
-        </h2>
-      </div>
-
+    <nz-header class="app-header">
+      <div class="header-left"><app-menu /><h2>History</h2></div>
     </nz-header>
-
     <nz-content role="main" class="app-content">
-      <section class="history-intro"><h1>Activity history</h1></section>
-      <section class="cardio-history">
-        <div class="section-heading">
-          <div>
-            <span>Outdoor activity</span>
-            <h3>Running history</h3>
-          </div>
-          <button
-            type="button"
-            class="collapse-toggle"
-            [attr.aria-expanded]="cardioHistoryOpen()"
-            aria-label="Toggle running history"
-            (click)="toggleCardioHistory()"
-          >
-            <strong>{{ runningSessions().length }}</strong>
-            <span nz-icon [nzType]="cardioHistoryOpen() ? 'up' : 'down'"></span>
-          </button>
-        </div>
-
-        <div class="collapse-content" *ngIf="cardioHistoryOpen()">
-          <div
-            class="cardio-session-grid"
-            *ngIf="runningSessions().length > 0; else noCardioSessions"
-          >
-            <article
-              class="cardio-session-card"
-              *ngFor="let session of runningSessions(); trackBy: trackRecord"
-              [class.expanded]="expandedRuns().has(session.id!)"
-            >
-              <div class="cardio-session-header">
-                <div>
-                  <h4>{{ session.indoor ? (session.mode === 'walking' ? 'Treadmill walk' : 'Treadmill run') : session.mode === 'walking' ? 'Walk' : 'Run' }}</h4>
-                  <span>{{ session.startedAt | date: 'd MMM y, HH:mm' }}</span>
-                </div>
-                <div class="cardio-header-right">
-                  <strong>{{ distanceValue(session.distanceMeters) | number: '1.2-2' }} {{ distanceUnit }}</strong>
-                  <button
-                    type="button"
-                    class="cardio-delete-btn"
-                    [attr.aria-label]="'Delete run from ' + (session.startedAt | date: 'd MMM y')"
-                    nz-popconfirm
-                    nzPopconfirmTitle="Delete session?"
-                    nzPopconfirmPlacement="left"
-                    (nzOnConfirm)="deleteRunningSession(session.id!)"
-                    (click)="$event.stopPropagation()"
-                  >
-                    <span nz-icon nzType="delete" nzTheme="outline"></span>
-                  </button>
-                </div>
-              </div>
-
-              <div *ngIf="session.route?.length" class="cardio-route" [class.tall]="expandedRuns().has(session.id!)">
-                <app-route-map [route]="session.route" label="Recorded running route"></app-route-map>
-              </div>
-
-              <!-- Statistici principale -->
-              <div class="cardio-session-stats">
-                <div>
-                  <span><span nz-icon nzType="ft:history" class="stat-icon-inline"></span>Duration</span>
-                  <strong>{{ formatDuration(session.durationSeconds) }}</strong>
-                </div>
-                <div>
-                  <span><span nz-icon nzType="ft:run" class="stat-icon-inline"></span>Pace</span>
-                  <strong>{{ formatPace(session) }} /{{ distanceUnit }}</strong>
-                </div>
-                <div>
-                  <span><span nz-icon nzType="fire" class="stat-icon-inline"></span>Calories</span>
-                  <strong>{{ session.indoor && session.indoor.calories === null ? 'Not recorded' : session.calories + ' kcal' }}</strong>
-                </div>
-              </div>
-
-              <!-- Detalii extinse -->
-              <div class="cardio-details" *ngIf="expandedRuns().has(session.id!)">
-                <div class="detail-row">
-                  <span>Avg speed</span>
-                  <strong>{{ speedValue(session.averageSpeedKmh) | number: '1.1-1' }} {{ distanceUnit }}/h</strong>
-                </div>
-                <div class="detail-row">
-                  <span>Steps</span>
-                  <strong>{{ session.indoor && session.indoor.steps === null ? 'Not recorded' : session.steps }}</strong>
-                </div>
-                <div class="detail-row" *ngIf="session.indoor && session.indoor.inclinePercent !== null">
-                  <span>Incline</span><strong>{{ session.indoor.inclinePercent }}%</strong>
-                </div>
-                <div class="detail-row">
-                  <span>Started</span>
-                  <strong>{{ session.startedAt | date: 'HH:mm:ss' }}</strong>
-                </div>
-                <div class="detail-row">
-                  <span>Finished</span>
-                  <strong>{{ session.endedAt | date: 'HH:mm:ss' }}</strong>
-                </div>
-                <div class="detail-row" *ngIf="session.route?.length">
-                  <span>GPS points</span>
-                  <strong>{{ session.route!.length }}</strong>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                class="run-expand-btn"
-                [attr.aria-expanded]="expandedRuns().has(session.id!)"
-                (click)="toggleRun(session.id!)"
-              >
-                {{ expandedRuns().has(session.id!) ? 'Hide details' : 'Details' }}
-                <span nz-icon [nzType]="expandedRuns().has(session.id!) ? 'up' : 'down'"></span>
-              </button>
-            </article>
-          </div>
-
-          <ng-template #noCardioSessions>
-            <div class="empty-cardio-history">
-              Outdoor runs and treadmill sessions will appear here.
-            </div>
-          </ng-template>
-        </div>
-      </section>
-
-      <section class="workout-history-section">
-        <div class="history-table-heading">
-          <div>
-            <span>Training log</span>
-            <h3>Workout history</h3>
-          </div>
-          <div class="history-table-controls">
-            <button
-              type="button"
-              class="collapse-toggle workout-collapse-toggle"
-              [attr.aria-expanded]="workoutHistoryOpen()"
-              aria-label="Toggle workout history"
-              (click)="toggleWorkoutHistory()"
-            >
-              <strong>{{ filteredWorkouts().length }} sessions</strong>
-              <span nz-icon [nzType]="workoutHistoryOpen() ? 'up' : 'down'"></span>
-            </button>
-          </div>
-        </div>
-
-        <ng-container *ngIf="workoutHistoryOpen()">
-          <div class="table-card desktop-workout-table">
-            <nz-table
-              #workoutTable
-              [nzData]="filteredWorkouts()"
-              [nzNoResult]="hideTableNoResult"
-              [nzPageSize]="10"
-              nzSize="middle"
-            >
-              <thead>
-                <tr>
-                  <th
-                    nzColumnKey="name"
-                    nzShowSort
-                    [nzSortFn]="true"
-                    [nzSortOrder]="sortColumn() === 'name' ? sortDirection() : null"
-                    (nzSortOrderChange)="onSortOrderChange('name', $event)"
-                  >
-                    Workout
-                  </th>
-                  <th
-                    nzColumnKey="date"
-                    nzShowSort
-                    [nzSortFn]="true"
-                    [nzSortOrder]="sortColumn() === 'date' ? sortDirection() : null"
-                    (nzSortOrderChange)="onSortOrderChange('date', $event)"
-                  >
-                    Date
-                  </th>
-                  <th
-                    nzColumnKey="exerciseCount"
-                    nzShowSort
-                    [nzSortFn]="true"
-                    [nzSortOrder]="sortColumn() === 'exerciseCount' ? sortDirection() : null"
-                    (nzSortOrderChange)="onSortOrderChange('exerciseCount', $event)"
-                  >
-                    Exercises
-                  </th>
-                  <th
-                    nzColumnKey="volume"
-                    nzShowSort
-                    [nzSortFn]="true"
-                    [nzSortOrder]="sortColumn() === 'volume' ? sortDirection() : null"
-                    (nzSortOrderChange)="onSortOrderChange('volume', $event)"
-                  >
-                    Volume
-                  </th>
-                  <th>Calories</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <ng-container *ngFor="let w of workoutTable.data; trackBy: trackRecord">
-                  <tr class="workout-row">
-                    <td class="workout-name-cell">
-                      <strong>{{ w.name }}</strong>
-                    </td>
-                    <td class="workout-date-cell">
-                      {{ w.date | date: 'd MMM y' }}
-                    </td>
-                    <td class="workout-count-cell">
-                      {{ getExerciseCount(w) }}
-                    </td>
-                    <td class="workout-volume-cell">
-                      @if (w.exercises.length) { {{ displayLoad(getWorkoutVolume(w)) | number: '1.0-0' }} {{ weightUnit }} } @else { — }
-                    </td>
-                    <td class="workout-kcal-cell">
-                      ~{{ getWorkoutCalories(w) }} kcal
-                    </td>
-                    <td class="workout-actions-cell">
-                      <ft-action
-                       class="details-button"
-                        (activated)="onExpandChange(w.id!, !expandSet.has(w.id!))"
-                      >
-                        <span>{{ expandSet.has(w.id!) ? 'Hide' : 'Details' }}</span>
-                        <span nz-icon [nzType]="expandSet.has(w.id!) ? 'up' : 'down'"></span>
-                      </ft-action>
-                      <ft-action
-                        *ngIf="!treadmillRecords(w).length" (activated)="openEdit(w)"
-                        style="margin-right: 4px"
-                      >
-                        <span nz-icon nzType="edit"></span>
-                      </ft-action>
-                      <ft-action
-                        [destructive]="true"
-                        (activated)="deleteWorkout(w.id!)"
-                      >
-                        <span nz-icon nzType="delete"></span>
-                        Delete
-                      </ft-action>
-                    </td>
-                  </tr>
-                  <tr class="workout-details-row" *ngIf="expandSet.has(w.id!)">
-                    <td colspan="6">
-                      <div class="desktop-exercise-list">
-                        @for (record of treadmillRecords(w); track record.exerciseIndex) {<div class="desktop-exercise-row"><div class="desktop-exercise-info"><strong>Treadmill walk</strong><span>Timed cardio</span></div><div class="desktop-exercise-stats"><span>{{ durationLabel(record.seconds) }}</span><span>~{{ treadmillEnergy(record) }} kcal estimated</span></div></div>}
-
-                        <div class="desktop-exercise-row" *ngFor="let ex of w.exercises">
-                          <div class="desktop-exercise-info">
-                            <strong>{{ ex.exerciseName }}</strong>
-                            <span>{{ ex.muscleGroup }}</span>
-                          </div>
-                          <div class="desktop-exercise-stats">
-                            <span>{{ ex.sets }} sets</span>
-                            <span *ngIf="!ex.setReps?.length">{{ ex.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}</span>
-                            <span class="set-weights" *ngIf="ex.setReps?.length">{{ formatSetReps(ex.setReps!, ex.repUnit) }}</span>
-                            <span *ngIf="!ex.setWeights?.length">{{ displayLoad(ex.weight) }} {{ weightUnit }}</span>
-                            <span class="set-weights" *ngIf="ex.setWeights?.length">{{ formatSetWeights(ex.setWeights!) }}</span>
-                            <span class="set-weights" *ngFor="let drop of ex.dropSets">Drop · set {{ drop.setIndex + 1 }}: {{ drop.reps }} reps × {{ displayLoad(drop.weight) }} {{ weightUnit }}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </ng-container>
-                <tr *ngIf="filteredWorkouts().length === 0">
-                  <td colspan="6" style="text-align: center; padding: 48px; color: #6e6e73">
-                    <span
-                      nz-icon
-                      nzType="inbox"
-                      style="font-size: 48px; display: block; margin-bottom: 16px; color: #d1d1d6"
-                    ></span>
-                    No workouts have been saved yet.
-                  </td>
-                </tr>
-              </tbody>
-            </nz-table>
-          </div>
-
-          <div class="mobile-workout-list">
-            <article class="mobile-workout-card" *ngFor="let w of filteredWorkouts(); trackBy: trackRecord">
-              <div class="mobile-workout-header">
-                <div>
-                  <h3>{{ w.name }}</h3>
-                </div>
-              </div>
-
-              <div class="mobile-workout-summary-clean">
-                <div class="stat-clean">
-                  <span class="stat-label">Date</span>
-                  <span class="stat-value">{{ w.date | date: 'd MMM y' }}</span>
-                </div>
-                <div class="stat-clean">
-                  <span class="stat-label">Exercises</span>
-                  <span class="stat-value">{{ getExerciseCount(w) }}</span>
-                </div>
-                <div class="stat-clean" *ngIf="w.exercises.length">
-                  <span class="stat-label">Volume</span>
-                  <span class="stat-value">{{ displayLoad(getWorkoutVolume(w)) | number: '1.0-0' }} {{ weightUnit }}</span>
-                </div>
-                <div class="stat-clean" *ngIf="w.durationSeconds != null">
-                  <span class="stat-label">Duration</span>
-                  <span class="stat-value">{{ durationLabel(w.durationSeconds!) }}</span>
-                </div>
-                <div class="stat-clean">
-                  <span class="stat-label">Calories</span>
-                  <span class="stat-value">~{{ getWorkoutCalories(w) }} kcal</span>
-                </div>
-              </div>
-
-              <div class="mobile-exercise-list-clean" *ngIf="expandSet.has(w.id!)">
-                @for (record of treadmillRecords(w); track record.exerciseIndex) {<div class="mobile-exercise-row-clean"><div><strong>Treadmill walk</strong><span>{{ durationLabel(record.seconds) }} · ~{{ treadmillEnergy(record) }} kcal estimated</span></div></div>}
-
-                <div class="mobile-exercise-row-clean" *ngFor="let ex of w.exercises">
-                  <div class="ex-info">
-                    <strong>{{ ex.exerciseName }}</strong>
-                    <span>{{ ex.muscleGroup }}</span>
-                  </div>
-                  <div class="ex-stats">
-                    <span>{{ ex.sets }} sets</span>
-                    <span *ngIf="!ex.setReps?.length">{{ ex.reps }} {{ ex.repUnit === 'seconds' ? 'sec' : 'reps' }}</span>
-                    <span class="set-weights" *ngIf="ex.setReps?.length">{{ formatSetReps(ex.setReps!, ex.repUnit) }}</span>
-                    <span *ngIf="!ex.setWeights?.length">{{ displayLoad(ex.weight) }} {{ weightUnit }}</span>
-                    <span class="set-weights" *ngIf="ex.setWeights?.length">{{ formatSetWeights(ex.setWeights!) }}</span>
-                            <span class="set-weights" *ngFor="let drop of ex.dropSets">Drop · set {{ drop.setIndex + 1 }}: {{ drop.reps }} reps × {{ displayLoad(drop.weight) }} {{ weightUnit }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="mobile-workout-actions-clean">
-                <button type="button" class="action-btn" (click)="onExpandChange(w.id!, !expandSet.has(w.id!))">
-                  {{ expandSet.has(w.id!) ? 'Hide Details' : 'Details' }}
+      <h1>Activity History</h1>
+      <div class="history-filters" role="group" aria-label="Activity type">
+        @for (option of filters; track option) {
+          <button type="button" [attr.aria-pressed]="filter() === option" (click)="filter.set(option)">{{ option }}</button>
+        }
+      </div>
+      @if (filter() === 'Workouts' && filteredWorkouts().length > 1) {
+        <label class="sort">Sort within month
+          <select #sort (change)="sortWorkouts(sort.selectedIndex)">
+            @for (option of sortOptions; track option.label) {
+              <option [selected]="option.column === sortColumn() && option.direction === sortDirection()">{{ option.label }}</option>
+            }
+          </select>
+        </label>
+      }
+      @for (group of months(); track group.month) {
+        <section class="month">
+          <h2>{{ group.month ? ((group.month + '-01') | date:'MMMM y') : 'Undated' }}</h2>
+          @for (entry of group.entries; track entry.key) {
+            @let open = expanded().has(entry.key);
+            <article [class.open]="open">
+              @if (entry.run; as run) {
+                <button class="entry-heading" type="button" [attr.aria-expanded]="open" (click)="toggleEntry(entry.key)">
+                  @if (!open) {
+                    @if (entry.thumbnail; as thumb) {
+                      <svg class="thumbnail" viewBox="0 0 48 48" aria-hidden="true">
+                        <polyline [attr.points]="thumb.line" />
+                        <circle [attr.cx]="thumb.end.x" [attr.cy]="thumb.end.y" r="3.5" />
+                      </svg>
+                    } @else { <span class="type-icon" nz-icon nzType="ft:run"></span> }
+                  }
+                  <span class="entry-name"><strong>{{ run.indoor ? (run.mode === 'walking' ? 'Treadmill walk' : 'Treadmill run') : (run.mode === 'walking' ? 'Walk' : 'Run') }}</strong>
+                    <small>{{ run.startedAt | date:'d MMM, HH:mm' }}</small>
+                    @if (!open && !run.distanceMeters) { <small>Too short to track</small> }
+                  </span>
+                  <span class="distance">{{ distanceValue(run.distanceMeters) | number:'1.2-2' }} <small>{{ distanceUnit }}</small></span>
+                  <span class="chevron" aria-hidden="true" nz-icon [nzType]="open ? 'up' : 'down'"></span>
                 </button>
-                <button type="button" class="action-btn" *ngIf="!treadmillRecords(w).length" (click)="openEdit(w)">Edit</button>
-                <button type="button" class="action-btn danger" (click)="deleteWorkout(w.id!)">
-                  Delete
+                @if (open) {
+                  @if (run.route?.length) { <app-route-map [route]="run.route" label="Recorded running route" /> }
+                  <dl class="metrics">
+                    <div><dd>{{ formatDuration(run.durationSeconds) }}</dd><dt>Duration</dt></div>
+                    <div><dd>{{ formatPace(run) }} @if (run.distanceMeters >= 20) { <small>/{{ distanceUnit }}</small> }</dd><dt>Pace</dt></div>
+                    <div><dd>{{ run.indoor && run.indoor.calories === null ? '—' : run.calories }} @if (!run.indoor || run.indoor.calories !== null) { <small>kcal</small> }</dd><dt>Energy</dt></div>
+                  </dl>
+                  <details class="more"><summary>Session details</summary>
+                    <dl class="detail-list">
+                      <dt>Average speed</dt><dd>{{ speedValue(run.averageSpeedKmh) | number:'1.1-1' }} {{ distanceUnit }}/h</dd>
+                      <dt>Steps</dt><dd>{{ run.indoor && run.indoor.steps === null ? 'Not recorded' : run.steps }}</dd>
+                      @if (run.indoor && run.indoor.inclinePercent !== null) { <dt>Incline</dt><dd>{{ run.indoor.inclinePercent }}%</dd> }
+                      <dt>Started</dt><dd>{{ run.startedAt | date:'HH:mm:ss' }}</dd>
+                      <dt>Finished</dt><dd>{{ run.endedAt | date:'HH:mm:ss' }}</dd>
+                      @if (run.route?.length) { <dt>GPS points</dt><dd>{{ run.route?.length }}</dd> }
+                    </dl>
+                    <button class="action danger" type="button" (click)="confirmDeleteRunningSession(run.id!)">Delete session</button>
+                  </details>
+                }
+              } @else if (entry.workout; as w) {
+                <button class="entry-heading" type="button" [attr.aria-expanded]="open" (click)="toggleEntry(entry.key)">
+                  @if (!open) { <span nz-icon class="type-icon" nzType="ft:workout"></span> }
+                  <span class="entry-name"><strong>{{ w.name }}</strong><small>{{ w.date | date:'d MMM' }} · {{ getExerciseCount(w) }} exercises</small></span>
+                  <span class="chevron" aria-hidden="true" nz-icon [nzType]="open ? 'up' : 'down'"></span>
                 </button>
-              </div>
+                @if (open) {
+                  <dl class="metrics">
+                    @if (w.durationSeconds != null) { <div><dd>{{ durationLabel(w.durationSeconds) }}</dd><dt>Duration</dt></div> }
+                    @if (w.exercises.length) { <div><dd>{{ displayLoad(getWorkoutVolume(w)) | number:'1.0-0' }} <small>{{ weightUnit }}</small></dd><dt>Volume</dt></div> }
+                    <div><dd>~{{ getWorkoutCalories(w) }} <small>kcal</small></dd><dt>Energy</dt></div>
+                  </dl>
+                  <details class="more"><summary>Workout details</summary>
+                    @for (record of treadmillRecords(w); track record.exerciseIndex) {
+                      <p><strong>Treadmill walk</strong><br>{{ durationLabel(record.seconds) }} · ~{{ treadmillEnergy(record) }} kcal estimated</p>
+                    }
+                    @for (ex of w.exercises; track $index) {
+                      <p><strong>{{ ex.exerciseName }}</strong> · {{ ex.muscleGroup }}<br>{{ ex.sets }} sets ·
+                        {{ ex.setReps?.length ? formatSetReps(ex.setReps!, ex.repUnit) : ex.reps + (ex.repUnit === 'seconds' ? ' sec' : ' reps') }} ·
+                        {{ ex.setWeights?.length ? formatSetWeights(ex.setWeights!) : displayLoad(ex.weight) + ' ' + weightUnit }}
+                        @for (drop of ex.dropSets; track $index) { <br>Drop · set {{ drop.setIndex + 1 }}: {{ drop.reps }} reps × {{ displayLoad(drop.weight) }} {{ weightUnit }} }
+                      </p>
+                    }
+                    @if (!treadmillRecords(w).length) { <button class="action" type="button" (click)="openEdit(w)">Edit workout</button> }
+                    <button class="action danger" type="button" (click)="deleteWorkout(w.id!)">Delete workout</button>
+                  </details>
+                }
+              }
             </article>
-
-            <div class="mobile-empty-state" *ngIf="filteredWorkouts().length === 0">
-              <span nz-icon nzType="inbox"></span>
-              <p>No workouts have been saved yet.</p>
-            </div>
-          </div>
-        </ng-container>
-      </section>
+          }
+        </section>
+      } @empty {
+        <p class="empty">{{ filter() === 'Runs' ? 'Your runs and walks will appear here.' : filter() === 'Workouts' ? 'Your saved workouts will appear here.' : 'Your saved runs and workouts will appear here.' }}</p>
+      }
     </nz-content>
   </nz-layout>
 </nz-layout>
-
-<app-workout-modal
-  [visible]="modalVisible()"
-  [saving]="modalSaving()"
-  [workout]="editingWorkout()"
-  (save)="onModalSave($event)"
-  (cancel)="onModalCancel()"
->
-</app-workout-modal>
+<app-workout-modal [visible]="modalVisible()" [saving]="modalSaving()" [workout]="editingWorkout()" (save)="onModalSave($event)" (cancel)="onModalCancel()" />

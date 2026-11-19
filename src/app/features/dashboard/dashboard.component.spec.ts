@@ -6,8 +6,6 @@ import { ProfileService } from '../../core/services/profile.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { RunningSession } from '../../core/models/running-session.model';
 import { WorkoutService } from '../../core/services/workout.service';
-import { AuthService } from '../../core/services/auth.service';
-import { NzMessageService } from 'ng-zorro-antd/message';
 
 describe('Dashboard Activity data', () => {
   const sessions = signal<RunningSession[]>([]);
@@ -22,7 +20,7 @@ describe('Dashboard Activity data', () => {
       { provide: RunningSessionService, useValue: { sessions } },
     ] });
     component = TestBed.runInInjectionContext(() => new DashboardComponent(
-      {} as WorkoutService, {} as AuthService, {} as NzMessageService,
+      {} as WorkoutService,
     ));
     component.selectedDate.set(new Date(2026, 9, 1));
   });
@@ -71,7 +69,7 @@ describe('Unperformed routines', () => {
       { provide: ProfileService, useValue: { moveGoal: signal(500), exerciseGoal: signal(30), weightKg: signal(75), weeklyWorkoutGoal: signal(4), units: signal('metric') } },
       { provide: RunningSessionService, useValue: { sessions: signal([]) } },
     ] });
-    const component = TestBed.runInInjectionContext(() => new DashboardComponent({} as any, {} as any, {} as any));
+    const component = TestBed.runInInjectionContext(() => new DashboardComponent({} as WorkoutService));
     component.selectedDate.set(new Date(2026, 9, 3));
     component.workouts.set([{ kind: 'routine', userId: 'test', name: 'New plan', date: '2026-10-03', exercises: [{ exerciseName: 'Squat', muscleGroup: 'Legs', sets: 3, reps: 20, weight: 0 }] }]);
     expect(component.activityWeekWorkouts()).toBe(0);

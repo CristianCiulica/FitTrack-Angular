@@ -57,3 +57,25 @@
 .live-body { overflow-y: auto; overscroll-behavior: contain; }
 .live-body > * { flex-shrink: 0; }
 @media (max-height: 700px) { .live-body { justify-content: flex-start; } }
+
+.workout-live { background: var(--bg); }
+.live-top { padding-bottom: 8px; }
+.live-routine h2 { display: inline-block; margin: 0; background: var(--surface); padding: 5px 9px; border: 1px solid var(--hairline); border-radius: 6px; font-size: 12px; }
+.live-body .live-exercise-head h1 { font-size: clamp(22px,3.2dvh,32px); margin: 0 0 8px; }
+.live-weight .live-stats { justify-content: space-between; margin: 0 0 15px; padding-bottom: 10px; border-bottom: 1px solid var(--hairline); }
+.live-weight .live-stat { display: flex; align-items: baseline; gap: 6px; }
+.live-weight .live-stat .value { font-size: 13px; }
+.live-weight .live-stat:last-child .value { color: var(--accent); }
+.live-weight .live-adjust label, .live-stat label { text-transform: uppercase; letter-spacing: .07em; font-size: 10px; }
+.live-weight .weight-stepper { justify-content: space-between; }
+.live-weight .stepper-btn { border: 1px solid var(--hairline); border-radius: 10px; background: var(--surface); }
+.live-actions .live-primary { --lg-fill: #347cf5; }
+:host ::ng-deep .live-actions .lg-button { border-radius: 14px; }
+:host { display: block; background: var(--bg); }
+
+@media (min-width: 340px) {
+  .set-navigation { grid-template-columns: auto 1fr auto; column-gap: 4px; align-items: center; }
+  .set-navigation > span { grid-column: 2; grid-row: 1; font-size: 11px; }
+  .set-navigation button { grid-row: 1; font-size: 11px; gap: 2px; }
+  .set-skip { grid-column: 3; }
+}

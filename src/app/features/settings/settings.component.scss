@@ -210,3 +210,9 @@
   .appearance-options { gap: 12px; }
   .appearance-preview { height: 110px; padding: 9px; gap: 10px; }
 }
+
+.settings-card.ant-card {
+  background: var(--surface-strong);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

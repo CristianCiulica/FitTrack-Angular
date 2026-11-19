@@ -10,6 +10,7 @@ import {
   updateProfile,
   user,
   GoogleAuthProvider,
+  OAuthProvider,
   signInWithPopup,
   getRedirectResult,
   sendPasswordResetEmail,
@@ -103,6 +104,13 @@ export class AuthService {
 
     // iOS PWA requires synchronous popup execution (no async/awaits before calling signInWithPopup).
     // Default persistence is already local, so we don't need to call setPersistence.
+    return from(signInWithPopup(this.auth, provider));
+  }
+
+  signInWithApple() {
+    const provider = new OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
     return from(signInWithPopup(this.auth, provider));
   }
 

@@ -98,27 +98,27 @@ export class LoginComponent {
   }
 
   // sign in with google
-  signInWithGoogle() {
+  signInWithProvider(provider: 'Google' | 'Apple') {
     this.googleLoading = true;
-    this.auth.signInWithGoogle().subscribe({
+    (provider === 'Google' ? this.auth.signInWithGoogle() : this.auth.signInWithApple()).subscribe({
       next: () => {
         this.loadingService.showAfterNextNavigation(1000);
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
-        this.showGoogleError(error);
+        this.showProviderError(provider, error);
         this.googleLoading = false;
       },
     });
   }
 
-  private showGoogleError(error: { code?: string }) {
+  private showProviderError(provider: string, error: { code?: string }) {
     if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
-      this.message.warning('Google sign-in was cancelled.');
+      this.message.warning(`${provider} sign-in was cancelled.`);
       return;
     }
     if (error?.code === 'auth/popup-blocked') {
-      this.message.error('The Google window was blocked. Allow popups and try again.');
+      this.message.error(`The ${provider} window was blocked. Allow popups and try again.`);
       return;
     }
     if (error?.code === 'auth/unauthorized-domain') {
@@ -126,7 +126,7 @@ export class LoginComponent {
       return;
     }
     if (error?.code === 'auth/operation-not-allowed') {
-      this.message.error('Google sign-in is not enabled in Firebase Authentication.');
+      this.message.error(`${provider} sign-in is unavailable.`);
       return;
     }
     if (error?.code === 'auth/network-request-failed') {
@@ -137,6 +137,6 @@ export class LoginComponent {
       this.message.error('This email is already registered with a password. Sign in with your email and password instead.');
       return;
     }
-    this.message.error(`Google sign-in failed${error?.code ? ' (' + error.code + ')' : ''}. Please try again.`);
+    this.message.error(`${provider} sign-in failed${error?.code ? ' (' + error.code + ')' : ''}. Please try again.`);
   }
 }

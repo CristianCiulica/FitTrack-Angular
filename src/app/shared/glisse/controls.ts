@@ -114,26 +114,30 @@ const tabs = primaryNavigation.map(([value, label, icon]) => ({
 
 @Component({selector: 'ft-tab-bar', template: ''})
 export class FitTabBar {
-  readonly locked = input(false);
-  readonly blocked = output<Event>();
+  readonly desktop = input(false);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly links = tabs.map(item => ({ ...item, href: this.location.prepareExternalUrl(item.value) }));
+  private readonly desktopLinks = [...this.links, {
+    value: '/progress', href: this.location.prepareExternalUrl('/progress'), label: 'Progress'
+  }].map(({ value, href, label }) => ({ value, href, label }));
   private readonly root = mount(inject(ElementRef).nativeElement);
   constructor() {
     afterRenderEffect(() => {
+      const links = this.desktop() ? this.desktopLinks : this.links;
       const url = this.router.lastSuccessfulNavigation?.()?.finalUrl?.toString() ?? this.router.url;
       const path = url?.split(/[?#]/)[0];
       this.root.render(h(TabBar, {
-        items: this.locked() ? tabs : this.links, value: tabs.find(item => item.value === path)?.value ?? null,
-        'aria-label': 'Main navigation', 'aria-disabled': this.locked(),
+        items: links, value: links.find(item => item.value === path)?.value ?? null,
+        'aria-label': 'Main navigation',
         onClick: event => {
-          if (this.locked()) this.blocked.emit(event.nativeEvent);
-          if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
-            event.preventDefault();
-          }
+          if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          const anchor = (event.target as Element).closest<HTMLAnchorElement>('a[href]');
+          const item = links.find(link => link.href === anchor?.getAttribute('href'));
+          if (!item) return;
+          event.preventDefault();
+          void this.router.navigateByUrl(item.value);
         },
-        onValueChange: value => { if (!this.locked()) void this.router.navigateByUrl(value); },
       }));
     });
   }

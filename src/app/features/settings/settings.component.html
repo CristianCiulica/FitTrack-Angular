@@ -1,5 +1,4 @@
 <nz-layout class="app-layout">
-  <ft-navigation (signOut)="logout()" />
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
@@ -122,11 +121,7 @@
               nz-button
               nzDanger
               [nzLoading]="deleting()"
-              nz-popconfirm
-              nzPopconfirmTitle="Delete your account and all data?"
-              nzOkText="Delete"
-              nzOkType="danger"
-              (nzOnConfirm)="deleteAccount()"
+              (click)="confirmDeleteAccount()"
             >
               Delete account
             </button>

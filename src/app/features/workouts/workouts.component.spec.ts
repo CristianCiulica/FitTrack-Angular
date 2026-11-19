@@ -69,6 +69,16 @@ describe('History separates actual strength and indoor cardio', () => {
     expect(component.filteredWorkouts().map((w) => w.id)).toEqual(['strength']);
     expect(component.runningSessions().map((s) => s.id)).toEqual(['indoor:cardio']);
     expect(component.runningSessions()[0].indoor?.calories).toBeNull();
+    component.workouts.update(items => [...items, { ...strength, id: 'older', date: '2025-12-31' }]);
+    expect(component.months().map(group => group.month)).toEqual(['2026-10', '2025-12']);
+    component.filter.set('Runs');
+    expect(component.months().map(group => group.entries.length)).toEqual([1]);
+    expect(component.expanded().has('run:indoor:cardio')).toBe(true);
+    component.toggleEntry('run:indoor:cardio');
+    expect(component.expanded().size).toBe(0);
+    component.filter.set('Workouts');
+    expect(component.months().map(group => group.entries.length)).toEqual([1, 1]);
+    expect(component.expanded().has('workout:strength')).toBe(true);
     component.deleteRunningSession('indoor:cardio');
     expect(service.deleteWorkout).toHaveBeenCalledWith('cardio');
     expect(component.runningSessions()).toEqual([]);

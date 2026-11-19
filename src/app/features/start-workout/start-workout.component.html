@@ -1,6 +1,4 @@
 <nz-layout class="app-layout" [attr.inert]="workoutInProgress() ? '' : null">
-  <!-- Sidebar -->
-  <ft-navigation (signOut)="logout()" [locked]="workoutInProgress()" (blocked)="blockNavigation($event)" />
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
@@ -8,7 +6,7 @@
         <app-menu></app-menu>
         <h2>
           <span class="desktop-page-title">Workout</span>
-          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+          <span class="mobile-header-brand">Workout</span>
         </h2>
       </div>
       <div class="header-actions"  *ngIf="!workoutInProgress()">
@@ -25,6 +23,7 @@
         <!-- SETUP STATE -->
         <ng-container *ngIf="state() === 'setup'">
           <app-workout-library
+            [initialTab]="libraryTab()"
             [gymRoutines]="gymRoutines"
             [homeRoutines]="homeRoutines"
             [routines]="routines"
@@ -161,6 +160,8 @@
       <h1>{{ ex.name }}</h1>
     </div>
 
+    <!-- logheaza ce ai facut efectiv la setul curent: repetari + greutate -->
+    <div class="live-weight">
     <div class="live-stats" *ngIf="!treadmillActive()">
       <div class="live-stat">
         <label>{{ activeDrop() ? 'Drop set' : 'Set' }}</label>
@@ -172,8 +173,7 @@
       </div>
     </div>
 
-    <!-- logheaza ce ai facut efectiv la setul curent: repetari + greutate -->
-    <div class="live-weight">
+
       @if (treadmillActive()) {
         <div class="treadmill-setup">
           <label for="treadmill-minutes">How many minutes would you like to walk?</label>
@@ -316,13 +316,13 @@
     <ft-action [destructive]="true" class="live-stop" label="Stop workout" title="Stop workout" [disabled]="saving()" (activated)="confirmStopWorkout()">
       <span nz-icon nzType="close" aria-hidden="true"></span>
     </ft-action>
-    <ft-action *ngIf="state() === 'active' && (currentExercise()?.repUnit === 'seconds' || treadmillActive())" class="live-primary" [disabled]="treadmillActive() && !treadmillInputValid()" (activated)="toggleHoldTimer()">
+    <ft-action *ngIf="state() === 'active' && (currentExercise()?.repUnit === 'seconds' || treadmillActive())" class="live-primary" variant="filled" [disabled]="treadmillActive() && !treadmillInputValid()" (activated)="toggleHoldTimer()">
       <svg class="hold-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path [attr.d]="holdRunning() ? 'M9 8v8m6-8v8' : 'm10 8 6 4-6 4V8Z'"/></svg>
       {{ holdRunning() ? 'Pause timer' : holdElapsedMs() > 0 ? 'Resume timer' : 'Start timer' }}
     </ft-action>
     <ft-action
       *ngIf="state() === 'active' && currentExercise()?.repUnit !== 'seconds' && !treadmillActive()"
-     class="live-primary"
+     class="live-primary" variant="filled"
       (activated)="finishSet()"
       [disabled]="!setInputsValid() || !dropInputValid()"
     >
@@ -330,12 +330,12 @@
     </ft-action>
     <ft-action
       *ngIf="state() === 'rest'"
-     class="live-primary"
+     class="live-primary" variant="filled"
       (activated)="skipRest()"
     >
       <span nz-icon nzType="forward"></span> Skip rest
     </ft-action>
-    <ft-action *ngIf="state() === 'review'" class="live-primary" [disabled]="completedSets() === 0" [busy]="saving()" (activated)="finishWorkout()"><span nz-icon nzType="check"></span> Save workout</ft-action>
+    <ft-action *ngIf="state() === 'review'" class="live-primary" variant="filled" [disabled]="completedSets() === 0" [busy]="saving()" (activated)="finishWorkout()"><span nz-icon nzType="check"></span> Save workout</ft-action>
   </div>
 </div>
 

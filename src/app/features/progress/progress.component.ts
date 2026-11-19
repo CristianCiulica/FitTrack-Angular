@@ -1,5 +1,4 @@
 import { FitAction } from '../../shared/glisse/controls';
-import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { ExerciseRecordsComponent } from './exercise-records/exercise-records.component';
 import {
   Component,
@@ -33,7 +32,6 @@ import { trainingProgress } from '../../core/utils/training-progress';
   standalone: true,
   imports: [
     FitAction,
-    NavigationComponent,
     CommonModule,
     ExerciseRecordsComponent,
     NzLayoutModule,

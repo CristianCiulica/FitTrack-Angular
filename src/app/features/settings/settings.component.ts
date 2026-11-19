@@ -1,5 +1,4 @@
 import { FitAction } from '../../shared/glisse/controls';
-import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { achievementReportHtml } from '../../core/utils/activity-export';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -10,7 +9,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { ConfirmationService } from '../../shared/components/confirmation';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -27,20 +26,20 @@ import { finalize } from 'rxjs';
   selector: 'app-settings',
   standalone: true,
   imports: [
-    NavigationComponent, FitAction,
+    FitAction,
     CommonModule,
     FormsModule,
     NzLayoutModule,
     NzButtonModule,
     NzIconModule,
     NzCardModule,
-    NzPopconfirmModule,
     AppMenuComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
 })
 export class SettingsComponent implements OnInit {
+  private readonly confirmation = inject(ConfirmationService);
   readonly appearance = inject(ThemeService);
   readonly appearanceOptions = ['light', 'dark', 'system'] as const;
   private readonly profileService = inject(ProfileService);
@@ -112,6 +111,15 @@ export class SettingsComponent implements OnInit {
           this.message.error('Could not export your achievements. Please try again.');
         },
       });
+  }
+
+  confirmDeleteAccount(): void {
+    this.confirmation.confirm({
+      nzTitle: 'Delete your account?',
+      nzContent: "Your profile, workouts, runs and weight entries will be permanently deleted. This can't be undone.",
+      nzCancelText: 'Keep account', nzOkText: 'Delete account', nzOkDanger: true,
+      nzOnOk: () => this.deleteAccount(),
+    });
   }
 
   deleteAccount(): void {

@@ -49,6 +49,7 @@ export class WorkoutLibraryComponent {
   readonly homeRoutines = input<WorkoutRoutine[]>([]);
   readonly routines = input<WorkoutRoutine[]>([]);
   readonly personalRoutines = input<WorkoutRoutine[]>([]);
+  @Input() set initialTab(tab: 'discover' | 'sessions') { this.setTab(tab); }
   @Input() deletingIds = new Set<string>();
   @Output() startRoutine = new EventEmitter<{ routine: WorkoutRoutine; key: string }>();
   @Output() createWorkout = new EventEmitter<void>();
@@ -93,7 +94,8 @@ export class WorkoutLibraryComponent {
     const latest = this.enrollments()[0];
     return latest && !latest.stoppedAt ? latest : null;
   });
-  readonly stopRequested = signal(false);
+  @ViewChild('stopDialog') private stopDialog!: ElementRef<HTMLDialogElement>;
+  showStopConfirmation(): void { this.stopDialog.nativeElement.showModal(); }
   readonly activeProgram = computed(
     () => this.programs().find((p) => p.id === this.activeEnrollment()?.programId) ?? null,
   );
@@ -238,7 +240,6 @@ export class WorkoutLibraryComponent {
   showProgram(program: WorkoutProgram, enrollment?: ProgramEnrollment) {
     this.expandedExercises.set(false);
     this.today.set(localDateKey());
-    this.stopRequested.set(false);
     this.selectedProgram.set(program);
     this.selectedRoutine.set(null);
     this.selectedSavedId.set(null);
@@ -292,7 +293,6 @@ export class WorkoutLibraryComponent {
   }
   close() {
     if (this.saving()) return;
-    this.stopRequested.set(false);
     this.dialog.nativeElement.close();
     this.opener?.focus({ preventScroll: true });
   }
@@ -392,7 +392,7 @@ export class WorkoutLibraryComponent {
   }
   requestStop(program: WorkoutProgram, enrollment: ProgramEnrollment) {
     this.showProgram(program, enrollment);
-    this.stopRequested.set(true);
+    this.showStopConfirmation();
   }
   async stopPlan() {
     const enrollment = this.selectedEnrollment(),
@@ -414,7 +414,6 @@ export class WorkoutLibraryComponent {
       if (!this.workouts.isDurablySaved(saved))
         throw new Error('Could not save the change. Keep this screen open and retry.');
       this.selectedEnrollment.set(stopped);
-      this.stopRequested.set(false);
       this.status.set('Plan stopped. Your completed sessions and progress are kept.');
     } catch (e) {
       this.error.set(e instanceof Error ? e.message : 'Could not stop this plan. Please retry.');

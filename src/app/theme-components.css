@@ -70,7 +70,7 @@ html[data-theme='dark'] body :is(
 html[data-theme='dark'] body :is(
   .metric-icon, .day-cell.selected .day-label, .recent-see-all, .recent-empty > span,
   .cardio-header-right > strong, .run-expand-btn, .stat-icon-inline,
-  .account-heading > span, .avatar-edit, .calorie-target > strong, .pace-header strong,
+  .account-heading > span, .avatar-edit, .pace-header strong,
   .wm-count, .wm-add, .weather-summary-score strong, .weather-alert,
   .auth-footer a, .brand-dot, .onboarding .eyebrow, .pace-head strong,
   .progress-copy strong, .answer-summary span, .result-kcal > strong,
@@ -135,7 +135,7 @@ html[data-theme='dark'] body :is(.exercise-preview, .plan-exercise-list li, .liv
   .mobile-workout-actions-clean, .mobile-workout-actions-clean .action-btn, .run-controls,
   .chat-header-modern, .assistant-footer) { border-color: var(--theme-line) !important; }
 html[data-theme='dark'] body :is(.progress-track, .live-progress-track, app-bmi .divider) { background: rgba(255, 255, 255, .12) !important; }
-html[data-theme='dark'] body .workout-live { background: #111113 !important; }
+html[data-theme='dark'] body .workout-live { background: #0b0b0e !important; }
 html[data-theme='dark'] body .live-exercise-head .ant-tag { background: rgba(10,132,255,.14) !important; }
 html[data-theme='dark'] body :is(.mobile-workout-actions-clean, .desktop-exercise-list) { background: rgba(255,255,255,.025) !important; }
 html[data-theme='dark'] body .desktop-exercise-row { background: var(--theme-raised) !important; border-color: var(--theme-line) !important; }

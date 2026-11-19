@@ -1,5 +1,5 @@
+import { CircularDialogMotion } from '../../shared/components/circular-dialog-motion';
 import { FitAction } from '../../shared/glisse/controls';
-import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { isTimedCardioOnly, treadmillSeconds, timedSession } from '../../core/utils/timed-cardio';
 import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { TrainingPlannerComponent } from '../training-planner/training-planner.component';
@@ -9,17 +9,10 @@ import { DestroyRef, Component, ElementRef, OnInit, ViewChild, signal, computed,
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
-import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
-import { NzTagModule } from 'ng-zorro-antd/tag';
-import { NzMessageService } from 'ng-zorro-antd/message';
 import { Workout } from '../../core/models/workout.model';
 import { isWorkoutSession, isStrengthWorkoutSession } from '../../core/utils/workout-kind';
 import { workoutActivityCalories, workoutActivityMinutes } from '../../core/utils/workout-calories';
@@ -38,18 +31,12 @@ import {
   standalone: true,
   imports: [
     FitAction,
-    NavigationComponent,
     CommonModule,
     TrainingPlannerComponent,
     ActivityGoalsComponent,
     RouterLink,
     NzLayoutModule,
-    NzCardModule,
-    NzStatisticModule,
     NzIconModule,
-    NzButtonModule,
-    NzDropDownModule,
-    NzTagModule,
     AppMenuComponent,
   ],
   templateUrl: './dashboard.component.html',
@@ -60,11 +47,8 @@ export class DashboardComponent implements OnInit {
   @ViewChild('assistantHeading') private assistantHeading?: ElementRef<HTMLElement>;
   @ViewChild('assistantTrigger') private assistantTrigger?: FitAction;
   @ViewChild('assistantDialog') private assistantDialog?: ElementRef<HTMLDialogElement>;
-  private assistantMotion?: Animation;
-  private assistantContentMotion?: Animation;
-  private assistantAnimationId = 0;
-  private assistantClosing = false;
-
+  @ViewChild('assistantSurface') private assistantSurface!: ElementRef<HTMLElement>;
+  private assistantMotion?: CircularDialogMotion;
   private readonly destroy = inject(DestroyRef);
   private readonly profileService = inject(ProfileService);
 
@@ -115,49 +99,7 @@ export class DashboardComponent implements OnInit {
       .filter((item): item is { step: Exclude<AssistantStep, 'result'>; label: string } => !!item),
   );
 
-  totalWorkouts = computed(() => this.workouts().length);
-  totalVolume = computed(() =>
-    this.workouts().reduce((acc, w) => {
-      const vol = w.exercises?.reduce((eAcc, e) => eAcc + e.sets * e.reps * e.weight, 0) || 0;
-      return acc + vol;
-    }, 0)
-  );
-  // inceputul saptamanii calendaristice curente (luni, 00:00) — obiectivul se
-  // reseteaza la fiecare saptamana, nu pe o fereastra glisanta de 7 zile
-  private startOfWeek(): Date {
-    const now = new Date();
-    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-    return monday;
-  }
-  thisWeekWorkouts = computed(() => {
-    const monday = this.startOfWeek();
-    const end = new Date(monday); end.setDate(end.getDate() + 7);
-    return this.workouts().filter(w => isStrengthWorkoutSession(w) && w.date.slice(0, 10) >= this.toKey(monday) && w.date.slice(0, 10) < this.toKey(end)).length;
-  });
-  recentWorkouts = computed(() => [...this.workouts()].slice(0, 5));
-
-  // aceleasi tonuri pe grupe musculare ca in History/Community
-  private readonly muscleTones: Record<string, string> = {
-    Chest: 'blue',
-    Back: 'green',
-    Shoulders: 'purple',
-    Arms: 'cyan',
-    Legs: 'indigo',
-    Core: 'pink',
-    Cardio: 'red',
-    'Full Body': 'graphite',
-  };
-
-  getPrimaryMuscle(workout: Workout): string {
-    return workout.exercises?.[0]?.muscleGroup ?? 'Full Body';
-  }
-
-  muscleTone(muscleGroup: string): string {
-    return this.muscleTones[muscleGroup] ?? 'graphite';
-  }
-
-  /* ---------------- Activity calendar + daily metrics ---------------- */
+  recentWorkouts = computed(() => [...this.workouts()].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5));
 
   private readonly runningSessionService = inject(RunningSessionService);
   readonly recoveredRunAvailable = signal(false);
@@ -198,7 +140,15 @@ export class DashboardComponent implements OnInit {
     });
   });
 
-  trackDay(_index: number, day: { key: string }) { return day.key; }
+  readonly weekLabel = computed(() => {
+    const week = this.weekDays();
+    const first = week[0].date;
+    const last = week[6].date;
+    const month = new Intl.DateTimeFormat('en', { month: 'long' });
+    return month.format(first) + ' ' + first.getDate() + '–' +
+      (first.getMonth() === last.getMonth() ? '' : month.format(last) + ' ') + last.getDate();
+  });
+
   trackWorkout(_index: number, workout: Workout) { return workout.id ?? workout; }
 
   selectDay(date: Date) {
@@ -224,8 +174,6 @@ export class DashboardComponent implements OnInit {
     const key = this.toKey(this.selectedDate());
     return this.workouts().filter((w) => isWorkoutSession(w) && (w.date ?? '').slice(0, 10) === key);
   });
-
-  readonly workoutsOnDay = computed(() => this.workoutsForDay().length);
 
   // caloriile estimate ale unui antrenament de forta, pe baza greutatii din profil
   workoutKcal(workout: Workout): number {
@@ -287,86 +235,22 @@ export class DashboardComponent implements OnInit {
 
   // tinta de antrenamente/saptamana aleasa la onboarding
   readonly weeklyGoal = computed(() => this.profileService.weeklyWorkoutGoal());
-  readonly goalPercent = computed(() =>
-    Math.min(100, Math.round((this.thisWeekWorkouts() / this.weeklyGoal()) * 100)),
-  );
-  // obiectivul saptamanal a fost atins
-  readonly goalReached = computed(() => this.thisWeekWorkouts() >= this.weeklyGoal());
-
   toggleChat(): void {
     if (this.isChatOpen()) this.closeAssistant();
     else this.openAssistant();
   }
 
-  private openAssistant(): void {
+  private async openAssistant(): Promise<void> {
     const dialog = this.assistantDialog?.nativeElement;
-    if (!dialog || dialog.open) return;
-    const token = ++this.assistantAnimationId;
-    this.cancelAssistantMotion();
-    this.assistantClosing = false;
-    dialog.showModal();
+    if (!dialog || !this.assistantTrigger || dialog.open) return;
+    this.assistantMotion ??= new CircularDialogMotion(dialog, this.assistantTrigger.button, this.assistantSurface.nativeElement);
     this.isChatOpen.set(true);
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !dialog.animate) {
-      this.scrollAssistantToTop();
-      return;
-    }
-
-    const { collapsed, expanded, blue } = this.assistantRevealGeometry(dialog);
-    const surface = getComputedStyle(dialog).backgroundColor;
-    this.assistantMotion = dialog.animate([
-      { clipPath: collapsed, backgroundColor: blue, offset: 0 },
-      { backgroundColor: surface, offset: .45 },
-      { clipPath: expanded, backgroundColor: surface, offset: 1 },
-    ], { duration: 1100, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
-    const content = dialog.querySelector<HTMLElement>('.modern-chat');
-    this.assistantContentMotion = content?.animate([
-      { opacity: 0, transform: 'translateY(18px) scale(.985)' },
-      { opacity: 1, transform: 'translateY(0) scale(1)' },
-    ], { duration: 600, delay: 220, easing: 'cubic-bezier(.16, 1, .3, 1)', fill: 'both' });
-    void this.assistantContentMotion?.finished.catch(() => {});
-    void this.assistantMotion.finished.then(() => {
-      if (token !== this.assistantAnimationId || !dialog.open) return;
-      this.cancelAssistantMotion();
-      this.scrollAssistantToTop();
-    }, () => {});
+    await this.assistantMotion.open();
+    if (dialog.open && !this.assistantMotion.closing) this.scrollAssistantToTop();
   }
 
   closeAssistant(): void {
-    const dialog = this.assistantDialog?.nativeElement;
-    if (!dialog?.open || this.assistantClosing) return;
-    this.assistantClosing = true;
-    const token = ++this.assistantAnimationId;
-    const { collapsed, expanded, blue } = this.assistantRevealGeometry(dialog);
-    const current = getComputedStyle(dialog);
-    const clip = current.clipPath === 'none' ? expanded : current.clipPath;
-    const background = current.backgroundColor;
-    const content = dialog.querySelector<HTMLElement>('.modern-chat');
-    const contentOpacity = content ? getComputedStyle(content).opacity : '1';
-    this.cancelAssistantMotion();
-    const finish = () => {
-      if (token !== this.assistantAnimationId) return;
-      this.cancelAssistantMotion();
-      dialog.close();
-      this.isChatOpen.set(false);
-      this.assistantClosing = false;
-      this.assistantTrigger?.button.focus({ preventScroll: true });
-    };
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !dialog.animate) {
-      finish();
-      return;
-    }
-    this.assistantContentMotion = content?.animate([
-      { opacity: contentOpacity, transform: 'translateY(0) scale(1)' },
-      { opacity: 0, transform: 'translateY(12px) scale(.985)' },
-    ], { duration: 240, fill: 'both' });
-    void this.assistantContentMotion?.finished.catch(() => {});
-    this.assistantMotion = dialog.animate([
-      { clipPath: clip, backgroundColor: background, offset: 0 },
-      { backgroundColor: background, offset: .55 },
-      { clipPath: collapsed, backgroundColor: blue, offset: 1 },
-    ], { duration: 750, easing: 'cubic-bezier(.65, 0, .35, 1)', fill: 'both' });
-    void this.assistantMotion.finished.then(finish, () => {});
+    void this.assistantMotion?.close();
   }
 
   onAssistantCancel(event: Event): void {
@@ -391,33 +275,7 @@ export class DashboardComponent implements OnInit {
   }
 
   onAssistantClosed(): void {
-    ++this.assistantAnimationId;
-    this.cancelAssistantMotion();
     this.isChatOpen.set(false);
-    this.assistantClosing = false;
-  }
-
-  private assistantRevealGeometry(dialog: HTMLDialogElement) {
-    const button = this.assistantTrigger!.button;
-    const rect = button.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-    const radius = Math.ceil(Math.hypot(
-      Math.max(x, dialog.clientWidth - x),
-      Math.max(y, dialog.clientHeight - y),
-    ));
-    return {
-      collapsed: `circle(${rect.width / 2}px at ${x}px ${y}px)`,
-      expanded: `circle(${radius}px at ${x}px ${y}px)`,
-      blue: getComputedStyle(button).backgroundColor,
-    };
-  }
-
-  private cancelAssistantMotion(): void {
-    this.assistantMotion?.cancel();
-    this.assistantContentMotion?.cancel();
-    this.assistantMotion = undefined;
-    this.assistantContentMotion = undefined;
   }
 
   chooseAssistantOption(value: string) {
@@ -479,16 +337,9 @@ export class DashboardComponent implements OnInit {
   }
 
   constructor(
-    private workoutService: WorkoutService,
-    private authService: AuthService,
-    private message: NzMessageService
+    private workoutService: WorkoutService
   ) {
-    this.destroy.onDestroy(() => {
-      ++this.assistantAnimationId;
-      this.cancelAssistantMotion();
-      const dialog = this.assistantDialog?.nativeElement;
-      if (dialog?.open) dialog.close();
-    });
+    this.destroy.onDestroy(() => this.assistantMotion?.destroy());
   }
 
   ngOnInit() {
@@ -504,9 +355,5 @@ export class DashboardComponent implements OnInit {
     this.runningSessionService.getSessions().pipe(takeUntilDestroyed(this.destroy)).subscribe({
       error: (err) => console.warn('[dashboard] Failed to load running sessions', err)
     });
-  }
-
-  logout() {
-    this.authService.logout().subscribe();
   }
 }

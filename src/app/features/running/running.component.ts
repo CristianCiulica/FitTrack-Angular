@@ -1,5 +1,5 @@
+import { ConfirmationService } from '../../shared/components/confirmation';
 import { FitAction } from '../../shared/glisse/controls';
-import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { Subscription } from 'rxjs';
 import { NativeRunService, NativeRunSnapshot } from '../../core/services/native-run.service';
 import { ProfileService } from '../../core/services/profile.service';
@@ -18,7 +18,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { WeatherService, WeatherSummary } from '../../core/services/weather.service';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { RunningSession } from '../../core/models/running-session.model';
 
 const GPS_CALIBRATION_MS = 5000;
@@ -39,7 +39,7 @@ interface AcceptedPosition {
   selector: 'app-running',
   standalone: true,
   imports: [
-    NavigationComponent, FitAction,
+    FitAction,
     LiquidGlassDirective,
     CommonModule,
     NzLayoutModule,
@@ -54,8 +54,15 @@ interface AcceptedPosition {
 })
 export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild('runningMap') mapContainer?: ElementRef<HTMLElement>;
+  @ViewChild('recordingPanel') recordingPanel?: ElementRef<HTMLElement>;
 
   isTracking = false;
+  readonly isPaused = signal(false);
+  readonly nativeBusy = signal(false);
+  readonly holdingEnd = signal(false);
+  private holdEndTimer?: ReturnType<typeof setTimeout>;
+  readonly holdDurationMs = 800;
+  readonly mapCredit = MAP_TILE_OPTIONS.attribution;
   isCalibrating = false;
   readonly statusText = signal('Tap Start to begin tracking.');
   calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
@@ -85,7 +92,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   private polyline?: L.Polyline;
   private polylineCasing?: L.Polyline;
   private routePoints: [number, number][] = [];
-  private marker?: L.CircleMarker;
+  private marker?: L.Marker;
+  private startMarker?: L.CircleMarker;
   private elapsedTimer: ReturnType<typeof setInterval> | null = null;
   private watchId: number | null = null;
   private startTime: number | null = null;
@@ -124,6 +132,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     if (document.visibilityState === 'visible') {
       this.resizeMap();
       this.updateElapsedTime();
+      if (this.isPaused()) return;
       if (this.nativeRun?.available) { void this.readNativeRun(); return; }
       if (this.isTracking && !this.isCalibrating) {
         const generation = this.trackingGeneration;
@@ -141,7 +150,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     private message: NzMessageService,
     private runningSessionService: RunningSessionService,
     private weatherService: WeatherService,
-    private modal: NzModalService,
+    private modal: ConfirmationService,
     @Optional() private zone: NgZone | null = null,
     @Optional() private profileService: ProfileService | null = null,
     @Optional() private nativeRun: NativeRunService | null = null,
@@ -176,6 +185,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
+    this.cancelHold();
     if (this.nativePoll) clearInterval(this.nativePoll);
     this.checkpointRun();
     this.destroyed = true;
@@ -257,18 +267,108 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     );
   }
 
-  confirmStopTracking() {
+  async togglePause(): Promise<void> {
+    if (!this.isTracking || this.isCalibrating || this.nativeBusy()) return;
+    if (this.isPaused()) {
+      this.resumeRecoveredRun();
+      return;
+    }
+    if (this.nativeRun?.available) {
+      if (!await this.stopNativeRun(false)) return;
+      this.recoveredRun = false;
+      this.isTracking = true;
+      this.runningSessionService.setTrackingActive(true);
+    } else {
+      this.checkpointRun();
+      this.trackingGeneration++;
+      if (this.watchId !== null) navigator.geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+      this.stopElapsedTimer();
+    }
+    this.startTime = null;
+    this.isPaused.set(true);
+    this.statusText.set('Run paused');
+  }
+
+  startHold(): void {
+    if (!this.isTracking || this.nativeBusy() || this.holdingEnd()) return;
+    this.holdingEnd.set(true);
+    this.holdEndTimer = setTimeout(() => {
+      this.cancelHold();
+      this.confirmStopTracking();
+    }, this.holdDurationMs);
+  }
+
+  cancelHold(): void {
+    clearTimeout(this.holdEndTimer);
+    this.holdEndTimer = undefined;
+    this.holdingEnd.set(false);
+  }
+
+  checkHoldBounds(event: PointerEvent): void {
+    if (!this.holdingEnd()) return;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right ||
+        event.clientY < rect.top || event.clientY > rect.bottom) this.cancelHold();
+  }
+
+  holdKey(event: KeyboardEvent): void {
+    if (event.key !== ' ' && event.key !== 'Enter') return;
+    event.preventDefault();
+    if (event.type === 'keyup') this.cancelHold();
+    else if (!event.repeat) this.startHold();
+  }
+
+  confirmStopTracking(): void {
+    if (!this.isTracking || this.nativeBusy()) return;
     this.modal.confirm({
       nzTitle: 'End this run?',
-      nzWidth: 300,
-      nzOkText: 'End run',
+      nzContent: 'Finish and save to keep your route and stats, or discard the run.',
+      stats: [{ label: 'Distance', value: this.distanceKm + ' ' + this.distanceUnit }, { label: 'Time', value: this.elapsedDisplay }],
+      nzCancelText: this.isPaused() ? 'Keep paused' : 'Keep running',
+      secondaryText: 'Finish & save',
+      onSecondary: () => this.finishRun(true),
+      nzOkText: 'Discard run',
       nzOkDanger: true,
-      nzOnOk: () => this.stopTracking(true),
-      nzCancelText: 'Keep running',
-      nzCentered: true,
-      nzClassName: 'glass-modal'
+      nzOnOk: () => this.finishRun(false),
     });
   }
+
+  private async finishRun(save: boolean): Promise<boolean> {
+    if (!this.isTracking || this.nativeBusy()) return false;
+    const owner = this.authService.currentUserId;
+    if (this.nativeRun?.available) {
+      if (!this.isPaused() && !await this.stopNativeRun(false)) return false;
+      if (!save) await this.nativeRun.clear(owner);
+      this.isTracking = false;
+      this.runningSessionService.setTrackingActive(false);
+      if (save) this.saveCompletedSession();
+    } else {
+      this.stopTracking(save);
+    }
+    if (!save) this.runningSessionService.clearRunDraft();
+    this.recoveredRun = false;
+    this.isPaused.set(false);
+    this.resetTracking();
+    this.resizeMap();
+    return true;
+  }
+
+  recenter(): void {
+    const position = this.marker?.getLatLng() ?? this.initialPosition;
+    if (!position || !this.map) return;
+    const zoom = Math.max(16, this.map.getZoom());
+    const center = this.map.project(position, zoom);
+    const panel = this.recordingPanel?.nativeElement.getBoundingClientRect();
+    if (panel) {
+      const bounds = this.map.getContainer().getBoundingClientRect();
+      if (bounds.height <= 500 && bounds.width > bounds.height) center.x += (bounds.right - panel.left) / 2;
+      else center.y += (bounds.bottom - panel.top) / 2;
+    }
+    this.map.setView(this.map.unproject(center, zoom), zoom, { animate: false });
+  }
+
+  get hasLocation(): boolean { return !!(this.marker || this.initialPosition); }
 
   stopTracking(saveSession = true) {
     if (this.nativeRun?.available) {
@@ -326,6 +426,9 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.isCalibrating = false;
     this.runningSessionService.setTrackingActive(false);
     this.stopCalibrationTimer();
+    this.isPaused.set(false);
+    this.startMarker?.remove();
+    this.startMarker = undefined;
     this.polyline?.setLatLngs([]);
     this.polylineCasing?.setLatLngs([]);
     this.routePoints = [];
@@ -385,22 +488,21 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const container = this.mapContainer?.nativeElement;
     if (!container) return;
 
-    this.map = L.map(container, { zoomControl: false, attributionControl: true }).setView(this.initialPosition ?? [44.4268, 26.1025], 16);
-    this.map.attributionControl.setPrefix(false);
+    this.map = L.map(container, { zoomControl: false, attributionControl: false }).setView(this.initialPosition ?? [44.4268, 26.1025], 16);
     const tiles = L.tileLayer(MAP_TILE_URL, MAP_TILE_OPTIONS);
     this.tiles = tiles;
     tiles.on('load', () => {
       this.mapUnavailable.set(!tiles.getContainer()?.querySelector('.leaflet-tile-loaded'));
     }).addTo(this.map);
 
-    // route with white casing, Strava style
-    this.polylineCasing = L.polyline(this.routePoints, { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(this.map);
-    this.polyline = L.polyline(this.routePoints, { color: '#0a84ff', weight: 5 }).addTo(this.map);
+    this.polylineCasing = L.polyline(this.routePoints, { color: '#16325b', weight: 9, opacity: .6, interactive: false }).addTo(this.map);
+    this.polyline = L.polyline(this.routePoints, { color: '#3987ff', weight: 5, opacity: 1, interactive: false }).addTo(this.map);
+    this.drawStartMarker();
     this.resizeMap();
   }
 
   private handlePosition(pos: GeolocationPosition) {
-    if (!this.isTracking || this.destroyed) return;
+    if (!this.isTracking || this.isPaused() || this.destroyed) return;
     const { latitude, longitude, accuracy } = pos.coords;
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
         Math.abs(latitude) > 90 || Math.abs(longitude) > 180 ||
@@ -575,8 +677,10 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   resumeRecoveredRun(): void {
-    if (this.nativeRun?.available && this.recoveredRun) { void this.startNativeRun(true); return; }
-    if (!this.recoveredRun || !navigator.geolocation || this.destroyed) return;
+    if ((!this.recoveredRun && !this.isPaused()) || this.destroyed || this.nativeBusy()) return;
+    if (this.nativeRun?.available) { void this.startNativeRun(true); return; }
+    if (!navigator.geolocation) return;
+    this.isPaused.set(false);
     this.recoveredRun = false;
     this.recoveredEndedAt = null;
     this.isTracking = true;
@@ -622,6 +726,9 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private async startNativeRun(resume = false): Promise<void> {
+    const wasPaused = this.isPaused();
+    this.nativeBusy.set(true);
+    this.isPaused.set(false);
     if (!resume) this.resetTracking(false);
     const generation = ++this.trackingGeneration;
     const owner = this.authService.currentUserId;
@@ -640,11 +747,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       await this.readNativeRun();
     } catch (error) {
       if (this.destroyed || generation !== this.trackingGeneration) return;
-      this.isTracking = false; this.isCalibrating = false; this.recoveredRun = resume;
-      this.runningSessionService.setTrackingActive(false);
+      this.isTracking = wasPaused; this.isCalibrating = false; this.recoveredRun = resume && !wasPaused;
+      this.isPaused.set(wasPaused);
+      this.runningSessionService.setTrackingActive(wasPaused);
       this.statusText.set('Location access is needed to start a run.');
       this.message.error(error instanceof Error ? error.message : 'Could not start native tracking.');
-    }
+    } finally { this.nativeBusy.set(false); }
   }
 
   private startNativePolling(): void {
@@ -653,7 +761,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private async readNativeRun(): Promise<void> {
-    if (!this.nativeRun?.available || this.nativeReading || this.destroyed) return;
+    if (!this.nativeRun?.available || this.isPaused() || this.nativeReading || this.destroyed) return;
     const generation = this.trackingGeneration;
     const owner = this.authService.currentUserId;
     this.nativeReading = true;
@@ -688,20 +796,27 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.statusText.set(session.trackingError ?? (snapshot.active ? this.isCalibrating ? 'Waiting for an accurate GPS position…' : 'Recording your run, including while the screen is locked.' : 'Your recorded run is safe. Resume or save it.'));
     const last = this.routePoints.at(-1);
     if (last && routeChanged) {
+      this.drawStartMarker();
       this.initialPosition = L.latLng(last[0], last[1]); this.updateMarker(this.initialPosition, true);
       this.polyline?.setLatLngs(this.routePoints); this.polylineCasing?.setLatLngs(this.routePoints);
     }
     if (!snapshot.active && this.nativePoll) { clearInterval(this.nativePoll); this.nativePoll = null; }
   }
 
-  private async stopNativeRun(save: boolean): Promise<void> {
+  private async stopNativeRun(save: boolean): Promise<boolean> {
+    if (this.nativeBusy()) return false;
+    this.nativeBusy.set(true);
     const generation = ++this.trackingGeneration;
     try {
       const snapshot = await this.nativeRun!.stop(this.authService.currentUserId);
-      if (this.destroyed || generation !== this.trackingGeneration) return;
+      if (this.destroyed || generation !== this.trackingGeneration || !snapshot.session) return false;
       this.applyNativeRun({ ...snapshot, active: false });
       if (save) this.saveCompletedSession();
-    } catch { this.message.error('Could not stop the run. Try again; your recording is kept on this device.'); }
+      return true;
+    } catch {
+      this.message.error('Could not stop the run. Please try again.');
+      return false;
+    } finally { this.nativeBusy.set(false); }
   }
 
   private handleCalibrationFix(point: L.LatLng, timestamp: number, accuracy: number) {
@@ -742,6 +857,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.polyline?.setLatLngs([position.point]);
     this.polylineCasing?.setLatLngs([position.point]);
     this.routePoints = [[position.point.lat, position.point.lng]];
+    this.drawStartMarker();
     this.checkpointRun();
     this.statusText.set(
       position.accuracy <= GPS_CALIBRATION_MAX_ACCURACY_METERS
@@ -791,22 +907,25 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.updateMarker(point, true);
   }
 
+  private drawStartMarker(): void {
+    const start = this.routePoints[0];
+    if (!start || !this.map || this.startMarker) return;
+    this.startMarker = L.circleMarker(start, { radius: 5, weight: 3, color: '#3987ff', fillColor: '#172333', fillOpacity: 1, interactive: false }).addTo(this.map);
+  }
+
   private updateMarker(point: L.LatLng, followPosition: boolean) {
     if (!this.marker && this.map) {
-      this.marker = L.circleMarker(point, {
-        radius: 8,
-        color: '#ffffff',
-        weight: 3,
-        fillColor: '#0a84ff',
-        fillOpacity: 1,
+      this.marker = L.marker(point, {
+        interactive: false, keyboard: false,
+        icon: L.divIcon({ className: 'runner-position', iconSize: [19, 19], iconAnchor: [9.5, 9.5] }),
       }).addTo(this.map);
-      this.map.setView(point, 16);
+      this.recenter();
       return;
     }
 
     this.marker?.setLatLng(point);
     if (followPosition && this.map && !this.map.getBounds().pad(-0.2).contains(point)) {
-      this.map.panTo(point, { animate: true });
+      this.recenter();
     }
   }
 

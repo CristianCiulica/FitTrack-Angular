@@ -1,3 +1,4 @@
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { ApplicationConfig, isDevMode, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withInMemoryScrolling, withPreloading } from '@angular/router';
 import { IdlePreloadingService } from './core/services/idle-preloading.service';
@@ -61,6 +62,7 @@ registerLocaleData(en);
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    NzModalService,
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }), withPreloading(IdlePreloadingService)),
     provideAnimationsAsync(),

@@ -492,140 +492,35 @@ a:hover {
   color: var(--ink-tertiary);
 }
 
-/* Glass Modal (Confirmations) */
-.glass-modal .ant-modal-content {
-  background: var(--glass-bg) !important;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.6) !important;
-  border-radius: 24px !important;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+/* A single action hierarchy for confirmations in either appearance. */
+.app-confirmation, .plan-confirmation {
+  --confirm-panel: #fff; --confirm-text: #18181b; --confirm-muted: #5b5b64;
+  --confirm-secondary: #efeff2; --confirm-danger: #be2d26;
 }
-
-.glass-modal .ant-modal-confirm-body-wrapper {
-  text-align: center;
+html[data-theme=dark] :is(.app-confirmation, .plan-confirmation) {
+  --confirm-panel: #1d1d20; --confirm-text: #fafafa; --confirm-muted: #aaaab4;
+  --confirm-secondary: #2e2e31; --confirm-danger: #ff8178;
 }
-
-.glass-modal .ant-modal-confirm-body .anticon {
-  display: none !important;
+html body .app-confirmation .ant-modal-content, dialog.plan-confirmation {
+  border-radius: 27px; background: var(--confirm-panel) !important; color: var(--confirm-text);
+  border: 1px solid var(--hairline); box-shadow: 0 16px 50px #0003; overflow: auto;
+  max-height: calc(100dvh - 32px); backdrop-filter: none; text-align: center;
 }
-
-.glass-modal .ant-modal-confirm-body {
-  padding-top: 8px;
-}
-
-.glass-modal .ant-modal-confirm-title {
-  display: block !important;
-  font-size: 21px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.02em !important;
-  margin-bottom: 8px !important;
-  color: #1d1d1f !important;
-}
-
-.glass-modal .ant-modal-confirm-content {
-  font-size: 15px !important;
-  color: #515154 !important;
-  margin-left: 0 !important;
-  margin-top: 0 !important;
-}
-
-.glass-modal .ant-modal-confirm-btns {
-  float: none !important;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 24px !important;
-}
-
-.glass-modal .ant-modal-confirm-btns button {
-  border-radius: 980px !important;
-  height: 44px !important;
-  padding: 0 24px !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  border: none !important;
-}
-
-.glass-modal .ant-modal-confirm-btns .ant-btn-default {
-  background: rgba(0, 0, 0, 0.05) !important;
-  color: #1d1d1f !important;
-  box-shadow: none !important;
-}
-
-.glass-modal .ant-modal-confirm-btns .ant-btn-dangerous {
-  background: linear-gradient(180deg, #ff3b30, #d70015) !important;
-  color: #fff !important;
-  box-shadow: 0 8px 16px rgba(215, 0, 21, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Solid Modal (Pure White Confirmations) */
-.solid-modal .ant-modal-content {
-  background: #ffffff !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 1px solid rgba(0, 0, 0, 0.05) !important;
-  border-radius: 24px !important;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08) !important;
-}
-
-.solid-modal .ant-modal-confirm-body-wrapper {
-  text-align: center;
-}
-
-.solid-modal .ant-modal-confirm-body .anticon {
-  display: none !important;
-}
-
-.solid-modal .ant-modal-confirm-body {
-  padding-top: 8px;
-}
-
-.solid-modal .ant-modal-confirm-title {
-  display: block !important;
-  font-size: 21px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.02em !important;
-  margin-bottom: 8px !important;
-  color: #1d1d1f !important;
-}
-
-.solid-modal .ant-modal-confirm-content {
-  font-size: 15px !important;
-  color: #515154 !important;
-  margin-left: 0 !important;
-  margin-top: 0 !important;
-}
-
-.solid-modal .ant-modal-confirm-btns {
-  float: none !important;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 24px !important;
-}
-
-.solid-modal .ant-modal-confirm-btns button {
-  border-radius: 980px !important;
-  height: 44px !important;
-  padding: 0 24px !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  border: none !important;
-}
-
-.solid-modal .ant-modal-confirm-btns .ant-btn-default {
-  background: #ffffff !important;
-  color: #1d1d1f !important;
-  border: 2.5px solid #000000 !important;
-  box-shadow: none !important;
-}
-
-.solid-modal .ant-modal-confirm-btns .ant-btn-dangerous {
-  background: linear-gradient(180deg, #ff3b30, #d70015) !important;
-  color: #fff !important;
-  box-shadow: 0 8px 16px rgba(215, 0, 21, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-}
+.app-confirmation .ant-modal-body, dialog.plan-confirmation { padding: 28px 24px 20px; }
+:is(.app-confirmation, .plan-confirmation) h2 { color: var(--confirm-text); font-size: 22px; line-height: 1.2; letter-spacing: -.035em; margin: 0; font-weight: 700; }
+:is(.app-confirmation, .plan-confirmation) p { color: var(--confirm-muted); font-size: 16px; line-height: 1.45; margin: 10px 0 0; }
+.confirmation-actions { display: grid; gap: 8px; margin-top: 24px; }
+.confirmation-actions button { border: 0; border-radius: 15px; min-height: 52px; width: 100%; font: inherit; font-weight: 650; cursor: pointer; }
+.confirmation-actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.confirmation-keep { background: var(--confirm-text); color: var(--confirm-panel); }
+.confirmation-secondary, .confirmation-proceed { background: var(--confirm-secondary); color: var(--confirm-text); }
+.confirmation-actions .confirmation-danger { background: transparent; color: var(--confirm-danger); }
+.confirmation-stats { display: flex; gap: 8px; margin: 20px 0 0; }
+.confirmation-stats div { flex: 1; padding: 10px; background: var(--confirm-secondary); border-radius: 14px; }
+.confirmation-stats dt { font-size: 12px; color: var(--confirm-muted); text-transform: uppercase; }
+.confirmation-stats dd { margin: 0; font-size: 20px; font-weight: 650; color: var(--confirm-text); }
+body:has(.app-confirmation) .ant-modal-mask, dialog.plan-confirmation::backdrop { background: #0009; backdrop-filter: blur(7px); }
+dialog.plan-confirmation { width: min(440px, calc(100vw - 32px)); margin: auto; }
 
 /* Popconfirm / popover / tooltip */
 .ant-popover-inner {
@@ -769,6 +664,8 @@ html[data-theme='dark'] .app-header { --header-surface: #1c1c1e; }
 /* ============================================================
    Map Overrides (Leaflet)
    ============================================================ */
+.leaflet-tile-pane { filter: saturate(.74) contrast(.95); }
+
 .leaflet-container,
 .leaflet-pane,
 .leaflet-control {
@@ -890,15 +787,7 @@ html body .app-layout .app-header .header-actions .logout-button {
   :root { --glass-bg: #f9fafc; }
 }
 
-/* Centred confirmations stay inside small screens and above active sessions. */
-.workout-confirm { max-width: calc(100vw - 32px); }
-.workout-confirm .ant-modal-content { border-radius: 24px; }
-.workout-confirm .ant-modal-body { padding: 24px; }
-.workout-confirm .ant-modal-confirm-title,
-.workout-confirm .ant-modal-confirm-content { white-space: normal; overflow-wrap: anywhere; }
-.workout-confirm .ant-modal-confirm-btns { float: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
-.workout-confirm .ant-modal-confirm-btns .ant-btn { flex: 1 1 120px; margin: 0; height: auto; min-height: 44px; padding: 10px 14px; white-space: normal; }
-body:has(.workout-live) .cdk-overlay-container { z-index: 1200; }
+body:has(.workout-live, .app-confirmation) .cdk-overlay-container { z-index: 1200; }
 
 /* Same rim refraction as the dock, resized to each Run panel. */
 body .run-layout .liquid-panel.ant-card {
@@ -960,7 +849,7 @@ body:has(.achievements-dialog[open]) { overflow: hidden; }
 ft-tab-bar { display:block; }
 ft-tab-bar svg { width:24px; height:24px; }
 ft-tab-bar .lg-tab-bar[data-icons] { --lg-tab-width: min(18vw, 76px); --lg-tab-selected: var(--accent-deep); }
-body:has(.workout-live) ft-navigation { visibility:hidden; }
+body:has(.workout-live, .live-map.active) ft-navigation > aside { visibility: hidden; }
 ft-action .lg-button { width:100%; }
 ft-slider .lg-slider { width:100%; }
 html body ft-action[class] {
@@ -969,3 +858,18 @@ html body ft-action[class] {
 }
 ft-action > span:not([hidden]) { display: block; width: 100%; }
 ft-action .lg-button > span > span { display: inline-flex; align-items: center; gap: 8px; }
+
+@media (min-width: 901px) {
+  ft-navigation .app-layout { min-height: calc(100dvh - var(--desktop-navigation-height)); }
+  ft-navigation .app-layout.run-layout { height: calc(100dvh - var(--desktop-navigation-height)); }
+}
+
+/* Offscreen workout drawers should not cast shadows into the session. */
+.ant-drawer:not(.ant-drawer-open) :is(.ant-drawer-content, .ant-drawer-content-wrapper) {
+  box-shadow: none !important;
+}
+html body .ant-modal.app-confirmation {
+  width: min(440px, calc(100vw - 40px)) !important;
+  margin-inline: auto;
+  padding-bottom: 0;
+}

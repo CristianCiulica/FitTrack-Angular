@@ -1,5 +1,5 @@
+import { ConfirmationService } from '../../shared/components/confirmation';
 import { FitAction } from '../../shared/glisse/controls';
-import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { WorkoutLibraryComponent } from '../workout-library/workout-library.component';
 import { WorkoutRoutine as Routine, orderRoutineExercises, isTreadmillExercise } from '../../core/models/workout-routine.model';
 import { timedSessionNotes, estimateTreadmillCalories, TreadmillLog } from '../../core/utils/timed-cardio';
@@ -732,13 +732,13 @@ const OFFICIAL_PLANS: OfficialPlan[] = [
   },
 ];
 
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 
 @Component({
   selector: 'app-start-workout',
   standalone: true,
   imports: [
-    NavigationComponent, FitAction,
+    FitAction,
     CommonModule,
     WorkoutLibraryComponent,
     RouterLink,
@@ -981,14 +981,17 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     private profileService: ProfileService,
     private message: NzMessageService,
     private route: ActivatedRoute,
-    private modalService: NzModalService,
+    private modalService: ConfirmationService,
   ) {}
 
   trackPersonalRoutine(_index: number, routine: { id?: string }) { return routine.id ?? routine; }
   trackPredefined(_index: number, item: { index: number }) { return item.index; }
 
+  readonly libraryTab = signal<'discover' | 'sessions'>('sessions');
+
   ngOnInit() {
     this.reads.add(this.route.queryParams.subscribe(params => {
+      this.libraryTab.set(params['view'] === 'discover' ? 'discover' : 'sessions');
       if (params['date']) {
         this.targetDate.set(params['date']);
       }
@@ -1097,19 +1100,18 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       nzTitle: 'Remove this session?',
       nzContent: 'The template will be removed from your library. Completed workouts stay in History.',
       nzOkText: 'Delete', nzCancelText: 'Keep workout', nzOkDanger: true,
-      nzCentered: true, nzWidth: 'min(400px, calc(100vw - 32px))',
-      nzClassName: 'solid-modal workout-confirm',
       nzOnOk: () => this.deleteWorkout(id),
     });
   }
 
   confirmStopWorkout(): void {
     this.modalService.confirm({
-      nzTitle: 'Stop this workout?',
-      nzContent: 'Your unsaved sets will be lost. You can keep training or finish and save the session.',
-      nzOkText: 'Stop workout', nzCancelText: 'Keep training', nzOkDanger: true,
-      nzCentered: true, nzWidth: 'min(400px, calc(100vw - 32px))',
-      nzClassName: 'solid-modal workout-confirm',
+      nzTitle: 'End this workout?',
+      nzContent: this.completedSets() ? `You have ${this.completedSets()} unsaved ${this.completedSets() === 1 ? 'set' : 'sets'}. Finish and save to keep them, or discard the workout.` : 'You can keep training or discard this workout.',
+      stats: [{label: 'Sets', value: String(this.completedSets())}, {label: 'Time', value: this.elapsedClock()}],
+      secondaryText: this.completedSets() ? 'Finish & save' : undefined,
+      onSecondary: () => { this.state.set('review'); this.finishWorkout(); },
+      nzOkText: 'Discard workout', nzCancelText: 'Keep training', nzOkDanger: true,
       nzOnOk: () => this.cancelWorkout(),
     });
   }

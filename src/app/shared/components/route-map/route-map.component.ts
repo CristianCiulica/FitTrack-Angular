@@ -14,13 +14,13 @@ import { validRoute } from '../../../core/utils/route';
     }
   `,
   styles: `
-    :host { display: block; position: relative; height: 220px; overflow: hidden; border-radius: 20px; background: #edf1ee; isolation: isolate; }
+    :host { display: block; position: relative; height: 220px; overflow: hidden; border-radius: 20px; background: var(--surface-strong); isolation: isolate; }
     .route-map { width: 100%; height: 100%; z-index: 0; }
-    .route-empty { position: absolute; inset: 0; display: grid; place-items: center; color: #71717a; font-size: 13px; background: #f3f4f2; }
-    .route-key { position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 20px; color: #3d4740; background: rgba(255,255,255,.92); font-size: 10px; font-weight: 600; pointer-events: none; }
-    i { width: 7px; height: 7px; border-radius: 50%; background: #248a3d; }
-    i.finish { background: #007aff; margin-left: 5px; }
-    :host ::ng-deep .leaflet-control-attribution { font-size: 9px; background: rgba(255,255,255,.85); }
+    .route-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-secondary); font-size: 13px; background: var(--surface-strong); }
+    .route-key { position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 20px; color: var(--ink); background: var(--surface-strong); border: 1px solid var(--glass-border); font-size: 10px; font-weight: 600; pointer-events: none; }
+    i { width: 7px; height: 7px; border-radius: 50%; background: #158653; }
+    i.finish { background: #3987ff; margin-left: 5px; }
+    :host ::ng-deep .leaflet-control-attribution { font-size: 9px; color: var(--ink-secondary); background: var(--surface-strong); }
   `,
 })
 export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
@@ -91,10 +91,10 @@ export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.layers.clearLayers();
     const points = validRoute(this.route);
     if (!points.length) return;
-    L.polyline(points, { color: '#fff', weight: 7, opacity: .95, interactive: false }).addTo(this.layers);
-    L.polyline(points, { color: '#007aff', weight: 4, interactive: false }).addTo(this.layers);
-    L.circleMarker(points[0], { radius: 5, color: '#fff', weight: 2, fillColor: '#248a3d', fillOpacity: 1, interactive: false }).addTo(this.layers);
-    if (points.length > 1) L.circleMarker(points[points.length - 1], { radius: 5, color: '#fff', weight: 2, fillColor: '#007aff', fillOpacity: 1, interactive: false }).addTo(this.layers);
+    L.polyline(points, { color: '#16325b', weight: 7, opacity: .55, interactive: false }).addTo(this.layers);
+    L.polyline(points, { color: '#3987ff', weight: 4, interactive: false }).addTo(this.layers);
+    L.circleMarker(points[0], { radius: 5, color: '#fff', weight: 2, fillColor: '#158653', fillOpacity: 1, interactive: false }).addTo(this.layers);
+    if (points.length > 1) L.circleMarker(points[points.length - 1], { radius: 5, color: '#fff', weight: 2, fillColor: '#3987ff', fillOpacity: 1, interactive: false }).addTo(this.layers);
     this.fitRoute();
   }
 

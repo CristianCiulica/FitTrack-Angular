@@ -1,5 +1,4 @@
 <nz-layout class="app-layout run-layout">
-  <ft-navigation (signOut)="logout()" [locked]="isTracking" [attr.inert]="isTracking ? '' : null" (blocked)="blockNavigation($event)" />
 
   <nz-layout class="main-layout">
     <nz-header class="app-header" [attr.inert]="isTracking ? '' : null">
@@ -97,33 +96,55 @@
           </div>
         }
         @if (isTracking) {
-          @if (!isCalibrating || mapUnavailable()) {
-            <div class="live-status" role="status">
-              <span class="gps-dot" [class.searching]="isCalibrating" aria-hidden="true"></span>
-              {{ isCalibrating ? 'Map unavailable' : statusText() }}
-              @if (!isCalibrating && mapUnavailable()) { <span>Map unavailable</span> }
-            </div>
-          }
-
+          <div class="live-status" role="status" [title]="statusText()">
+            @if (isPaused()) { Paused }
+            @else if (gpsAccuracy !== undefined) { GPS · ±{{ gpsAccuracy | number: '1.0-0' }} m }
+            @else { GPS · Searching }
+          </div>
           @if (isCalibrating) {
             <div class="calibration-panel">
-              <span class="calibration-pulse" aria-hidden="true"></span>
               <strong>Finding your starting point</strong>
               <span>{{ statusText() }}</span>
             </div>
           }
-
-          <section class="live-panel" aria-label="Run recording">
-            <dl class="live-stats">
-              <div><dt>Time</dt><dd>{{ elapsedDisplay }}</dd></div>
-              <div><dt>Distance <small>({{ distanceUnit }})</small></dt><dd>{{ distanceKm }}</dd></div>
-              <div><dt>Speed <small>({{ distanceUnit }}/h)</small></dt><dd>{{ avgSpeedDisplay }}</dd></div>
-              <div><dt>Energy <small>(kcal)</small></dt><dd>{{ caloriesDisplay }}</dd></div>
-            </dl>
-            <ft-action class="run-stop" [destructive]="true" (activated)="confirmStopTracking()">
-              <span class="stop-mark" aria-hidden="true"></span> End run
-            </ft-action>
-          </section>
+          <div class="run-hud">
+            <div class="map-tools">
+              <span class="map-credit" [innerHTML]="mapCredit"></span>
+              @if (mapUnavailable()) { <span class="map-offline">Map unavailable</span> }
+              <button type="button" class="recenter" aria-label="Center map on your position" [disabled]="!hasLocation" (click)="recenter()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="7.1"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3m14 0h3"/></svg>
+              </button>
+            </div>
+            <section #recordingPanel class="live-panel" aria-label="Run recording">
+              <div class="live-time"><span>Time</span><strong>{{ elapsedDisplay }}</strong></div>
+              <dl class="live-stats">
+                <div><dt class="sr-only">Distance</dt><dd>{{ distanceKm }} <small>{{ distanceUnit }}</small></dd></div>
+                <div><dt class="sr-only">Average speed</dt><dd>{{ avgSpeedDisplay }} <small>{{ distanceUnit }}/h</small></dd></div>
+                <div><dt class="sr-only">Energy</dt><dd>{{ caloriesDisplay }} <small>kcal</small></dd></div>
+              </dl>
+              <div class="recording-actions">
+                <button class="pause-run" type="button" [disabled]="isCalibrating || nativeBusy()" (click)="togglePause()">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
+                    @if (isPaused()) { <path d="M4 3a1 1 0 0 1 1.55-.83l9 6a1 1 0 0 1 0 1.66l-9 6A1 1 0 0 1 4 15z"/> }
+                    @else { <rect x="3" y="2" width="4" height="14" rx="1"/><rect x="11" y="2" width="4" height="14" rx="1"/> }
+                  </svg>
+                  {{ isPaused() ? 'Resume' : 'Pause' }}
+                </button>
+                <button class="run-stop" type="button" aria-label="Hold to end run" aria-describedby="end-run-hint"
+                  [style.--hold-duration]="holdDurationMs + 'ms'" [class.holding]="holdingEnd()" [disabled]="nativeBusy()"
+                  (pointerdown)="$event.button === 0 && $event.isPrimary && startHold()" (pointerup)="cancelHold()"
+                  (pointerleave)="cancelHold()" (pointercancel)="cancelHold()" (pointermove)="checkHoldBounds($event)"
+                  (blur)="cancelHold()" (keydown)="holdKey($event)" (keyup)="holdKey($event)"
+                  (click)="$event.detail === 0 && confirmStopTracking()" (contextmenu)="$event.preventDefault()">
+                  <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" pathLength="100"/></svg>
+                  <span class="stop-mark" aria-hidden="true"></span>
+                </button>
+              </div>
+              <p id="end-run-hint">Hold the red button to end your run</p>
+            </section>
+          </div>
+        } @else {
+          <span class="map-credit idle-credit" [innerHTML]="mapCredit"></span>
         }
       </div>
     </nz-content>

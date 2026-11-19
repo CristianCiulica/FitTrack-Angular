@@ -37,7 +37,7 @@
     font-weight: 750;
     letter-spacing: -0.04em;
     line-height: 1;
-    color: #0066cc; /* Apple Blue */
+    color: var(--ink);
     font-variant-numeric: tabular-nums;
   }
 
@@ -45,7 +45,7 @@
     margin-top: 4px;
     font-size: 15px;
     font-weight: 590;
-    color: #515154;
+    color: var(--accent);
   }
 }
 
@@ -267,3 +267,8 @@
     color: #ff6961;
   }
 }
+
+.result-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0; background: var(--surface-strong); border: 1px solid var(--hairline); border-radius: 16px; overflow: hidden; }
+.result-grid .metric { padding: 16px 4px; }
+.result-grid .metric + .metric { border-inline-start: 1px solid var(--hairline); }
+.hero-results .calorie-target strong { font-size: clamp(50px,7vw,72px); }

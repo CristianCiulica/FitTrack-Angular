@@ -1,4 +1,4 @@
-@if (activeSummary(); as active) {
+@if (tab() !== 'sessions' && activeSummary(); as active) {
   <section class="active-program">
     <div class="active-program-copy">
       <span class="library-eyebrow">YOUR CURRENT PLAN · SESSION {{ active.day }} / 30</span>
@@ -440,7 +440,7 @@
               </button>
             }
             @if (selectedEnrollment() && !selectedEnrollment()?.stoppedAt) {
-              <button type="button" class="stop-plan-link" (click)="stopRequested.set(true)">
+              <button type="button" class="stop-plan-link" (click)="showStopConfirmation()">
                 Stop this plan
               </button>
             }
@@ -624,31 +624,7 @@
       }
     </div>
     <footer>
-      @if (stopRequested()) {
-        <div class="stop-plan-confirm" role="group" aria-label="Stop this plan">
-          <div>
-            <strong>Stop this plan?</strong>
-            <p>
-              Your saved workouts and progress stay in History. You can start a new block whenever
-              you want.
-            </p>
-          </div>
-          <button
-            type="button"
-            class="library-text-button"
-            [disabled]="saving()"
-            (click)="stopRequested.set(false)"
-          >
-            Keep plan
-          </button>
-          <button type="button" class="stop-plan-button" [disabled]="saving()" (click)="stopPlan()">
-            {{ saving() ? 'Stopping…' : 'Stop plan' }}
-          </button>
-        </div>
-        @if (error()) {
-          <p class="program-error" role="alert">{{ error() }}</p>
-        }
-      } @else {
+
         @if (error()) {
           <p class="program-error" role="alert">{{ error() }}</p>
         }
@@ -709,7 +685,15 @@
             </button>
           }
         </div>
-      }
     </footer>
+  </div>
+</dialog>
+
+<dialog #stopDialog class="plan-confirmation" aria-labelledby="stop-plan-title">
+  <h2 id="stop-plan-title">Stop this plan?</h2>
+  <p>Your completed workouts stay in History. You can start a new block whenever you want.</p>
+  <div class="confirmation-actions">
+    <button type="button" class="confirmation-keep" autofocus (click)="stopDialog.close()">Keep plan</button>
+    <button type="button" class="confirmation-danger" (click)="stopDialog.close(); stopPlan()">Stop plan</button>
   </div>
 </dialog>

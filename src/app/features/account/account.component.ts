@@ -1,4 +1,3 @@
-import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -28,7 +27,6 @@ import {
   selector: 'app-account',
   standalone: true,
   imports: [
-    NavigationComponent,
     CommonModule,
     FormsModule,
     RouterLink,

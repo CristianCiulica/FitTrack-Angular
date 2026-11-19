@@ -1,140 +1,81 @@
 <nz-layout class="app-layout">
-  <ft-navigation (signOut)="logout()" />
-
-  <!-- Content -->
   <nz-layout class="main-layout">
-    <nz-header class="app-header dashboard-header">
-      <div class="header-left">
-        <app-menu></app-menu>
-        <h2>
-          <span class="desktop-page-title">Dashboard</span>
-          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
-        </h2>
-      </div>
-
-    </nz-header>
-
-    <nz-content role="main" class="app-content">
-      <!-- Activity head: title + month navigation -->
-      <div class="activity-head">
-        <div class="activity-title">
-          <h1>Ready for a workout?</h1>
-          <p>{{ selectedDate() | date: 'MMMM y' }}</p>
+    <header class="dashboard-mobile-header">
+      <span class="dashboard-brand">FitTrack<span>.</span></span>
+      <app-menu />
+    </header>
+    <main class="dashboard-content">
+      <section class="dashboard-hero" aria-labelledby="dashboard-title">
+        <h1 id="dashboard-title">Ready for a workout?</h1>
+        @if (recentWorkouts()[0]; as last) {
+          <p>Your last session was {{ last.name || 'a workout' }} on {{ last.date | date:'d MMM' }}.</p>
+        } @else {
+          <p>Choose a workout for your first session.</p>
+        }
+        <div class="planner-actions">
+          <a routerLink="/start-workout" [queryParams]="{ view: 'sessions', date: toKey(selectedDate()) }" class="start-cta">
+            <span aria-hidden="true">▶</span> Start workout
+          </a>
+          <app-training-planner />
+          <ft-action #assistantTrigger dialogId="nutrition-assistant-screen" [expanded]="isChatOpen()" (activated)="toggleChat()">Nutrition Assistant</ft-action>
         </div>
-        <div class="month-nav">
-          <div class="month-arrows">
+      </section>
+
+      @if (recoveredRunAvailable()) {
+        <a class="run-recovery-notice" routerLink="/running"><span>Run recovered</span><strong>Resume or save ›</strong></a>
+      }
+
+      <section class="calendar-card dash-card" aria-label="Activity calendar">
+        <div class="dash-card-header">
+          <h2><span class="desktop-month">{{ selectedDate() | date:'MMMM y' }}</span><span class="mobile-week">{{ weekLabel() }}</span></h2>
+          <div class="week-controls">
             <button type="button" aria-label="Previous week" (click)="shiftWeek(-1)">‹</button>
             <button type="button" aria-label="Next week" (click)="shiftWeek(1)">›</button>
           </div>
         </div>
-      </div>
-
-      <!-- Week strip -->
-      <div class="week-strip">
-        <button
-          type="button"
-          class="day-cell"
-          *ngFor="let day of weekDays(); trackBy: trackDay"
-          [class.selected]="day.selected"
-          [class.today]="day.isToday"
-          (click)="selectDay(day.date)"
-        >
-          <span class="day-label">{{ day.label }}</span>
-          <span class="day-num">{{ day.dayNum }}</span>
-          <span class="day-dot" [class.visible]="day.hasActivity" aria-hidden="true"></span>
-        </button>
-      </div>
-
-      @if (recoveredRunAvailable()) {
-        <a class="run-recovery-notice" routerLink="/running"><span>Run recovered</span><strong>Resume or save <span aria-hidden="true">›</span></strong></a>
-      }
-
-      <section class="activity-summary" aria-labelledby="activity-summary-title">
-        <div class="activity-summary-heading">
-          <h2 id="activity-summary-title">Activity</h2>
-          <div class="activity-heading-actions"><span>{{ selectedDate() | date: 'MMM d' }}</span><app-activity-goals /></div>
+        <div class="calendar-days">
+          @for (day of weekDays(); track day.key) {
+            <button type="button" class="calendar-day" [attr.aria-pressed]="day.selected"
+              [attr.aria-label]="(day.date | date:'fullDate') + (day.hasActivity ? ', activity recorded' : '')"
+              [attr.aria-current]="day.isToday ? 'date' : null" (click)="selectDay(day.date)">
+              <small>{{ day.label }}</small><b>{{ day.dayNum }}</b>
+              @if (day.hasActivity) { <i aria-hidden="true"></i> }
+            </button>
+          }
         </div>
-        <div class="activity-card">
-          <div class="activity-card-main">
+      </section>
+
+      <div class="dashboard-metrics">
+        <section class="dash-card activity-panel" aria-labelledby="activity-title">
+          <div class="dash-card-header"><h2 id="activity-title">Activity</h2><app-activity-goals /></div>
+          <div class="activity-pair">
+            <svg class="activity-rings" viewBox="0 0 160 160" aria-hidden="true" focusable="false">
+              @for (ring of activityRings(); track ring.name) {
+                <circle cx="80" cy="80" [attr.r]="ring.radius" class="ring-track" [attr.stroke]="ring.color" />
+                <circle cx="80" cy="80" [attr.r]="ring.radius" class="ring-progress" [attr.stroke]="ring.color"
+                  transform="rotate(-90 80 80)" pathLength="100" [attr.stroke-dasharray]="ring.progress + ' 100'" />
+              }
+            </svg>
             <div class="activity-values">
               @for (ring of activityRings(); track ring.name) {
-                <div class="activity-measure" [style.--ring-color]="ring.color">
-                  <span class="activity-label">{{ ring.name }} @if (ring.progress >= 100) { <span class="ring-done" aria-label="Goal complete">✓</span> }</span>
-                  <div class="activity-reading">
-                    <strong>{{ ring.value | number: '1.0-0' }}/{{ ring.goal }}</strong>
-                    <span>{{ ring.unit }}</span>
+                <div class="ring-measure">
+                  <span>{{ ring.name === 'Workouts' ? 'Workouts this week' : ring.name }}</span>
+                  <div><strong>{{ ring.value | number:'1.0-0' }}</strong><b>/{{ ring.goal }}</b>
+                    @if (ring.name !== 'Workouts') { <small>{{ ring.unit }}</small> }
                   </div>
                 </div>
               }
             </div>
-            <svg class="activity-rings" viewBox="0 0 160 160" aria-hidden="true" focusable="false">
-              <defs>
-                <linearGradient id="activity-move" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#ff163c"/><stop offset="100%" stop-color="#ff367c"/>
-                </linearGradient>
-                <linearGradient id="activity-exercise" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#8ce900"/><stop offset="100%" stop-color="#c5ff00"/>
-                </linearGradient>
-                <linearGradient id="activity-workouts" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#00c3dc"/><stop offset="100%" stop-color="#00e5ef"/>
-                </linearGradient>
-              </defs>
-              @for (ring of activityRings(); track ring.name) {
-                <circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-track" [attr.stroke]="ring.color"/>
-                <g transform="rotate(-90 80 80)"><circle cx="80" cy="80" [attr.r]="ring.radius" class="activity-ring-progress"
-                  pathLength="100" [attr.stroke]="ring.paint" [attr.stroke-dasharray]="ring.progress + ' 100'"
-                  [attr.opacity]="ring.progress > 0 ? 1 : 0"/></g>
-                @if (ring.progress > 0) {
-                  <text x="80" [attr.y]="80 - ring.radius + 4" class="activity-ring-arrow">{{ ring.arrow }}</text>
-                }
-              }
-            </svg>
           </div>
-        </div>
+          <p class="move-caption">@if (moveGoal() > burnedKcal()) { {{ moveGoal() - burnedKcal() }} kcal to close your Move ring. } @else { Move goal reached. }</p>
+        </section>
 
-        <!-- Daily metric cards -->
-        <div class="metric-grid">
-          <div class="metric-card steps-card">
-            <div class="metric-head">
-              <span class="metric-title">Steps</span>
-              <span class="metric-icon" nz-icon nzType="rise"></span>
-            </div>
-            <strong class="metric-value">{{ stepsForDay() | number }}</strong>
-            <span class="metric-caption">{{ activityDistance() | number: '1.2-2' }} {{ activityDistanceUnit() }} recorded</span>
-            <span class="metric-caption" *ngIf="workoutsOnDay() > 0">
-              {{ workoutsOnDay() }}{{ workoutsOnDay() === 1 ? ' workout logged' : ' workouts logged' }}
-            </span>
-          </div>
-
-          <div class="metric-card goals-card" [class.goal-complete]="goalReached()">
-            <div class="metric-head">
-              <span class="metric-title">Goals</span>
-            </div>
-            <strong class="metric-value">{{ thisWeekWorkouts() }}/{{ weeklyGoal() }}</strong>
-            <span class="metric-caption">workouts this week</span>
-
-            <div class="goal-done" *ngIf="goalReached()">
-              <span class="goal-done-check" nz-icon nzType="check-circle" nzTheme="fill"></span>
-              <span class="goal-done-text">Well done</span>
-            </div>
-            <span class="goal-remaining" *ngIf="!goalReached()">
-              {{ weeklyGoal() - thisWeekWorkouts() }} to go
-            </span>
-          </div>
-        </div>
-
-      </section>
-
-      <div class="planner-actions">
-        <a [routerLink]="['/start-workout']" [queryParams]="{ date: toKey(selectedDate()) }" class="hero-cta start-cta">
-          <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-          Start a new workout
-        </a>
-        <app-training-planner />
-        <ft-action #assistantTrigger dialogId="nutrition-assistant-screen" [expanded]="isChatOpen()" (activated)="toggleChat()">
-          <span nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
-          Nutrition Assistant
-        </ft-action>
+        <section class="dash-card steps-panel" aria-labelledby="steps-title">
+          <h2 id="steps-title">Steps</h2>
+          <strong class="step-count">{{ stepsForDay() | number }}</strong>
+          <p>{{ activityDistance() | number:'1.2-2' }} {{ activityDistanceUnit() | lowercase }} recorded</p>
+          <a routerLink="/running" class="record-steps">Record activity</a>
+        </section>
       </div>
 
       <section class="recent-section">
@@ -149,7 +90,7 @@
         <div class="recent-list" *ngIf="recentWorkouts().length > 0; else noRecent">
           <a
             *ngFor="let w of recentWorkouts(); trackBy: trackWorkout"
-            class="recent-item"
+            class="log-row"
             routerLink="/workouts"
           >
             <span class="recent-icon">
@@ -161,12 +102,12 @@
             </span>
             <span class="recent-side">
               <span class="recent-date">{{ w.date | date: 'd MMM' }}</span>
-            </span>
+            </span><span class="row-chevron" aria-hidden="true">›</span>
           </a>
         </div>
 
         <ng-template #noRecent>
-          <a routerLink="/start-workout" class="recent-empty">
+          <a routerLink="/start-workout" [queryParams]="{ view: 'sessions', date: toKey(selectedDate()) }" class="recent-empty">
             <strong>No workouts yet</strong>
             <span>Start your first workout →</span>
           </a>
@@ -183,7 +124,7 @@
         (close)="onAssistantClosed()"
         (keydown)="trapAssistantTab($event)"
       >
-          <div class="chat-container modern-chat">
+          <div #assistantSurface class="chat-container modern-chat">
             <div class="chat-header-modern">
               <span class="assistant-mark assistant-header-symbol" nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
               <div class="chat-title-info">
@@ -323,6 +264,6 @@
             </div>
           </div>
       </dialog>
-    </nz-content>
+    </main>
   </nz-layout>
 </nz-layout>
