@@ -28,11 +28,15 @@
 .set-navigation svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 .live-actions { position: relative; bottom: auto; padding: 0; gap: 10px; border: 0; border-radius: 0; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .live-actions .ant-btn { display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 18px; border-radius: 16px !important; font-size: 14px; font-weight: 600; box-shadow: none; }
-.live-actions .live-stop { flex: 0 0 56px; width: 56px; padding: 0; color: #ff5c60; background: var(--surface); border: 1px solid var(--hairline); border-color: var(--hairline) !important; }
+.live-actions .live-stop { flex: 0 0 56px; width: 56px; padding: 0; border: 0; background: transparent; }
 .live-actions .live-stop .anticon { margin: 0; font-size: 18px; }
-.live-actions .live-primary { flex: 1; min-width: 0; background: #4b78f6 !important; border-color: transparent !important; color: #fff !important; }
-.live-actions .live-primary:hover:not(:disabled), .live-actions .live-primary:focus-visible { background: #416ce5 !important; box-shadow: none; }
-.live-actions .live-primary:disabled { opacity: .45; }
+.live-actions .live-primary { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--ink); }
+:host ::ng-deep .live-actions .lg-button { min-height: 52px; }
+.session-clock { text-align: center; font-size: clamp(36px, 6dvh, 56px); line-height: 1.1; font-weight: 600; letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.rest-next { display: grid; gap: 4px; text-align: center; }
+.rest-next > span { font-size: 12px; color: var(--muted); }
+.rest-next strong { font-size: clamp(20px, 3dvh, 28px); line-height: 1.2; color: var(--ink); }
+.rest-next small { color: var(--muted); font-size: 13px; }
 .live-actions button:focus-visible, .set-navigation button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .hold-countdown { width: clamp(104px, 20dvh, 160px); }
 .hold-status { margin: 6px 0 0; }.hold-controls { margin-top: 0; }

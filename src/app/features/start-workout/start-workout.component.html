@@ -146,7 +146,6 @@
 <div role="main" class="workout-live" *ngIf="workoutInProgress()">
   <div class="live-top">
     <div class="live-routine">
-      <span class="live-eyebrow">Elapsed <span role="timer" style="font-variant-numeric: tabular-nums">{{ elapsedClock() }}</span></span>
       <h2>{{ currentRoutine().name }}</h2>
     </div>
     <div class="live-progress-ring"><strong>{{ completedSets() }}</strong><span>/ {{ totalSets() }} {{ hasTreadmill() ? 'steps' : 'sets' }}</span></div>
@@ -157,6 +156,7 @@
 
   <!-- ACTIVE -->
   <div class="live-body" *ngIf="state() === 'active' && currentExercise() as ex" [class.timed-exercise]="ex.repUnit === 'seconds' || treadmillActive()" [class.treadmill-exercise]="treadmillActive()">
+    <div class="session-clock" role="timer" aria-label="Workout duration">{{ elapsedClock() }}</div>
     <div class="live-exercise-head">
       <h1>{{ ex.name }}</h1>
     </div>
@@ -278,6 +278,20 @@
   <!-- REST -->
   <div class="live-body rest" *ngIf="state() === 'rest'">
     <span class="rest-label">Rest</span>
+    <div class="rest-next">
+      <span>Next up</span>
+      @if (currentExercise(); as exercise) {
+        @if (currentSetIndex() < exercise.sets) {
+          <strong>{{ exercise.name }}</strong>
+          <small>Set {{ currentSetIndex() + 1 }} of {{ exercise.sets }}</small>
+        } @else if (currentRoutine().exercises[currentExerciseIndex() + 1]; as next) {
+          <strong>{{ next.name }}</strong>
+          <small>Set 1 of {{ next.sets }}</small>
+        } @else {
+          <strong>Session review</strong>
+        }
+      }
+    </div>
     <div class="timer-display">{{ restClock() }}</div>
     <div class="timer-adjust">
       <ft-action (activated)="addTime(-10)">-10s</ft-action>
