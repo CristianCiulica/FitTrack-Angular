@@ -1,4 +1,4 @@
-import { Component, ElementRef, afterRenderEffect, inject, input, output, viewChild, DestroyRef } from '@angular/core';
+import { Component, ElementRef, afterRenderEffect, inject, input, output, viewChild, DestroyRef, NgZone } from '@angular/core';
 import { createRoot } from 'react-dom/client';
 import { createElement as h, useState } from 'react';
 import { Location } from '@angular/common';
@@ -7,9 +7,13 @@ import { FT_ICONS } from './icons';
 import { Button, Slider, TabBar } from 'glisse';
 
 function mount(element: HTMLElement) {
-  const root = createRoot(element);
-  inject(DestroyRef).onDestroy(() => root.unmount());
-  return root;
+  const zone = inject(NgZone);
+  // Glisse schedules frame loops and pointer listeners. Keep them outside change detection.
+  const root = zone.runOutsideAngular(() => createRoot(element));
+  inject(DestroyRef).onDestroy(() => zone.runOutsideAngular(() => root.unmount()));
+  return {
+    render: (node: Parameters<typeof root.render>[0]) => zone.runOutsideAngular(() => root.render(node)),
+  };
 }
 
 interface PaceProps {
@@ -57,11 +61,12 @@ export class FitSlider {
   readonly inputId = input<string>();
   readonly valueText = input.required<string>();
   readonly changed = output<number>();
+  private readonly zone = inject(NgZone);
   private readonly root = mount(inject(ElementRef).nativeElement);
   constructor() {
     afterRenderEffect(() => this.root.render(h(PaceSlider, {
       value: this.value(), max: this.max(), id: this.inputId(),
-      label: this.label(), valueText: this.valueText(), change: value => this.changed.emit(value),
+      label: this.label(), valueText: this.valueText(), change: value => this.zone.run(() => this.changed.emit(value)),
     })));
   }
 }
@@ -86,19 +91,21 @@ export class FitAction {
   readonly variant = input<'glass' | 'filled'>('glass');
   private readonly target = viewChild.required<ElementRef>('target');
   private readonly content = viewChild.required<ElementRef>('content');
+  private readonly zone = inject(NgZone);
   constructor() {
+    const zone = this.zone;
     const destroy = inject(DestroyRef);
     let root: ReturnType<typeof createRoot> | undefined;
-    destroy.onDestroy(() => root?.unmount());
+    destroy.onDestroy(() => zone.runOutsideAngular(() => root?.unmount()));
     afterRenderEffect(() => {
-      root ??= createRoot(this.target().nativeElement);
+      root ??= zone.runOutsideAngular(() => createRoot(this.target().nativeElement));
       const content = this.content().nativeElement;
-      root.render(h(Button, {
+      zone.runOutsideAngular(() => root!.render(h(Button, {
         type: this.kind(), disabled: this.disabled() || this.busy(),
         'aria-haspopup': this.dialogId() ? 'dialog' : undefined,
         'aria-controls': this.dialogId(), 'aria-expanded': this.expanded(),
-        variant: this.variant(), destructive: this.destructive(), 'aria-label': this.label(), 'aria-busy': this.busy(), onClick: () => this.activated.emit(),
-      }, h('span', {ref: (el: HTMLSpanElement | null) => { if (el) el.append(content); }})));
+        variant: this.variant(), destructive: this.destructive(), 'aria-label': this.label(), 'aria-busy': this.busy(), onClick: () => zone.run(() => this.activated.emit()),
+      }, h('span', {ref: (el: HTMLSpanElement | null) => { if (el) el.append(content); }}))));
     });
   }
 }
@@ -121,6 +128,7 @@ export class FitTabBar {
   private readonly desktopLinks = [...this.links, {
     value: '/progress', href: this.location.prepareExternalUrl('/progress'), label: 'Progress'
   }].map(({ value, href, label }) => ({ value, href, label }));
+  private readonly zone = inject(NgZone);
   private readonly root = mount(inject(ElementRef).nativeElement);
   constructor() {
     afterRenderEffect(() => {
@@ -136,7 +144,7 @@ export class FitTabBar {
           const item = links.find(link => link.href === anchor?.getAttribute('href'));
           if (!item) return;
           event.preventDefault();
-          void this.router.navigateByUrl(item.value);
+          this.zone.run(() => void this.router.navigateByUrl(item.value));
         },
       }));
     });

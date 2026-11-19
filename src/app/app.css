@@ -20,8 +20,6 @@
   position: fixed;
   inset: 0;
   background: rgba(245, 245, 247, 0.55);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -42,8 +40,6 @@
     0 30px 80px rgba(15, 23, 42, 0.16),
     0 4px 14px rgba(15, 23, 42, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   min-width: 240px;
   animation: card-pop 320ms cubic-bezier(0.32, 0.72, 0, 1);
 }
