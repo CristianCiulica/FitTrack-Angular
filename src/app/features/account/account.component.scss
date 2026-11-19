@@ -508,3 +508,9 @@ fieldset {
 .profile-badges[open] .badge-manage .anticon {
   transform: rotate(180deg);
 }
+
+@media (max-width: 380px) {
+  .field-grid:has(select[name="gender"]) {
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 1.5fr);
+  }
+}
