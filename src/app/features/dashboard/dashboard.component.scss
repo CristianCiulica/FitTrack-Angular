@@ -113,7 +113,7 @@
 .run-recovery-notice { display: flex; justify-content: space-between; gap: 8px; margin-top: 14px; padding: 12px 16px; color: var(--ink); strong { color: var(--accent); } }
 
 @media (max-width: 900px) {
-  .dashboard-mobile-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: max(18px,env(safe-area-inset-top)) 16px 8px; }
+  .dashboard-mobile-header { display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: max(18px,env(safe-area-inset-top)) 16px 8px; }
   .dashboard-brand { font-size: 26px; font-weight: 750; letter-spacing: -.065em; span { color: #ed835e; } }
   .dashboard-content { width: calc(100% - 32px); margin: 12px auto 0; }
   .dashboard-hero { padding: 0; border: 0; background: transparent; overflow: visible; }
