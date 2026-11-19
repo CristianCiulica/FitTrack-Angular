@@ -198,10 +198,13 @@
     display: flex; align-items: flex-end; gap: 5px; height: 32px;
     color: var(--accent);
     i { display: block; flex: 0 0 4px; background: currentColor; border-radius: 2px; }
-    i:nth-child(1), i:nth-child(7) { height: 10px; }
-    i:nth-child(2), i:nth-child(6) { height: 17px; }
-    i:nth-child(3), i:nth-child(5) { height: 24px; }
+    i:nth-child(1) { height: 13px; }
+    i:nth-child(2) { height: 27px; }
+    i:nth-child(3) { height: 18px; }
     i:nth-child(4) { height: 32px; }
+    i:nth-child(5) { height: 11px; }
+    i:nth-child(6) { height: 23px; }
+    i:nth-child(7) { height: 16px; }
   }
   .login-rings { position: absolute; right: 24px; top: 30px; width: 106px; height: 106px; }
   .track-wordmark { font-size: 28px; letter-spacing: -.06em; color: var(--ink); }
