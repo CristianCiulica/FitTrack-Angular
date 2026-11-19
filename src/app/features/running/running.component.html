@@ -1,82 +1,24 @@
 <nz-layout class="app-layout run-layout">
-  <nz-sider
-    [nzWidth]="208"
-    class="sidebar"
-  >
-    <div class="sidebar-logo">
-      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
-    </div>
-    <ul nz-menu nzMode="inline" class="sidebar-menu">
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
-        <a [routerLink]="isTracking ? null : '/dashboard'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Dashboard">
-          <span nz-icon nzType="ft:home"></span>
-          <span>Home</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
-        <a [routerLink]="isTracking ? null : '/workouts'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Workouts">
-          <span nz-icon nzType="ft:history"></span>
-          <span>History</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
-        <a [routerLink]="isTracking ? null : '/start-workout'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Start workout">
-          <span nz-icon nzType="ft:workout"></span>
-          <span>Workout</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/running" aria-label="Running">
-          <span nz-icon nzType="ft:run"></span>
-          <span>Run</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking">
-        <a [routerLink]="isTracking ? null : '/bmi'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Nutrition calculator">
-          <span nz-icon nzType="ft:nutrition"></span>
-          <span>Nutrition</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav sidebar-secondary-item" [class.tracking-locked]="isTracking"><a [routerLink]="isTracking ? null : '/progress'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking" class="sidebar-secondary-item"><a [routerLink]="isTracking ? null : '/weight'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a></li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking" class="sidebar-secondary-item">
-        <a [routerLink]="isTracking ? null : '/account'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Profile">
-          <span nz-icon nzType="user"></span>
-          <span>Profile</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" [class.tracking-locked]="isTracking" class="sidebar-secondary-item">
-        <a [routerLink]="isTracking ? null : '/settings'" [attr.aria-disabled]="isTracking" (click)="blockNavigation($event)" aria-label="Settings">
-          <span nz-icon nzType="setting"></span>
-          <span>Settings</span>
-        </a>
-      </li>
-      <li nz-menu-item class="sidebar-logout-item" (click)="logout()">
-        <a aria-label="Logout">
-          <span>Logout</span>
-        </a>
-      </li>
-    </ul>
-  <ft-tab-bar [locked]="isTracking" />
-  </nz-sider>
+  <ft-navigation (signOut)="logout()" [locked]="isTracking" [attr.inert]="isTracking ? '' : null" (blocked)="blockNavigation($event)" />
 
   <nz-layout class="main-layout">
-    <nz-header class="app-header">
+    <nz-header class="app-header" [attr.inert]="isTracking ? '' : null">
       <div class="header-left">
         <app-menu></app-menu>
         <h2>
           <span class="desktop-page-title">Running</span>
-          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
+          <span class="mobile-header-brand">Running</span>
         </h2>
       </div>
 
     </nz-header>
 
-    <nz-content class="app-content">
-      <div class="run-dashboard">
+    <nz-content role="main" class="app-content">
+      <h1 class="sr-only">Running</h1>
+      <div class="run-dashboard" *ngIf="!isTracking">
         <nz-card appLiquidGlass class="weather-card" [ngClass]="weatherTheme">
           <div class="weather-content weather-loading" *ngIf="weatherLoading">
-            Loading weather...
+            Checking local conditions…
           </div>
           <div class="weather-content weather-error" *ngIf="!weatherLoading && weatherError">
             {{ weatherError }}
@@ -125,79 +67,65 @@
           </div>
         </nz-card>
 
-        <nz-card appLiquidGlass class="run-card">
-          <div class="run-card-top">
-            <div class="run-card-summary">
-              <div>
-                <span class="run-card-eyebrow">Activity</span>
-                <strong>Running</strong>
+        <div class="run-launch">
+          @if (recoveredRun) {
+            <nz-card appLiquidGlass class="recovery-card">
+              <h3>Resume your run</h3>
+              <p>{{ elapsedDisplay }} recorded · {{ distanceKm }} {{ distanceUnit }}</p>
+              <div class="recovery-actions">
+                <ft-action variant="filled" (activated)="resumeRecoveredRun()">Resume</ft-action>
+                <ft-action (activated)="saveRecoveredRun()">Save to history</ft-action>
               </div>
-              <div class="run-card-state" *ngIf="isTracking && !isCalibrating">
-                <span class="gps-badge">GPS active</span>
-              </div>
-            </div>
-            <div class="run-recovery" *ngIf="recoveredRun"><strong>Run recovered</strong><p>{{ elapsedDisplay }} · {{ distanceKm }} {{ distanceUnit }} recorded</p><div><ft-action (activated)="resumeRecoveredRun()">Resume run</ft-action><ft-action (activated)="saveRecoveredRun()">Save to History</ft-action></div></div>
-            <ft-action *ngIf="!recoveredRun"
-
-             class="quick-run-button"
-              [class.stop]="isTracking"
-              (activated)="isTracking ? stopTracking() : quickStartRun()"
-            >
-              <span nz-icon [nzType]="isTracking ? 'close' : 'play-circle'"></span>
-              {{ isTracking ? 'Stop' : 'Quick Run' }}
+            </nz-card>
+          } @else {
+            <ft-action class="run-start" variant="filled" (activated)="quickStartRun()">
+              <svg viewBox="0 0 16 16" aria-hidden="true" width="16" height="16"><path fill="currentColor" d="M4 2.8a.85.85 0 0 1 1.28-.73l8.43 5.2a.86.86 0 0 1 0 1.46l-8.43 5.2A.85.85 0 0 1 4 13.2z"/></svg>
+              Start run
             </ft-action>
-          </div>
-        </nz-card>
+          }
+        </div>
       </div>
 
-      <!-- Live map: hidden until Start, then fullscreen (Strava style) -->
       <div class="live-map" [class.active]="isTracking">
-        <div #runningMap class="map"></div>
-
-        <div class="live-top">
-          <div class="live-status">
-            <span class="gps-badge" *ngIf="!isCalibrating">GPS active</span>
-            <span class="live-status-text">{{ statusText }}</span>
+        <div #runningMap class="map" [class.unavailable]="mapUnavailable()" aria-label="Running route map"></div>
+        @if (mapUnavailable() && !isTracking) {
+          <div class="map-fallback">
+            <span class="route-icon" nz-icon nzType="ft:run" aria-hidden="true"></span>
+            <strong role="status">Map unavailable</strong>
+            <p>You can still record a run with GPS.</p>
+            <ft-action (activated)="retryMap()">Retry map</ft-action>
           </div>
-        </div>
+        }
+        @if (isTracking) {
+          @if (!isCalibrating || mapUnavailable()) {
+            <div class="live-status" role="status">
+              <span class="gps-dot" [class.searching]="isCalibrating" aria-hidden="true"></span>
+              {{ isCalibrating ? 'Map unavailable' : statusText() }}
+              @if (!isCalibrating && mapUnavailable()) { <span>Map unavailable</span> }
+            </div>
+          }
 
-        <div class="gps-calibration-overlay" *ngIf="isCalibrating">
-          <div class="calibration-pulse"></div>
-          <strong>Calibrating GPS</strong>
-          <span *ngIf="calibrationSecondsRemaining > 0">
-            Keep still for {{ calibrationSecondsRemaining }}s
-          </span>
-          <span *ngIf="calibrationSecondsRemaining === 0">
-            Waiting for a stable signal
-          </span>
-        </div>
+          @if (isCalibrating) {
+            <div class="calibration-panel">
+              <span class="calibration-pulse" aria-hidden="true"></span>
+              <strong>Finding your starting point</strong>
+              <span>{{ statusText() }}</span>
+            </div>
+          }
 
-        <div class="live-panel">
-          <div class="live-stats">
-            <div>
-              <span>Time</span>
-              <strong>{{ elapsedDisplay }}</strong>
-            </div>
-            <div>
-              <span>Distance</span>
-              <strong>{{ distanceKm }} {{ distanceUnit }}</strong>
-            </div>
-            <div>
-              <span>Speed</span>
-              <strong>{{ avgSpeedDisplay }}</strong>
-            </div>
-            <div>
-              <span>Kcal</span>
-              <strong>{{ caloriesDisplay }}</strong>
-            </div>
-          </div>
-          <button type="button" class="live-stop" (click)="confirmStopTracking()">
-            <span nz-icon nzType="close"></span>
-            Stop
-          </button>
-        </div>
+          <section class="live-panel" aria-label="Run recording">
+            <dl class="live-stats">
+              <div><dt>Time</dt><dd>{{ elapsedDisplay }}</dd></div>
+              <div><dt>Distance <small>({{ distanceUnit }})</small></dt><dd>{{ distanceKm }}</dd></div>
+              <div><dt>Speed <small>({{ distanceUnit }}/h)</small></dt><dd>{{ avgSpeedDisplay }}</dd></div>
+              <div><dt>Energy <small>(kcal)</small></dt><dd>{{ caloriesDisplay }}</dd></div>
+            </dl>
+            <ft-action class="run-stop" [destructive]="true" (activated)="confirmStopTracking()">
+              <span class="stop-mark" aria-hidden="true"></span> End run
+            </ft-action>
+          </section>
+        }
       </div>
-
     </nz-content>
   </nz-layout>
 </nz-layout>

@@ -1,10 +1,9 @@
-import { FitTabBar, FitSlider } from '../../shared/glisse/controls';
+import { FitSlider } from '../../shared/glisse/controls';
+import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { Component, computed, effect, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -17,6 +16,7 @@ import {
   cmToFeetInches,
   displayWeight,
   feetInchesToCm,
+  kgToLb,
   toCanonicalWeight,
   weightUnitLabel,
 } from '../../core/utils/units';
@@ -25,13 +25,10 @@ import {
   selector: 'app-bmi',
   standalone: true,
   imports: [
-    FitTabBar, FitSlider,
+    NavigationComponent, FitSlider,
     CommonModule,
     FormsModule,
-    RouterLink,
-    RouterLinkActive,
     NzLayoutModule,
-    NzMenuModule,
     NzButtonModule,
     NzIconModule,
     NzCardModule,
@@ -60,7 +57,7 @@ export class BmiComponent implements OnDestroy {
   goalRate = signal<number>(0.5);
 
   readonly units = this.profileService.units;
-  readonly goalRateDisplay = computed(() => displayWeight(this.goalRate(), this.profileService.units()));
+  readonly goalRateDisplay = computed(() => this.units() === 'imperial' ? kgToLb(this.goalRate()) : this.goalRate());
   readonly isImperial = computed(() => this.units() === 'imperial');
   readonly weightUnit = computed(() => weightUnitLabel(this.units()));
   readonly weightInput = computed(() => displayWeight(this.weight(), this.units()));
@@ -155,6 +152,7 @@ export class BmiComponent implements OnDestroy {
   }
 
   onGoalRate(value: number) {
+    if (this.goalRate() === value) return;
     this.goalRate.set(value);
     this.queueGoalSync();
   }
@@ -178,7 +176,7 @@ export class BmiComponent implements OnDestroy {
     const revision = this.goalRevision;
     this.profileService.patch({
       goal: this.goal(),
-      goalRate: Math.round(this.goalRate() * 10) / 10,
+      goalRate: this.goalRate(),
       strengthTrainingDays: Math.round(this.strengthTrainingDays()),
     }).subscribe({ error: () => {
       if (revision !== this.goalRevision) return;

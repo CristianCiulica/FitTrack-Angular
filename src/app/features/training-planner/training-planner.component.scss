@@ -1,79 +1,6 @@
 :host {
   display: contents;
 }
-.training-fab {
-  position: fixed;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: calc(max(28px, env(safe-area-inset-bottom)) + 68px);
-  z-index: 850;
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  color: #fff;
-  background: #007aff;
-  box-shadow:
-    0 6px 20px #00000024,
-    0 2px 5px #00000012;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 180ms ease;
-  > [nz-icon] {
-    font-size: 26px;
-  }
-  .fab-star {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 10px;
-    height: 10px;
-  }
-  &:active {
-    transform: scale(0.94);
-  }
-  &:focus-visible {
-    outline: 3px solid var(--accent);
-    outline-offset: 4px;
-  }
-}
-:host-context(html[data-theme='dark']) .training-fab {
-  background: #0a84ff;
-}
-.fab-label {
-  position: absolute;
-  right: calc(100% + 12px);
-  padding: 9px 13px;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
-  color: var(--ink);
-  background: var(--surface-strong);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateX(6px);
-  pointer-events: none;
-  transition:
-    opacity 160ms ease,
-    transform 160ms ease;
-}
-.training-fab:focus-visible .fab-label {
-  opacity: 1;
-  transform: none;
-}
-@media (hover: hover) {
-  .training-fab:hover {
-    transform: translateY(-2px);
-    .fab-label {
-      opacity: 1;
-      transform: none;
-    }
-  }
-}
 .training-dialog {
   --planner-action: #0071e3;
   --planner-card: #fff;
@@ -636,10 +563,6 @@ fieldset {
   gap: 10px;
 }
 @media (max-width: 900px) {
-  .training-fab {
-    right: max(20px, env(safe-area-inset-right));
-    bottom: calc(148px + env(safe-area-inset-bottom));
-  }
   .wizard-layout {
     grid-template-columns: minmax(0, 1fr);
     max-width: 640px;
@@ -908,8 +831,6 @@ fieldset {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .training-fab,
-  .fab-label,
   .choice,
   .step-track span {
     transition: none;

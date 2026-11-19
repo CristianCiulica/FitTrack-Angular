@@ -19,9 +19,7 @@
     (function () {
       var choice = 'system';
       try { choice = localStorage.getItem('fittrack_theme') || 'system'; } catch (_) {}
-      var login = /^\/(?:auth(?:\/login)?)?\/?$/.test(window.location.pathname);
-      var dark = !login && (choice === 'dark' || (choice !== 'light' && choice !== 'dark' && window.matchMedia('(prefers-color-scheme: dark)').matches));
-      if (login) document.documentElement.style.setProperty('--startup-background', '#ffffff');
+      var dark = choice === 'dark' || (choice !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
       document.documentElement.dataset.theme = dark ? 'dark' : 'light';
       document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
       document.documentElement.style.backgroundColor = dark ? '#0b0c0f' : '#ffffff';

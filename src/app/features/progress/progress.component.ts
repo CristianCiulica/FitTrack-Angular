@@ -1,4 +1,5 @@
-import { FitTabBar } from '../../shared/glisse/controls';
+import { FitAction } from '../../shared/glisse/controls';
+import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { ExerciseRecordsComponent } from './exercise-records/exercise-records.component';
 import {
   Component,
@@ -11,11 +12,9 @@ import {
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin, interval } from 'rxjs';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { ActivityCalendarComponent } from '../../shared/components/activity-calendar/activity-calendar.component';
@@ -33,13 +32,11 @@ import { trainingProgress } from '../../core/utils/training-progress';
   selector: 'app-progress',
   standalone: true,
   imports: [
-    FitTabBar,
+    FitAction,
+    NavigationComponent,
     CommonModule,
     ExerciseRecordsComponent,
-    RouterLink,
-    RouterLinkActive,
     NzLayoutModule,
-    NzMenuModule,
     NzIconModule,
     AppMenuComponent,
     ActivityCalendarComponent,
@@ -55,7 +52,7 @@ export class ProgressComponent implements OnInit {
   private readonly profile = inject(ProfileService);
   private readonly auth = inject(AuthService);
   private readonly destroy = inject(DestroyRef);
-  @ViewChild('achievementsLauncher') private achievementsLauncher!: ElementRef<HTMLButtonElement>;
+  @ViewChild('achievementsLauncher') private achievementsLauncher!: FitAction;
   @ViewChild('achievementsDialog') private achievementsDialog!: ElementRef<HTMLDialogElement>;
   @ViewChild('achievementsBody') private achievementsBody!: ElementRef<HTMLElement>;
   private achievementsMotion?: CircularDialogMotion;
@@ -70,7 +67,7 @@ export class ProgressComponent implements OnInit {
     if (this.achievementsOpen()) return;
     this.achievementsMotion ??= new CircularDialogMotion(
       this.achievementsDialog.nativeElement,
-      this.achievementsLauncher.nativeElement,
+      this.achievementsLauncher.button,
       this.achievementsBody.nativeElement,
     );
     this.achievementsOpen.set(true);

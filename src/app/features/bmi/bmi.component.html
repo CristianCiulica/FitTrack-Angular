@@ -1,67 +1,5 @@
 <nz-layout class="app-layout">
-  <nz-sider
-    [nzWidth]="208"
-    class="sidebar"
-  >
-    <div class="sidebar-logo">
-      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
-    </div>
-    <ul nz-menu nzMode="inline" class="sidebar-menu">
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/dashboard" aria-label="Dashboard">
-          <span nz-icon nzType="ft:home"></span>
-          <span>Home</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/workouts" aria-label="Workouts">
-          <span nz-icon nzType="ft:history"></span>
-          <span>History</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/start-workout" aria-label="Start workout">
-          <span nz-icon nzType="ft:workout"></span>
-          <span>Workout</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/running" aria-label="Running">
-          <span nz-icon nzType="ft:run"></span>
-          <span>Run</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/bmi" aria-label="Nutrition calculator">
-          <span nz-icon nzType="ft:nutrition"></span>
-          <span>Nutrition</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav sidebar-secondary-item"><a routerLink="/progress" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/account" aria-label="Profile">
-          <span nz-icon nzType="user"></span>
-          <span>Profile</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/settings" aria-label="Settings">
-          <span nz-icon nzType="setting"></span>
-          <span>Settings</span>
-        </a>
-      </li>
-      <li nz-menu-item class="sidebar-logout-item" (click)="logout()">
-        <a aria-label="Logout">
-          <span>Logout</span>
-        </a>
-      </li>
-    </ul>
-
-  <ft-tab-bar />
-  </nz-sider>
+  <ft-navigation (signOut)="logout()" />
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
@@ -75,7 +13,8 @@
 
     </nz-header>
 
-    <nz-content class="app-content">
+    <nz-content role="main" class="app-content">
+      <h1 class="sr-only">Nutrition</h1>
       <div class="container">
         <div class="nutrition-page">
           
@@ -162,14 +101,14 @@
           <div class="settings-group">
             <div class="settings-group-title">YOUR GOAL</div>
             
-            <div class="goal-segmented-large">
-              <button type="button" class="goal-segment" [class.selected]="goal() === 'lose'" (click)="setGoal('lose')">
+            <div class="goal-segmented-large" role="group" aria-label="Nutrition goal">
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'lose'" [attr.aria-pressed]="goal() === 'lose'" (click)="setGoal('lose')">
                 Lose Fat
               </button>
-              <button type="button" class="goal-segment" [class.selected]="goal() === 'maintain'" (click)="setGoal('maintain')">
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'maintain'" [attr.aria-pressed]="goal() === 'maintain'" (click)="setGoal('maintain')">
                 Maintain
               </button>
-              <button type="button" class="goal-segment" [class.selected]="goal() === 'gain'" (click)="setGoal('gain')">
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'gain'" [attr.aria-pressed]="goal() === 'gain'" (click)="setGoal('gain')">
                 Bulk Up
               </button>
             </div>
@@ -177,10 +116,10 @@
             <div class="settings-card" *ngIf="goal() !== 'maintain'">
               <div class="calc-row pace-row">
                 <div class="pace-header">
-                  <span>Pace</span>
-                  <strong>{{ goalRateDisplay() | number: '1.1-1' }} {{ weightUnit() }}/wk</strong>
+                  <label for="nutrition-pace">Weekly pace</label>
+                  <strong>{{ goalRateDisplay() | number: '1.2-2' }} {{ weightUnit() }}/wk</strong>
                 </div>
-                <ft-slider inputId="onboarding-pace" label="Weekly weight change pace" [max]="goal() === 'lose' ? 1 : 0.5" [value]="goalRate()" (changed)="onGoalRate(+$event)" />
+                <ft-slider inputId="nutrition-pace" [valueText]="(goalRateDisplay() | number: '1.2-2') + ' ' + weightUnit() + ' per week'" label="Weekly weight change pace" [max]="goal() === 'lose' ? 1 : 0.5" [value]="goalRate()" (changed)="onGoalRate($event)" />
               </div>
             </div>
             <p class="settings-footer">Calculated using the Mifflin-St Jeor equation combined with your weekly weight-training frequency.</p>

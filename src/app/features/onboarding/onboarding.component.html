@@ -84,8 +84,8 @@
             </div>
             @if (goal() !== 'maintain') {
               <div class="pace-field">
-                <div class="pace-head"><label for="onboarding-pace">Weekly pace</label><strong>{{ goalRate() | number: '1.1-1' }} kg/week</strong></div>
-                <ft-slider inputId="onboarding-pace" label="Weekly weight change pace" [max]="goal() === 'lose' ? 1 : 0.5" [value]="goalRate()" (changed)="goalRate.set(+$event)" />
+                <div class="pace-head"><label for="onboarding-pace">Weekly pace</label><strong>{{ goalRate() | number: '1.2-2' }} kg/week</strong></div>
+                <ft-slider inputId="onboarding-pace" [valueText]="(goalRate() | number: '1.2-2') + ' kg per week'" label="Weekly weight change pace" [max]="goal() === 'lose' ? 1 : 0.5" [value]="goalRate()" (changed)="goalRate.set($event)" />
               </div>
             }
           </section>

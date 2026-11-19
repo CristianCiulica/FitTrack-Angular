@@ -1,96 +1,6 @@
 <nz-layout class="app-layout" [attr.inert]="workoutInProgress() ? '' : null">
   <!-- Sidebar -->
-  <nz-sider
-    [nzWidth]="208"
-    class="sidebar"
-  >
-      <div class="sidebar-logo">
-        <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
-      </div>
-      <ul nz-menu nzMode="inline" class="sidebar-menu">
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a
-            [routerLink]="workoutInProgress() ? null : '/dashboard'"
-            [attr.aria-disabled]="workoutInProgress()"
-            [class.navigation-locked]="workoutInProgress()"
-            (click)="blockNavigation($event)"
-            aria-label="Dashboard">
-            <span nz-icon nzType="ft:home"></span>
-            <span>Home</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a
-            [routerLink]="workoutInProgress() ? null : '/workouts'"
-            [attr.aria-disabled]="workoutInProgress()"
-            [class.navigation-locked]="workoutInProgress()"
-            (click)="blockNavigation($event)"
-            aria-label="Workouts">
-            <span nz-icon nzType="ft:history"></span>
-            <span>History</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/start-workout" aria-label="Start workout">
-            <span nz-icon nzType="ft:workout"></span>
-            <span>Workout</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a
-            [routerLink]="workoutInProgress() ? null : '/running'"
-            [attr.aria-disabled]="workoutInProgress()"
-            [class.navigation-locked]="workoutInProgress()"
-            (click)="blockNavigation($event)"
-            aria-label="Running">
-            <span nz-icon nzType="ft:run"></span>
-            <span>Run</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a
-            [routerLink]="workoutInProgress() ? null : '/bmi'"
-            [attr.aria-disabled]="workoutInProgress()"
-            [class.navigation-locked]="workoutInProgress()"
-            (click)="blockNavigation($event)"
-            aria-label="Nutrition calculator">
-            <span nz-icon nzType="ft:nutrition"></span>
-            <span>Nutrition</span>
-          </a>
-        </li>
-
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav sidebar-secondary-item"><a [routerLink]="workoutInProgress() ? null : '/progress'" [attr.aria-disabled]="workoutInProgress()" [class.navigation-locked]="workoutInProgress()" (click)="blockNavigation($event)" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item"><a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a></li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-          <a
-            [routerLink]="workoutInProgress() ? null : '/account'"
-            [attr.aria-disabled]="workoutInProgress()"
-            [class.navigation-locked]="workoutInProgress()"
-            (click)="blockNavigation($event)"
-            aria-label="Profile">
-            <span nz-icon nzType="user"></span>
-            <span>Profile</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-          <a
-            [routerLink]="workoutInProgress() ? null : '/settings'"
-            [attr.aria-disabled]="workoutInProgress()"
-            [class.navigation-locked]="workoutInProgress()"
-            (click)="blockNavigation($event)"
-            aria-label="Settings">
-            <span nz-icon nzType="setting"></span>
-            <span>Settings</span>
-          </a>
-        </li>
-        <li nz-menu-item class="sidebar-logout-item" (click)="logout()">
-          <a aria-label="Logout">
-            <span>Logout</span>
-          </a>
-        </li>
-      </ul>
-  <ft-tab-bar />
-  </nz-sider>
+  <ft-navigation (signOut)="logout()" [locked]="workoutInProgress()" (blocked)="blockNavigation($event)" />
 
   <nz-layout class="main-layout">
     <nz-header class="app-header">
@@ -109,7 +19,7 @@
       </div>
     </nz-header>
 
-    <nz-content class="app-content">
+    <nz-content role="main" class="app-content">
       <div class="container">
 
         <!-- SETUP STATE -->
@@ -233,7 +143,7 @@
 
 <!-- Antrenament activ: mod fullscreen, ca la running. Acopera navigarea si
      ramane deschis pana cand userul opreste manual antrenamentul. -->
-<div class="workout-live" *ngIf="workoutInProgress()">
+<div role="main" class="workout-live" *ngIf="workoutInProgress()">
   <div class="live-top">
     <div class="live-routine">
       <span class="live-eyebrow">Elapsed <span role="timer" style="font-variant-numeric: tabular-nums">{{ elapsedClock() }}</span></span>

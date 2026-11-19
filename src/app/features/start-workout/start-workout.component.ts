@@ -1,4 +1,5 @@
-import { FitTabBar, FitAction } from '../../shared/glisse/controls';
+import { FitAction } from '../../shared/glisse/controls';
+import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { WorkoutLibraryComponent } from '../workout-library/workout-library.component';
 import { WorkoutRoutine as Routine, orderRoutineExercises, isTreadmillExercise } from '../../core/models/workout-routine.model';
 import { timedSessionNotes, estimateTreadmillCalories, TreadmillLog } from '../../core/utils/timed-cardio';
@@ -13,9 +14,8 @@ import { createWorkoutSummaryImage } from '../../core/utils/workout-share';
 import { localDateKey } from '../../core/utils/weight-progress';
 import { Component, HostListener, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -738,13 +738,11 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
   selector: 'app-start-workout',
   standalone: true,
   imports: [
-    FitTabBar, FitAction,
+    NavigationComponent, FitAction,
     CommonModule,
     WorkoutLibraryComponent,
     RouterLink,
-    RouterLinkActive,
     NzLayoutModule,
-    NzMenuModule,
     NzButtonModule,
     NzIconModule,
     NzCardModule,

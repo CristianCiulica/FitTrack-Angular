@@ -1,65 +1,5 @@
 <nz-layout class="app-layout">
-  <nz-sider
-    [nzWidth]="208"
-    class="sidebar">
-      <div class="sidebar-logo">
-        <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
-      </div>
-      <ul nz-menu nzMode="inline" class="sidebar-menu">
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/dashboard" aria-label="Dashboard">
-            <span nz-icon nzType="ft:home"></span>
-            <span>Home</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/workouts" aria-label="Workouts">
-            <span nz-icon nzType="ft:history"></span>
-            <span>History</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/start-workout" aria-label="Start workout">
-            <span nz-icon nzType="ft:workout"></span>
-            <span>Workout</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/running" aria-label="Running">
-            <span nz-icon nzType="ft:run"></span>
-            <span>Run</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-          <a routerLink="/bmi" aria-label="Nutrition calculator">
-            <span nz-icon nzType="ft:nutrition"></span>
-            <span>Nutrition</span>
-          </a>
-        </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav sidebar-secondary-item"><a routerLink="/progress" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-          <a routerLink="/account" aria-label="Profile">
-            <span nz-icon nzType="user"></span>
-            <span>Profile</span>
-          </a>
-        </li>
-        <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-          <a routerLink="/settings" aria-label="Settings">
-            <span nz-icon nzType="setting"></span>
-            <span>Settings</span>
-          </a>
-        </li>
-        <li nz-menu-item class="sidebar-logout-item" (click)="logout()">
-          <a aria-label="Logout">
-            <span>Logout</span>
-          </a>
-        </li>
-      </ul>
-  <ft-tab-bar />
-  </nz-sider>
+  <ft-navigation (signOut)="logout()" />
 
   <!-- Content -->
   <nz-layout class="main-layout">
@@ -74,7 +14,7 @@
 
     </nz-header>
 
-    <nz-content class="app-content">
+    <nz-content role="main" class="app-content">
       <!-- Activity head: title + month navigation -->
       <div class="activity-head">
         <div class="activity-title">
@@ -150,48 +90,52 @@
               }
             </svg>
           </div>
-          <div class="activity-card-footer">
-            <div><span>Steps</span><strong>{{ stepsForDay() | number }}<small> logged</small></strong></div>
-            <div><span>Distance</span><strong>{{ activityDistance() | number: '1.2-2' }}<small>{{ activityDistanceUnit() }}</small></strong></div>
+        </div>
+
+        <!-- Daily metric cards -->
+        <div class="metric-grid">
+          <div class="metric-card steps-card">
+            <div class="metric-head">
+              <span class="metric-title">Steps</span>
+              <span class="metric-icon" nz-icon nzType="rise"></span>
+            </div>
+            <strong class="metric-value">{{ stepsForDay() | number }}</strong>
+            <span class="metric-caption">{{ activityDistance() | number: '1.2-2' }} {{ activityDistanceUnit() }} recorded</span>
+            <span class="metric-caption" *ngIf="workoutsOnDay() > 0">
+              {{ workoutsOnDay() }}{{ workoutsOnDay() === 1 ? ' workout logged' : ' workouts logged' }}
+            </span>
+          </div>
+
+          <div class="metric-card goals-card" [class.goal-complete]="goalReached()">
+            <div class="metric-head">
+              <span class="metric-title">Goals</span>
+            </div>
+            <strong class="metric-value">{{ thisWeekWorkouts() }}/{{ weeklyGoal() }}</strong>
+            <span class="metric-caption">workouts this week</span>
+
+            <div class="goal-done" *ngIf="goalReached()">
+              <span class="goal-done-check" nz-icon nzType="check-circle" nzTheme="fill"></span>
+              <span class="goal-done-text">Well done</span>
+            </div>
+            <span class="goal-remaining" *ngIf="!goalReached()">
+              {{ weeklyGoal() - thisWeekWorkouts() }} to go
+            </span>
           </div>
         </div>
+
       </section>
 
-      <!-- Daily metric cards -->
-      <div class="metric-grid">
-        <div class="metric-card steps-card">
-          <div class="metric-head">
-            <span class="metric-title">Steps</span>
-            <span class="metric-icon" nz-icon nzType="rise"></span>
-          </div>
-          <strong class="metric-value">{{ stepsForDay() | number }}</strong>
-          <span class="metric-caption">steps today</span>
-          <span class="metric-caption" *ngIf="workoutsOnDay() > 0">
-            {{ workoutsOnDay() }}{{ workoutsOnDay() === 1 ? ' workout logged' : ' workouts logged' }}
-          </span>
-        </div>
-
-        <div class="metric-card goals-card" [class.goal-complete]="goalReached()">
-          <div class="metric-head">
-            <span class="metric-title">Goals</span>
-          </div>
-          <strong class="metric-value">{{ thisWeekWorkouts() }}/{{ weeklyGoal() }}</strong>
-          <span class="metric-caption">workouts this week</span>
-
-          <div class="goal-done" *ngIf="goalReached()">
-            <span class="goal-done-check" nz-icon nzType="check-circle" nzTheme="fill"></span>
-            <span class="goal-done-text">Well done</span>
-          </div>
-          <span class="goal-remaining" *ngIf="!goalReached()">
-            {{ weeklyGoal() - thisWeekWorkouts() }} to go
-          </span>
-        </div>
+      <div class="planner-actions">
+        <a [routerLink]="['/start-workout']" [queryParams]="{ date: toKey(selectedDate()) }" class="hero-cta start-cta">
+          <span nz-icon nzType="play-circle" nzTheme="fill"></span>
+          Start a new workout
+        </a>
+        <app-training-planner />
+        <ft-action #assistantTrigger dialogId="nutrition-assistant-screen" [expanded]="isChatOpen()" (activated)="toggleChat()">
+          <span nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
+          Nutrition Assistant
+        </ft-action>
       </div>
-
-      <a [routerLink]="['/start-workout']" [queryParams]="{ date: toKey(selectedDate()) }" class="hero-cta start-cta">
-        <span nz-icon nzType="play-circle" nzTheme="fill"></span>
-        Start a new workout
-      </a>
 
       <section class="recent-section">
         <div class="recent-heading">
@@ -228,23 +172,6 @@
           </a>
         </ng-template>
       </section>
-
-      <app-training-planner />
-
-      <button
-        #assistantTrigger
-        type="button"
-        class="assistant-fab"
-        aria-label="Nutrition Assistant"
-        aria-haspopup="dialog"
-        aria-controls="nutrition-assistant-screen"
-        [attr.aria-expanded]="isChatOpen()"
-        (click)="toggleChat()"
-      >
-        <span class="fab-nutrition-icon" nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
-        <svg class="fab-sparkle" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0 10.2 5.8 16 8l-5.8 2.2L8 16l-2.2-5.8L0 8l5.8-2.2Z"/></svg>
-        <span class="assistant-fab-label" aria-hidden="true">Nutrition Assistant</span>
-      </button>
 
       <dialog
         #assistantDialog

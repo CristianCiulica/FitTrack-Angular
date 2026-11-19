@@ -4,6 +4,11 @@
   color: var(--ink);
 }
 .progress-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   margin: 0 0 26px;
 }
 h1 {
@@ -196,71 +201,6 @@ h1 {
 .progress-information {
   margin-top: 24px;
 }
-.achievements-fab {
-  position: fixed;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: max(28px, env(safe-area-inset-bottom));
-  z-index: 850;
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  color: white;
-  background: #007aff;
-  box-shadow:
-    0 6px 20px #00000024,
-    0 2px 5px #00000012;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 180ms ease;
-  > [nz-icon] {
-    font-size: 25px;
-  }
-  &:active {
-    transform: scale(0.94);
-  }
-  &:focus-visible {
-    outline: 3px solid var(--accent);
-    outline-offset: 4px;
-  }
-}
-:host-context(html[data-theme='dark']) .achievements-fab {
-  background: #0a84ff;
-}
-.achievements-tooltip {
-  position: absolute;
-  right: calc(100% + 12px);
-  padding: 9px 13px;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
-  background: var(--surface-strong);
-  color: var(--ink);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(6px);
-  transition:
-    opacity 160ms ease,
-    transform 160ms ease;
-}
-.achievements-fab:focus-visible .achievements-tooltip {
-  opacity: 1;
-  transform: none;
-}
-@media (hover: hover) {
-  .achievements-fab:hover {
-    transform: translateY(-2px);
-    .achievements-tooltip {
-      opacity: 1;
-      transform: none;
-    }
-  }
-}
 .achievements-dialog {
   position: fixed;
   inset: 0;
@@ -434,12 +374,6 @@ h1 {
 .earned .earned-check {
   color: var(--accent);
 }
-@media (max-width: 900px) {
-  .achievements-fab {
-    right: max(20px, env(safe-area-inset-right));
-    bottom: calc(80px + env(safe-area-inset-bottom));
-  }
-}
 @media (max-width: 600px) {
   .progress-information {
     margin-top: 18px;
@@ -478,11 +412,4 @@ h1 {
     margin-top: -6px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .achievements-fab,
-  .achievements-tooltip {
-    transition: none;
-  }
-}
-
 .progress-tabs {display:flex;gap:4px;padding:5px;margin:0 0 24px;border:1px solid var(--hairline);border-radius:18px;background:var(--surface);button {flex:1;min-height:44px;border:0;border-radius:13px;background:transparent;color:var(--ink-secondary);font:inherit;font-size:14px;font-weight:550;cursor:pointer} button[aria-pressed="true"] {background:var(--surface-strong);color:var(--ink);box-shadow:0 2px 5px #00000008} button:focus-visible {outline:2px solid var(--accent);outline-offset:1px} }

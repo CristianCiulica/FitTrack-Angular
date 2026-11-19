@@ -1,16 +1,15 @@
-import { FitTabBar, FitAction } from '../../shared/glisse/controls';
+import { FitAction } from '../../shared/glisse/controls';
+import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { Subscription } from 'rxjs';
 import { NativeRunService, NativeRunSnapshot } from '../../core/services/native-run.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { displayDistance, displaySpeed, distanceUnitLabel } from '../../core/utils/units';
 import { LiquidGlassDirective } from '../../shared/components/liquid-glass/liquid-glass.directive';
 import { MAP_TILE_URL, MAP_TILE_OPTIONS } from '../../core/config/map-tiles';
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ElementRef, NgZone, Optional } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, ElementRef, NgZone, Optional, HostListener, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import * as L from 'leaflet';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -40,13 +39,10 @@ interface AcceptedPosition {
   selector: 'app-running',
   standalone: true,
   imports: [
-    FitTabBar, FitAction,
+    NavigationComponent, FitAction,
     LiquidGlassDirective,
     CommonModule,
-    RouterLink,
-    RouterLinkActive,
     NzLayoutModule,
-    NzMenuModule,
     NzButtonModule,
     NzIconModule,
     NzCardModule,
@@ -61,7 +57,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   isTracking = false;
   isCalibrating = false;
-  statusText = 'Tap Start to begin tracking.';
+  readonly statusText = signal('Tap Start to begin tracking.');
   calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
   gpsAccuracy?: number;
   weatherExpanded = false;
@@ -77,7 +73,15 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   calories = 0;
   elapsedSeconds = 0;
 
+  readonly mapUnavailable = signal(false);
+  private tiles?: L.TileLayer;
   private map?: L.Map;
+
+  @HostListener('window:online')
+  retryMap(): void {
+    this.tiles?.redraw();
+  }
+
   private polyline?: L.Polyline;
   private polylineCasing?: L.Polyline;
   private routePoints: [number, number][] = [];
@@ -218,7 +222,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.resizeMap();
     this.runningSessionService.setTrackingActive(true);
     this.calibrationSecondsRemaining = GPS_CALIBRATION_MS / 1000;
-    this.statusText = 'Allow location access to start tracking.';
+    this.statusText.set('Allow location access to start tracking.');
 
     const locationOptions: PositionOptions = {
       enableHighAccuracy: true,
@@ -232,7 +236,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
         this.sessionStartedAt = Date.now();
         this.calibrationStartedAt = Date.now();
-        this.statusText = 'Calibrating GPS. Keep the phone still.';
+        this.statusText.set('Calibrating GPS. Keep the phone still.');
         this.startCalibrationTimer();
         this.handlePosition(position);
 
@@ -255,12 +259,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   confirmStopTracking() {
     this.modal.confirm({
-      nzTitle: 'End workout?',
+      nzTitle: 'End this run?',
       nzWidth: 300,
-      nzOkText: 'End',
+      nzOkText: 'End run',
       nzOkDanger: true,
       nzOnOk: () => this.stopTracking(true),
-      nzCancelText: 'Cancel',
+      nzCancelText: 'Keep running',
       nzCentered: true,
       nzClassName: 'glass-modal'
     });
@@ -286,7 +290,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     if (wasTracking) {
       this.isTracking = false;
       this.isCalibrating = false;
-      this.statusText = 'Tracking stopped.';
+      this.statusText.set('Tracking stopped.');
       this.runningSessionService.setTrackingActive(false);
       if (!this.destroyed) this.resizeMap();
       if (saveSession) {
@@ -328,7 +332,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.marker?.remove();
     this.marker = undefined;
     if (clearStatus) {
-      this.statusText = 'Tap Start to begin tracking.';
+      this.statusText.set('Tap Start to begin tracking.');
     }
   }
 
@@ -383,7 +387,11 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
     this.map = L.map(container, { zoomControl: false, attributionControl: true }).setView(this.initialPosition ?? [44.4268, 26.1025], 16);
     this.map.attributionControl.setPrefix(false);
-    L.tileLayer(MAP_TILE_URL, MAP_TILE_OPTIONS).addTo(this.map);
+    const tiles = L.tileLayer(MAP_TILE_URL, MAP_TILE_OPTIONS);
+    this.tiles = tiles;
+    tiles.on('load', () => {
+      this.mapUnavailable.set(!tiles.getContainer()?.querySelector('.leaflet-tile-loaded'));
+    }).addTo(this.map);
 
     // route with white casing, Strava style
     this.polylineCasing = L.polyline(this.routePoints, { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(this.map);
@@ -409,7 +417,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.updateLivePosition(point, timestamp, accuracy);
 
     if (accuracy > GPS_MAX_ACCURACY_METERS) {
-      this.statusText = `Weak GPS signal (~${Math.round(accuracy)}m). Waiting for a better fix.`;
+      this.statusText.set(`Weak GPS signal (~${Math.round(accuracy)}m). Waiting for a better fix.`);
       return;
     }
 
@@ -426,7 +434,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const noiseThreshold = Math.max(3, Math.min(8, (accuracy + previous.accuracy) * 0.2));
 
     if (segmentMeters < noiseThreshold) {
-      this.statusText = `GPS stable. Accuracy ~${Math.round(accuracy)}m.`;
+      this.statusText.set(`GPS stable. Accuracy ~${Math.round(accuracy)}m.`);
       return;
     }
 
@@ -443,7 +451,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       segmentSpeedKmh > maxPlausibleSpeedKmh * 0.75;
 
     if (segmentSpeedKmh > maxPlausibleSpeedKmh || reportedSpeedLooksWrong) {
-      this.statusText = 'GPS jump ignored. Rechecking your position...';
+      this.statusText.set('GPS jump ignored. Rechecking your position...');
       return;
     }
 
@@ -452,7 +460,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.distanceMeters += segmentMeters;
     this.acceptPosition(point, timestamp, accuracy, true);
     this.updateMetrics();
-    this.statusText = `Run tracking active. Accuracy ~${Math.round(accuracy)}m.`;
+    this.statusText.set(`Run tracking active. Accuracy ~${Math.round(accuracy)}m.`);
   }
 
   private handleError(err: GeolocationPositionError, fromWatch = false) {
@@ -460,7 +468,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     // A watch remains alive after a timeout/unavailable fix. Keep the session so
     // a brief tunnel, screen lock or radio interruption cannot discard the run.
     if (fromWatch && err.code !== 1) {
-      this.statusText = 'GPS signal interrupted. Your run is still recording; waiting for a new fix.';
+      this.statusText.set('GPS signal interrupted. Your run is still recording; waiting for a new fix.');
       return;
     }
     this.trackingGeneration += 1;
@@ -477,18 +485,18 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     if (this.startTime && this.routePoints.length) this.saveCompletedSession();
 
     if (err.code === err.PERMISSION_DENIED) {
-      this.statusText = 'Location permission denied.';
+      this.statusText.set('Location permission denied.');
       this.message.error('Location permission denied. Please enable it and try again.');
       return;
     }
 
     if (err.code === err.TIMEOUT) {
-      this.statusText = 'GPS signal timed out.';
+      this.statusText.set('GPS signal timed out.');
       this.message.error('GPS signal timed out. Move outdoors and try again.');
       return;
     }
 
-    this.statusText = 'GPS position unavailable.';
+    this.statusText.set('GPS position unavailable.');
     this.message.error('Unable to get location. Please try again.');
   }
 
@@ -563,7 +571,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const last = this.routePoints.at(-1);
     if (last) this.initialPosition = L.latLng(last[0], last[1]);
     this.recoveredRun = true;
-    this.statusText = 'Your recorded run is safe. Resume or save it.';
+    this.statusText.set('Your recorded run is safe. Resume or save it.');
   }
 
   resumeRecoveredRun(): void {
@@ -579,7 +587,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.runningSessionService.setTrackingActive(true);
     this.startElapsedTimer();
     this.resizeMap();
-    this.statusText = 'Run resumed. Waiting for GPS…';
+    this.statusText.set('Run resumed. Waiting for GPS…');
     const generation = ++this.trackingGeneration;
     this.watchId = navigator.geolocation.watchPosition(position => {
       if (generation === this.trackingGeneration) this.handlePosition(position);
@@ -619,7 +627,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const owner = this.authService.currentUserId;
     this.isTracking = true; this.isCalibrating = !resume; this.recoveredRun = false;
     this.runningSessionService.setTrackingActive(true);
-    this.statusText = 'Allow precise location access to record your route.';
+    this.statusText.set('Allow precise location access to record your route.');
     this.resizeMap();
     if (!resume) {
       this.sessionStartedAt = Date.now(); this.nativeClientId = 'r_' + crypto.randomUUID();
@@ -634,7 +642,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       if (this.destroyed || generation !== this.trackingGeneration) return;
       this.isTracking = false; this.isCalibrating = false; this.recoveredRun = resume;
       this.runningSessionService.setTrackingActive(false);
-      this.statusText = 'Location access is needed to start a run.';
+      this.statusText.set('Location access is needed to start a run.');
       this.message.error(error instanceof Error ? error.message : 'Could not start native tracking.');
     }
   }
@@ -677,7 +685,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       this.runningSessionService.checkpointRun(session);
       this.checkpointAt = Date.now();
     }
-    this.statusText = session.trackingError ?? (snapshot.active ? this.isCalibrating ? 'Waiting for an accurate GPS position…' : 'Recording your run, including while the screen is locked.' : 'Your recorded run is safe. Resume or save it.');
+    this.statusText.set(session.trackingError ?? (snapshot.active ? this.isCalibrating ? 'Waiting for an accurate GPS position…' : 'Recording your run, including while the screen is locked.' : 'Your recorded run is safe. Resume or save it.'));
     const last = this.routePoints.at(-1);
     if (last && routeChanged) {
       this.initialPosition = L.latLng(last[0], last[1]); this.updateMarker(this.initialPosition, true);
@@ -703,7 +711,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     }
 
     if (accuracy > GPS_CALIBRATION_MAX_ACCURACY_METERS) {
-      this.statusText = `Calibrating GPS. Accuracy is ~${Math.round(accuracy)}m.`;
+      this.statusText.set(`Calibrating GPS. Accuracy is ~${Math.round(accuracy)}m.`);
       return;
     }
 
@@ -735,10 +743,11 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.polylineCasing?.setLatLngs([position.point]);
     this.routePoints = [[position.point.lat, position.point.lng]];
     this.checkpointRun();
-    this.statusText =
+    this.statusText.set(
       position.accuracy <= GPS_CALIBRATION_MAX_ACCURACY_METERS
         ? `GPS ready. Accuracy ~${Math.round(position.accuracy)}m.`
-        : `Tracking started with a weak signal (~${Math.round(position.accuracy)}m).`;
+        : `Tracking started with a weak signal (~${Math.round(position.accuracy)}m).`,
+    );
   }
 
   private acceptPosition(
@@ -814,12 +823,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.calibrationSecondsRemaining = Math.ceil(remainingMs / 1000);
 
     if (remainingMs > 0) {
-      this.statusText = `Calibrating GPS. Keep still for ${this.calibrationSecondsRemaining}s.`;
+      this.statusText.set(`Calibrating GPS. Keep still for ${this.calibrationSecondsRemaining}s.`);
       return;
     }
 
     if (this.calibrationFixes < GPS_REQUIRED_FIXES) {
-      this.statusText = 'Calibrating GPS. Waiting for a stable signal...';
+      this.statusText.set('Calibrating GPS. Waiting for a stable signal...');
     }
 
     if (elapsedMs >= GPS_CALIBRATION_TIMEOUT_MS && this.bestCalibrationPosition &&

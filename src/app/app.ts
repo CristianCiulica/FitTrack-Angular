@@ -14,6 +14,7 @@ import { FT_ICONS } from './shared/glisse/icons';
   standalone: true,
   imports: [CommonModule, RouterOutlet, LiquidGlassComponent],
   template: `
+    <button type="button" class="skip-link" (click)="focusContent()">Skip to content</button>
     <app-liquid-glass />
     <div class="route-shell">
       <router-outlet />
@@ -54,11 +55,21 @@ export class App implements OnInit {
     });
   }
 
+  focusContent(preventScroll = false): void {
+    const content = Array.from(document.querySelectorAll<HTMLElement>('.route-shell :is(main, [role="main"])')).find(landmark => !landmark.closest('[inert]'));
+    const target = content?.querySelector<HTMLElement>('h1') ?? content;
+    if (target) {
+      target.tabIndex = -1;
+      target.focus({ preventScroll });
+    }
+  }
+
   ngOnInit(): void {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         // Keep the static startup screen until a route has actually rendered.
         document.dispatchEvent(new Event('fittrack:ready'));
+        if (event.id > 1) requestAnimationFrame(() => this.focusContent(true));
         const pendingDuration = this.loadingService.consumePendingDuration();
         if (pendingDuration) {
           this.loadingService.showFor(pendingDuration);

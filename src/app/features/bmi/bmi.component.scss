@@ -226,36 +226,12 @@
   .pace-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 4px;
 
     strong {
-      color: #0066cc;
+      font-variant-numeric: tabular-nums;
+      color: var(--ink);
       font-weight: 500;
-    }
-  }
-
-  input[type='range'] {
-    width: 100%;
-    appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-
-    &::-webkit-slider-runnable-track {
-      height: 4px;
-      border-radius: 4px;
-      background: rgba(120, 120, 128, 0.2);
-    }
-
-    &::-webkit-slider-thumb {
-      appearance: none;
-      -webkit-appearance: none;
-      width: 28px;
-      height: 28px;
-      margin-top: -12px;
-      border-radius: 50%;
-      background: #fff;
-      border: 0.5px solid rgba(0, 0, 0, 0.04);
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
     }
   }
 }

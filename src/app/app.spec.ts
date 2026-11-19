@@ -31,6 +31,20 @@ describe('App shell', () => {
     expect(fixture.nativeElement.querySelector('.route-shell app-liquid-glass svg defs')).toBeNull();
   });
 
+  it('moves keyboard focus past the navigation', () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.detectChanges();
+    const inactive = document.createElement('main');
+    inactive.setAttribute('inert', '');
+    fixture.nativeElement.querySelector('.route-shell').append(inactive);
+    const main = document.createElement('main');
+    const heading = document.createElement('h1');
+    main.append(heading);
+    fixture.nativeElement.querySelector('.route-shell').append(main);
+    fixture.nativeElement.querySelector('.skip-link').click();
+    expect(document.activeElement).toBe(heading);
+  });
+
   it('only blocks content while loading', () => {
     const fixture = TestBed.createComponent(App);
     const loading = TestBed.inject(LoadingService);

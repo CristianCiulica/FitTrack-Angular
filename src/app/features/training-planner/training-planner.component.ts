@@ -17,6 +17,7 @@ import { WorkoutService } from '../../core/services/workout.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { localDateKey } from '../../core/utils/weight-progress';
 import { displayWeight, weightUnitLabel } from '../../core/utils/units';
+import { FitAction } from '../../shared/glisse/controls';
 import { CircularDialogMotion } from '../../shared/components/circular-dialog-motion';
 import {
   EQUIPMENT_OPTIONS,
@@ -43,12 +44,12 @@ import { savedTrainingPlans, trainingPlanWorkouts } from './training-plan-storag
 @Component({
   selector: 'app-training-planner',
   standalone: true,
-  imports: [CommonModule, NzIconModule],
+  imports: [CommonModule, NzIconModule, FitAction],
   templateUrl: './training-planner.component.html',
   styleUrls: ['./training-planner-result.scss', './training-planner.component.scss'],
 })
 export class TrainingPlannerComponent {
-  @ViewChild('launcher') private launcher!: ElementRef<HTMLButtonElement>;
+  @ViewChild('launcher') private launcher!: FitAction;
   @ViewChild('dialog') private dialog!: ElementRef<HTMLDialogElement>;
   @ViewChild('screen') private screen!: ElementRef<HTMLElement>;
   @ViewChild('scrollBody') private scrollBody!: ElementRef<HTMLElement>;
@@ -194,7 +195,7 @@ export class TrainingPlannerComponent {
     }
     this.motion ??= new CircularDialogMotion(
       this.dialog.nativeElement,
-      this.launcher.nativeElement,
+      this.launcher.button,
       this.screen.nativeElement,
     );
     this.opened.set(true);

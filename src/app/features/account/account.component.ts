@@ -1,11 +1,10 @@
-import { FitTabBar } from '../../shared/glisse/controls';
+import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
@@ -29,13 +28,11 @@ import {
   selector: 'app-account',
   standalone: true,
   imports: [
-    FitTabBar,
+    NavigationComponent,
     CommonModule,
     FormsModule,
     RouterLink,
-    RouterLinkActive,
     NzLayoutModule,
-    NzMenuModule,
     NzIconModule,
     AppMenuComponent,
     AchievementBadgeComponent,

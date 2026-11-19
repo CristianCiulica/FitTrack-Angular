@@ -1,56 +1,3 @@
-.assistant-fab {
-  position: fixed;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: max(28px, env(safe-area-inset-bottom));
-  z-index: 850;
-  display: grid;
-  place-items: center;
-  width: 56px;
-  height: 56px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  color: #fff;
-  background: #007aff;
-  box-shadow: 0 6px 20px #00000024, 0 2px 5px #00000012;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 180ms ease, box-shadow 180ms ease;
-  .fab-nutrition-icon { font-size: 26px; transform: translate(-1px, 2px); }
-  .fab-sparkle { position: absolute; top: 10px; right: 10px; width: 11px; height: 11px; }
-  &:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
-  &:active { transform: scale(.94); }
-}
-:host-context(html[data-theme='dark']) .assistant-fab { background: #0a84ff; }
-.assistant-fab-label {
-  position: absolute;
-  right: calc(100% + 12px);
-  padding: 9px 13px;
-  border: 1px solid var(--hairline);
-  border-radius: 12px;
-  color: var(--ink);
-  background: var(--surface-strong);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateX(6px);
-  pointer-events: none;
-  transition: opacity 160ms ease, transform 160ms ease;
-}
-.assistant-fab:focus-visible .assistant-fab-label { opacity: 1; transform: none; }
-@media (hover: hover) {
-  .assistant-fab:hover { transform: translateY(-2px); }
-  .assistant-fab:hover .assistant-fab-label { opacity: 1; transform: none; }
-}
-@media (max-width: 900px) {
-  .assistant-fab {
-    right: max(20px, env(safe-area-inset-right));
-    bottom: calc(80px + env(safe-area-inset-bottom));
-  }
-}
-
 /* Native top-layer dialog covers the shell and provides modal focus management. */
 ::ng-deep dialog.nutrition-screen {
   position: fixed;
@@ -660,7 +607,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .assistant-fab, .assistant-fab-label { transition: none; }
   ::ng-deep .nutrition-modal .modern-chat * {
     transition: none !important;
   }

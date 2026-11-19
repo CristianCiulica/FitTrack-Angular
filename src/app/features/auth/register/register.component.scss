@@ -1,15 +1,4 @@
-/* Register shares the Liquid Glass auth design with the login screen. */
 @use '../login/login.component.scss';
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-@media (max-width: 480px) {
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 340px) { .form-row { grid-template-columns: 1fr; } }

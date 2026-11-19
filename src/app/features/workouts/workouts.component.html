@@ -1,64 +1,6 @@
 <nz-layout class="app-layout">
   <!-- Sidebar -->
-  <nz-sider [nzWidth]="208" class="sidebar">
-    <div class="sidebar-logo">
-      <span class="logo-text" aria-label="FitTrack">FitTrack<span class="logo-dot">.</span></span>
-    </div>
-    <ul nz-menu nzMode="inline" class="sidebar-menu">
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/dashboard" aria-label="Dashboard">
-          <span nz-icon nzType="ft:home"></span>
-          <span>Home</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/workouts" aria-label="Workouts">
-          <span nz-icon nzType="ft:history"></span>
-          <span>History</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/start-workout" aria-label="Start workout">
-          <span nz-icon nzType="ft:workout"></span>
-          <span>Workout</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/running" aria-label="Running">
-          <span nz-icon nzType="ft:run"></span>
-          <span>Run</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected">
-        <a routerLink="/bmi" aria-label="Nutrition calculator">
-          <span nz-icon nzType="ft:nutrition"></span>
-          <span>Nutrition</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="progress-nav sidebar-secondary-item"><a routerLink="/progress" aria-label="Progress"><span nz-icon nzType="line-chart"></span><span>Progress</span></a></li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/weight" aria-label="Weight"><span nz-icon nzType="line-chart"></span><span>Weight</span></a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/account" aria-label="Profile">
-          <span nz-icon nzType="user"></span>
-          <span>Profile</span>
-        </a>
-      </li>
-      <li nz-menu-item routerLinkActive="ant-menu-item-selected" class="sidebar-secondary-item">
-        <a routerLink="/settings" aria-label="Settings">
-          <span nz-icon nzType="setting"></span>
-          <span>Settings</span>
-        </a>
-      </li>
-      <li nz-menu-item class="sidebar-logout-item" (click)="logout()">
-        <a aria-label="Logout">
-          <span>Logout</span>
-        </a>
-      </li>
-    </ul>
-  <ft-tab-bar />
-  </nz-sider>
+  <ft-navigation (signOut)="logout()" />
 
   <nz-layout class="main-layout">
     <nz-header class="app-header workouts-header">
@@ -72,8 +14,8 @@
 
     </nz-header>
 
-    <nz-content class="app-content">
-      <section class="history-intro"><span>YOUR ACTIVITY</span><h1>A little stronger.<br>Every session.</h1><p>Your runs and workouts, all in one place.</p></section>
+    <nz-content role="main" class="app-content">
+      <section class="history-intro"><h1>Activity history</h1></section>
       <section class="cardio-history">
         <div class="section-heading">
           <div>

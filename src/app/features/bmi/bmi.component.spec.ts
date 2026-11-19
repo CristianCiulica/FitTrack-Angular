@@ -8,6 +8,23 @@ import { BmiComponent } from './bmi.component';
 
 describe('Nutrition autosave', () => {
   afterEach(() => vi.useRealTimers());
+  it('saves the last hundredth of a kg once after dragging, including in imperial units', () => {
+    vi.useFakeTimers();
+    const patch = vi.fn(() => of({}));
+    TestBed.configureTestingModule({ providers: [
+      { provide: ProfileService, useValue: { load: () => of(null), profile: signal({}), units: signal('imperial'), patch } },
+      { provide: AuthService, useValue: {} },
+    ] });
+    const component = TestBed.runInInjectionContext(() => new BmiComponent());
+    for (const pace of [0.31, 0.32, 0.33, 0.33]) component.onGoalRate(pace);
+    expect(component.goalRateDisplay()).toBeCloseTo(0.7275, 4);
+    expect(patch).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(600);
+    expect(patch).toHaveBeenCalledTimes(1);
+    expect(patch).toHaveBeenCalledWith(expect.objectContaining({ goalRate: 0.33 }));
+    component.ngOnDestroy();
+  });
+
   it('flushes the latest input when leaving before the debounce expires', () => {
     vi.useFakeTimers();
     const patch = vi.fn((_update: unknown) => of({}));

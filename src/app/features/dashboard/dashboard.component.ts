@@ -1,4 +1,5 @@
-import { FitTabBar } from '../../shared/glisse/controls';
+import { FitAction } from '../../shared/glisse/controls';
+import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { isTimedCardioOnly, treadmillSeconds, timedSession } from '../../core/utils/timed-cardio';
 import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { TrainingPlannerComponent } from '../training-planner/training-planner.component';
@@ -6,13 +7,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivityGoalsComponent } from '../../shared/components/activity-goals/activity-goals.component';
 import { DestroyRef, Component, ElementRef, OnInit, ViewChild, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -37,14 +37,13 @@ import {
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    FitTabBar,
+    FitAction,
+    NavigationComponent,
     CommonModule,
     TrainingPlannerComponent,
     ActivityGoalsComponent,
     RouterLink,
-    RouterLinkActive,
     NzLayoutModule,
-    NzMenuModule,
     NzCardModule,
     NzStatisticModule,
     NzIconModule,
@@ -59,7 +58,7 @@ import {
 export class DashboardComponent implements OnInit {
   @ViewChild('chatBody') private chatBody?: ElementRef<HTMLElement>;
   @ViewChild('assistantHeading') private assistantHeading?: ElementRef<HTMLElement>;
-  @ViewChild('assistantTrigger') private assistantTrigger?: ElementRef<HTMLButtonElement>;
+  @ViewChild('assistantTrigger') private assistantTrigger?: FitAction;
   @ViewChild('assistantDialog') private assistantDialog?: ElementRef<HTMLDialogElement>;
   private assistantMotion?: Animation;
   private assistantContentMotion?: Animation;
@@ -241,7 +240,8 @@ export class DashboardComponent implements OnInit {
       return `${Math.round((workout.durationSeconds ?? 0) / 60)} min · ${distance.toFixed(2)} ${this.activityDistanceUnit().toLowerCase()}`;
     }
     if (isTimedCardioOnly(workout)) return `${Math.round(treadmillSeconds(workout) / 60)} min · ~${this.workoutKcal(workout)} kcal`;
-    return `${workout.exercises.length + (timedSession(workout)?.treadmill.length ?? 0)} exercises · ~${this.workoutKcal(workout)} kcal`;
+    const count = workout.exercises.length + (timedSession(workout)?.treadmill.length ?? 0);
+    return `${count} ${count === 1 ? 'exercise' : 'exercises'} · ~${this.workoutKcal(workout)} kcal`;
   }
 
   // arse = alergari + antrenamentele de forta din ziua selectata
@@ -350,7 +350,7 @@ export class DashboardComponent implements OnInit {
       dialog.close();
       this.isChatOpen.set(false);
       this.assistantClosing = false;
-      this.assistantTrigger?.nativeElement.focus({ preventScroll: true });
+      this.assistantTrigger?.button.focus({ preventScroll: true });
     };
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !dialog.animate) {
       finish();
@@ -398,7 +398,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private assistantRevealGeometry(dialog: HTMLDialogElement) {
-    const button = this.assistantTrigger!.nativeElement;
+    const button = this.assistantTrigger!.button;
     const rect = button.getBoundingClientRect();
     const x = rect.left + rect.width / 2;
     const y = rect.top + rect.height / 2;

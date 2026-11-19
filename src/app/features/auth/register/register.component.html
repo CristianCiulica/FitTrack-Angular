@@ -1,31 +1,19 @@
-<div class="auth-wrapper">
-  <div class="auth-left">
-    <div class="auth-brand">
-      <span class="brand-logo" aria-label="FitTrack">FitTrack<span class="brand-dot">.</span></span>
-    </div>
-    <div class="auth-hero">
-      <h1>Start your training log</h1>
-    </div>
+<main class="access-page">
+  <div class="track-photo" role="img" aria-label="FitTrack">
+    <span class="track-wordmark" aria-hidden="true">FitTrack<span>.</span></span>
   </div>
-
-  <div class="auth-right">
-    <div class="mobile-brand">
-      <span class="brand-logo" aria-label="FitTrack">FitTrack<span class="brand-dot">.</span></span>
-
-    </div>
-    <div class="auth-card">
-      <div class="card-header">
-        <h2>Create account</h2>
-
-      </div>
-
+  <section class="access-panel" aria-labelledby="access-title">
+    <div class="access-form">
+      <header class="access-heading">
+        <h1 id="access-title">Create an account</h1>
+      </header>
       <form nz-form [formGroup]="form" (ngSubmit)="submit()" class="auth-form">
         <div class="form-row">
           <div class="form-group">
             <label for="register-firstName">First name</label>
             <nz-form-item>
               <nz-form-control nzErrorTip="Required.">
-                <input nz-input formControlName="firstName" id="register-firstName" autocomplete="given-name" placeholder="John" class="apple-input" />
+                <input nz-input formControlName="firstName" id="register-firstName" autocomplete="given-name" class="auth-input" />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -33,7 +21,7 @@
             <label for="register-lastName">Last name</label>
             <nz-form-item>
               <nz-form-control nzErrorTip="Required.">
-                <input nz-input formControlName="lastName" id="register-lastName" autocomplete="family-name" placeholder="Doe" class="apple-input" />
+                <input nz-input formControlName="lastName" id="register-lastName" autocomplete="family-name" class="auth-input" />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -43,7 +31,7 @@
           <label for="register-email">Email</label>
           <nz-form-item>
             <nz-form-control nzErrorTip="Enter a valid email.">
-              <input nz-input formControlName="email" id="register-email" autocomplete="email" placeholder="you@example.com" type="email" class="apple-input" />
+              <input nz-input formControlName="email" id="register-email" autocomplete="email" placeholder="you@example.com" type="email" class="auth-input" />
             </nz-form-control>
           </nz-form-item>
         </div>
@@ -51,10 +39,10 @@
         <div class="form-group">
           <label for="register-password">Password</label>
           <nz-form-item>
-            <nz-form-control nzErrorTip="Min. 6 chars: upper, lower, number, special.">
+            <nz-form-control nzErrorTip="Use at least 6 characters with upper and lowercase letters, a number and a symbol.">
               <div class="input-wrapper">
-                <input nz-input formControlName="password" id="register-password" autocomplete="new-password" placeholder="••••••••"
-                  [type]="passwordVisible ? 'text' : 'password'" class="apple-input" />
+                <input nz-input formControlName="password" id="register-password" aria-describedby="password-rules" autocomplete="new-password" placeholder="••••••••"
+                  [type]="passwordVisible ? 'text' : 'password'" class="auth-input" />
                 <button type="button" class="eye-btn" [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'" [attr.aria-pressed]="passwordVisible" (click)="passwordVisible = !passwordVisible">
                   <span nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"></span>
                 </button>
@@ -63,17 +51,21 @@
           </nz-form-item>
         </div>
 
+        <p class="field-hint" id="password-rules">Use at least 6 characters with a capital letter, a lowercase letter, a number and a symbol.</p>
         <div class="form-group">
           <label for="register-confirmPassword">Confirm password</label>
           <nz-form-item>
-            <nz-form-control [nzErrorTip]="form.hasError('passwordMismatch') ? 'Passwords do not match.' : 'Required.'">
+            <nz-form-control
+              [nzValidateStatus]="showPasswordMismatch ? 'error' : form.controls['confirmPassword']"
+              [nzErrorTip]="showPasswordMismatch ? 'Passwords do not match.' : 'Required.'"
+            >
               <div class="input-wrapper">
                 <input
                   nz-input
                   formControlName="confirmPassword" id="register-confirmPassword" autocomplete="new-password"
                   placeholder="••••••••"
                   [type]="confirmPasswordVisible ? 'text' : 'password'"
-                  class="apple-input"
+                  class="auth-input"
                 />
                 <button
                   type="button"
@@ -89,8 +81,8 @@
           </nz-form-item>
         </div>
 
-        <ft-action [busy]="loading" kind="submit" class="submit-btn">
-          Create account
+        <ft-action [busy]="loading" kind="submit" variant="filled" class="auth-primary">
+          {{ loading ? 'Creating account…' : 'Create account' }}
         </ft-action>
 
         <div class="divider">
@@ -98,8 +90,7 @@
         </div>
 
         <ft-action
-
-         class="google-btn"
+          class="auth-google"
           [busy]="googleLoading"
           (activated)="signInWithGoogle()"
         >
@@ -114,11 +105,7 @@
           Continue with Google
         </ft-action>
       </form>
-
-      <div class="auth-footer">
-        <span>Already have an account?</span>
-        <a routerLink="/auth/login">Sign in</a>
-      </div>
+      <p class="access-footer">Already have an account? <a routerLink="/auth/login">Sign in</a></p>
     </div>
-  </div>
-</div>
+  </section>
+</main>

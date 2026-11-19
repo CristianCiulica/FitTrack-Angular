@@ -1,3 +1,16 @@
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  transform: translateY(calc(-100% - 12px));
+  z-index: 10000;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: var(--surface-strong);
+  color: var(--ink);
+}
+.skip-link:focus { transform: none; }
+
 .route-shell {
   position: relative;
   min-height: 100dvh;

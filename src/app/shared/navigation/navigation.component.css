@@ -1,0 +1,28 @@
+:host { display: block; flex: none; position: sticky; top: 0; z-index: 101; }
+aside {
+  display: flex; align-items: center; gap: clamp(14px, 2vw, 32px);
+  min-height: var(--desktop-navigation-height); padding: 8px clamp(20px, 3vw, 48px); color: var(--ink);
+  background: var(--bg); border-bottom: 1px solid var(--hairline);
+}
+.wordmark { margin-right: auto; font-size: 25px; line-height: 32px; font-weight: 750; letter-spacing: -.065em; }
+.wordmark span { color: var(--accent); }
+nav { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+nav a, .sign-out {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-width: 44px; min-height: 44px; padding-inline: 10px; border: 0; border-radius: 12px;
+  color: var(--ink-secondary); background: transparent; font: inherit;
+  font-weight: 550; font-size: 14px; text-decoration: none; white-space: nowrap; cursor: pointer;
+}
+nav a:hover, .sign-out:hover { background: var(--hairline); color: var(--ink); }
+nav .current { color: var(--accent-deep); background: var(--glass-bg); box-shadow: var(--glass-edge); }
+nav a:focus-visible, .sign-out:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+nav [aria-disabled=true] { opacity: .55; cursor: default; }
+.anticon { font-size: 18px; }
+@media (min-width: 901px) and (max-width: 1150px) {
+  .link-label { display: none; }
+}
+@media (max-width: 900px) {
+  :host { position: fixed; top: auto; bottom: calc(8px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 900; }
+  aside { display: block; min-height: 0; padding: 0; border: 0; background: transparent; }
+  .wordmark, nav, .sign-out { display: none; }
+}

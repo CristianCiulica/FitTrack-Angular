@@ -1,4 +1,5 @@
-import { FitTabBar, FitAction } from '../../shared/glisse/controls';
+import { FitAction } from '../../shared/glisse/controls';
+import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { timedSession, TreadmillLog, estimateTreadmillCalories } from '../../core/utils/timed-cardio';
 import { indoorCardio } from '../../core/utils/indoor-cardio';
 import { CardioHistorySession, indoorHistorySession } from '../../core/utils/indoor-cardio';
@@ -8,7 +9,6 @@ import { isWorkoutSession } from '../../core/utils/workout-kind';
 import { displayWeight, displayDistance, displaySpeed, distanceUnitLabel, weightUnitLabel } from '../../core/utils/units';
 import { Component, DestroyRef, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { WorkoutService } from '../../core/services/workout.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -21,9 +21,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { RouterLinkActive } from '@angular/router';
 import { WorkoutModalComponent } from '../../shared/components/workout-modal/workout-modal.component';
 import { AppMenuComponent } from '../../shared/components/app-menu/app-menu.component';
 import { ProfileService } from '../../core/services/profile.service';
@@ -36,16 +34,13 @@ type SortDirection = 'ascend' | 'descend' | null;
   selector: 'app-workouts',
   standalone: true,
   imports: [
-    FitTabBar, FitAction,
+    NavigationComponent, FitAction,
     CommonModule,
-    RouterLink,
-    RouterLinkActive,
     NzTableModule,
     NzButtonModule,
     NzIconModule,
     NzPopconfirmModule,
     NzLayoutModule,
-    NzMenuModule,
     NzModalModule,
     WorkoutModalComponent,
     AppMenuComponent,

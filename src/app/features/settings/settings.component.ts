@@ -1,12 +1,12 @@
-import { FitTabBar, FitAction } from '../../shared/glisse/controls';
+import { FitAction } from '../../shared/glisse/controls';
+import { NavigationComponent } from '../../shared/navigation/navigation.component';
 import { achievementReportHtml } from '../../core/utils/activity-export';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Auth, signOut } from '@angular/fire/auth';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -27,13 +27,10 @@ import { finalize } from 'rxjs';
   selector: 'app-settings',
   standalone: true,
   imports: [
-    FitTabBar, FitAction,
+    NavigationComponent, FitAction,
     CommonModule,
     FormsModule,
-    RouterLink,
-    RouterLinkActive,
     NzLayoutModule,
-    NzMenuModule,
     NzButtonModule,
     NzIconModule,
     NzCardModule,

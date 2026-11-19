@@ -50,6 +50,11 @@ export class RegisterComponent {
     }, { validators: passwordMatchValidator });
   }
 
+  get showPasswordMismatch(): boolean {
+    const confirmation = this.form.controls['confirmPassword'];
+    return confirmation.dirty && !confirmation.hasError('required') && this.form.hasError('passwordMismatch');
+  }
+
   submit() {
     if (this.form.invalid) {
       for (const control of Object.values(this.form.controls)) {
