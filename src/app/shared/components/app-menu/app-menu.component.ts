@@ -45,7 +45,7 @@ export class AppMenuComponent {
   readonly links: MenuLink[] = [
     {
       label: 'Progress',
-      icon: 'line-chart',
+      icon: 'ft:progress',
       path: '/progress',
     },
     {
@@ -55,12 +55,12 @@ export class AppMenuComponent {
     },
     {
       label: 'Profile',
-      icon: 'user',
+      icon: 'ft:profile',
       path: '/account',
     },
     {
       label: 'Settings',
-      icon: 'setting',
+      icon: 'ft:settings',
       path: '/settings',
     },
   ];
