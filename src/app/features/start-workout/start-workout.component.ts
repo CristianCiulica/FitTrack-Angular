@@ -844,6 +844,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   readonly holdProgress = computed(() => Math.min(100, this.holdElapsedMs() / (this.holdTargetSeconds() * 10)));
   private loggedWeights: (number | null)[][] = [];
   readonly activeDrop = signal(false);
+  readonly holdingFinishSet = signal(false);
+  private finishSetHoldTimer?: ReturnType<typeof setTimeout>;
+  private readonly finishSetHoldDuration = 800;
   private loggedDrops: DropSetLog[][] = [];
   readonly supportsDropSet = computed(() => {
     const ex = this.currentExercise();
@@ -1016,12 +1019,45 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.componentDestroyed = true;
+    this.cancelFinishHold();
     this.checkpointWorkout();
     if (this.draftInterval) clearInterval(this.draftInterval);
     this.unlockPageScroll();
     this.reads.unsubscribe();
     this.stopTimer();
     this.sessionGeneration++;
+  }
+
+  startFinishHold(event: PointerEvent | KeyboardEvent): void {
+    if (this.holdingFinishSet() || !this.setInputsValid() || !this.dropInputValid()) return;
+    if (event.type === 'pointerdown') (event.target as HTMLElement).setPointerCapture?.((event as PointerEvent).pointerId);
+    this.holdingFinishSet.set(true);
+    this.finishSetHoldTimer = setTimeout(() => {
+      this.cancelFinishHold();
+      this.finishSet();
+    }, this.finishSetHoldDuration);
+  }
+
+  cancelFinishHold(): void {
+    clearTimeout(this.finishSetHoldTimer);
+    this.finishSetHoldTimer = undefined;
+    this.holdingFinishSet.set(false);
+  }
+
+  checkFinishHoldBounds(event: PointerEvent): void {
+    if (!this.holdingFinishSet()) return;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) this.cancelFinishHold();
+  }
+
+  finishHoldKey(event: KeyboardEvent): void {
+    if (event.key !== ' ' && event.key !== 'Enter') return;
+    event.preventDefault();
+    if (event.type === 'keyup') {
+      if (this.holdingFinishSet()) this.cancelFinishHold();
+      return;
+    }
+    if (!event.repeat) this.startFinishHold(event);
   }
 
   logout() {

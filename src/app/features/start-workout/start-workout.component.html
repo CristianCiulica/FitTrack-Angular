@@ -157,6 +157,7 @@
   <div class="live-body" *ngIf="state() === 'active' && currentExercise() as ex" [class.timed-exercise]="ex.repUnit === 'seconds' || treadmillActive()" [class.treadmill-exercise]="treadmillActive()">
     <div class="session-clock" role="timer" aria-label="Workout duration">{{ elapsedClock() }}</div>
     <div class="live-exercise-head">
+      <span class="exercise-position">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }}</span>
       <h1>{{ ex.name }}</h1>
     </div>
 
@@ -323,10 +324,15 @@
     <ft-action
       *ngIf="state() === 'active' && currentExercise()?.repUnit !== 'seconds' && !treadmillActive()"
      class="live-primary" variant="filled"
-      (activated)="finishSet()"
+      [class.holding]="holdingFinishSet()"
+      (pointerdown)="$event.button === 0 && $event.isPrimary && startFinishHold($event)"
+      (pointerup)="cancelFinishHold()" (pointercancel)="cancelFinishHold()" (lostpointercapture)="cancelFinishHold()"
+      (pointerleave)="checkFinishHoldBounds($event)" (blur)="cancelFinishHold()"
+      (keydown)="finishHoldKey($event)" (keyup)="finishHoldKey($event)"
+      [attr.aria-label]="holdingFinishSet() ? 'Keep holding to finish set' : 'Hold to finish set'"
       [disabled]="!setInputsValid() || !dropInputValid()"
     >
-      <span nz-icon nzType="check"></span> {{ activeDrop() ? 'Finish drop set' : 'Finish set' }}
+      {{ holdingFinishSet() ? 'Keep holding…' : activeDrop() ? 'Finish drop set' : 'Finish set' }}
     </ft-action>
     <ft-action
       *ngIf="state() === 'rest'"
