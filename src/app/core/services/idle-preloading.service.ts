@@ -12,7 +12,7 @@ export class IdlePreloadingService implements PreloadingStrategy {
     return new Observable<void>(subscriber => {
       const ready = () => { subscriber.next(); subscriber.complete(); };
       if ('requestIdleCallback' in window) {
-        const id = window.requestIdleCallback(ready, { timeout: 2500 });
+        const id = window.requestIdleCallback(ready);
         return () => window.cancelIdleCallback(id);
       }
       const id = setTimeout(ready, 800);

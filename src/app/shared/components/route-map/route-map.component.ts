@@ -1,10 +1,11 @@
 import { MAP_TILE_URL, MAP_TILE_OPTIONS } from '../../../core/config/map-tiles';
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, ViewChild, inject, NgZone } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnDestroy, ViewChild, inject, NgZone, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import * as L from 'leaflet';
 import { validRoute } from '../../../core/utils/route';
 
 @Component({
   selector: 'app-route-map',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   template: `
     <div #mapCanvas class="route-map" [attr.aria-label]="label" role="img"></div>
@@ -28,6 +29,7 @@ export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() label = 'Recorded running route';
   @ViewChild('mapCanvas', { static: true }) canvas!: ElementRef<HTMLElement>;
   hasRoute = false;
+  private points: [number, number][] = [];
   private map?: L.Map;
   private layers?: L.LayerGroup;
   private resizeObserver?: ResizeObserver;
@@ -58,10 +60,14 @@ export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
   }
 
-  ngOnChanges(): void {
-    this.hasRoute = validRoute(this.route).length > 0;
-    if (this.map) this.drawRoute();
-    else if (this.viewReady && this.hasRoute && !this.intersectionObserver) this.initMap();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (!changes['route']) return;
+    this.points = validRoute(this.route);
+    this.hasRoute = this.points.length > 0;
+    this.zone.runOutsideAngular(() => {
+      if (this.map) this.drawRoute();
+      else if (this.viewReady && this.hasRoute && !this.intersectionObserver) this.initMap();
+    });
   }
 
   private initMap(): void {
@@ -75,7 +81,13 @@ export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
     this.layers = L.layerGroup().addTo(this.map);
     this.drawRoute();
     if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => {
+      let previousWidth = -1;
+      let previousHeight = -1;
+      this.resizeObserver = new ResizeObserver(entries => {
+        const size = entries[0]?.contentRect;
+        if (!size || (size.width === previousWidth && size.height === previousHeight)) return;
+        previousWidth = size.width;
+        previousHeight = size.height;
         if (this.frame !== undefined) cancelAnimationFrame(this.frame);
         this.frame = requestAnimationFrame(() => {
           this.map?.invalidateSize({ animate: false });
@@ -89,7 +101,7 @@ export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   private drawRoute(): void {
     if (!this.map || !this.layers) return;
     this.layers.clearLayers();
-    const points = validRoute(this.route);
+    const points = this.points;
     if (!points.length) return;
     L.polyline(points, { color: '#16325b', weight: 7, opacity: .55, interactive: false }).addTo(this.layers);
     L.polyline(points, { color: '#3987ff', weight: 4, interactive: false }).addTo(this.layers);
@@ -99,7 +111,7 @@ export class RouteMapComponent implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private fitRoute(): void {
-    const points = validRoute(this.route);
+    const points = this.points;
     if (points.length && this.map) this.map.fitBounds(L.latLngBounds(points), { padding: [28, 28], maxZoom: 17, animate: false });
   }
 
