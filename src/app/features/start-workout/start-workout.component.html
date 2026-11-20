@@ -314,7 +314,12 @@
   </div>
   <!-- Actiuni, fixate jos -->
   <div class="live-actions">
-    <ft-action [destructive]="true" class="live-stop" label="Stop workout" title="Stop workout" [disabled]="saving()" (activated)="confirmStopWorkout()">
+    <ft-action [destructive]="true" class="live-stop" label="Hold to stop workout" title="Hold to stop workout" [disabled]="saving()" [class.holding]="holdingStopWorkout()"
+      (pointerdown)="$event.button === 0 && $event.isPrimary && startStopWorkoutHold($event)"
+      (pointerup)="cancelStopWorkoutHold()" (pointercancel)="cancelStopWorkoutHold()" (lostpointercapture)="cancelStopWorkoutHold()"
+      (pointerleave)="checkStopWorkoutHoldBounds($event)" (blur)="cancelStopWorkoutHold()"
+      (keydown)="stopWorkoutHoldKey($event)" (keyup)="stopWorkoutHoldKey($event)"
+      [attr.aria-label]="holdingStopWorkout() ? 'Keep holding to stop workout' : 'Hold to stop workout'">
       <span nz-icon nzType="close" aria-hidden="true"></span>
     </ft-action>
     <ft-action *ngIf="state() === 'active' && (currentExercise()?.repUnit === 'seconds' || treadmillActive())" class="live-primary" variant="filled" [disabled]="treadmillActive() && !treadmillInputValid()" (activated)="toggleHoldTimer()">
@@ -324,15 +329,10 @@
     <ft-action
       *ngIf="state() === 'active' && currentExercise()?.repUnit !== 'seconds' && !treadmillActive()"
      class="live-primary" variant="filled"
-      [class.holding]="holdingFinishSet()"
-      (pointerdown)="$event.button === 0 && $event.isPrimary && startFinishHold($event)"
-      (pointerup)="cancelFinishHold()" (pointercancel)="cancelFinishHold()" (lostpointercapture)="cancelFinishHold()"
-      (pointerleave)="checkFinishHoldBounds($event)" (blur)="cancelFinishHold()"
-      (keydown)="finishHoldKey($event)" (keyup)="finishHoldKey($event)"
-      [attr.aria-label]="holdingFinishSet() ? 'Keep holding to finish set' : 'Hold to finish set'"
+      (activated)="finishSet()"
       [disabled]="!setInputsValid() || !dropInputValid()"
     >
-      {{ holdingFinishSet() ? 'Keep holding…' : activeDrop() ? 'Finish drop set' : 'Finish set' }}
+      {{ activeDrop() ? 'Finish drop set' : 'Finish set' }}
     </ft-action>
     <ft-action
       *ngIf="state() === 'rest'"

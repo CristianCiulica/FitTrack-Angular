@@ -844,9 +844,9 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   readonly holdProgress = computed(() => Math.min(100, this.holdElapsedMs() / (this.holdTargetSeconds() * 10)));
   private loggedWeights: (number | null)[][] = [];
   readonly activeDrop = signal(false);
-  readonly holdingFinishSet = signal(false);
-  private finishSetHoldTimer?: ReturnType<typeof setTimeout>;
-  private readonly finishSetHoldDuration = 800;
+  readonly holdingStopWorkout = signal(false);
+  private stopWorkoutHoldTimer?: ReturnType<typeof setTimeout>;
+  private readonly stopWorkoutHoldDuration = 800;
   private loggedDrops: DropSetLog[][] = [];
   readonly supportsDropSet = computed(() => {
     const ex = this.currentExercise();
@@ -1019,7 +1019,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.componentDestroyed = true;
-    this.cancelFinishHold();
+    this.cancelStopWorkoutHold();
     this.checkpointWorkout();
     if (this.draftInterval) clearInterval(this.draftInterval);
     this.unlockPageScroll();
@@ -1028,36 +1028,36 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.sessionGeneration++;
   }
 
-  startFinishHold(event: PointerEvent | KeyboardEvent): void {
-    if (this.holdingFinishSet() || !this.setInputsValid() || !this.dropInputValid()) return;
+  startStopWorkoutHold(event: PointerEvent | KeyboardEvent): void {
+    if (this.holdingStopWorkout() || this.saving()) return;
     if (event.type === 'pointerdown') (event.target as HTMLElement).setPointerCapture?.((event as PointerEvent).pointerId);
-    this.holdingFinishSet.set(true);
-    this.finishSetHoldTimer = setTimeout(() => {
-      this.cancelFinishHold();
-      this.finishSet();
-    }, this.finishSetHoldDuration);
+    this.holdingStopWorkout.set(true);
+    this.stopWorkoutHoldTimer = setTimeout(() => {
+      this.cancelStopWorkoutHold();
+      this.confirmStopWorkout();
+    }, this.stopWorkoutHoldDuration);
   }
 
-  cancelFinishHold(): void {
-    clearTimeout(this.finishSetHoldTimer);
-    this.finishSetHoldTimer = undefined;
-    this.holdingFinishSet.set(false);
+  cancelStopWorkoutHold(): void {
+    clearTimeout(this.stopWorkoutHoldTimer);
+    this.stopWorkoutHoldTimer = undefined;
+    this.holdingStopWorkout.set(false);
   }
 
-  checkFinishHoldBounds(event: PointerEvent): void {
-    if (!this.holdingFinishSet()) return;
+  checkStopWorkoutHoldBounds(event: PointerEvent): void {
+    if (!this.holdingStopWorkout()) return;
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) this.cancelFinishHold();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) this.cancelStopWorkoutHold();
   }
 
-  finishHoldKey(event: KeyboardEvent): void {
+  stopWorkoutHoldKey(event: KeyboardEvent): void {
     if (event.key !== ' ' && event.key !== 'Enter') return;
     event.preventDefault();
     if (event.type === 'keyup') {
-      if (this.holdingFinishSet()) this.cancelFinishHold();
+      if (this.holdingStopWorkout()) this.cancelStopWorkoutHold();
       return;
     }
-    if (!event.repeat) this.startFinishHold(event);
+    if (!event.repeat) this.startStopWorkoutHold(event);
   }
 
   logout() {
