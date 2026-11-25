@@ -1,0 +1,42 @@
+dialog {
+  position: fixed;
+  inset: 0;
+  width: min(390px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  box-sizing: border-box;
+  margin: auto;
+  padding: 20px 20px 22px;
+  overflow: auto;
+  border: 1px solid var(--hairline);
+  border-radius: 26px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: center;
+}
+dialog::backdrop { background: rgb(0 0 0 / 62%); }
+header { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; }
+h2 { grid-column: 2; margin: 0; font: inherit; font-weight: 650; font-size: 18px; line-height: 1.2; color: inherit; }
+button { font: inherit; cursor: pointer; }
+.close {
+  display: grid; place-items: center; height: 44px; padding: 0; border: 0;
+  border-radius: 50%; background: transparent; color: var(--ink-secondary);
+}
+.close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.readout { margin-top: 20px; font-size: clamp(58px, 17vw, 76px); line-height: 1; font-weight: 730; letter-spacing: -.06em; font-variant-numeric: tabular-nums; }
+.unit { margin-top: 6px; color: var(--ink-secondary); font-size: 13px; }
+.scale { position: relative; margin: 20px 0 22px; }
+.ruler {
+  display: flex; align-items: start; height: 64px; padding-top: 7px; box-sizing: border-box;
+  overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: none;
+  scroll-snap-type: x proximity; cursor: ew-resize; user-select: none; touch-action: pan-x;
+}
+.ruler::-webkit-scrollbar { display: none; }
+.ruler::before, .ruler::after { content: ''; flex: 0 0 calc(50% - var(--tick-width) / 2); }
+.tick { position: relative; flex: 0 0 var(--tick-width); height: 48px; scroll-snap-align: center; }
+.tick::before { content: ''; display: block; width: 1px; height: 12px; margin: auto; background: var(--ink-tertiary); }
+.tick.major::before { height: 24px; background: var(--ink-secondary); }
+.tick small { position: absolute; top: 29px; left: 50%; transform: translateX(-50%); font-size: 11px; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
+.cursor { position: absolute; pointer-events: none; top: 3px; left: 50%; transform: translateX(-50%); height: 29px; width: 3px; border-radius: 2px; background: #ef813e; }
+.cursor::before { content: ''; position: absolute; left: -2px; top: -2px; width: 7px; height: 7px; border-radius: 50%; background: inherit; }
+.start { width: 100%; min-height: 50px; border: 0; border-radius: 15px; background: var(--ink); color: var(--bg); font-weight: 650; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }

@@ -70,6 +70,7 @@ export const sessionBodySchema = z
     endedAt: instantSchema,
     durationSeconds: z.number().int().min(0).max(604800),
     distanceMeters: z.number().finite().min(0).max(500000),
+    kilometreTimes: z.array(z.number().finite().positive()).max(500).optional(),
     steps: z.number().int().min(0).max(200000),
     averageSpeedKmh: z.number().finite().min(0).max(200),
     calories: z.number().finite().min(0).max(20000),
@@ -82,6 +83,11 @@ export const sessionBodySchema = z
       .default([]),
   })
   .superRefine((session, ctx) => {
+    const times = session.kilometreTimes;
+    if (times && (times.length !== Math.floor(session.distanceMeters / 1000) ||
+        times.some((time, i) => time >= session.durationSeconds + 1 || (i > 0 && time <= times[i - 1])))) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['kilometreTimes'], message: 'Split times are inconsistent with the recorded run' });
+    }
     const elapsed = (Date.parse(session.endedAt) - Date.parse(session.startedAt)) / 1000;
     if (elapsed < 0 || session.durationSeconds > elapsed + 2) {
       ctx.addIssue({

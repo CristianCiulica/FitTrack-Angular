@@ -1,0 +1,25 @@
+<dialog #dialog aria-labelledby="rest-picker-title">
+  <header>
+    <h2 id="rest-picker-title">Rest between sets</h2>
+    <button type="button" class="close" aria-label="Cancel workout start" (click)="dialog.close()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6"/></svg>
+    </button>
+  </header>
+  <div class="readout" aria-hidden="true">{{ formatTime(seconds()) }}</div>
+  <div class="unit" aria-hidden="true">min : sec</div>
+  <div class="scale" [style.--tick-width]="tickWidth + 'px'">
+    <div #ruler class="ruler" role="slider" aria-labelledby="rest-picker-title" tabindex="0" autofocus
+      aria-valuemin="5" [attr.aria-valuemax]="maximum" [attr.aria-valuenow]="seconds()"
+      [attr.aria-valuetext]="seconds() + ' seconds'"
+      (scroll)="readPosition()" (keydown)="keyDown($event)" (pointerdown)="pointerDown($event)"
+      (pointermove)="pointerMove($event)" (pointerup)="pointerUp($event)" (lostpointercapture)="cancelDrag()">
+      @for (tick of ticks; track tick) {
+        <span class="tick" aria-hidden="true" [class.major]="tick % 30 === 0">
+          @if (tick % 30 === 0) { <small>{{ formatTime(tick) }}</small> }
+        </span>
+      }
+    </div>
+    <i class="cursor" aria-hidden="true"></i>
+  </div>
+  <button type="button" class="start" (click)="start()">Start workout</button>
+</dialog>

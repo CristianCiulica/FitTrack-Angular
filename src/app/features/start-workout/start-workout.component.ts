@@ -1,5 +1,6 @@
 import { ConfirmationService } from '../../shared/components/confirmation';
 import { FitAction } from '../../shared/glisse/controls';
+import { WorkoutRestPickerComponent } from './workout-rest-picker.component';
 import { WorkoutLibraryComponent } from '../workout-library/workout-library.component';
 import { WorkoutRoutine as Routine, orderRoutineExercises, isTreadmillExercise } from '../../core/models/workout-routine.model';
 import { timedSessionNotes, estimateTreadmillCalories, TreadmillLog } from '../../core/utils/timed-cardio';
@@ -12,7 +13,7 @@ import { displayWeight, toCanonicalWeight, weightUnitLabel } from '../../core/ut
 import { previousExercises, PreviousExercise, exerciseKey, workoutVolume, durationLabel } from '../../core/utils/workout-history';
 import { createWorkoutSummaryImage } from '../../core/utils/workout-share';
 import { localDateKey } from '../../core/utils/weight-progress';
-import { Component, HostListener, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, ViewChild, HostListener, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -741,6 +742,7 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
     FitAction,
     CommonModule,
     WorkoutLibraryComponent,
+    WorkoutRestPickerComponent,
     RouterLink,
     NzLayoutModule,
     NzButtonModule,
@@ -929,6 +931,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     return this.loggedWeights.filter(sets => sets.some(weight => weight != null)).length;
   }
 
+  @ViewChild(WorkoutRestPickerComponent, { static: true }) restPicker!: WorkoutRestPickerComponent;
+  private uniformRest = false;
   restTimeTarget = signal(90);
   restTimeRemaining = signal(90);
   restClock = computed(() => `${Math.floor(this.restTimeRemaining() / 60)}:${String(this.restTimeRemaining() % 60).padStart(2, '0')}`);
@@ -1205,7 +1209,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.workoutInProgress() || !this.collectionRoutines().includes(routine)) return;
     this.gymPlanOpen.set(false);
     this.selectRoutine(routine, `${this.homePlanSelected() ? 'home-upper-lower' : 'gym-ppl'}-${routine.name.toLowerCase()}`);
-    this.startWorkout();
+    this.restPicker.open();
   }
 
   routineSets(routine: Routine): number {
@@ -1243,7 +1247,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   startFromPlan(routine: Routine, planId: string, index: number) {
     this.selectRoutine(routine, `plan-${planId}-${index}`);
     this.closePlan();
-    this.startWorkout();
+    this.restPicker.open();
   }
 
   private launchedPlanRoutine: string | null = null;
@@ -1276,23 +1280,25 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         if (!routine) return;
         this.launchedPlanRoutine = requested;
         this.selectRoutine(routine, 'personal-' + routine.id);
-        this.startWorkout();
+        this.restPicker.open();
       });
     }));
   }
 
   exerciseRestSeconds(): number {
-    return this.currentExercise()?.restSeconds ?? this.restTimeTarget();
+    return this.uniformRest ? this.restTimeTarget() : (this.currentExercise()?.restSeconds ?? this.restTimeTarget());
   }
 
   startLibraryRoutine(event: { routine: Routine; key: string }): void {
     if (this.workoutInProgress()) return;
     this.selectRoutine(event.routine, event.key);
-    this.startWorkout();
+    this.restPicker.open();
   }
 
-  startWorkout() {
+  startWorkout(restSeconds = 60) {
     if (this.currentRoutine().exercises.length === 0) return;
+    this.restTimeTarget.set(restSeconds);
+    this.uniformRest = true;
     this.previousBodyOverflow ??= document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     this.currentExerciseIndex.set(0);
@@ -1749,7 +1755,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       date: this.targetDate(), routine: this.currentRoutine(), state, exerciseIndex: this.currentExerciseIndex(), setIndex: this.currentSetIndex(),
       dropSets: this.loggedDrops, activeDrop: this.activeDrop(),
       weights: this.loggedWeights, reps: this.loggedReps, currentWeight: this.currentWeight(), currentReps: this.currentReps(),
-      startedAt: this.sessionStartedAt, endedAt: this.sessionEndedAt, restDeadline: this.restDeadline, restSeconds: this.restTimeTarget(),
+      startedAt: this.sessionStartedAt, endedAt: this.sessionEndedAt, restDeadline: this.restDeadline, restSeconds: this.restTimeTarget(), uniformRest: this.uniformRest,
       holdElapsedMs: Math.min(this.holdTargetSeconds() * 1000, this.holdRunning() ? this.holdAccumulatedMs + Math.max(0, Date.now() - this.holdStartedAt) : this.holdElapsedMs()),
     });
     if (!stored && !this.warnedAboutStorage) {
@@ -1775,7 +1781,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.loggedWeights = draft.weights; this.loggedReps = draft.reps;
     this.currentWeight.set(this.bodyweightActive() ? 0 : draft.currentWeight); this.currentReps.set(draft.currentReps);
     this.sessionStartedAt = draft.startedAt; this.sessionEndedAt = draft.endedAt;
-    this.restDeadline = draft.restDeadline; this.restTimeTarget.set(draft.restSeconds);
+    this.restDeadline = draft.restDeadline; this.restTimeTarget.set(draft.restSeconds); this.uniformRest = draft.uniformRest === true;
     this.holdAccumulatedMs = draft.holdElapsedMs; this.holdElapsedMs.set(draft.holdElapsedMs); this.holdRunning.set(false);
     this.state.set(draft.state); this.inputsTouched = true; this.updateCompletedSets(); this.loadLastWeights();
     if (draft.state === 'rest') {

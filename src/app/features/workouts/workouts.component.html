@@ -41,6 +41,7 @@
                 </button>
                 @if (open) {
                   @if (run.route?.length) { <app-route-map [route]="run.route" label="Recorded running route" /> }
+                  <app-run-splits [session]="run" />
                   <details class="run-details"><summary title="Session details" aria-label="Session details">
                   <span class="metrics">
                     <span><strong>{{ formatDuration(run.durationSeconds) }}</strong><small>Duration</small></span>

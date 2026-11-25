@@ -23,7 +23,7 @@ describe('Workout session recovery', () => {
       { name: 'Press', sets: 2, reps: 10, weight: 50, muscleGroup: 'Chest' },
       { name: 'Row', sets: 1, reps: 8, weight: 40, muscleGroup: 'Back' },
     ] }, 'test');
-    component.startWorkout();
+    component.startWorkout(90);
   });
   afterEach(() => { component.ngOnDestroy(); vi.useRealTimers(); });
 
@@ -40,7 +40,11 @@ describe('Workout session recovery', () => {
     component.openGymPlan();
     expect(component.gymPlanOpen()).toBe(true);
     const legs = component.gymRoutines.find(routine => routine.name === 'LEGS')!;
+    component.restPicker = { open: vi.fn() } as any;
     component.startFromGymPlan(legs);
+    expect(component.restPicker.open).toHaveBeenCalledOnce();
+    expect(component.state()).toBe('setup');
+    component.startWorkout(75);
     expect(component.gymPlanOpen()).toBe(false);
     expect(component.state()).toBe('active');
     expect(component.currentExercise()?.name).toBe('Leg Press');
@@ -48,7 +52,7 @@ describe('Workout session recovery', () => {
     expect(component.currentRoutine().exercises.at(-1)).toMatchObject({name: 'Machine Calf Raise', sets: 3, reps: 12});
     expect(component.currentRoutine().exercises.at(-2)?.name).toBe('Leg Raises');
     component.finishSet();
-    expect(component.restClock()).toBe('1:30');
+    expect(component.restClock()).toBe('1:15');
     component.skipRest();
     expect(component.currentSetIndex()).toBe(2);
     expect(component.currentExercise()?.name).toBe('Leg Press');
@@ -62,7 +66,9 @@ describe('Workout session recovery', () => {
     expect(component.gymPlanOpen()).toBe(true);
     expect(component.collectionTotalSets()).toBe(36);
     const lower = component.homeRoutines[1];
+    component.restPicker = { open: vi.fn() } as any;
     component.startFromGymPlan(lower);
+    component.startWorkout();
     expect(component.gymPlanOpen()).toBe(false);
     expect(component.totalSets()).toBe(20);
     expect(component.currentExercise()?.repRange).toBe('8–15');
@@ -314,6 +320,19 @@ describe('Workout draft and immediate input', () => {
     component.startWorkout();
   });
   afterEach(() => { component.ngOnDestroy(); vi.useRealTimers(); });
+  it('uses the selected rest across recovery even when the exercise specifies another duration', () => {
+    component.cancelWorkout();
+    component.selectRoutine({ name: 'Legs', exercises: [{ name: 'Squat', sets: 3, reps: 10, weight: 20, muscleGroup: 'Legs', restSeconds: 30 }] }, 'legs');
+    component.startWorkout(85);
+    component.finishSet();
+    vi.advanceTimersByTime(10_000);
+    component.ngOnDestroy(); component = create(); component.ngOnInit();
+    expect(component.restTimeRemaining()).toBe(75);
+    vi.advanceTimersByTime(75_000);
+    expect(component.currentSetIndex()).toBe(2);
+    component.finishSet();
+    expect(component.restTimeRemaining()).toBe(85);
+  });
   it('opens the recommended plan from onboarding when there is no active session', () => {
     component.cancelWorkout(); component.ngOnDestroy();
     component = create({ plan: 'push-pull-legs' }); component.ngOnInit();

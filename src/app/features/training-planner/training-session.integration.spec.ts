@@ -38,13 +38,17 @@ describe('Personal plan in a live workout', () => {
       { queryParams: of({}), snapshot: { queryParamMap: { get: () => requested } } } as any,
       { confirm: vi.fn() } as any,
     );
+    component.restPicker = { open: vi.fn() } as any;
     components.push(component);
     return component;
   }
-  it('launches the chosen saved day and uses its rep range, coaching and per-exercise rest', async () => {
+  it('asks for rest before launching the saved day and preserves its rep range and coaching', async () => {
     const component = create('tp_live.0');
     component.ngOnInit();
     await Promise.resolve();
+    expect(component.restPicker.open).toHaveBeenCalledOnce();
+    expect(component.state()).toBe('setup');
+    component.startWorkout(95);
     expect(component.state()).toBe('active');
     expect(component.currentRoutine().name).toBe('Your plan · Upper body A');
     expect(component.currentExercise()).toMatchObject({
@@ -54,8 +58,8 @@ describe('Personal plan in a live workout', () => {
     });
     expect(component.currentExercise()!.cue).toBeTruthy();
     component.finishSet();
-    expect(component.restTimeRemaining()).toBe(120);
-    expect(component.restClock()).toBe('2:00');
+    expect(component.restTimeRemaining()).toBe(95);
+    expect(component.restClock()).toBe('1:35');
     component.skipRest();
     expect(component.currentSetIndex()).toBe(2);
   });
@@ -63,6 +67,8 @@ describe('Personal plan in a live workout', () => {
     const first = create('tp_live.0');
     first.ngOnInit();
     await Promise.resolve();
+    expect(first.restPicker.open).toHaveBeenCalledOnce();
+    first.startWorkout(95);
     first.finishSet();
     first.checkpointWorkout();
     first.ngOnDestroy();
@@ -76,5 +82,7 @@ describe('Personal plan in a live workout', () => {
       restSeconds: 120,
     });
     expect(restored.state()).toBe('rest');
+    expect(restored.restPicker.open).not.toHaveBeenCalled();
+    expect(restored.exerciseRestSeconds()).toBe(95);
   });
 });

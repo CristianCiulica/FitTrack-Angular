@@ -13,6 +13,7 @@ import { WorkoutService } from '../../core/services/workout.service';
 import { RunningSessionService } from '../../core/services/running-session.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Workout } from '../../core/models/workout.model';
+import { RunSplitsComponent } from '../../shared/components/run-splits/run-splits.component';
 import { RouteMapComponent } from '../../shared/components/route-map/route-map.component';
 import { RunningSession } from '../../core/models/running-session.model';
 import { NzIconModule } from 'ng-zorro-antd/icon';
@@ -48,6 +49,7 @@ function routeThumbnail(run: RunningSession) {
   selector: 'app-workouts',
   standalone: true,
   imports: [
+    RunSplitsComponent,
     CommonModule,
     NzIconModule,
     NzLayoutModule,

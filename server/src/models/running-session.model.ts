@@ -9,6 +9,7 @@ const runningSessionSchema = new Schema(
     endedAt: { type: String, required: true },
     durationSeconds: { type: Number, required: true, min: 0 },
     distanceMeters: { type: Number, required: true, min: 0 },
+    kilometreTimes: { type: [Number], default: undefined },
     steps: { type: Number, required: true, min: 0 },
     averageSpeedKmh: { type: Number, required: true, min: 0 },
     calories: { type: Number, required: true, min: 0 },

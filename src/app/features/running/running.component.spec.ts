@@ -151,6 +151,25 @@ describe('Running GPS lifecycle', () => {
     expect(persistence.saveSession.mock.calls[0][1]).toBe(true);
   });
 
+  it('records a boundary after recovery on the active clock and retains the partial kilometre', () => {
+    persistence.recoverRun.mockReturnValue({
+      ...recovered, session: { ...recovered.session, distanceMeters: 950, kilometreTimes: [] },
+    });
+    component.restoreRun();
+    vi.advanceTimersByTime(60000);
+    component.resumeRecoveredRun();
+    const callback = geo.watchPosition.mock.calls[0][0];
+    callback(fix());
+    vi.advanceTimersByTime(20000);
+    callback({ ...fix(), coords: { ...fix().coords, latitude: 44.4277 } });
+    component.stopTracking();
+    const saved = persistence.saveSession.mock.calls[0][0];
+    expect(saved.distanceMeters).toBeGreaterThan(1040);
+    expect(saved.kilometreTimes).toHaveLength(1);
+    expect(saved.kilometreTimes[0]).toBeCloseTo(610, 0);
+    expect(saved.durationSeconds).toBe(620);
+  });
+
   it('resumes with the recorded duration and a fresh GPS anchor instead of adding the missing gap', () => {
     persistence.recoverRun.mockReturnValue(recovered);
     component.restoreRun();

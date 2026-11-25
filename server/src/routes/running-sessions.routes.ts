@@ -18,6 +18,7 @@ function serialize(doc: Document | any) {
     endedAt: obj.endedAt,
     durationSeconds: obj.durationSeconds,
     distanceMeters: obj.distanceMeters,
+    kilometreTimes: obj.kilometreTimes,
     steps: obj.steps,
     averageSpeedKmh: obj.averageSpeedKmh,
     calories: obj.calories,

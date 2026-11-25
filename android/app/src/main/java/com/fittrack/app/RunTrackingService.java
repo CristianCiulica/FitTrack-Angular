@@ -100,16 +100,28 @@ public class RunTrackingService extends Service implements LocationListener {
     }
     @Override public void onLocationChanged(Location location) {
         if (session == null || !location.hasAccuracy() || location.getAccuracy() > 50 || location.getTime() < System.currentTimeMillis() - 30000) return;
+        long fixElapsed = location.getElapsedRealtimeNanos() / 1000000;
+        if (fixElapsed < startedElapsed) return;
         try {
             JSONArray route = session.optJSONArray("route");
             if (route == null) route = new JSONArray();
             if (anchor != null) {
-                double seconds = (location.getTime() - anchor.getTime()) / 1000.0;
+                long anchorElapsed = anchor.getElapsedRealtimeNanos() / 1000000;
+                double seconds = (fixElapsed - anchorElapsed) / 1000.0;
                 double distance = anchor.distanceTo(location);
                 if (seconds <= 0) return;
                 if (seconds > 60) { anchor = location; persist(); return; }
                 if (!RunTrackingMath.acceptSegment(distance, seconds, location.getAccuracy())) return;
-                session.put("distanceMeters", session.optDouble("distanceMeters") + distance);
+                double metresBefore = session.optDouble("distanceMeters");
+                JSONArray times = session.optJSONArray("kilometreTimes");
+                if (times != null) {
+                    double startSeconds = baseDuration + (anchorElapsed - startedElapsed) / 1000.0;
+                    // The speed/gap filter accepts at most 720 m per fix.
+                    double crossing = RunTrackingMath.crossingTime(metresBefore, distance, times.length(),
+                        startSeconds, startSeconds + seconds);
+                    if (Double.isFinite(crossing)) times.put(Math.floor(crossing));
+                }
+                session.put("distanceMeters", metresBefore + distance);
             }
             anchor = new Location(location);
             route.put(new JSONArray().put(location.getLatitude()).put(location.getLongitude()));

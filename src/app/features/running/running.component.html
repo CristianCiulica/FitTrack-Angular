@@ -14,7 +14,19 @@
 
     <nz-content role="main" class="app-content">
       <h1 class="sr-only">Running</h1>
-      <div class="run-dashboard" *ngIf="!isTracking">
+      @if (finishedRun(); as run) {
+        <section class="run-recap" aria-labelledby="run-recap-title">
+          <header>
+            <div><h2 id="run-recap-title">Run complete</h2>
+              <p>{{ distanceValue(run.distanceMeters) | number:'1.2-2' }} {{ distanceUnit }} · {{ durationLabel(run.durationSeconds) }}</p>
+            </div>
+            <button type="button" (click)="finishedRun.set(null)">Done</button>
+          </header>
+          @if (run.route?.length) { <app-route-map [route]="run.route" label="Completed running route" /> }
+          <app-run-splits [session]="run" />
+        </section>
+      }
+      <div class="run-dashboard" *ngIf="!isTracking && !finishedRun()">
         <nz-card appLiquidGlass class="weather-card" [ngClass]="weatherTheme">
           <div class="weather-content weather-loading" *ngIf="weatherLoading">
             Checking local conditions…
@@ -85,7 +97,7 @@
         </div>
       </div>
 
-      <div class="live-map" [class.active]="isTracking">
+      <div class="live-map" [hidden]="finishedRun()" [class.active]="isTracking">
         <div #runningMap class="map" [class.unavailable]="mapUnavailable()" aria-label="Running route map"></div>
         @if (mapUnavailable() && !isTracking) {
           <div class="map-fallback">

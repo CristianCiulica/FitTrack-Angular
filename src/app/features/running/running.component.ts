@@ -1,8 +1,12 @@
 import { ConfirmationService } from '../../shared/components/confirmation';
+import { RouteMapComponent } from '../../shared/components/route-map/route-map.component';
+import { RunSplitsComponent } from '../../shared/components/run-splits/run-splits.component';
+import { durationLabel } from '../../core/utils/workout-history';
 import { FitAction } from '../../shared/glisse/controls';
 import { Subscription } from 'rxjs';
 import { NativeRunService, NativeRunSnapshot } from '../../core/services/native-run.service';
 import { ProfileService } from '../../core/services/profile.service';
+import { recordKilometres, validKilometreTimes } from '../../core/utils/run-splits';
 import { displayDistance, displaySpeed, distanceUnitLabel } from '../../core/utils/units';
 import { LiquidGlassDirective } from '../../shared/components/liquid-glass/liquid-glass.directive';
 import { MAP_TILE_URL, MAP_TILE_OPTIONS } from '../../core/config/map-tiles';
@@ -39,7 +43,7 @@ interface AcceptedPosition {
   selector: 'app-running',
   standalone: true,
   imports: [
-    FitAction,
+    FitAction, RouteMapComponent, RunSplitsComponent,
     LiquidGlassDirective,
     CommonModule,
     NzLayoutModule,
@@ -69,6 +73,12 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
   gpsAccuracy?: number;
   weatherExpanded = false;
   activityExpanded = false;
+  readonly finishedRun = signal<Omit<RunningSession, 'id'> | null>(null);
+  readonly durationLabel = durationLabel;
+  distanceValue(meters: number): number {
+    return displayDistance(meters, this.profileService?.units() ?? 'metric');
+  }
+
 
   weatherLoading = true;
   weatherError = '';
@@ -91,6 +101,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   private polyline?: L.Polyline;
   private polylineCasing?: L.Polyline;
+  private kilometreTimes: number[] | undefined = [];
   private routePoints: [number, number][] = [];
   private marker?: L.Marker;
   private startMarker?: L.CircleMarker;
@@ -408,6 +419,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
     this.isTracking = false;
     this.distanceMeters = 0;
+    this.kilometreTimes = [];
     this.steps = 0;
     this.avgSpeedKmh = 0;
     this.calories = 0;
@@ -508,7 +520,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
         Math.abs(latitude) > 90 || Math.abs(longitude) > 180 ||
         !Number.isFinite(accuracy) || accuracy < 0) return;
     const point = L.latLng(latitude, longitude);
-    const timestamp = pos.timestamp || Date.now();
+    const now = Date.now();
+    const timestamp = Math.min(pos.timestamp || now, now);
     this.gpsAccuracy = accuracy;
 
     if (this.isCalibrating) {
@@ -559,6 +572,11 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
     this.movementConfirmed = true;
 
+    if (this.kilometreTimes && this.startTime !== null) {
+      const start = Math.max(0, (previous.timestamp - this.startTime) / 1000);
+      const end = Math.max(start, (timestamp - this.startTime) / 1000);
+      recordKilometres(this.kilometreTimes, this.distanceMeters, this.distanceMeters + segmentMeters, start, end);
+    }
     this.distanceMeters += segmentMeters;
     this.acceptPosition(point, timestamp, accuracy, true);
     this.updateMetrics();
@@ -584,7 +602,11 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.isCalibrating = false;
     this.runningSessionService.setTrackingActive(false);
     this.resizeMap();
-    if (this.startTime && this.routePoints.length) this.saveCompletedSession();
+    if (this.startTime && this.routePoints.length) {
+      this.elapsedSeconds = Math.floor((Date.now() - this.startTime) / 1000);
+      this.updateMetrics();
+      this.saveCompletedSession();
+    }
 
     if (err.code === err.PERMISSION_DENIED) {
       this.statusText.set('Location permission denied.');
@@ -627,6 +649,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     const session = this.sessionSnapshot(this.recoveredEndedAt ?? Date.now());
     // saveSession writes the finished record locally before starting its upload.
     const saved = this.runningSessionService.saveSession(session, true);
+    this.finishedRun.set(session);
     this.recoveredRun = false;
     this.recoveredEndedAt = null;
     this.sessionStartedAt = null;
@@ -644,7 +667,8 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       userId: this.authService.currentUserId!, mode: 'running',
       ...(this.nativeClientId ? { clientId: this.nativeClientId } : {}),
       startedAt: new Date(this.sessionStartedAt!).toISOString(), endedAt: new Date(endedAt).toISOString(),
-      durationSeconds: Math.max(1, this.elapsedSeconds), distanceMeters: Math.round(this.distanceMeters),
+      durationSeconds: Math.max(1, this.elapsedSeconds), distanceMeters: this.distanceMeters,
+      ...(this.kilometreTimes ? { kilometreTimes: [...this.kilometreTimes] } : {}),
       steps: this.steps, averageSpeedKmh: Number(this.avgSpeedKmh.toFixed(1)),
       calories: Math.round(this.calories), route: this.routePoints,
     };
@@ -666,6 +690,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.recoveredEndedAt = Date.parse(session.endedAt);
     this.elapsedSeconds = session.durationSeconds;
     this.distanceMeters = session.distanceMeters;
+    this.kilometreTimes = validKilometreTimes(session) ? session.kilometreTimes?.slice() : undefined;
     this.steps = session.steps;
     this.avgSpeedKmh = session.averageSpeedKmh;
     this.calories = session.calories;
@@ -781,6 +806,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.sessionStartedAt = Date.parse(session.startedAt); this.recoveredEndedAt = snapshot.active ? null : Date.parse(session.endedAt);
     this.startTime = Date.now() - session.durationSeconds * 1000;
     this.elapsedSeconds = session.durationSeconds; this.distanceMeters = session.distanceMeters;
+    this.kilometreTimes = session.kilometreTimes;
     this.steps = session.steps; this.avgSpeedKmh = session.averageSpeedKmh; this.calories = session.calories;
     const oldLast = this.routePoints.at(-1);
     const nextLast = session.route?.at(-1);

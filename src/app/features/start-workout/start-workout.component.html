@@ -65,6 +65,8 @@
   </nz-layout>
 </nz-layout>
 
+<app-workout-rest-picker (started)="startWorkout($event)" />
+
 <app-workout-modal
   [visible]="modalVisible()"
   [saving]="modalSaving()"
@@ -149,7 +151,7 @@
       <div class="gym-plan-intro">
         <span class="section-eyebrow">{{ homePlanSelected() ? 'YOUR HOME PLAN' : 'YOUR GYM PLAN' }}</span>
         <h2>{{ homePlanSelected() ? 'Upper. Lower. Home.' : 'Push. Pull. Legs.' }}</h2>
-        <div class="gym-plan-facts"><span>{{ collectionRoutines().length }} workouts</span><span>{{ collectionTotalSets() }} sets</span><span>1:30 rest</span></div>
+        <div class="gym-plan-facts"><span>{{ collectionRoutines().length }} workouts</span><span>{{ collectionTotalSets() }} sets</span></div>
       </div>
       <div class="plan-list gym-plan-list">
         @for (routine of collectionRoutines(); track routine.name; let i = $index) {

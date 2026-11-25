@@ -7,6 +7,8 @@ export interface RunningSession {
   endedAt: string;
   durationSeconds: number;
   distanceMeters: number;
+  /** Cumulative active seconds at each full kilometre. Older runs have no timings. */
+  kilometreTimes?: number[];
   steps: number;
   averageSpeedKmh: number;
   calories: number;

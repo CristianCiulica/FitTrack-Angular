@@ -57,6 +57,11 @@ test('rejects impossible run time ranges and fractional steps', () => {
   );
   assert.equal(sessionBodySchema.safeParse({ ...session, durationSeconds: 700 }).success, false);
   assert.equal(sessionBodySchema.safeParse({ ...session, steps: 10.5 }).success, false);
+  assert.deepEqual(sessionBodySchema.parse({ ...session, kilometreTimes: [599.8] }).kilometreTimes, [599.8]);
+  for (const times of [[], [601], [-3], [100, 200]]) {
+    assert.equal(sessionBodySchema.safeParse({ ...session, kilometreTimes: times }).success, false);
+  }
+  assert.equal(sessionBodySchema.safeParse({ ...session, distanceMeters: 2500, kilometreTimes: [400, 300] }).success, false);
 });
 test('retrying the same operation, including after a lost response, creates one record per account', async () => {
   const records = new Map<string, any>();

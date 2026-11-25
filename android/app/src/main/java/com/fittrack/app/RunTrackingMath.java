@@ -10,4 +10,11 @@ final class RunTrackingMath {
             && distance >= Math.max(4, Math.min(12, accuracy * 0.4))
             && distance / seconds <= 12;
     }
+
+    static double crossingTime(double metresBefore, double segmentMetres, int completedKilometres,
+                               double startSeconds, double endSeconds) {
+        double remaining = (completedKilometres + 1) * 1000.0 - metresBefore;
+        if (remaining <= 0 || remaining > segmentMetres) return Double.NaN;
+        return startSeconds + (endSeconds - startSeconds) * remaining / segmentMetres;
+    }
 }

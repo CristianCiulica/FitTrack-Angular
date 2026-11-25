@@ -41,6 +41,7 @@ export interface WorkoutDraft {
   endedAt: number | null;
   restDeadline: number;
   restSeconds: number;
+  uniformRest?: boolean;
   holdElapsedMs: number;
 }
 
@@ -69,6 +70,7 @@ export function readWorkoutDraft(owner: string): WorkoutDraft | null {
       !bounded(value.currentWeight, 1000) ||
       !bounded(value.currentReps, 7200) ||
       !bounded(value.holdElapsedMs, 7_200_000) ||
+      (value.uniformRest != null && typeof value.uniformRest !== 'boolean') ||
       !bounded(value.restSeconds, 900) ||
       value.restSeconds < 1 ||
       !Number.isFinite(value.restDeadline) ||
