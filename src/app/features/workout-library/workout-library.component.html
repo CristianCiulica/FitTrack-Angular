@@ -214,10 +214,6 @@
         <div class="session-kicker"><span>Custom</span><button type="button" class="session-delete" [disabled]="deletingIds.has(routine.id!)" [attr.aria-label]="'Delete ' + routine.name" (click)="deleteRoutine.emit(routine.id!)">•••</button></div>
         <h3><button type="button" class="session-open" (click)="viewRoutine(routine)">{{ routine.name }}</button></h3>
         <div class="session-facts"><span>{{ routine.exercises.length }} exercises</span><span>~{{ minuteEstimate(routine) }} min</span></div>
-        @let level = sessionLevel(routine);
-        <div class="session-level" [attr.data-level]="level">{{ level }}
-          <span class="level-bars" aria-hidden="true"><i></i><i></i><i></i></span>
-        </div>
       </article>
     } @empty {
       <div class="library-empty">
@@ -255,10 +251,6 @@
         <div class="session-kicker"><span>{{ routine.category || 'Strength' }}</span><span aria-hidden="true">➜</span></div>
         <h3><button type="button" class="session-open" (click)="viewRoutine(routine)">{{ routine.name }}</button></h3>
         <div class="session-facts"><span>{{ routine.exercises.length }} exercises</span><span>~{{ minuteEstimate(routine) }} min</span></div>
-        @let level = sessionLevel(routine);
-        <div class="session-level" [attr.data-level]="level">{{ level }}
-          <span class="level-bars" aria-hidden="true"><i></i><i></i><i></i></span>
-        </div>
       </article>
     } @empty {
       <div class="library-empty">
@@ -289,7 +281,7 @@
     <span class="collection-copy"
       ><span class="library-eyebrow">CLASSIC BODYBUILDING</span><strong>Legends collection</strong
       ></span>
-    <span class="collection-stack" aria-hidden="true">@for (athlete of ['arnold', 'mentzer', 'cbum', 'ronnie', 'dorian']; track athlete) { <img [src]="'legends/' + athlete + '.jpg'" alt="" /> }</span>
+    <span class="collection-stack" aria-hidden="true">@for (athlete of ['arnold', 'mentzer', 'cbum', 'ronnie', 'dorian']; track athlete) { <img [attr.data-athlete]="athlete" [src]="'legends/' + athlete + '.jpg'" alt="" /> }</span>
   </button>
 </div>
 <dialog

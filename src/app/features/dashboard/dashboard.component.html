@@ -138,6 +138,9 @@
               <div class="assistant-progress">
                 <div class="progress-copy">
                   <span>{{ assistantQuestion().eyebrow }}</span>
+                  @if (assistantStep(); as step) {
+                    @if (step !== 'result') { <span>{{ assistantStepOrder.indexOf(step) + 1 }} / {{ assistantStepOrder.length }}</span> }
+                  }
                 </div>
                 <div class="assistant-step-track" role="progressbar" aria-label="Meal preferences" [attr.aria-valuenow]="assistantProgress()" aria-valuemin="0" aria-valuemax="100">
                   <span *ngFor="let step of assistantStepOrder; let index = index" [class.completed]="(index + 1) * 20 <= assistantProgress()"></span>

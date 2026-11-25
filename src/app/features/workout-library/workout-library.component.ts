@@ -432,10 +432,6 @@ export class WorkoutLibraryComponent {
       key: routine.id ? 'personal-' + routine.id : 'library-' + routine.name,
     });
   }
-  sessionLevel(routine: WorkoutRoutine): string {
-    const minutes = this.minuteEstimate(routine);
-    return minutes <= 30 ? 'Beginner' : minutes >= 53 ? 'Advanced' : 'Intermediate';
-  }
   minuteEstimate(routine: WorkoutRoutine) {
     return Math.round(
       (300 +

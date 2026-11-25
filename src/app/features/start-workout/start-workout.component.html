@@ -78,35 +78,38 @@
   <ng-container *nzDrawerContent>
     @if (activePlan(); as plan) {
       <section class="legend-log">
-        <header class="athlete-cover">
-          <img [src]="'legends/' + plan.id + '.jpg'" alt="" />
-          <button type="button" class="log-back" aria-label="Back to legends" (click)="backToLegends()"><span nz-icon nzType="left"></span></button>
-          <div><h1>{{ plan.athlete }}</h1><p class="log-title">{{ plan.title }}</p></div>
-        </header>
-        <div class="log-tabs" role="group" aria-label="Legend plan sessions">
-          @for (routine of plan.routines; track $index) {
-            <button type="button" [attr.aria-pressed]="legendRoutineIndex() === $index" (click)="legendRoutineIndex.set($index); legendExpanded.set(false)">
-              <small>Session {{ $index + 1 }}</small><strong>{{ routine.name }}</strong>
-            </button>
-          }
-        </div>
         @if (legendRoutine(); as routine) {
-          <article class="log-card">
-            <h2>{{ routine.name }}</h2>
-            <dl>@for (metric of [[routine.exercises.length, 'exercises'], [routineSets(routine), 'working sets'], ['~' + routineMinutes(routine), 'min']]; track metric[1]) {
-              <div><dt>{{ metric[1] }}</dt><dd>{{ metric[0] }}</dd></div>
-            }</dl>
-            <ol id="legend-exercises">
-              @for (exercise of (legendExpanded() ? routine.exercises : routine.exercises.slice(0, 1)); track $index) {
-                <li><span>{{ ($index + 1).toString().padStart(2, '0') }}</span><strong>{{ exercise.name }}</strong><b>{{ exercise.sets }} × {{ exercise.repRange || exercise.reps }}<small>{{ exercise.repUnit === 'seconds' ? 'sec' : 'reps' }}</small></b></li>
+          <div class="log-scroll">
+            <header class="athlete-cover">
+              <img [attr.data-athlete]="plan.id" [src]="'legends/' + plan.id + '.jpg'" alt="" />
+              <button type="button" class="log-back" aria-label="Back to legends" (click)="backToLegends()"><span nz-icon nzType="left"></span></button>
+              <div><h1>{{ plan.athlete }}</h1><p class="log-title">{{ plan.title }}</p></div>
+            </header>
+            <div class="log-tabs" role="group" aria-label="Legend plan sessions">
+              @for (routine of plan.routines; track $index) {
+                <button type="button" [attr.aria-pressed]="legendRoutineIndex() === $index" (click)="legendRoutineIndex.set($index); legendExpanded.set(false)">
+                  <small>Session {{ $index + 1 }}</small><strong>{{ routine.name }}</strong>
+                </button>
               }
-            </ol>
-            @if (routine.exercises.length > 1) {
-              <button type="button" class="log-toggle" aria-controls="legend-exercises" [attr.aria-expanded]="legendExpanded()" (click)="legendExpanded.set(!legendExpanded())">
-                {{ legendExpanded() ? 'Show less' : 'Show all ' + routine.exercises.length + ' exercises' }}
-              </button>
-            }
-          </article>
+            </div>
+
+            <article class="log-card">
+              <h2>{{ routine.name }}</h2>
+              <dl>@for (metric of [[routine.exercises.length, 'exercises'], [routineSets(routine), 'working sets'], ['~' + routineMinutes(routine), 'min']]; track metric[1]) {
+                <div><dt>{{ metric[1] }}</dt><dd>{{ metric[0] }}</dd></div>
+              }</dl>
+              <ol id="legend-exercises">
+                @for (exercise of (legendExpanded() ? routine.exercises : routine.exercises.slice(0, 1)); track $index) {
+                  <li><span>{{ ($index + 1).toString().padStart(2, '0') }}</span><strong>{{ exercise.name }}</strong><b>{{ exercise.sets }} × {{ exercise.repRange || exercise.reps }}<small>{{ exercise.repUnit === 'seconds' ? 'sec' : 'reps' }}</small></b></li>
+                }
+              </ol>
+              @if (routine.exercises.length > 1) {
+                <button type="button" class="log-toggle" aria-controls="legend-exercises" [attr.aria-expanded]="legendExpanded()" (click)="legendExpanded.set(!legendExpanded())">
+                  {{ legendExpanded() ? 'Show less' : 'Show all ' + routine.exercises.length + ' exercises' }}
+                </button>
+              }
+            </article>
+          </div>
           <footer><button type="button" (click)="startFromPlan(routine, plan.id, legendRoutineIndex())"><span aria-hidden="true">▶</span> Start session</button></footer>
         }
       </section>
@@ -120,7 +123,7 @@
           @for (plan of officialPlans; track plan.id) {
             <button type="button" class="lc-athlete-card" (click)="openPlan(plan)">
               <div class="lc-portrait">
-                <img [src]="'legends/' + plan.id + '.jpg'" alt="" loading="lazy" />
+                <img [attr.data-athlete]="plan.id" [src]="'legends/' + plan.id + '.jpg'" alt="" loading="lazy" />
                 <span class="lc-card-number">{{ ($index + 1).toString().padStart(2, '0') }}</span>
                 <div><span>{{ plan.title }}</span><h2>{{ plan.athlete }}</h2></div>
               </div>
@@ -340,7 +343,7 @@
 
   <div class="set-navigation">
     <button type="button" class="set-back" [disabled]="(!canGoBack() && !activeDrop()) || saving()" (click)="previousSet()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>{{ activeDrop() ? 'Edit main set' : state() === 'rest' ? 'Edit this set' : treadmillActive() ? 'Previous exercise' : 'Previous set' }}</button>
-    <span *ngIf="currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} <ng-container *ngIf="!treadmillActive()"> · Set {{ currentSetIndex() }} of {{ exercise.sets }}</ng-container></span>
+    <span *ngIf="state() !== 'active' && currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} <ng-container *ngIf="!treadmillActive()"> · Set {{ currentSetIndex() }} of {{ exercise.sets }}</ng-container></span>
     <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">{{ activeDrop() ? 'Skip drop' : treadmillActive() ? 'Skip treadmill' : 'Skip set' }} <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg></button>
   </div>
   <!-- Actiuni, fixate jos -->

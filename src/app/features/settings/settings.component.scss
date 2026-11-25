@@ -149,6 +149,7 @@
 }
 
 @media (max-width: 600px) {
+  .settings-heading { display: none; }
   .settings-card ::ng-deep .ant-card-body {
     padding: 20px 18px;
   }

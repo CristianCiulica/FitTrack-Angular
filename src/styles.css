@@ -873,3 +873,48 @@ html body .ant-modal.app-confirmation {
   margin-inline: auto;
   padding-bottom: 0;
 }
+
+/* Keep faces in frame across the collection fan, tiles and full-width covers. */
+img[data-athlete="arnold"] { --portrait-y: 15%; }
+img[data-athlete="mentzer"] { --portrait-y: 19%; }
+img[data-athlete="cbum"] { --portrait-y: 10%; }
+img[data-athlete="ronnie"] { --portrait-y: 20%; }
+img[data-athlete="dorian"] { --portrait-y: 12%; }
+:is(#training-planner-screen, #nutrition-assistant-screen) {
+  --wizard-gutter: max(20px, calc((100% - 760px) / 2));
+}
+:is(#training-planner-screen, #nutrition-assistant-screen) :is(.planner-header, .chat-header-modern) {
+  justify-content: space-between;
+  padding: max(12px, env(safe-area-inset-top)) var(--wizard-gutter) 12px;
+  background: var(--bg);
+}
+:is(#training-planner-screen, #nutrition-assistant-screen) :is(.planner-header h2, .chat-header-modern h3) {
+  margin: 0; font-size: 21px; line-height: 1.25; font-weight: 650;
+}
+:is(#training-planner-screen, #nutrition-assistant-screen) :is(.planner-close, .assistant-collapse) {
+  position: static; display: grid; place-items: center; flex: 0 0 44px; height: 44px; padding: 0;
+}
+:is(#training-planner-screen, #nutrition-assistant-screen) :is(.step-caption, .progress-copy) {
+  font-size: 12px; font-weight: 600; line-height: 1.4;
+}
+:is(#training-planner-screen, #nutrition-assistant-screen) :is(.planner-footer, .assistant-footer) {
+  padding: 12px var(--wizard-gutter) max(12px, env(safe-area-inset-bottom));
+}
+:is(#training-planner-screen .footer-inner, #nutrition-assistant-screen .assistant-footer) > :is(.primary-action, .meal-next, .back-action, .assistant-back) {
+  display: inline-grid; place-items: center; height: 48px; width: auto; flex: none;
+  padding: 0 16px; border-radius: 12px; font-size: 15px; font-weight: 600; line-height: 1;
+}
+:is(#training-planner-screen .footer-inner, #nutrition-assistant-screen .assistant-footer) > :is(.primary-action, .meal-next) {
+  min-width: 124px; border: 0; background: #2864eb; color: white;
+}
+:is(#training-planner-screen, #nutrition-assistant-screen) :is(.planner-scroll:has(.wizard-layout), .assistant-body:has(.assistant-question)) {
+  padding: 24px var(--wizard-gutter);
+}
+#training-planner-screen .wizard-layout { max-width: 760px; }
+#nutrition-assistant-screen .progress-copy { margin-bottom: 12px; }
+#nutrition-assistant-screen .assistant-step-track { gap: 6px; }
+#nutrition-assistant-screen .assistant-step-track span { height: 3px; }
+:is(#training-planner-screen .footer-inner, #nutrition-assistant-screen .assistant-footer) > :is(.back-action, .assistant-back) {
+  color: var(--ink-secondary); background: transparent !important; border: 0;
+}
+:is(#training-planner-screen .footer-inner, #nutrition-assistant-screen .assistant-footer) > button { font-size: 15px !important; }
