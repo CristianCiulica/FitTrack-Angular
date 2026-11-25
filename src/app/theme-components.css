@@ -183,7 +183,7 @@ html[data-theme='dark'] body .auth-card .divider::after { background: var(--them
 html[data-theme='dark'] body .workout-count-picker button:not(.selected) {
   color: var(--theme-ink) !important; background: var(--theme-raised) !important; border-color: var(--theme-line) !important;
 }
-html[data-theme='dark'] body :is(.goal-options button.selected, .assistant-options button.selected) {
+html[data-theme='dark'] body .goal-options button.selected {
   background: rgba(10,132,255,.14) !important;
   border-color: #64b5ff !important;
   box-shadow: 0 0 0 2px rgba(100,181,255,.1) !important;
