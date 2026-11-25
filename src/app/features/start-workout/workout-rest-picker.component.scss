@@ -9,10 +9,11 @@ dialog {
   overflow: auto;
   border: 1px solid var(--hairline);
   border-radius: 26px;
-  background: var(--surface);
+  background: #fff;
   color: var(--ink);
   text-align: center;
 }
+:host-context(html[data-theme='dark']) dialog { background: #1d1d20; }
 dialog::backdrop { background: rgb(0 0 0 / 62%); }
 header { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; }
 h2 { grid-column: 2; margin: 0; font: inherit; font-weight: 650; font-size: 18px; line-height: 1.2; color: inherit; }

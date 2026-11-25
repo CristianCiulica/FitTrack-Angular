@@ -40,6 +40,10 @@ button {
 }
 .arrow,
 .browser-heading button {
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   width: 34px;
   height: 36px;
   border: 1px solid var(--hairline);

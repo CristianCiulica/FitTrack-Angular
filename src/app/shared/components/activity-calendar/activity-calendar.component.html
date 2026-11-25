@@ -8,7 +8,7 @@
         [disabled]="period().getFullYear() === 1970 && period().getMonth() === 0"
         aria-label="Previous month"
       >
-        ‹
+        <svg viewBox="0 0 20 20" aria-hidden="true"><polyline points="13 4 7 10 13 16" /></svg>
       </button>
       <details class="period-picker" #picker (keydown.escape)="escapePicker($event)">
         <summary
@@ -25,7 +25,7 @@
               (click)="pickerYear.set(pickerYear() - 1)"
               [disabled]="pickerYear() <= 1970"
             >
-              ‹</button
+              <svg viewBox="0 0 20 20" aria-hidden="true"><polyline points="13 4 7 10 13 16" /></svg></button
             ><strong>{{ pickerYear() }}</strong
             ><button
               type="button"
@@ -33,7 +33,7 @@
               (click)="pickerYear.set(pickerYear() + 1)"
               [disabled]="pickerYear() >= today().getFullYear()"
             >
-              ›
+              <svg viewBox="0 0 20 20" aria-hidden="true"><polyline points="7 4 13 10 7 16" /></svg>
             </button>
           </div>
           <div class="month-options">
@@ -69,7 +69,7 @@
         [disabled]="currentPeriod()"
         aria-label="Next month"
       >
-        ›
+        <svg viewBox="0 0 20 20" aria-hidden="true"><polyline points="7 4 13 10 7 16" /></svg>
       </button>
     </div>
   </header>
