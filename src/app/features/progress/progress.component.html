@@ -20,7 +20,7 @@
           <button type="button" [attr.aria-pressed]="tab() === 'exercises'" (click)="tab.set('exercises')">Exercises</button>
         </nav>
         @if (tab() === 'overview') {
-        <app-activity-calendar [(period)]="period" />
+        <app-activity-calendar [(period)]="period" [loading]="loading()" [failed]="!!error()" />
         <div class="progress-information">
           <section class="weekly-focus" aria-label="This week's workout goal">
             <div>

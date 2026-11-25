@@ -1,8 +1,6 @@
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
-import { of, Subject } from 'rxjs';
-import { vi } from 'vitest';
 import { ActivityCalendarComponent } from './activity-calendar.component';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { RunningSessionService } from '../../../core/services/running-session.service';
@@ -10,20 +8,18 @@ import { Workout } from '../../../core/models/workout.model';
 
 describe('Monthly progress calendar', () => {
   const workouts = signal<Workout[]>([]);
-  const getWorkouts = vi.fn(() => of([]));
   beforeEach(() => {
     workouts.set([
       { userId: 'test', name: 'Pull', date: '2026-10-16', kind: 'session', exercises: [] },
     ]);
-    getWorkouts.mockReset().mockReturnValue(of([]));
     TestBed.configureTestingModule({
       imports: [ActivityCalendarComponent],
       providers: [
         provideRouter([]),
-        { provide: WorkoutService, useValue: { workouts, getWorkouts } },
+        { provide: WorkoutService, useValue: { workouts } },
         {
           provide: RunningSessionService,
-          useValue: { sessions: signal([]), getSessions: () => of([]) },
+          useValue: { sessions: signal([]) },
         },
       ],
     });
@@ -77,13 +73,14 @@ describe('Monthly progress calendar', () => {
     expect(fixture.componentInstance.selectedDay().key).toBe('2026-09-01');
     fixture.destroy();
   });
-  it('waits for history before displaying inactive days and updates when sessions change', () => {
-    const response = new Subject<any>();
-    getWorkouts.mockReturnValue(response as any);
+  it('shows the full month and cached sessions throughout a refresh', () => {
     const fixture = create();
-    expect(fixture.nativeElement.querySelector('.day')).toBeNull();
-    response.next([]);
-    response.complete();
+    fixture.componentRef.setInput('loading', true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelectorAll('.day')).toHaveLength(31);
+    expect(fixture.nativeElement.querySelector('.day-detail').textContent).toContain('Updating activity');
+    expect(fixture.nativeElement.querySelector('[data-date="2026-10-16"]').classList.contains('active')).toBe(true);
+    fixture.componentRef.setInput('loading', false);
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelectorAll('.day.active')).toHaveLength(1);
     workouts.set([]);

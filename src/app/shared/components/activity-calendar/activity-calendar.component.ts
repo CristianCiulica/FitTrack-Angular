@@ -5,6 +5,7 @@ import {
   ElementRef,
   HostListener,
   inject,
+  input,
   model,
   OnInit,
   signal,
@@ -12,7 +13,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin, interval } from 'rxjs';
+import { interval } from 'rxjs';
 import { WorkoutService } from '../../../core/services/workout.service';
 import { RunningSessionService } from '../../../core/services/running-session.service';
 import { ActivityDay, activityYear } from '../../../core/utils/activity-calendar';
@@ -34,8 +35,8 @@ export class ActivityCalendarComponent implements OnInit {
   readonly period = model(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   readonly pickerYear = signal(this.today().getFullYear());
   readonly selectedKey = signal(localDateKey(this.today()));
-  readonly loading = signal(true);
-  readonly failed = signal(false);
+  readonly loading = input(false);
+  readonly failed = input(false);
   readonly weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   readonly monthNames = Array.from({ length: 12 }, (_, index) =>
     new Date(2026, index, 1).toLocaleDateString('en-GB', { month: 'short' }),
@@ -62,24 +63,10 @@ export class ActivityCalendarComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    this.load();
     interval(60_000)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         if (localDateKey() !== localDateKey(this.today())) this.today.set(new Date());
-      });
-  }
-  load(): void {
-    this.loading.set(true);
-    this.failed.set(false);
-    forkJoin([this.workouts.getWorkouts(), this.running.getSessions()])
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => this.loading.set(false),
-        error: () => {
-          this.loading.set(false);
-          this.failed.set(true);
-        },
       });
   }
   selectMonth(year: number, index: number): void {
@@ -112,8 +99,12 @@ export class ActivityCalendarComponent implements OnInit {
     this.closePicker();
     this.picker()?.nativeElement.querySelector('summary')?.focus();
   }
+  emptyDayLabel(): string {
+    if (this.failed()) return 'Activity unavailable';
+    return this.loading() ? 'Updating activity…' : 'No training logged';
+  }
   dayDescription(day: ActivityDay): string {
-    return `${day.label}${day.today ? ' · Today' : ''} · ${day.state === 'future' ? 'Upcoming day' : day.sessions.length ? day.sessions.join(', ') : 'No training logged'}`;
+    return `${day.label}${day.today ? ' · Today' : ''} · ${day.state === 'future' ? 'Upcoming day' : day.sessions.length ? day.sessions.join(', ') : this.emptyDayLabel()}`;
   }
   onDayKey(event: KeyboardEvent, day: ActivityDay): void {
     const step: Record<string, number> = {

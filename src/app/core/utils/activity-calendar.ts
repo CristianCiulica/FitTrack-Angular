@@ -3,6 +3,11 @@ import { RunningSession } from '../models/running-session.model';
 import { isWorkoutSession } from './workout-kind';
 import { localDateKey } from './weight-progress';
 
+const dayFormatter = new Intl.DateTimeFormat('en-GB', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+});
+const monthFormatter = new Intl.DateTimeFormat('en-GB', { month: 'long' });
+
 export interface ActivityDay {
   key: string;
   number: number;
@@ -60,18 +65,13 @@ export function activityYear(
         number: offset + 1,
         sessions: entries,
         today: key === todayKey,
-        label: date.toLocaleDateString('en-GB', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-          year: 'numeric',
-        }),
+        label: dayFormatter.format(date),
         state: key > todayKey ? 'future' : entries.length ? 'active' : 'inactive',
       };
     });
     return {
       index,
-      name: start.toLocaleDateString('en-GB', { month: 'long' }),
+      name: monthFormatter.format(start),
       offset: (start.getDay() + 6) % 7,
       days,
       activeDays: days.filter((day) => day.state === 'active').length,

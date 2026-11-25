@@ -73,82 +73,74 @@
       </button>
     </div>
   </header>
-  @if (loading()) {
-    <div class="calendar-placeholder" role="status">Gathering your training days…</div>
-  } @else if (failed()) {
-    <div class="calendar-placeholder" role="alert">
-      Your activity couldn’t load. <button type="button" (click)="load()">Try again</button>
-    </div>
-  } @else {
-    <div class="calendar-body">
-      <div class="month" [attr.aria-label]="monthLabel()">
-        <div class="weekdays" aria-hidden="true">
-          @for (weekday of weekdays; track $index) {
-            <span>{{ weekday[0] }}</span>
-          }
-        </div>
-        <div class="days-grid">
-          @for (day of month().days; track day.key) {
-            <button
-              type="button"
-              class="day"
-              [class.active]="day.state === 'active'"
-              [class.inactive]="day.state === 'inactive'"
-              [class.future]="day.state === 'future'"
-              [class.today]="day.today"
-              [class.selected]="day.key === selectedDay().key"
-              [style.grid-column-start]="day.number === 1 ? month().offset + 1 : null"
-              [attr.data-date]="day.key"
-              [attr.title]="dayDescription(day)"
-              [attr.aria-label]="dayDescription(day)"
-              [attr.aria-pressed]="day.key === selectedDay().key"
-              [attr.aria-current]="day.today ? 'date' : null"
-              [attr.tabindex]="selectedDay().key === day.key ? 0 : -1"
-              (click)="selectedKey.set(day.key)"
-              (keydown)="onDayKey($event, day)"
-            >
-              <span>{{ day.number }}</span>
-            </button>
-          }
-        </div>
-        <div class="legend" aria-label="Calendar legend">
-          <span><i class="legend-active"></i>Trained</span
-          ><span><i class="legend-today"></i>Today</span>
-        </div>
+  <div class="calendar-body">
+    <div class="month" [attr.aria-label]="monthLabel()">
+      <div class="weekdays" aria-hidden="true">
+        @for (weekday of weekdays; track $index) {
+          <span>{{ weekday[0] }}</span>
+        }
       </div>
-      <aside class="day-detail" aria-live="polite" aria-atomic="true">
-        @let day = selectedDay();
-        <div class="journal-label">{{ day.today ? 'Today' : 'Selected day' }}</div>
-        <h2 class="day-title">{{ day.label.split(',')[0] }}, {{ day.number }} {{ monthLabel().slice(0, 3) }}</h2>
-        @if (day.sessions.length) {
-          <span class="journal-status trained">You showed up.</span>
-          <div class="session-list">
-            @for (session of day.sessions; track $index) {
-              <div>
-                <span class="session-check" aria-hidden="true">✓</span
-                ><strong>{{ session }}</strong>
-              </div>
-            }
-          </div>
-          <p class="journal-note">
-            {{ day.sessions.length }} {{ day.sessions.length === 1 ? 'session' : 'sessions' }} in
-            the books. Keep building.
-          </p>
-        } @else {
-          <p class="journal-empty">
-            {{
-              day.state === 'future'
-                ? 'Your next chapter is ahead of you.'
-                : 'No training logged yet. The next square is a fresh start.'
-            }}
-          </p>
+      <div class="days-grid">
+        @for (day of month().days; track day.key) {
+          <button
+            type="button"
+            class="day"
+            [class.active]="day.state === 'active'"
+            [class.inactive]="day.state === 'inactive'"
+            [class.future]="day.state === 'future'"
+            [class.today]="day.today"
+            [class.selected]="day.key === selectedDay().key"
+            [style.grid-column-start]="day.number === 1 ? month().offset + 1 : null"
+            [attr.data-date]="day.key"
+            [attr.title]="dayDescription(day)"
+            [attr.aria-label]="dayDescription(day)"
+            [attr.aria-pressed]="day.key === selectedDay().key"
+            [attr.aria-current]="day.today ? 'date' : null"
+            [attr.tabindex]="selectedDay().key === day.key ? 0 : -1"
+            (click)="selectedKey.set(day.key)"
+            (keydown)="onDayKey($event, day)"
+          >
+            <span>{{ day.number }}</span>
+          </button>
         }
-        @if (day.today) {
-          <a routerLink="/start-workout" class="journal-link">Start a workout </a>
-        } @else if (day.state !== 'future') {
-          <a routerLink="/workouts" class="journal-link">Open training history </a>
-        }
-      </aside>
+      </div>
+      <div class="legend" aria-label="Calendar legend">
+        <span><i class="legend-active"></i>Trained</span
+        ><span><i class="legend-today"></i>Today</span>
+      </div>
     </div>
-  }
+    <aside class="day-detail" aria-live="polite" aria-atomic="true">
+      @let day = selectedDay();
+      <div class="journal-label">{{ day.today ? 'Today' : 'Selected day' }}</div>
+      <h2 class="day-title">{{ day.label.split(',')[0] }}, {{ day.number }} {{ monthLabel().slice(0, 3) }}</h2>
+      @if (day.sessions.length) {
+        <span class="journal-status trained">You showed up.</span>
+        <div class="session-list">
+          @for (session of day.sessions; track $index) {
+            <div>
+              <span class="session-check" aria-hidden="true">✓</span
+              ><strong>{{ session }}</strong>
+            </div>
+          }
+        </div>
+        <p class="journal-note">
+          {{ day.sessions.length }} {{ day.sessions.length === 1 ? 'session' : 'sessions' }} in
+          the books. Keep building.
+        </p>
+      } @else {
+        <p class="journal-empty">
+          {{
+            day.state === 'future'
+              ? 'Your next chapter is ahead of you.'
+              : loading() || failed() ? emptyDayLabel() : 'No training logged yet. The next square is a fresh start.'
+          }}
+        </p>
+      }
+      @if (day.today) {
+        <a routerLink="/start-workout" class="journal-link">Start a workout </a>
+      } @else if (day.state !== 'future') {
+        <a routerLink="/workouts" class="journal-link">Open training history </a>
+      }
+    </aside>
+  </div>
 </section>

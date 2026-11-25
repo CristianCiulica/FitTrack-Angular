@@ -324,20 +324,6 @@ summary > span {
   font-size: 9px;
   color: var(--ink-tertiary);
 }
-.calendar-placeholder {
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-size: 13px;
-  color: var(--ink-tertiary);
-}
-.calendar-placeholder button {
-  background: none;
-  border: 0;
-  color: var(--accent);
-}
 :host-context(html[data-theme='dark']) {
   .day.inactive {
     background: #693b41;
