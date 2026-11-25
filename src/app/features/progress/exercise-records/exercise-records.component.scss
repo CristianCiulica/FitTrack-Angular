@@ -170,7 +170,7 @@ summary {
   }
 }
 details[open] summary svg {
-  transform: rotate(180deg);
+  visibility: hidden;
 }
 .record-history {
   padding: 0 22px 12px;

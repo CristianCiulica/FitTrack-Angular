@@ -151,7 +151,7 @@
               <ng-container *ngIf="assistantStep() !== 'result'; else assistantResultTemplate">
                 <section class="assistant-question">
                   <h4 #assistantHeading tabindex="-1">{{ assistantQuestion().title }}</h4>
-                  <p>{{ assistantQuestion().description }}</p>
+
                 </section>
 
                 <div class="assistant-options">
@@ -164,9 +164,9 @@
                   >
                     <span class="option-copy">
                       <strong>{{ option.label }}</strong>
-                      <small>{{ option.description }}</small>
+
                     </span>
-                    <span class="option-arrow" aria-hidden="true">›</span>
+                    <span class="option-arrow" aria-hidden="true">{{ isAssistantOptionSelected(option.value) ? '✓' : '' }}</span>
                   </button>
                 </div>
               </ng-container>
@@ -238,15 +238,18 @@
               </ng-template>
             </div>
 
-            <div class="assistant-footer" *ngIf="assistantStep() !== 'goal'" [class.result-visible]="assistantStep() === 'result'">
+            <div class="assistant-footer" [class.result-visible]="assistantStep() === 'result'">
               <button
                 type="button"
-                class="assistant-back"
+                class="assistant-back" [disabled]="assistantStep() === 'goal'"
                 aria-label="Back to previous preference"
                 (click)="goBackAssistant()"
               >
-                <span aria-hidden="true">‹</span><span class="back-label">Back</span>
+                Back
               </button>
+              @if (assistantStep() !== 'result') {
+                <button type="button" class="meal-next" [disabled]="!canAdvanceMeal()" (click)="advanceMeal()">{{ assistantStep() === 'budget' ? 'Find my meal' : 'Continue' }}</button>
+              }
               <div class="assistant-result-actions" *ngIf="assistantStep() === 'result'">
                 <button type="button" class="assistant-another" (click)="showAnotherRecipe()">
                   Another recipe

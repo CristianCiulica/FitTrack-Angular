@@ -877,10 +877,11 @@ svg {
 .library-section-heading.compact { margin: 24px 0 12px; align-items: center; }
 .library-section-heading.compact h2 { font-size: 12px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-tertiary); }
 .collection-grid { margin-top: 0; }
-.collection-stack { position: relative; flex: 0 0 86px; height: 70px; }
-.collection-stack i { position: absolute; top: 5px; left: 0; width: 48px; height: 68px; border: 1px solid var(--hairline); border-radius: 9px; background: var(--library-subtle); transform: rotate(-7deg); }
-.collection-stack i:nth-child(2) { left: 18px; top: 0; transform: none; }
-.collection-stack i:nth-child(3) { left: 35px; transform: rotate(7deg); background: color-mix(in srgb, var(--library-subtle) 94%, var(--ink)); }
+.collection-stack { display: flex; flex: 0 0 auto; align-items: center; padding: 6px 2px; }
+.collection-stack img { width: clamp(24px, 7vw, 38px); height: 64px; object-fit: cover; object-position: center 18%; border: 1px solid var(--hairline); border-radius: 6px; }
+.collection-stack img + img { margin-left: -5px; }
+.collection-stack img:nth-child(even) { transform: translateY(-4px); }
+
 :host-context(html[data-theme='dark']) { --library-card: #17171b; --library-subtle: #303034; }
 @media (max-width: 600px) {
   .session-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }

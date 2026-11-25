@@ -37,7 +37,7 @@
                     @if (!open && !run.distanceMeters) { <small>Too short to track</small> }
                   </span>
                   <span class="distance">{{ distanceValue(run.distanceMeters) | number:'1.2-2' }} <small>{{ distanceUnit }}</small></span>
-                  <span class="chevron" aria-hidden="true" nz-icon [nzType]="open ? 'up' : 'down'"></span>
+                  <span class="chevron" aria-hidden="true" >{{ open ? '−' : '+' }}</span>
                 </button>
                 @if (open) {
                   @if (run.route?.length) { <app-route-map [route]="run.route" label="Recorded running route" /> }
@@ -63,7 +63,7 @@
                 <button class="entry-heading" type="button" [attr.aria-expanded]="open" (click)="toggleEntry(entry.key)">
                   @if (!open) { <span nz-icon class="type-icon" nzType="ft:workout"></span> }
                   <span class="entry-name"><strong>{{ w.name }}</strong><small>{{ w.date | date:'d MMM' }} · {{ getExerciseCount(w) }} exercises</small></span>
-                  <span class="chevron" aria-hidden="true" nz-icon [nzType]="open ? 'up' : 'down'"></span>
+                  <span class="chevron" aria-hidden="true" >{{ open ? '−' : '+' }}</span>
                 </button>
                 @if (open) {
                   <dl class="metrics">

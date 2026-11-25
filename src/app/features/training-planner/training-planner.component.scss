@@ -786,3 +786,5 @@ fieldset {
 .training-screen .equipment-grid { column-gap: 24px; }
 .training-screen .planner-header, .training-screen .planner-footer { background: var(--bg); }
 .training-screen .planner-header > div { flex: 1; }
+
+.training-screen .back-action { display: inline-grid; place-items: center; min-width: 76px; height: 48px; padding: 0 16px; line-height: 1; }

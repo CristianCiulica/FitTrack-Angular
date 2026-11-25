@@ -289,7 +289,7 @@
     <span class="collection-copy"
       ><span class="library-eyebrow">CLASSIC BODYBUILDING</span><strong>Legends collection</strong
       ></span>
-    <span class="collection-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="collection-stack" aria-hidden="true">@for (athlete of ['arnold', 'mentzer', 'cbum', 'ronnie', 'dorian']; track athlete) { <img [src]="'legends/' + athlete + '.jpg'" alt="" /> }</span>
   </button>
 </div>
 <dialog
@@ -404,7 +404,7 @@
                 class="library-text-button new-block-action"
                 (click)="newBlock()"
               >
-                Start a new 30-session block <span aria-hidden="true">↗</span>
+                Start a new 30-session block
               </button>
             }
             @if (selectedEnrollment() && !selectedEnrollment()?.stoppedAt) {
@@ -498,7 +498,7 @@
                 </div>
               } @else {
                 <div class="program-recovery">
-                  <span aria-hidden="true">↗</span>
+
                   <h4>Recovery day</h4>
                 </div>
               }

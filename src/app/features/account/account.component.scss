@@ -506,7 +506,7 @@ fieldset {
   font-size: 9px;
 }
 .profile-badges[open] .badge-manage .anticon {
-  transform: rotate(180deg);
+  visibility: hidden;
 }
 
 @media (max-width: 380px) {

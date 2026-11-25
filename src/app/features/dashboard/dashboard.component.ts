@@ -283,6 +283,16 @@ export class DashboardComponent implements OnInit {
     if (step === 'result') return;
 
     this.assistantAnswers.update((answers) => ({ ...answers, [step]: value }));
+  }
+
+  readonly canAdvanceMeal = computed(() => {
+    const step = this.assistantStep();
+    return step !== 'result' && !!this.assistantAnswers()[step];
+  });
+
+  advanceMeal() {
+    const step = this.assistantStep();
+    if (step === 'result' || !this.canAdvanceMeal()) return;
     const currentIndex = this.assistantStepOrder.indexOf(step);
 
     if (currentIndex === this.assistantStepOrder.length - 1) {

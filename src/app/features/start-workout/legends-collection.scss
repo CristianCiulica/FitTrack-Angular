@@ -156,7 +156,7 @@
   font-weight: 400;
   color: var(--ink-tertiary);
 }
-.lc-card-footer > span:last-child {
+.lc-card-footer > span:nth-child(2) {
   display: grid;
   place-items: center;
   width: 34px;
@@ -242,7 +242,7 @@
   .lc-card-footer > span:first-child > span {
     font-size: 8px;
   }
-  .lc-card-footer > span:last-child {
+  .lc-card-footer > span:nth-child(2) {
     width: 27px;
     height: 27px;
     font-size: 17px;
@@ -287,7 +287,7 @@
   li b { text-align: right; line-height: 1.2; }
   li small { display: block; font-weight: 400; }
   .log-toggle { width: 100%; padding: 16px 0; border: 0; border-top: 1px solid var(--hairline); background: transparent; color: var(--accent); font-weight: 600; }
-  footer { position: sticky; bottom: 0; margin-top: auto; padding: 12px 0 max(16px, env(safe-area-inset-bottom)); background: var(--bg); }
+  footer { position: sticky; bottom: 0; margin-top: auto; padding: 12px 0 max(16px, env(safe-area-inset-bottom)); background: transparent; }
   footer button { width: 100%; min-height: 56px; border: 0; border-radius: 18px; background: var(--log-blue); color: white; font-size: 16px; font-weight: 650; }
   footer span { margin-right: 6px; }
 }

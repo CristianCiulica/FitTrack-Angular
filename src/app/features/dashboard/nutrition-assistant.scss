@@ -624,3 +624,15 @@
   .answer-summary span { padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink-secondary); }
   .answer-summary span + span::before { content: ' · '; white-space: pre; }
 }
+
+::ng-deep .nutrition-modal .modern-chat {
+  .assistant-footer { justify-content: space-between; }
+  .assistant-back, .meal-next { display: inline-grid; place-items: center; min-width: 76px; height: 48px; padding: 0 16px; border: 0; border-radius: 12px; line-height: 1; }
+  .assistant-back { background: transparent; }
+  .meal-next { min-width: 124px; color: white; background: #2864eb; font-weight: 600; }
+  .assistant-footer button:disabled { opacity: .4; cursor: default; }
+  .assistant-options button { min-height: 60px; }
+  .option-arrow { display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--hairline); border-radius: 50%; font-size: 13px; }
+  .selected .option-arrow { background: var(--accent); color: var(--bg); }
+  .assistant-question h4 { font-size: clamp(32px, 3.4vw, 46px); margin-bottom: 24px; }
+}

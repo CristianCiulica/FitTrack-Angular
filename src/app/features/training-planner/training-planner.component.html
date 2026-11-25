@@ -47,7 +47,7 @@
               }
             </div>
             <h1 #heading tabindex="-1">{{ questions[step()].title }}</h1>
-            <p class="question-copy">{{ questions[step()].description }}</p>
+            @if (step() === 2 || step() === 3) { <p class="question-copy">{{ questions[step()].description }}</p> }
             @switch (step()) {
               @case (0) {
                 <div class="choice-stack">
@@ -61,7 +61,7 @@
                     <span class="choice-symbol"><span nz-icon nzType="ft:workout"></span></span
                     ><span
                       ><strong>Build muscle</strong
-                      ><small>Progressive, balanced training for hypertrophy.</small></span
+                      ></span
                     ><span class="choice-check" aria-hidden="true">{{
                       answers().goal === 'muscle' ? '✓' : ''
                     }}</span>
@@ -77,8 +77,6 @@
                       ><svg viewBox="0 0 24 24"><path d="m4 16 5-5 4 3 7-9M14 5h6v6" /></svg></span
                     ><span
                       ><strong>Get stronger</strong
-                      ><small
-                        >Lower rep ranges on main lifts, with muscle-building support work.</small
                       ></span
                     ><span class="choice-check" aria-hidden="true">{{
                       answers().goal === 'strength' ? '✓' : ''
@@ -97,8 +95,6 @@
                         <path d="m8 12 3 3 5-6" /></svg></span
                     ><span
                       ><strong>Build & maintain muscle</strong
-                      ><small
-                        >A manageable workload alongside your body-composition goals.</small
                       ></span
                     ><span class="choice-check" aria-hidden="true">{{
                       answers().goal === 'recomp' ? '✓' : ''
@@ -119,8 +115,6 @@
                       ><i></i><i class="off"></i><i class="off"></i></span
                     ><span
                       ><strong>Building my foundation</strong
-                      ><small
-                        >New to structured lifting, or still learning consistent technique.</small
                       ></span
                     ><span class="choice-check" aria-hidden="true">{{
                       answers().experience === 'new' ? '✓' : ''
@@ -137,8 +131,6 @@
                       ><i></i><i></i><i class="off"></i></span
                     ><span
                       ><strong>Training consistently</strong
-                      ><small
-                        >Comfortable with the main movements and logging my workouts.</small
                       ></span
                     ><span class="choice-check" aria-hidden="true">{{
                       answers().experience === 'consistent' ? '✓' : ''
@@ -154,9 +146,6 @@
                     <span class="level-symbol" aria-hidden="true"><i></i><i></i><i></i></span
                     ><span
                       ><strong>Experienced lifter</strong
-                      ><small
-                        >Years of consistent training, with reliable technique and effort
-                        control.</small
                       ></span
                     ><span class="choice-check" aria-hidden="true">{{
                       answers().experience === 'experienced' ? '✓' : ''
@@ -458,7 +447,7 @@
                           @for (alternative of alternatives(); track alternative.id) {
                             <button type="button" (click)="swap(i, alternative.id)">
                               <span>{{ alternative.name }}</span
-                              ><span aria-hidden="true">↗</span>
+                              >
                             </button>
                           } @empty {
                             <p class="no-alternatives">
@@ -476,7 +465,7 @@
                   }
                 </div>
                 <div class="warmup-note">
-                  <span class="note-icon" aria-hidden="true">↗</span>
+
                   <div>
                     <strong>Earn your working weight.</strong>
                     <p>
@@ -515,7 +504,7 @@
                 </p>
                 @for (source of sources; track source.url) {
                   <a [href]="source.url" target="_blank" rel="noopener noreferrer"
-                    >{{ source.label }} <span aria-hidden="true">↗</span></a
+                    >{{ source.label }} </a
                   >
                 }
               </details>
@@ -534,7 +523,7 @@
       <div class="footer-inner">
         @if (step() < 6) {
           <button type="button" class="back-action" [disabled]="step() === 0" (click)="back()">
-            <span aria-hidden="true">←</span> Back</button
+            Back</button
           ><button
             type="button"
             class="primary-action"
@@ -542,7 +531,7 @@
             (click)="next()"
           >
             {{ step() === 5 ? 'Build my plan' : 'Continue'
-            }}<span aria-hidden="true">{{ step() === 5 ? '↗' : '→' }}</span>
+            }}
           </button>
         } @else {
           <div class="result-actions">
@@ -562,7 +551,7 @@
                 [disabled]="saving()"
                 (click)="startSelectedDay()"
               >
-                Save & train <span aria-hidden="true">↗</span>
+                Save & train
               </button>
             }
           </div>

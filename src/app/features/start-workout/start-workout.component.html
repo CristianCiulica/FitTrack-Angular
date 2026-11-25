@@ -103,7 +103,7 @@
             </ol>
             @if (routine.exercises.length > 1) {
               <button type="button" class="log-toggle" aria-controls="legend-exercises" [attr.aria-expanded]="legendExpanded()" (click)="legendExpanded.set(!legendExpanded())">
-                {{ legendExpanded() ? 'Show less' : 'Show all ' + routine.exercises.length + ' exercises' }} <span nz-icon [nzType]="legendExpanded() ? 'up' : 'down'"></span>
+                {{ legendExpanded() ? 'Show less' : 'Show all ' + routine.exercises.length + ' exercises' }}
               </button>
             }
           </article>
@@ -124,7 +124,7 @@
                 <span class="lc-card-number">{{ ($index + 1).toString().padStart(2, '0') }}</span>
                 <div><span>{{ plan.title }}</span><h2>{{ plan.athlete }}</h2></div>
               </div>
-              <div class="lc-card-footer"><span>{{ plan.routines.length }} sessions</span><span aria-hidden="true">↗</span></div>
+              <div class="lc-card-footer"><span>{{ plan.routines.length }} sessions</span></div>
             </button>
           }
         </div>
