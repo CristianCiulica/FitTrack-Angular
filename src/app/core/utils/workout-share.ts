@@ -5,6 +5,8 @@ export function createWorkoutSummaryImage(summary: {
   sets: number;
   hasTimedCardio?: boolean;
   calories: number;
+  volumeKg: number | null;
+  volumeChangeKg: number | null;
 }): string {
   const canvas = document.createElement('canvas');
   canvas.width = 1080;
@@ -44,6 +46,15 @@ export function createWorkoutSummaryImage(summary: {
   for (const [value, unit, x] of [[clock, 'min', 24], [String(summary.calories), 'kcal', 199]] as const) {
     draw(value, x, 309, 28, 750, ink, 100);
     draw(unit, x + Math.min(100, ctx.measureText(value).width) + 4, 309, 13, 550, muted);
+  }
+  if (summary.volumeKg !== null) {
+    const kg = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 1 });
+    draw('TOTAL LIFTED', 24, 359, 10, 650, muted);
+    draw(kg.format(summary.volumeKg) + ' kg', 24, 393, 32, 750);
+    if (summary.volumeChangeKg !== null) {
+      const change = summary.volumeChangeKg;
+      draw((change > 0 ? '+' : '') + kg.format(change) + ' kg vs last session', 24, 420, 14, 550, muted);
+    }
   }
   return canvas.toDataURL('image/png');
 }

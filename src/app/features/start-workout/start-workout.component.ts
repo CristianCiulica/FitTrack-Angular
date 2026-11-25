@@ -1715,6 +1715,8 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
         hasTimedCardio: this.hasTreadmill(),
         sets: this.completedSets(),
         calories: this.finishedCalories(),
+        volumeKg: this.cardioOnly() ? null : this.finishedVolume(),
+        volumeChangeKg: this.finishedDelta(),
       }));
     } catch { this.message.error('Could not save the image. Please try again.'); }
     finally { this.exporting.set(false); }
