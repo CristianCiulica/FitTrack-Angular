@@ -126,9 +126,7 @@
       >
           <div #assistantSurface class="chat-container modern-chat">
             <div class="chat-header-modern">
-              <span class="assistant-mark assistant-header-symbol" nz-icon nzType="ft:nutrition" aria-hidden="true"></span>
               <div class="chat-title-info">
-                <span class="chat-brand">MEAL PLANNER</span>
                 <h3 id="nutrition-assistant-title">Nutrition Assistant</h3>
               </div>
               <button type="button" class="assistant-collapse" aria-label="Close Nutrition Assistant" autofocus (click)="closeAssistant()">
@@ -140,7 +138,6 @@
               <div class="assistant-progress">
                 <div class="progress-copy">
                   <span>{{ assistantQuestion().eyebrow }}</span>
-                  <strong>{{ assistantStep() === 'result' ? 'Ready' : 'Personalize your meal' }}</strong>
                 </div>
                 <div class="assistant-step-track" role="progressbar" aria-label="Meal preferences" [attr.aria-valuenow]="assistantProgress()" aria-valuemin="0" aria-valuemax="100">
                   <span *ngFor="let step of assistantStepOrder; let index = index" [class.completed]="(index + 1) * 20 <= assistantProgress()"></span>
@@ -165,9 +162,6 @@
                     [attr.aria-pressed]="isAssistantOptionSelected(option.value)"
                     (click)="chooseAssistantOption(option.value)"
                   >
-                    <span class="option-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path [attr.d]="option.icon" /></svg>
-                    </span>
                     <span class="option-copy">
                       <strong>{{ option.label }}</strong>
                       <small>{{ option.description }}</small>

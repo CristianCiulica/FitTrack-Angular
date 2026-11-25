@@ -611,3 +611,16 @@
     transition: none !important;
   }
 }
+
+::ng-deep .nutrition-modal .modern-chat {
+  .assistant-options { background: transparent; border: 0; border-radius: 0; border-top: 1px solid var(--hairline); }
+  .assistant-options button { display: flex; align-items: center; gap: 16px; padding: 16px 2px; border-radius: 0; border: 0; border-bottom: 1px solid var(--hairline); }
+  .option-copy { flex: 1; }
+  .result-section, .macro-card { border: 0; border-radius: 0; background: transparent; }
+  .result-section { padding: 20px 0; border-top: 1px solid var(--hairline); }
+  .macro-grid { gap: 0; padding-block: 14px; border-block: 1px solid var(--hairline); }
+  .macro-card + .macro-card { border-left: 1px solid var(--hairline); }
+  .answer-summary { gap: 0; }
+  .answer-summary span { padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--ink-secondary); }
+  .answer-summary span + span::before { content: ' · '; white-space: pre; }
+}

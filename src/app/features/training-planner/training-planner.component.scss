@@ -413,75 +413,6 @@ fieldset {
     }
   }
 }
-.planner-aside {
-  padding-top: 20px;
-  h3 {
-    margin: 30px 0 24px;
-    font-size: 20px;
-    font-weight: 650;
-    line-height: 1.35;
-    letter-spacing: -0.035em;
-  }
-}
-.blueprint {
-  padding: 12px 10px 20px;
-  border: 1px solid var(--hairline);
-  border-radius: 24px;
-  background: var(--planner-card);
-  color: var(--accent);
-  svg {
-    width: 100%;
-    height: auto;
-    stroke-width: 1;
-    .blueprint-card {
-      fill: var(--planner-card);
-      stroke: var(--hairline);
-    }
-    .blueprint-line {
-      stroke: var(--ink-tertiary);
-      stroke-width: 3;
-    }
-    .blueprint-axis {
-      stroke: var(--hairline);
-    }
-    .blueprint-curve {
-      stroke-width: 2.5;
-    }
-    .blueprint-point {
-      fill: var(--accent);
-      stroke: var(--planner-card);
-      stroke-width: 2;
-    }
-  }
-  > span {
-    display: block;
-    text-align: center;
-    color: var(--ink-secondary);
-    font-size: 11px;
-    font-weight: 500;
-  }
-}
-.principle {
-  display: flex;
-  gap: 14px;
-  margin-top: 22px;
-  > span {
-    padding-top: 3px;
-    font-size: 10px;
-    font-weight: 650;
-    color: var(--accent);
-  }
-  strong {
-    font-size: 13px;
-    font-weight: 600;
-  }
-  p {
-    margin-top: 5px;
-    font-size: 12px;
-    line-height: 1.7;
-    color: var(--ink-secondary);
-  }
-}
 .planner-feedback {
   max-width: 1080px;
   margin: 22px auto 0;
@@ -843,3 +774,15 @@ fieldset {
   overflow-y: auto;
   font-size: 12px;
 }
+
+.training-screen .wizard-layout { display: block; max-width: 660px; }
+.training-screen .choice-stack, .training-screen .equipment-grid {
+  gap: 0; border-top: 1px solid var(--hairline);
+}
+.training-screen .choice { padding: 16px 4px; min-height: 66px; border: 0; border-bottom: 1px solid var(--hairline); border-radius: 0; background: transparent; align-items: center; }
+.training-screen .choice.selected { background: transparent; }
+.training-screen .choice:hover { background: var(--planner-subtle); }
+.training-screen .choice-symbol, .training-screen .level-symbol { display: none; }
+.training-screen .equipment-grid { column-gap: 24px; }
+.training-screen .planner-header, .training-screen .planner-footer { background: var(--bg); }
+.training-screen .planner-header > div { flex: 1; }

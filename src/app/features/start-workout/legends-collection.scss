@@ -271,6 +271,7 @@
   .log-tabs { display: flex; gap: 8px; overflow: auto; margin-right: -16px; padding-right: 16px; scrollbar-width: none; }
   .log-tabs button { flex: none; min-width: 150px; padding: 12px 16px; border: 1px solid var(--hairline); border-radius: 18px; background: var(--surface); color: var(--ink); text-align: left; }
   .log-tabs button[aria-pressed=true] { background: var(--log-blue); color: white; border-color: transparent; }
+  .log-tabs:has(button:nth-child(3):last-child) button { flex: 1; min-width: 0; padding-inline: 10px; }
   .log-tabs small { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; opacity: .8; }
   .log-tabs strong { font-size: 15px; }
   .log-card { margin: 16px 0 20px; padding: 18px 20px; border: 1px solid var(--hairline); border-radius: 24px; background: var(--surface); }
@@ -294,7 +295,6 @@
 ::ng-deep .legend-collection-drawer:has(.lc-index) .ant-drawer-header { display: none; }
 .lc-index .legends-back { width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--hairline); color: var(--ink); background: var(--surface); }
 .lc-index .lc-portrait { background: linear-gradient(180deg,#3b3b43,#17171b); }
-.lc-index .lc-portrait::after { background: radial-gradient(circle at 50% 34%,#ffffff13 0 13%,transparent 13.5%),radial-gradient(ellipse at 50% 110%,#ffffff08 0 42%,transparent 42.5%); }
 .lc-index .lc-athlete-card { background: var(--surface); }
 .lc-index .lc-card-footer { border-top: 1px solid var(--hairline); }
 @media (max-width: 600px) {
@@ -307,4 +307,20 @@
   .lc-index .lc-portrait > div > span { font-size: 11px; margin-bottom: 3px; line-height: 1.2; }
   .lc-index .lc-portrait h2 { font-size: 17px; line-height: 1.13; max-width: 8em; }
   .lc-index .lc-card-footer { padding: 7px 14px; font-size: 14px; min-height: 50px; }
+}
+
+.lc-index .legends-back, .legend-log .log-back {
+  display: grid; place-items: center; padding: 0; width: 44px; height: 44px;
+}
+.legend-log .athlete-cover {
+  position: relative; isolation: isolate; display: flex; align-items: end;
+  min-height: clamp(280px, 52dvh, 460px); margin: calc(-25px - env(safe-area-inset-top)) -16px 20px;
+  padding: 24px 20px 8px; background: #101013; color: white;
+  img, &::after { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+  img { object-fit: cover; object-position: center 22%; }
+  &::after { content: ''; background: linear-gradient(180deg, #0002, transparent 35%, #0c0c10ee); }
+  .log-back { position: absolute; top: max(16px, env(safe-area-inset-top)); left: 16px; border-radius: 12px; background: #151518c9; color: white; }
+  .log-back span { width: auto; height: auto; background: transparent; border: 0; }
+  h1 { color: white; max-width: 12ch; font-size: clamp(36px, 9vw, 48px); }
+  .log-title { color: #97baff; }
 }

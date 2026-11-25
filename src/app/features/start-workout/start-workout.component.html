@@ -78,10 +78,11 @@
   <ng-container *nzDrawerContent>
     @if (activePlan(); as plan) {
       <section class="legend-log">
-        <button type="button" class="log-back" (click)="backToLegends()"><span nz-icon nzType="left"></span> All legends</button>
-        <h1>{{ plan.athlete }}</h1>
-        <p class="log-title">{{ plan.title }}</p>
-        <header class="log-sessions"><h2>Sessions</h2><span>{{ legendRoutineIndex() + 1 }} / {{ plan.routines.length }}</span></header>
+        <header class="athlete-cover">
+          <img [src]="'legends/' + plan.id + '.jpg'" alt="" />
+          <button type="button" class="log-back" aria-label="Back to legends" (click)="backToLegends()"><span nz-icon nzType="left"></span></button>
+          <div><h1>{{ plan.athlete }}</h1><p class="log-title">{{ plan.title }}</p></div>
+        </header>
         <div class="log-tabs" role="group" aria-label="Legend plan sessions">
           @for (routine of plan.routines; track $index) {
             <button type="button" [attr.aria-pressed]="legendRoutineIndex() === $index" (click)="legendRoutineIndex.set($index); legendExpanded.set(false)">
@@ -119,6 +120,7 @@
           @for (plan of officialPlans; track plan.id) {
             <button type="button" class="lc-athlete-card" (click)="openPlan(plan)">
               <div class="lc-portrait">
+                <img [src]="'legends/' + plan.id + '.jpg'" alt="" loading="lazy" />
                 <span class="lc-card-number">{{ ($index + 1).toString().padStart(2, '0') }}</span>
                 <div><span>{{ plan.title }}</span><h2>{{ plan.athlete }}</h2></div>
               </div>

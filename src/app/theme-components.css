@@ -98,7 +98,7 @@ html[data-theme='dark'] body .legend-dot.target { background: #e5e5ea !important
 html[data-theme='dark'] body :is(
   .plan-promo, .plan-card, .legend-card, .plan-hero, .live-weight,
   .cardio-session-card, .table-card, .mobile-workout-card, .wm-exercise,
-  .settings-card, .projection, .assistant-options button, .macro-card,
+  .settings-card, .projection,
   .recent-empty, .empty-cardio-history, .mobile-empty-state,
   .empty-personal-routines, .goal-options button
 ) {
@@ -107,7 +107,7 @@ html[data-theme='dark'] body :is(
   border-color: var(--theme-line) !important;
   box-shadow: 0 8px 26px rgba(0, 0, 0, .12) !important;
 }
-html[data-theme='dark'] body :is(.plan-card:hover, .plan-promo:hover, .assistant-options button:hover) {
+html[data-theme='dark'] body :is(.plan-card:hover, .plan-promo:hover) {
   border-color: rgba(100, 181, 255, .35) !important;
 }
 html[data-theme='dark'] body :is(.heading-count, .plan-chip, .filter-pills button, .stepper-btn,

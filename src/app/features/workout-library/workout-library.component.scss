@@ -856,9 +856,9 @@ svg {
   }
 }
 
-.session-filters { display: flex; flex-wrap: wrap; margin: 0 0 36px; }
-.session-filters button { padding: 8px 16px; background: transparent; border: 1px solid var(--hairline); border-radius: 99px; color: var(--ink-secondary); font-size: 13px; font-weight: 600; }
-.session-filters button[aria-pressed=true] { color: var(--ink); background: var(--library-subtle); }
+.session-filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 36px; }
+.session-filters button, .program-goals button { padding: 8px 12px; background: transparent; border: 1px solid var(--hairline); border-radius: 99px; color: var(--ink-secondary); font-size: 13px; font-weight: 600; }
+.session-filters button[aria-pressed=true], .program-goals button.selected { border-color: var(--hairline); color: var(--ink); background: var(--library-subtle); }
 .session-grid { gap: 12px; }
 .session-tile { padding: 18px; min-height: 178px; border-radius: 22px; }
 .session-kicker { color: var(--ink-secondary); font-size: 12px; font-weight: 550; }

@@ -68,13 +68,7 @@
       type="search"
       [ngModel]="query()"
       (ngModelChange)="search($event)"
-      [placeholder]="
-        tab() === 'discover'
-          ? 'Find your plan'
-          : tab() === 'mine'
-            ? 'Find a plan'
-            : 'Search sessions or exercises'
-      "
+      placeholder="Search workouts"
       aria-label="Search training library"
   /></label>
 </div>

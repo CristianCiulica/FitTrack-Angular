@@ -86,21 +86,21 @@ export class TrainingPlannerComponent {
   readonly minuteOptions = [30, 45, 60, 75] as const;
   readonly questions = [
     {
-      title: 'A plan with your name on it.',
-      description: 'Start with what you want to achieve. We’ll build the training around you.',
+      title: 'What are you training for?',
+      description: 'Your goal sets the balance between reps, load and weekly volume.',
     },
     {
-      title: 'Meet yourself where you are.',
+      title: 'How long have you been lifting?',
       description:
-        'Your experience sets the starting workload. Consistency matters more than an ambitious label.',
+        'Choose the level that matches your recent training.',
     },
     {
-      title: 'Your space. Your equipment.',
+      title: 'What equipment can you use?',
       description:
         'Select what you can actually use. Every exercise and alternative will respect this list.',
     },
     {
-      title: 'Make room for stronger.',
+      title: 'When can you train?',
       description:
         'Choose two to six days you can sustain, then the time you have for each session.',
     },
@@ -110,7 +110,7 @@ export class TrainingPlannerComponent {
         'We’ll prioritise your focus while keeping the rest of your training in balance.',
     },
     {
-      title: 'Start from a good place.',
+      title: 'How is your recovery?',
       description: 'A useful plan matches your current readiness, as well as your ambition.',
     },
   ];

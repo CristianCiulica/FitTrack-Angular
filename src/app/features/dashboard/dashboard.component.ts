@@ -75,11 +75,11 @@ export class DashboardComponent implements OnInit {
 
   assistantQuestion = computed(() => {
     switch (this.assistantStep()) {
-      case 'goal': return { eyebrow: 'Step 1 of 5', title: 'Eat well. Your way.', description: 'Start with your goal. We’ll find a meal that fits your day.' };
-      case 'meal': return { eyebrow: 'Step 2 of 5', title: 'What do you want to plan?', description: 'Choose the moment when you want to eat this meal.' };
+      case 'goal': return { eyebrow: 'Step 1 of 5', title: 'What’s your nutrition goal?', description: 'This helps set the portion size and protein target.' };
+      case 'meal': return { eyebrow: 'Step 2 of 5', title: 'What do you want to plan?', description: 'Pick breakfast, lunch, dinner or a snack.' };
       case 'diet': return { eyebrow: 'Step 3 of 5', title: 'Any dietary preference?', description: 'The assistant will only use compatible meal ideas.' };
       case 'time': return { eyebrow: 'Step 4 of 5', title: 'How much time do you have?', description: 'We will match the preparation style to your schedule.' };
-      case 'budget': return { eyebrow: 'Step 5 of 5', title: 'Choose your budget', description: 'One last choice before building your recommendation.' };
+      case 'budget': return { eyebrow: 'Step 5 of 5', title: 'Choose your budget', description: 'Choose what you want to spend per serving.' };
       case 'result': return { eyebrow: 'Your meal', title: 'Meal recommendation', description: 'Chosen for your preferences.' };
     }
   });

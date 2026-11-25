@@ -13,12 +13,6 @@
 >
   <div #screen class="training-screen">
     <header class="planner-header">
-      <span
-        class="planner-mark assistant-header-symbol"
-        nz-icon
-        nzType="ft:workout"
-        aria-hidden="true"
-      ></span>
       <div>
         <h2 id="training-planner-title">Training Assistant</h2>
       </div>
@@ -315,48 +309,7 @@
               }
             }
           </section>
-          <aside class="planner-aside">
-            <div class="blueprint" aria-hidden="true">
-              <svg viewBox="0 0 280 200">
-                <defs>
-                  <pattern id="training-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                    <path d="M20 0H0V20" fill="none" stroke="currentColor" stroke-opacity=".08" />
-                  </pattern>
-                </defs>
-                <rect width="280" height="200" fill="url(#training-grid)" />
-                <rect x="37" y="30" width="206" height="140" rx="16" class="blueprint-card" />
-                <path d="M56 62h70M56 73h45" class="blueprint-line" />
-                <path d="M56 143h168" class="blueprint-axis" />
-                <path d="m62 129 28-12 28 5 28-28 28 5 40-34" class="blueprint-curve" />
-                <circle cx="214" cy="65" r="5" class="blueprint-point" /></svg
-              ><span>Small steps. Strong foundations.</span>
-            </div>
-            <h3>The thinking behind your plan.</h3>
-            <div class="principle">
-              <span>01</span>
-              <div>
-                <strong>A workload you can repeat</strong>
-                <p>Your schedule and experience shape the split, sets and session length.</p>
-              </div>
-            </div>
-            <div class="principle">
-              <span>02</span>
-              <div>
-                <strong>Every movement has a role</strong>
-                <p>
-                  Presses, pulls and lower-body patterns form the foundation. Accessories follow
-                  your priorities.
-                </p>
-              </div>
-            </div>
-            <div class="principle">
-              <span>03</span>
-              <div>
-                <strong>Progress with a purpose</strong>
-                <p>Clear rep ranges, useful rest and room to improve before adding weight.</p>
-              </div>
-            </div>
-          </aside>
+
         </div>
       } @else if (plan(); as p) {
         <div class="result-layout">
