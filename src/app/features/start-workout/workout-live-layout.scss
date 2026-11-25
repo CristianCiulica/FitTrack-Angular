@@ -136,13 +136,6 @@
 
 .workout-live:has(.review) {
   padding-top: max(24px, env(safe-area-inset-top));
-  padding-bottom: max(28px, env(safe-area-inset-bottom));
   .live-routine h2 { padding: 0; border: 0; background: transparent; color: var(--ink-secondary); font-size: 15px; font-weight: 500; }
   .review h1 { margin: 0 0 12px; font-size: clamp(30px, 9vw, 38px); font-weight: 750; }
-  .set-navigation { display: flex; justify-content: space-between; align-items: center; }
-  .set-navigation > span { order: 0; width: auto; font-size: 13px; }
-  .set-navigation button { font-size: 14px; }
-  .live-actions { gap: 12px; }
 }
-:host ::ng-deep .workout-live:has(.review) .live-actions .lg-button { min-height: 56px; }
-:host ::ng-deep .workout-live:has(.review) .live-stop .lg-button { border-radius: 50%; }

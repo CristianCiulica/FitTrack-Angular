@@ -345,7 +345,7 @@
 
   <div class="set-navigation">
     <button type="button" class="set-back" [disabled]="(!canGoBack() && !activeDrop()) || saving()" (click)="previousSet()"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m12 5-5 5 5 5" /></svg>{{ activeDrop() ? 'Edit main set' : state() === 'rest' ? 'Edit this set' : treadmillActive() ? 'Previous exercise' : 'Previous set' }}</button>
-    <span *ngIf="state() !== 'active' && currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} <ng-container *ngIf="!treadmillActive()"> · Set {{ currentSetIndex() }} of {{ exercise.sets }}</ng-container></span>
+    <span *ngIf="state() === 'rest' && currentExercise() as exercise">Exercise {{ currentExerciseIndex() + 1 }} of {{ currentRoutine().exercises.length }} <ng-container *ngIf="!treadmillActive()"> · Set {{ currentSetIndex() }} of {{ exercise.sets }}</ng-container></span>
     <button type="button" class="set-skip" *ngIf="state() === 'active'" (click)="skipSet()">{{ activeDrop() ? 'Skip drop' : treadmillActive() ? 'Skip treadmill' : 'Skip set' }} <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m8 5 5 5-5 5" /></svg></button>
   </div>
   <!-- Actiuni, fixate jos -->
