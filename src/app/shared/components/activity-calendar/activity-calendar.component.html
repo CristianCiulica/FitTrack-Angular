@@ -1,8 +1,5 @@
-<section class="activity-calendar" aria-labelledby="calendar-title" [attr.aria-busy]="loading()">
+<section class="activity-calendar" aria-label="Training calendar" [attr.aria-busy]="loading()">
   <header class="calendar-top">
-    <div>
-      <h2 id="calendar-title">Your training days.</h2>
-    </div>
     <div class="month-navigation">
       <button
         class="arrow"
@@ -87,7 +84,7 @@
       <div class="month" [attr.aria-label]="monthLabel()">
         <div class="weekdays" aria-hidden="true">
           @for (weekday of weekdays; track $index) {
-            <span>{{ weekday }}</span>
+            <span>{{ weekday[0] }}</span>
           }
         </div>
         <div class="days-grid">
@@ -110,27 +107,19 @@
               (click)="selectedKey.set(day.key)"
               (keydown)="onDayKey($event, day)"
             >
-              <span>{{ day.number }}</span
-              ><i aria-hidden="true">{{ day.state === 'active' ? '✓' : '' }}</i>
+              <span>{{ day.number }}</span>
             </button>
           }
         </div>
         <div class="legend" aria-label="Calendar legend">
           <span><i class="legend-active"></i>Trained</span
-          ><span><i class="legend-inactive"></i>No training</span
-          ><span><i class="legend-future"></i>Upcoming</span>
+          ><span><i class="legend-today"></i>Today</span>
         </div>
       </div>
       <aside class="day-detail" aria-live="polite" aria-atomic="true">
         @let day = selectedDay();
-        <div class="journal-label">THE DAILY RECORD</div>
-        <div class="journal-date">
-          <strong>{{ day.number < 10 ? '0' + day.number : day.number }}</strong>
-          <div>
-            <span>{{ day.label.split(',')[0] }}</span
-            ><span>{{ monthLabel() }}{{ day.today ? ' · Today' : '' }}</span>
-          </div>
-        </div>
+        <div class="journal-label">{{ day.today ? 'Today' : 'Selected day' }}</div>
+        <h2 class="day-title">{{ day.label.split(',')[0] }}, {{ day.number }} {{ monthLabel().slice(0, 3) }}</h2>
         @if (day.sessions.length) {
           <span class="journal-status trained">You showed up.</span>
           <div class="session-list">
@@ -146,14 +135,11 @@
             the books. Keep building.
           </p>
         } @else {
-          <span class="journal-status">{{
-            day.state === 'future' ? 'Still to be written.' : 'Become Stronger'
-          }}</span>
           <p class="journal-empty">
             {{
               day.state === 'future'
                 ? 'Your next chapter is ahead of you.'
-                : 'No training logged for this day. The next square is a fresh start.'
+                : 'No training logged yet. The next square is a fresh start.'
             }}
           </p>
         }
@@ -164,8 +150,5 @@
         }
       </aside>
     </div>
-    <footer class="calendar-footnote">
-      <span>Workouts, runs & walks. All part of your story.</span><span>Today is outlined.</span>
-    </footer>
   }
 </section>

@@ -780,6 +780,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   // hub-ul Legends' Plans: drawer-ul + planul selectat in el (null = lista de staruri)
   legendsOpen = signal(false);
   activePlan = signal<OfficialPlan | null>(null);
+  readonly legendExpanded = signal(false);
   readonly legendRoutineIndex = signal(0);
   readonly legendRoutine = computed(() => {
     const routine = this.activePlan()?.routines[this.legendRoutineIndex()];
@@ -918,6 +919,15 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   exporting = signal(false);
   summaryImage = signal<string | null>(null);
   readonly durationLabel = durationLabel;
+  readonly setBars = [1, 2, 3, 4, 5, 6, 7, 8];
+  readonly finishedClock = computed(() => {
+    const seconds = this.finishedDuration();
+    return Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0');
+  });
+
+  loggedExerciseCount(): number {
+    return this.loggedWeights.filter(sets => sets.some(weight => weight != null)).length;
+  }
 
   restTimeTarget = signal(90);
   restTimeRemaining = signal(90);
@@ -1208,6 +1218,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
   }
 
   openPlan(plan: OfficialPlan) {
+    this.legendExpanded.set(false);
     this.legendRoutineIndex.set(0);
     this.activePlan.set(plan);
   }
@@ -1691,7 +1702,14 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.state() !== 'finished' || this.exporting()) return;
     this.exporting.set(true);
     try {
-      this.summaryImage.set(createWorkoutSummaryImage({name:this.currentRoutine().name,date:this.targetDate(),durationSeconds:this.finishedDuration(),hasTimedCardio:this.hasTreadmill(),...(this.cardioOnly() ? {cardioTargetSeconds:this.currentRoutine().exercises.reduce((sum,e)=>sum+(e.durationMinutes ?? 20)*60,0)} : {}),sets:this.completedSets(),plannedSets:this.totalSets(),volume:this.displayLoad(this.finishedVolume()),weightUnit:this.weightUnit(),calories:this.finishedCalories(),delta:this.finishedDelta() == null ? null : this.displayLoad(this.finishedDelta()!)}));
+      this.summaryImage.set(createWorkoutSummaryImage({
+        name: this.currentRoutine().name,
+        date: this.targetDate(),
+        durationSeconds: this.finishedDuration(),
+        hasTimedCardio: this.hasTreadmill(),
+        sets: this.completedSets(),
+        calories: this.finishedCalories(),
+      }));
     } catch { this.message.error('Could not save the image. Please try again.'); }
     finally { this.exporting.set(false); }
   }

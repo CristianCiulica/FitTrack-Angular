@@ -1,7 +1,7 @@
 <nz-layout class="app-layout" [attr.inert]="workoutInProgress() ? '' : null">
 
   <nz-layout class="main-layout">
-    <nz-header class="app-header">
+    <nz-header class="app-header" *ngIf="state() !== 'finished'">
       <div class="header-left">
         <app-menu></app-menu>
         <h2>
@@ -39,25 +39,23 @@
         <!-- FINISHED STATE -->
         <ng-container *ngIf="state() === 'finished'">
           <section class="session-summary" aria-labelledby="summary-title">
-            <div class="summary-check" aria-hidden="true">✓</div>
-            <span class="summary-eyebrow">SESSION COMPLETE</span>
-            <h1 id="summary-title">{{ currentRoutine().name }}</h1>
-            <p class="summary-date">{{ targetDate() | date:'EEEE, MMMM d' }}</p>
+            <h1 id="summary-title">{{ currentRoutine().name }}<span *ngIf="!currentRoutine().name.toLowerCase().includes('workout')">Workout</span></h1>
             <div class="summary-metrics">
-              <div><span>Duration</span><strong>{{ durationLabel(finishedDuration()) }}</strong><small>{{ cardioOnly() ? 'walking time · pauses excluded' : 'including rests' }}</small></div>
-              <div><span>{{ hasTreadmill() ? 'Steps completed' : 'Sets completed' }}</span><strong>{{ completedSets() }}<small> / {{ totalSets() }}</small></strong><small>{{ totalSets() - completedSets() }} skipped</small></div>
-              <div *ngIf="!cardioOnly()"><span>Total volume</span><strong>{{ displayLoad(finishedVolume()) | number:'1.0-0' }}<small> {{ weightUnit() }}</small></strong><small>reps × weight</small></div>
-              <div><span>Estimated energy</span><strong>{{ finishedCalories() }}<small> kcal</small></strong><small>{{ hasTreadmill() ? 'from completed activity' : 'from completed sets' }}</small></div>
+              <div><span>Duration</span><strong>{{ finishedClock() }} <small>min</small></strong></div>
+              <div><span>Energy</span><strong>{{ finishedCalories() }} <small>kcal</small></strong></div>
+              <div *ngIf="!cardioOnly()"><span>Volume</span><strong>{{ finishedVolume() ? (displayLoad(finishedVolume()) | number:'1.0-0') : '—' }} <small>{{ weightUnit() }}</small></strong></div>
+              <div><span>Exercises</span><strong>{{ finishedExercises().length }}</strong></div>
             </div>
             @if (finishedPrevious(); as previous) {
               <div class="summary-comparison"><span>Compared with {{ previous.date | date:'MMM d' }}</span><strong>{{ finishedDelta()! > 0 ? '+' : '' }}{{ displayLoad(finishedDelta()!) | number:'1.0-0' }} {{ weightUnit() }} <small>volume</small></strong>@if (previous.durationSeconds != null) { <small>Previous duration · {{ durationLabel(previous.durationSeconds) }}</small> }</div>
             }
-            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><strong>{{ exercise.name }}</strong><span>{{ exercise.seconds != null ? durationLabel(exercise.seconds) + ' · treadmill' : exercise.sets + (exercise.sets === 1 ? ' set' : ' sets') + ' · ' + displayLoad(exercise.volume) + ' ' + weightUnit() }}</span>
+            <header class="sets-heading"><strong>Exercises</strong><span>Sets per exercise</span></header>
+            <div class="summary-exercises">@for (exercise of finishedExercises(); track $index) { <div><small>{{ ($index + 1).toString().padStart(2, '0') }}</small><strong>{{ exercise.name }}</strong><span class="set-bars" [attr.aria-label]="exercise.sets + ' sets'">@for (bar of setBars.slice(0, exercise.sets); track bar) { <i [style.height.px]="6 + bar * 3"></i> }@if (exercise.sets > setBars.length) { {{ exercise.sets }} }</span><span class="sr-only">{{ exercise.seconds != null ? durationLabel(exercise.seconds) + ' · treadmill' : exercise.sets + (exercise.sets === 1 ? ' set' : ' sets') + ' · ' + displayLoad(exercise.volume) + ' ' + weightUnit() }}</span>
               @for (change of exercise.loadChanges; track change.set) {
                 <small class="load-change" [class.load-up]="change.delta > 0" [class.load-down]="change.delta < 0">Set {{ change.set }} · {{ change.delta > 0 ? '+' : '' }}{{ change.delta | number:'1.0-1' }} {{ weightUnit() }} <span>vs {{ change.date | date:'MMM d' }}</span></small>
               }
             </div> }</div>
-            <p class="summary-saved" role="status">{{ savedLocally() ? 'Saved on this device. It will sync when you reconnect and open your history.' : 'Saved to your workout history.' }}</p>
+            <p *ngIf="savedLocally()" class="summary-saved" role="status">{{ savedLocally() ? 'Saved on this device. It will sync when you reconnect and open your history.' : 'Saved to your workout history.' }}</p>
             <div class="summary-actions"><button type="button" (click)="exportSummary()" [disabled]="exporting()">{{ exporting() ? 'Preparing image…' : 'Save as image' }}</button><a routerLink="/dashboard" class="summary-primary" (click)="reset()">Back to Home</a></div>
           </section>
         </ng-container>
@@ -79,27 +77,55 @@
 <nz-drawer [nzVisible]="legendsOpen()" nzWrapClassName="legends-drawer legend-collection-drawer" [nzWidth]="'100%'" [nzBodyStyle]="{ padding: '0', background: 'var(--bg)' }" nzPlacement="right" [nzTitle]="activePlan()?.athlete ?? 'The Legends Collection'" (nzOnClose)="closePlan()">
   <ng-container *nzDrawerContent>
     @if (activePlan(); as plan) {
-      <div class="lc-detail">
-        <button type="button" class="lc-back" (click)="backToLegends()"><span aria-hidden="true">←</span> All legends</button>
-        <section class="lc-athlete-hero">
-          <div><span class="lc-eyebrow">THE LEGENDS COLLECTION</span><h1>{{ plan.athlete }}<span>.</span></h1><p class="lc-athlete-title">{{ plan.title }}</p><div class="lc-athlete-meta"><span>{{ plan.routines.length }} sessions to explore</span><span>Advanced training</span></div></div>
-          <img [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" />
-        </section>
-        <section class="lc-session-section">
-          <div class="lc-section-heading"><div><span class="lc-eyebrow">PICK YOUR SESSION</span><h2>Sessions</h2></div><span>{{ legendRoutineIndex() + 1 }} / {{ plan.routines.length }}</span></div>
-          <div class="lc-day-tabs" role="group" aria-label="Legend plan sessions">@for (routine of plan.routines; track $index) {<button type="button" [class.active]="legendRoutineIndex() === $index" [attr.aria-pressed]="legendRoutineIndex() === $index" (click)="legendRoutineIndex.set($index)"><small>SESSION {{ $index + 1 }}</small><strong>{{ routine.name }}</strong></button>}</div>
-          @if (legendRoutine(); as routine) {
-            <div class="lc-session-card"><header><div><span class="lc-eyebrow">YOUR SELECTED SESSION</span><h2>{{ routine.name }}</h2></div><div class="lc-session-metrics"><span><strong>{{ routine.exercises.length }}</strong> exercises</span><span><strong>{{ routineSets(routine) }}</strong> working sets</span><span><strong>~{{ routineMinutes(routine) }}</strong> min</span></div></header>
-              <ol class="lc-exercises">@for (exercise of routine.exercises; track $index) {<li><span class="lc-exercise-number">{{ ($index + 1).toString().padStart(2, '0') }}</span><strong>{{ exercise.name }}</strong><span>{{ exercise.sets }} × {{ exercise.repRange || exercise.reps }}<small>{{ exercise.repUnit === 'seconds' ? 'sec' : 'reps' }}</small></span></li>}</ol>
-              <footer><p>Advanced training · Compounds first</p><button type="button" class="lc-start" (click)="startFromPlan(routine, plan.id, legendRoutineIndex())">Start this session</button></footer>
-            </div>
+      <section class="legend-log">
+        <button type="button" class="log-back" (click)="backToLegends()"><span nz-icon nzType="left"></span> All legends</button>
+        <h1>{{ plan.athlete }}</h1>
+        <p class="log-title">{{ plan.title }}</p>
+        <header class="log-sessions"><h2>Sessions</h2><span>{{ legendRoutineIndex() + 1 }} / {{ plan.routines.length }}</span></header>
+        <div class="log-tabs" role="group" aria-label="Legend plan sessions">
+          @for (routine of plan.routines; track $index) {
+            <button type="button" [attr.aria-pressed]="legendRoutineIndex() === $index" (click)="legendRoutineIndex.set($index); legendExpanded.set(false)">
+              <small>Session {{ $index + 1 }}</small><strong>{{ routine.name }}</strong>
+            </button>
           }
-        </section>
-      </div>
+        </div>
+        @if (legendRoutine(); as routine) {
+          <article class="log-card">
+            <h2>{{ routine.name }}</h2>
+            <dl>@for (metric of [[routine.exercises.length, 'exercises'], [routineSets(routine), 'working sets'], ['~' + routineMinutes(routine), 'min']]; track metric[1]) {
+              <div><dt>{{ metric[1] }}</dt><dd>{{ metric[0] }}</dd></div>
+            }</dl>
+            <ol id="legend-exercises">
+              @for (exercise of (legendExpanded() ? routine.exercises : routine.exercises.slice(0, 1)); track $index) {
+                <li><span>{{ ($index + 1).toString().padStart(2, '0') }}</span><strong>{{ exercise.name }}</strong><b>{{ exercise.sets }} × {{ exercise.repRange || exercise.reps }}<small>{{ exercise.repUnit === 'seconds' ? 'sec' : 'reps' }}</small></b></li>
+              }
+            </ol>
+            @if (routine.exercises.length > 1) {
+              <button type="button" class="log-toggle" aria-controls="legend-exercises" [attr.aria-expanded]="legendExpanded()" (click)="legendExpanded.set(!legendExpanded())">
+                {{ legendExpanded() ? 'Show less' : 'Show all ' + routine.exercises.length + ' exercises' }} <span nz-icon [nzType]="legendExpanded() ? 'up' : 'down'"></span>
+              </button>
+            }
+          </article>
+          <footer><button type="button" (click)="startFromPlan(routine, plan.id, legendRoutineIndex())"><span aria-hidden="true">▶</span> Start session</button></footer>
+        }
+      </section>
     } @else {
       <div class="lc-index">
-        <header class="lc-intro"><span class="lc-eyebrow">THE LEGENDS COLLECTION</span><h1>Train like<br />the greats<span>.</span></h1><div class="lc-index-meta"><span>{{ officialPlans.length }} icons of bodybuilding</span></div></header>
-        <div class="lc-grid">@for (plan of officialPlans; track plan.id) {<button type="button" class="lc-athlete-card" (click)="openPlan(plan)"><div class="lc-portrait"><img [src]="'legends/' + plan.id + '.jpg'" [alt]="plan.athlete" loading="lazy" /><span class="lc-card-number">{{ ($index + 1).toString().padStart(2, '0') }}</span><div><span>{{ plan.title }}</span><h2>{{ plan.athlete }}</h2></div></div><div class="lc-card-footer"><span>{{ plan.routines.length }} sessions<span>Explore the split</span></span><span aria-hidden="true">↗</span></div></button>}</div>
+        <header class="lc-intro">
+          <button class="legends-back" type="button" aria-label="Back to workouts" (click)="closePlan()"><span nz-icon nzType="left"></span></button>
+          <h1>Discover new<br />workouts</h1>
+        </header>
+        <div class="lc-grid">
+          @for (plan of officialPlans; track plan.id) {
+            <button type="button" class="lc-athlete-card" (click)="openPlan(plan)">
+              <div class="lc-portrait">
+                <span class="lc-card-number">{{ ($index + 1).toString().padStart(2, '0') }}</span>
+                <div><span>{{ plan.title }}</span><h2>{{ plan.athlete }}</h2></div>
+              </div>
+              <div class="lc-card-footer"><span>{{ plan.routines.length }} sessions</span><span aria-hidden="true">↗</span></div>
+            </button>
+          }
+        </div>
       </div>
     }
   </ng-container>
@@ -301,10 +327,13 @@
   </div>
 
   <div class="live-body review" *ngIf="state() === 'review'">
-    <span class="review-symbol" nz-icon nzType="check-circle"></span>
-    <span class="rest-label">Session review</span><h1>Ready to wrap up?</h1>
-    <p>{{ completedSets() }} of {{ totalSets() }} {{ hasTreadmill() ? 'steps' : 'sets' }} completed.</p>
-    <p class="review-note">{{ completedSets() === 0 ? 'Go back and complete an exercise to save this workout.' : 'Only completed work is saved. You can still go back to a skipped exercise.' }}</p>
+    <div class="review-ring" [style.--complete]="progressPercent() + '%'"><strong>{{ progressPercent() }}%</strong><small>complete</small></div>
+    <h1>Ready to wrap up?</h1>
+    <div class="review-counts">
+      <div><strong>{{ completedSets() }} <small>/ {{ totalSets() }}</small></strong><span>{{ hasTreadmill() ? 'steps' : 'sets' }} completed</span></div>
+      <div><strong>{{ loggedExerciseCount() }} <small>/ {{ currentRoutine().exercises.length }}</small></strong><span>exercises</span></div>
+    </div>
+    @if (!completedSets()) { <p>Go back and complete an exercise to save this workout.</p> }
   </div>
 
   <div class="set-navigation">
@@ -341,11 +370,11 @@
     >
       <span nz-icon nzType="forward"></span> Skip rest
     </ft-action>
-    <ft-action *ngIf="state() === 'review'" class="live-primary" variant="filled" [disabled]="completedSets() === 0" [busy]="saving()" (activated)="finishWorkout()"><span nz-icon nzType="check"></span> Save workout</ft-action>
+    <ft-action *ngIf="state() === 'review'" class="live-primary" variant="filled" [disabled]="completedSets() === 0" [busy]="saving()" (activated)="finishWorkout()">Save workout</ft-action>
   </div>
 </div>
 
-<nz-modal [nzVisible]="!!summaryImage()" nzTitle="Your session" [nzFooter]="null" nzCentered
+<nz-modal [nzVisible]="!!summaryImage()" nzTitle="Your session" [nzFooter]="null" nzWrapClassName="session-image-sheet"
   [nzWidth]="'min(430px, calc(100vw - 32px))'" nzClassName="solid-modal" (nzOnCancel)="summaryImage.set(null)">
   <ng-container *nzModalContent>
     <img class="summary-share-image" [src]="summaryImage()" alt="Your workout summary image" />

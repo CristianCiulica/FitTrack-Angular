@@ -1,10 +1,7 @@
 <nz-layout class="app-layout">
   <nz-layout class="main-layout">
-    <nz-header class="app-header">
-      <div class="header-left"><app-menu /><h2>History</h2></div>
-    </nz-header>
-    <nz-content role="main" class="app-content">
-      <h1>Activity History</h1>
+    <nz-content role="main" class="history-content">
+      <header class="history-heading"><app-menu /><h1>Activity History</h1></header>
       <div class="history-filters" role="group" aria-label="Activity type">
         @for (option of filters; track option) {
           <button type="button" [attr.aria-pressed]="filter() === option" (click)="filter.set(option)">{{ option }}</button>
@@ -44,12 +41,13 @@
                 </button>
                 @if (open) {
                   @if (run.route?.length) { <app-route-map [route]="run.route" label="Recorded running route" /> }
-                  <dl class="metrics">
-                    <div><dd>{{ formatDuration(run.durationSeconds) }}</dd><dt>Duration</dt></div>
-                    <div><dd>{{ formatPace(run) }} @if (run.distanceMeters >= 20) { <small>/{{ distanceUnit }}</small> }</dd><dt>Pace</dt></div>
-                    <div><dd>{{ run.indoor && run.indoor.calories === null ? '—' : run.calories }} @if (!run.indoor || run.indoor.calories !== null) { <small>kcal</small> }</dd><dt>Energy</dt></div>
-                  </dl>
-                  <details class="more"><summary>Session details</summary>
+                  <details class="run-details"><summary title="Session details" aria-label="Session details">
+                  <span class="metrics">
+                    <span><strong>{{ formatDuration(run.durationSeconds) }}</strong><small>Duration</small></span>
+                    <span><strong>{{ formatPace(run) }} @if (run.distanceMeters >= 20) { <small>/{{ distanceUnit }}</small> }</strong><small>Pace</small></span>
+                    <span><strong>{{ run.indoor && run.indoor.calories === null ? '—' : run.calories }} @if (!run.indoor || run.indoor.calories !== null) { <small>kcal</small> }</strong><small>Energy</small></span>
+                  </span>
+                  </summary>
                     <dl class="detail-list">
                       <dt>Average speed</dt><dd>{{ speedValue(run.averageSpeedKmh) | number:'1.1-1' }} {{ distanceUnit }}/h</dd>
                       <dt>Steps</dt><dd>{{ run.indoor && run.indoor.steps === null ? 'Not recorded' : run.steps }}</dd>

@@ -4,3 +4,10 @@
 .create-workout-action [nz-icon] { font-size: 14px; }
 .compact-button-label { display: none; }
 @media (max-width: 360px) { .create-workout-action { padding-inline: 12px; gap: 5px; font-size: 12px; }.create-workout-action .button-label { display: none; }.compact-button-label { display: inline; } }
+
+@media (max-width: 600px) {
+  .create-workout-action { width: 40px; height: 40px; min-height: 40px; padding: 0; border: 0; border-radius: 50%; color: white; background: #2563eb; }
+  .create-workout-action:hover, .create-workout-action:active { background: #1d54ce; }
+  .create-workout-action [nz-icon] { font-size: 18px; }
+  .create-workout-action .button-label, .create-workout-action .compact-button-label { display: none; }
+}

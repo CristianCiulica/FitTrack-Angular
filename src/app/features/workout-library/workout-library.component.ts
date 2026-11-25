@@ -65,6 +65,8 @@ export class WorkoutLibraryComponent {
   private pendingEnrollment: ProgramEnrollment | null = null;
   readonly tab = signal<'discover' | 'mine' | 'sessions'>('discover');
   readonly goal = signal('all');
+  readonly category = signal('All');
+  readonly sessionCategories = ['All', 'Push', 'Pull', 'Legs', 'Full body'];
   readonly query = signal('');
   readonly page = signal(0);
   readonly minePage = signal(0);
@@ -114,12 +116,12 @@ export class WorkoutLibraryComponent {
   readonly filteredSessions = computed(() => {
     const q = this.query().trim().toLowerCase();
     return this.routines().filter(
-      (r) =>
+      (r) => (this.category() === 'All' || this.category() === (r.category || 'Strength')) && (
         !q ||
         [r.name, r.description, r.category, ...r.exercises.map((e) => e.name)]
           .join(' ')
           .toLowerCase()
-          .includes(q),
+          .includes(q)),
     );
   });
   readonly visibleSessions = computed(() =>
@@ -429,6 +431,10 @@ export class WorkoutLibraryComponent {
       routine,
       key: routine.id ? 'personal-' + routine.id : 'library-' + routine.name,
     });
+  }
+  sessionLevel(routine: WorkoutRoutine): string {
+    const minutes = this.minuteEstimate(routine);
+    return minutes <= 30 ? 'Beginner' : minutes >= 53 ? 'Advanced' : 'Intermediate';
   }
   minuteEstimate(routine: WorkoutRoutine) {
     return Math.round(

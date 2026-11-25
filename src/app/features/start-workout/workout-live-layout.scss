@@ -85,3 +85,64 @@
   .set-navigation button { grid-row: 1; font-size: 11px; gap: 2px; }
   .set-skip { grid-column: 3; }
 }
+
+.review-ring {
+  width: 124px; height: 124px; display: grid; place-content: center;
+  position: relative; isolation: isolate; border-radius: 50%;
+  background: conic-gradient(#3069ed var(--complete), var(--hairline) 0);
+}
+.review-ring::before { content: ''; position: absolute; inset: 8px; border-radius: inherit; background: var(--bg); z-index: -1; }
+.review-ring strong { color: var(--ink); font-size: 36px; line-height: 1; letter-spacing: -.05em; }
+.review-ring small, .review-counts span, .review-counts small { color: var(--ink-secondary); }
+.review-counts { display: grid; grid-template-columns: 1fr 1fr; width: 100%; padding: 17px 0; border: 1px solid var(--hairline); border-radius: 20px; background: var(--surface); }
+.review-counts div { display: grid; gap: 2px; }
+.review-counts div + div { border-left: 1px solid var(--hairline); }
+.review-counts strong { font-size: 27px; line-height: 1.25; }
+.review-counts small { font-size: 16px; }
+.review-counts span { font-size: 13px; }
+.app-content:has(.session-summary) { padding: 0 !important; }
+.session-summary {
+  margin: 0 auto; border: 0; border-radius: 0; background: var(--bg); text-align: left;
+  padding: 68px 20px 24px;
+  h1 { margin: 0; padding-bottom: 36px; border-bottom: 4px solid var(--ink-tertiary); font-size: clamp(52px,18vw,76px); font-weight: 800; letter-spacing: -.065em; line-height: .96; }
+  h1 span { display: block; }
+}
+.summary-metrics { gap: 0; margin: 32px 0; border-top: 1px solid var(--hairline); }
+.summary-metrics > div { padding: 20px 0; border-bottom: 1px solid var(--hairline); }
+.summary-metrics > div:nth-child(even) { border-left: 1px solid var(--hairline); padding-left: 20px; }
+.summary-metrics span,.sets-heading strong { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; font-weight: 650; color: var(--ink-tertiary); }
+.summary-metrics strong { font-size: 36px; }
+.summary-metrics small { color: var(--ink-tertiary); }
+.sets-heading { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 14px; font-size: 13px; color: var(--ink-secondary); border-bottom: 1px solid var(--hairline); }
+.summary-exercises { margin: 0; }
+.summary-exercises > div { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; min-height: 54px; }
+.summary-exercises strong { font-size: 16px; }
+.summary-exercises small { color: var(--ink-tertiary); }
+.summary-exercises .load-change { grid-column: 2 / -1; }
+.set-bars { display: flex; align-items: end; gap: 3px; }
+.set-bars i { width: 4px; border-radius: 3px; background: var(--ink); }
+.summary-actions { margin-top: clamp(40px,9vh,108px); text-align: center; }
+.summary-actions .summary-primary { order: -1; border-radius: 16px; padding: 16px; background: #3069ed; }
+.summary-actions button { border: 0; }
+.summary-share-image { border-radius: 24px; }
+.summary-download { border-radius: 16px; padding: 16px; background: #3069ed; }
+@media (max-width: 600px) {
+  ::ng-deep .session-image-sheet .ant-modal { position: fixed; inset: auto 0 0; width: 100% !important; max-width: none; margin: 0; padding: 0; }
+  ::ng-deep .session-image-sheet .ant-modal-content { border-radius: 28px 28px 0 0 !important; padding: 26px 16px max(24px, env(safe-area-inset-bottom)); }
+  ::ng-deep .session-image-sheet .ant-modal-body { padding: 0; }
+  ::ng-deep .session-image-sheet .ant-modal-header { padding: 6px 0 16px; border: 0; }
+  ::ng-deep .session-image-sheet .ant-modal-content::before { content: ''; position: absolute; top: 10px; left: calc(50% - 18px); width: 36px; height: 4px; border-radius: 4px; background: var(--ink-tertiary); }
+}
+
+.workout-live:has(.review) {
+  padding-top: max(24px, env(safe-area-inset-top));
+  padding-bottom: max(28px, env(safe-area-inset-bottom));
+  .live-routine h2 { padding: 0; border: 0; background: transparent; color: var(--ink-secondary); font-size: 15px; font-weight: 500; }
+  .review h1 { margin: 0 0 12px; font-size: clamp(30px, 9vw, 38px); font-weight: 750; }
+  .set-navigation { display: flex; justify-content: space-between; align-items: center; }
+  .set-navigation > span { order: 0; width: auto; font-size: 13px; }
+  .set-navigation button { font-size: 14px; }
+  .live-actions { gap: 12px; }
+}
+:host ::ng-deep .workout-live:has(.review) .live-actions .lg-button { min-height: 56px; }
+:host ::ng-deep .workout-live:has(.review) .live-stop .lg-button { border-radius: 50%; }

@@ -12,6 +12,7 @@ import {
   SettingOutline,
   UserOutline,
 } from '@ant-design/icons-angular/icons';
+import { FT_ICONS } from '../../glisse/icons';
 import { AppMenuComponent } from './app-menu.component';
 import { ProfileService } from '../../../core/services/profile.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -45,11 +46,7 @@ describe('Mobile navigation lifecycle', () => {
       ],
     });
     const icons = TestBed.inject(NzIconService);
-    for (const name of ['home', 'history', 'workout', 'run', 'nutrition', 'weight', 'sign-out'])
-      icons.addIconLiteral(
-        'ft:' + name,
-        '<svg viewBox="0 0 24 24"><path d="M2 2h20v20H2z"/></svg>',
-      );
+    for (const [name, svg] of Object.entries(FT_ICONS)) icons.addIconLiteral(name, svg);
   });
   afterEach(() => vi.unstubAllGlobals());
   it('creates no drawer at startup and returns to closed state after recreation', () => {

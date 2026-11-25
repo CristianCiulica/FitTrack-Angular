@@ -398,32 +398,32 @@
    ------------------------------------------------------------ */
 
 @media (max-width: 600px) {
-  ::ng-deep .ant-modal {
+  ::ng-deep .workout-modal-wrap .ant-modal {
     top: max(8px, env(safe-area-inset-top)) !important;
     width: calc(100vw - 16px) !important;
     max-width: calc(100vw - 16px) !important;
     padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
   }
 
-  ::ng-deep .ant-modal-content {
+  ::ng-deep .workout-modal-wrap .ant-modal-content {
     display: flex;
     flex-direction: column;
     max-height: calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 
-  ::ng-deep .ant-modal-header {
+  ::ng-deep .workout-modal-wrap .ant-modal-header {
     flex: 0 0 auto;
     padding: 16px 18px !important;
   }
 
-  ::ng-deep .ant-modal-body {
+  ::ng-deep .workout-modal-wrap .ant-modal-body {
     flex: 1 1 auto;
     max-height: none !important;
     overflow-y: auto !important;
     overscroll-behavior: contain;
   }
 
-  ::ng-deep .ant-modal-footer {
+  ::ng-deep .workout-modal-wrap .ant-modal-footer {
     flex: 0 0 auto;
     padding: 12px 18px max(12px, env(safe-area-inset-bottom)) !important;
     background: rgba(255, 255, 255, 0.72);

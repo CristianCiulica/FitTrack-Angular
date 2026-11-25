@@ -1,23 +1,13 @@
 <nz-layout class="app-layout">
 
   <nz-layout class="main-layout">
-    <nz-header class="app-header">
-      <div class="header-left">
-        <app-menu></app-menu>
-        <h2>
-          <span class="desktop-page-title">Progress</span>
-          <span class="mobile-header-brand">FitTrack<span class="brand-dot">.</span></span>
-        </h2>
-      </div>
-    </nz-header>
-
     <nz-content role="main" class="app-content">
       <div class="progress-page">
         <header class="progress-intro">
-          <h1>Progress</h1>
-          <ft-action #achievementsLauncher dialogId="achievements-screen"
+          <app-menu /><h1>Progress</h1>
+          <ft-action #achievementsLauncher label="Achievements" dialogId="achievements-screen"
             [expanded]="achievementsOpen()" (activated)="openAchievements()">
-            <span nz-icon nzType="trophy" aria-hidden="true"></span> Achievements
+            <span nz-icon nzType="trophy" aria-hidden="true"></span>
           </ft-action>
         </header>
         @if (error()) {
@@ -51,23 +41,23 @@
           </section>
           <section class="month-overview" aria-labelledby="month-overview-title">
             <div class="section-caption">
-              <h2 id="month-overview-title">The month at a glance</h2>
+              <h2 id="month-overview-title">This month</h2>
               <span>{{ monthLabel() }}</span>
             </div>
             <div class="progress-stats" [attr.aria-busy]="loading()">
               <div class="stat-card">
                 <span>Training days</span
                 ><strong>{{ loading() ? '—' : summary().activeDays }}</strong
-                ><small>{{ summary().elapsedDays }} days so far</small>
+                >
               </div>
               <div class="stat-card">
                 <span>Sessions</span><strong>{{ loading() ? '—' : summary().totalSessions }}</strong
-                ><small>Completed this month</small>
+                >
               </div>
               <div class="stat-card">
                 <span>Consistency</span
                 ><strong>{{ loading() ? '—' : summary().consistency }}<small>%</small></strong
-                ><small>Active / elapsed days</small>
+                >
               </div>
             </div>
           </section>

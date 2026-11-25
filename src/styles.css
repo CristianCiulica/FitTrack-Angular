@@ -849,7 +849,7 @@ body:has(.achievements-dialog[open]) { overflow: hidden; }
 ft-tab-bar { display:block; }
 ft-tab-bar svg { width:24px; height:24px; }
 ft-tab-bar .lg-tab-bar[data-icons] { --lg-tab-width: min(18vw, 76px); --lg-tab-selected: var(--accent-deep); }
-body:has(.workout-live, .live-map.active) ft-navigation > aside { visibility: hidden; }
+body:has(.workout-live, .session-summary, .live-map.active) ft-navigation > aside { visibility: hidden; }
 ft-action .lg-button { width:100%; }
 ft-slider .lg-slider { width:100%; }
 html body ft-action[class] {

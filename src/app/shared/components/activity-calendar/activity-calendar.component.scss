@@ -443,3 +443,30 @@ summary > span {
 .journal-link:hover { color: #fff; background: var(--accent-strong); }
 :host-context(html[data-theme='dark']) .journal-status.trained,
 :host-context(html[data-theme='dark']) .session-check { color: var(--accent); }
+
+.month-navigation { width: 100%; justify-content: space-between; }
+.day { display: grid; place-items: center; }
+.day span { position: static; }
+.day.inactive, :host-context(html[data-theme='dark']) .day.inactive, .day.future { background: transparent; border: 0; color: var(--ink-secondary); }
+.day.future { color: var(--ink-tertiary); }
+.day.active, .legend-active { background: #34cf99; color: #091b15; }
+.day.today { outline: 2px solid var(--ink); outline-offset: -2px; }
+.legend-today { border: 2px solid var(--ink); }
+.journal-label { text-transform: uppercase; font-size: 12px; }
+.day-title { font-size: 22px; }
+.journal-empty { font-size: 14px; line-height: 1.45; }
+.journal-link { background: #2864eb; align-items: center; }
+@media (max-width: 600px) {
+  .activity-calendar { background: transparent; border: 0; padding: 0; box-shadow: none; }
+  .calendar-top, .month, .day-detail { background: var(--surface-strong); border: 1px solid var(--hairline); }
+  .calendar-top { margin: 0; padding: 20px 22px 0; border-bottom: 0; border-radius: 22px 22px 0 0; }
+  .month { padding: 4px 16px 15px; border-top: 0; border-radius: 0 0 22px 22px; }
+  .calendar-body { gap: 12px; }
+  .arrow { border-radius: 50%; width: 32px; height: 32px; line-height: 1; background: var(--hairline); border: 0; }
+  summary { font-size: 15px; }
+  .weekdays, .days-grid { gap: 4px; }
+  .day { height: 40px; aspect-ratio: auto; font-size: 14px; border-radius: 12px; }
+  .legend { justify-content: flex-start; gap: 16px; margin: 14px 4px 0; font-size: 12px; }
+  .day-detail { padding: 20px; border-radius: 22px; }
+  .journal-link { min-height: 52px; font-size: 16px; border-radius: 16px; }
+}

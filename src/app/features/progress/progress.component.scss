@@ -413,3 +413,25 @@ h1 {
   }
 }
 .progress-tabs {display:flex;gap:4px;padding:5px;margin:0 0 24px;border:1px solid var(--hairline);border-radius:18px;background:var(--surface);button {flex:1;min-height:44px;border:0;border-radius:13px;background:transparent;color:var(--ink-secondary);font:inherit;font-size:14px;font-weight:550;cursor:pointer} button[aria-pressed="true"] {background:var(--surface-strong);color:var(--ink);box-shadow:0 2px 5px #00000008} button:focus-visible {outline:2px solid var(--accent);outline-offset:1px} }
+
+.progress-intro { justify-content: flex-start; gap: 8px; }
+.progress-intro ft-action { margin-left: auto; color: #d99600; }
+.progress-intro ::ng-deep .lg-button { width: 40px; height: 40px; padding: 0; border-radius: 50%; }
+.stat-card > strong { order: -1; }
+.progress-tabs { border-radius: 99px; padding: 4px; }
+.progress-tabs button { border-radius: 99px; }
+@media (max-width: 600px) {
+  .progress-page { padding: 8px 2px 90px; }
+  .progress-intro { margin-bottom: 20px; }
+  .progress-intro h1 { font-size: 25px; }
+  .progress-tabs { margin-bottom: 16px; }
+  .progress-tabs button { min-height: 40px; }
+  .weekly-focus, .month-overview { margin-bottom: 12px; padding: 20px; box-shadow: none; }
+  .month-overview { min-height: 160px; }
+  .section-caption h2 { font-size: 16px; }
+  .section-caption > span { font-size: 13px; }
+  .stat-card, .stat-card + .stat-card { padding: 0; border: 0; gap: 4px; }
+  .stat-card > strong { font-size: 28px; }
+}
+
+:host-context(html[data-theme='dark']) { --surface-strong: #17171b; }

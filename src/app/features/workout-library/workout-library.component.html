@@ -72,7 +72,7 @@
         tab() === 'discover'
           ? 'Find your plan'
           : tab() === 'mine'
-            ? 'Find a plan or custom session'
+            ? 'Find a plan'
             : 'Search sessions or exercises'
       "
       aria-label="Search training library"
@@ -145,15 +145,8 @@
     }
   </div>
 } @else if (tab() === 'mine') {
-  <div class="library-section-heading">
-    <div>
-      <h2>Your plans</h2>
-    </div>
-    <button type="button" class="library-text-button" (click)="createWorkout.emit()">
-      + New session
-    </button>
-  </div>
   @if (filteredSaved().length) {
+    <div class="library-section-heading"><h2>Your plans</h2></div>
     <div class="saved-plan-grid">
       @for (item of visibleSaved(); track item.plan.id) {
         <button type="button" class="saved-plan-card" (click)="viewSavedPlan(item.plan.id)">
@@ -224,23 +217,13 @@
   <div class="session-grid">
     @for (routine of visibleCustom(); track routine.id) {
       <article class="session-tile">
-        <div>
-          <span class="library-eyebrow">CUSTOM SESSION</span
-          ><button
-            type="button"
-            class="session-delete"
-            [disabled]="deletingIds.has(routine.id!)"
-            [attr.aria-label]="'Delete ' + routine.name"
-            (click)="deleteRoutine.emit(routine.id!)"
-          >
-            {{ deletingIds.has(routine.id!) ? '…' : '×' }}
-          </button>
+        <div class="session-kicker"><span>Custom</span><button type="button" class="session-delete" [disabled]="deletingIds.has(routine.id!)" [attr.aria-label]="'Delete ' + routine.name" (click)="deleteRoutine.emit(routine.id!)">•••</button></div>
+        <h3><button type="button" class="session-open" (click)="viewRoutine(routine)">{{ routine.name }}</button></h3>
+        <div class="session-facts"><span>{{ routine.exercises.length }} exercises</span><span>~{{ minuteEstimate(routine) }} min</span></div>
+        @let level = sessionLevel(routine);
+        <div class="session-level" [attr.data-level]="level">{{ level }}
+          <span class="level-bars" aria-hidden="true"><i></i><i></i><i></i></span>
         </div>
-        <h3>{{ routine.name }}</h3>
-        <p>{{ routine.exercises.length }} exercises · ~{{ minuteEstimate(routine) }} min</p>
-        <button type="button" class="session-view" (click)="viewRoutine(routine)">
-          View session <span aria-hidden="true">→</span>
-        </button>
       </article>
     } @empty {
       <div class="library-empty">
@@ -267,24 +250,21 @@
     </div>
   }
 } @else {
-  <div class="library-section-heading">
-    <div>
-      <h2>Single sessions</h2>
-    </div>
-    <span>{{ filteredSessions().length }} sessions</span>
+  <div class="session-filters" role="group" aria-label="Session category">
+    @for (item of sessionCategories; track item) {
+      <button type="button" [attr.aria-pressed]="category() === item" (click)="category.set(item); page.set(0)">{{ item }}</button>
+    }
   </div>
   <div class="session-grid">
     @for (routine of visibleSessions(); track routine.name) {
       <article class="session-tile">
-        <span class="library-eyebrow">{{ routine.category || 'STRENGTH' }}</span>
-        <h3>{{ routine.name }}</h3>
-        <div class="session-facts">
-          <span>{{ routine.exercises.length }} exercises</span
-          ><span>~{{ minuteEstimate(routine) }} min</span>
+        <div class="session-kicker"><span>{{ routine.category || 'Strength' }}</span><span aria-hidden="true">➜</span></div>
+        <h3><button type="button" class="session-open" (click)="viewRoutine(routine)">{{ routine.name }}</button></h3>
+        <div class="session-facts"><span>{{ routine.exercises.length }} exercises</span><span>~{{ minuteEstimate(routine) }} min</span></div>
+        @let level = sessionLevel(routine);
+        <div class="session-level" [attr.data-level]="level">{{ level }}
+          <span class="level-bars" aria-hidden="true"><i></i><i></i><i></i></span>
         </div>
-        <button type="button" class="session-view" (click)="viewRoutine(routine)">
-          View session <span aria-hidden="true">→</span>
-        </button>
       </article>
     } @empty {
       <div class="library-empty">
@@ -309,19 +289,13 @@
     </div>
   }
 }
+<div class="library-section-heading compact"><h2>Collections</h2></div>
 <div class="collection-grid">
   <button type="button" class="legends-collection-card" (click)="openLegends.emit()">
     <span class="collection-copy"
       ><span class="library-eyebrow">CLASSIC BODYBUILDING</span><strong>Legends collection</strong
-      ><span>5 athletes · Advanced training</span></span
-    >
-    <span class="collection-portraits" aria-hidden="true"
-      ><img src="legends/arnold.jpg" alt="" loading="lazy" /><img
-        src="legends/mentzer.jpg"
-        alt=""
-        loading="lazy" /><img src="legends/cbum.jpg" alt="" loading="lazy"
-    /></span>
-    <span class="collection-arrow" aria-hidden="true">↗</span>
+      ></span>
+    <span class="collection-stack" aria-hidden="true"><i></i><i></i><i></i></span>
   </button>
 </div>
 <dialog
