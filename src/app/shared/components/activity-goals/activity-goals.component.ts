@@ -13,7 +13,6 @@ import { ProfileService } from '../../../core/services/profile.service';
       (nzOnCancel)="open.set(false)">
       <ng-container *nzModalContent>
         <form class="goals-form" (ngSubmit)="save()">
-          <p>Choose targets that fit your routine.</p>
           <label>Move <span>kcal per day</span><input name="move" type="number" min="50" max="5000" step="50" required [(ngModel)]="move" /></label>
           <label>Exercise <span>minutes per day</span><input name="exercise" type="number" min="5" max="300" step="5" required [(ngModel)]="exercise" /></label>
           <label>Workouts <span>sessions per week</span><input name="weekly" type="number" min="1" max="14" step="1" required [(ngModel)]="weekly" /></label>
@@ -25,13 +24,13 @@ import { ProfileService } from '../../../core/services/profile.service';
   styles: [`
     .goals-link { border: 0; background: transparent; color: var(--accent); padding: 8px 0 8px 12px; cursor: pointer; font-size: 12px; font-weight: 600; }
     .goals-form { color: var(--ink); }
-    .goals-form p { color: var(--ink-secondary); font-size: 13px; }
+    label:first-of-type { padding-top: 0; }
     label { display: grid; grid-template-columns: 1fr 90px; gap: 2px 16px; padding: 16px 0; border-bottom: 1px solid var(--hairline); font-weight: 600; }
     label span { grid-column: 1; font-size: 12px; font-weight: 400; color: var(--ink-secondary); }
     input { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 100%; min-width: 0; border: 1px solid var(--hairline); border-radius: 12px; background: var(--surface-input); color: var(--ink); padding: 10px; font: inherit; text-align: center; }
     .save-goals { margin-top: 22px; border: 0; border-radius: 24px; background: #007aff; color: #fff; padding: 13px; width: 100%; font-weight: 600; cursor: pointer; }
     .save-goals:disabled { opacity: .5; cursor: default; }
-    .goals-form .form-error { color: var(--red); }
+    .goals-form .form-error { color: var(--red); font-size: 13px; }
   `],
 })
 export class ActivityGoalsComponent {
