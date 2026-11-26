@@ -371,7 +371,7 @@
     }
     <div class="scanner-preview" [hidden]="!scanning()">
       <video #video autoplay muted playsinline aria-label="Barcode scanner"></video>
-      <div class="scanner-frame" aria-hidden="true"></div>
+      <div #scannerFrame class="scanner-frame" aria-hidden="true"></div>
       <p>Center the barcode in the frame</p>
       <button type="button" class="quiet" (click)="stopCamera()">Enter code instead</button>
     </div>

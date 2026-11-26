@@ -2,7 +2,7 @@ import { Food, NutritionRecord, Recipe } from '../../core/models/nutrition.model
 import { UserProfile } from '../../core/models/user-profile.model';
 import { WeightEntry } from '../../core/models/weight-entry.model';
 import { moveDate, portionNutrients, recipeFood, suggestTarget, summarize } from './nutrition-math';
-import { expandUpce } from './food-scanner';
+import { expandUpce, scannerCrop } from './food-scanner';
 
 const yogurt: Food = {
   name: 'Yogurt',
@@ -71,5 +71,19 @@ describe('nutrition totals', () => {
 
   it('expands UPC-E into the full code without dropping its leading zero', () => {
     expect(expandUpce('04252614')).toBe('042100005264');
+  });
+});
+
+describe('scanner preview', () => {
+  it('maps the guide into a landscape video cropped by a portrait preview', () => {
+    const video = {
+      videoWidth: 1280,
+      videoHeight: 720,
+      getBoundingClientRect: () => ({ left: 0, top: 58, width: 400, height: 720 }),
+    } as HTMLVideoElement;
+    const guide = {
+      getBoundingClientRect: () => ({ left: 50, top: 350, width: 300, height: 150 }),
+    } as HTMLElement;
+    expect(scannerCrop(video, guide)).toEqual({ x: 472, y: 292, width: 336, height: 150 });
   });
 });

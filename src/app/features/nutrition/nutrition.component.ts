@@ -75,6 +75,7 @@ export class NutritionComponent {
   private readonly destroy = inject(DestroyRef);
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('editor');
   private readonly video = viewChild.required<ElementRef<HTMLVideoElement>>('video');
+  private readonly scannerFrame = viewChild.required<ElementRef<HTMLElement>>('scannerFrame');
   private scanner?: AbortController;
   private loadVersion = 0;
   private catalogVersion = 0;
@@ -337,13 +338,18 @@ export class NutritionComponent {
     this.detectedCode.set('');
     this.scanning.set(true);
     try {
-      await scanFood(this.video().nativeElement, request.signal, (code) => {
-        this.zone.run(() => {
-          if (request.signal.aborted) return;
-          this.detectedCode.set(code);
-          void this.search(code, true);
-        });
-      });
+      await scanFood(
+        this.video().nativeElement,
+        this.scannerFrame().nativeElement,
+        request.signal,
+        (code) => {
+          this.zone.run(() => {
+            if (request.signal.aborted) return;
+            this.detectedCode.set(code);
+            void this.search(code, true);
+          });
+        },
+      );
     } catch {
       if (!request.signal.aborted) {
         this.stopCamera();
