@@ -32,8 +32,13 @@ describe('Workout session recovery', () => {
     vi.stubGlobal('navigator', { vibrate });
     try {
       component.finishSet();
+      expect(vibrate).toHaveBeenCalledExactlyOnceWith(30);
+      vibrate.mockClear();
       component.skipRest();
+      expect(vibrate).not.toHaveBeenCalled();
       component.finishSet();
+      expect(vibrate).toHaveBeenCalledExactlyOnceWith(30);
+      vibrate.mockClear();
       component.addTime(15);
       vi.advanceTimersByTime(104_000);
       expect(vibrate).not.toHaveBeenCalled();

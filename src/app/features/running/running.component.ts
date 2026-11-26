@@ -1,3 +1,4 @@
+import { vibrate } from '../../core/utils/haptics';
 import { ConfirmationService } from '../../shared/components/confirmation';
 import { RouteMapComponent } from '../../shared/components/route-map/route-map.component';
 import { RunSplitsComponent } from '../../shared/components/run-splits/run-splits.component';
@@ -299,6 +300,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     this.startTime = null;
     this.isPaused.set(true);
     this.statusText.set('Run paused');
+    vibrate('confirm');
   }
 
   startHold(): void {
@@ -332,6 +334,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
 
   confirmStopTracking(): void {
     if (!this.isTracking || this.nativeBusy()) return;
+    vibrate('hold');
     this.modal.confirm({
       nzTitle: 'End this run?',
       nzContent: 'Finish and save to keep your route and stats, or discard the run.',
@@ -724,6 +727,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
       if (generation === this.trackingGeneration) this.handleError(error, true);
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 });
     this.checkpointRun();
+    vibrate('confirm');
   }
 
   saveRecoveredRun(): void {
@@ -768,6 +772,7 @@ export class RunningComponent implements AfterViewInit, OnDestroy, OnInit {
     try {
       await this.nativeRun!.start(seed);
       if (this.destroyed || generation !== this.trackingGeneration) return;
+      if (resume) vibrate('confirm');
       this.startNativePolling();
       await this.readNativeRun();
     } catch (error) {

@@ -122,13 +122,17 @@ describe('Running GPS lifecycle', () => {
     component.startTracking();
     geo.getCurrentPosition.mock.calls[0][0](fix());
     vi.advanceTimersByTime(10000);
+    const vibrate = vi.fn();
+    vi.stubGlobal('navigator', { geolocation: geo, vibrate });
     component.startHold();
     vi.advanceTimersByTime(400);
     component.cancelHold();
     vi.advanceTimersByTime(1000);
     expect(confirmation.confirm).not.toHaveBeenCalled();
+    expect(vibrate).not.toHaveBeenCalled();
     component.startHold();
     vi.advanceTimersByTime(component.holdDurationMs);
+    expect(vibrate).toHaveBeenCalledExactlyOnceWith(80);
     expect(confirmation.confirm).toHaveBeenCalledTimes(1);
     await confirmation.confirm.mock.calls[0][0].nzOnOk();
     expect(component.isTracking).toBe(false);

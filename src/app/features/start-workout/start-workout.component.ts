@@ -1,3 +1,4 @@
+import { vibrate } from '../../core/utils/haptics';
 import { ConfirmationService } from '../../shared/components/confirmation';
 import { FitAction } from '../../shared/glisse/controls';
 import { WorkoutRestPickerComponent } from './workout-rest-picker.component';
@@ -1048,6 +1049,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.holdingStopWorkout.set(true);
     this.stopWorkoutHoldTimer = setTimeout(() => {
       this.cancelStopWorkoutHold();
+      vibrate('hold');
       this.confirmStopWorkout();
     }, this.stopWorkoutHoldDuration);
   }
@@ -1506,6 +1508,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
       this.loggedDrops[exIdx] = this.loggedDrops[exIdx].filter(d => d.setIndex !== setIdx || d.weight < this.currentWeight());
     }
     this.updateCompletedSets();
+    vibrate('confirm');
     if (this.treadmillActive()) { this.advanceSet(); return; }
     this.beginSetRest();
   }
@@ -1526,7 +1529,7 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     this.restTimeRemaining.set(remaining);
     if (remaining === 0) {
       this.skipRest();
-      navigator.vibrate?.(200);
+      vibrate('restComplete');
     }
   }
 
