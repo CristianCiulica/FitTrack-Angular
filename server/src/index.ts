@@ -9,6 +9,8 @@ import { initFirebaseAdmin } from './config/firebase-admin';
 import { connectMongo } from './db/mongo';
 import { requireAuth } from './middleware/auth';
 import { errorHandler, notFound } from './middleware/error';
+import nutritionRoutes from './routes/nutrition.routes';
+import { NutritionRecord } from './models/nutrition-record.model';
 import meRoutes from './routes/me.routes';
 import workoutsRoutes from './routes/workouts.routes';
 import runningRoutes from './routes/running-sessions.routes';
@@ -25,6 +27,7 @@ async function main() {
   // Idempotency relies on these indexes, including on an existing database.
   await Promise.all([
     Workout.createIndexes(),
+    NutritionRecord.createIndexes(),
     RunningSession.createIndexes(),
     AccountDeletion.createIndexes(),
   ]);
@@ -59,6 +62,7 @@ async function main() {
     });
   });
 
+  app.use('/api/nutrition', requireAuth, nutritionRoutes);
   app.use('/api/me', requireAuth, meRoutes);
   app.use('/api/workouts', requireAuth, workoutsRoutes);
   app.use('/api/running-sessions', requireAuth, runningRoutes);

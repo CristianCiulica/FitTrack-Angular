@@ -1,3 +1,4 @@
+import { NutritionRecord } from '../models/nutrition.model';
 import { timedSession } from './timed-cardio';
 import { Workout } from '../models/workout.model';
 import { RunningSession } from '../models/running-session.model';
@@ -17,6 +18,7 @@ export interface ActivityExport {
   workouts: Workout[];
   runningSessions: RunningSession[];
   weightEntries: WeightEntry[];
+  nutrition?: NutritionRecord[];
 }
 
 export function compactActivityExport(data: ActivityExport) {
@@ -27,6 +29,7 @@ export function compactActivityExport(data: ActivityExport) {
     profile: p
       ? { name: p.displayName, heightCm: p.heightCm, weightKg: p.weightKg, goal: p.goal }
       : null,
+    ...(data.nutrition ? { nutrition: data.nutrition } : {}),
     weights: data.weightEntries.map((e) => ({ date: e.date, kg: e.weightKg })),
     workouts: data.workouts.filter(isWorkoutSession).map((w) => ({
       name: w.name,

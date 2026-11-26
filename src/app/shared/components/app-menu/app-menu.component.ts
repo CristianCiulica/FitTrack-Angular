@@ -63,6 +63,7 @@ export class AppMenuComponent {
       icon: 'ft:settings',
       path: '/settings',
     },
+    { label: 'Nutrition goals', icon: 'ft:nutrition', path: '/nutrition-goals' },
   ];
 
   constructor() {

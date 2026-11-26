@@ -5,6 +5,7 @@ import { getAuth } from '../config/firebase-admin';
 import { strictLimiter } from '../middleware/rate-limit';
 import { deleteAccount } from '../services/account-deletion';
 
+import { NutritionRecord } from '../models/nutrition-record.model';
 import { WeightEntry } from '../models/weight-entry.model';
 import { weightDateSchema, weightBodySchema } from '../validation/weight-entry';
 
@@ -29,6 +30,8 @@ const updateProfileSchema = z.object({
   units: z.enum(['metric', 'imperial']).optional(),
   theme: z.enum(['light', 'dark', 'system']).optional(),
   goal: z.enum(['lose', 'maintain', 'gain']).optional(),
+  nutritionCalorieOverride: z.number().int().min(1).max(10000).nullable().optional(),
+  nutritionCalorieReviewDate: weightDateSchema.nullable().optional(),
   goalRate: z.number().min(0).max(2).optional(),
   weeklyWorkoutGoal: z.number().int().min(1).max(14).optional(),
   strengthTrainingDays: z.number().int().min(0).max(7).optional(),
@@ -133,12 +136,13 @@ router.get('/export', strictLimiter, async (req, res, next) => {
   try {
     const user = req.user!;
 
-    const [profile, workouts, runningSessions, weightEntries] = await Promise.all([
+    const [profile, workouts, runningSessions, nutrition, weightEntries] = await Promise.all([
       UserProfile.findOne({ uid: user.uid }).select('-following').lean(),
       (await import('../models/workout.model')).Workout.find({ userId: user.uid }).lean(),
       (await import('../models/running-session.model')).RunningSession.find({
         userId: user.uid,
       }).lean(),
+      NutritionRecord.find({ userId: user.uid }).select('data -_id').lean(),
       WeightEntry.find({ userId: user.uid }).sort({ date: 1 }).select('date weightKg -_id').lean(),
     ]);
 
@@ -153,6 +157,7 @@ router.get('/export', strictLimiter, async (req, res, next) => {
       workouts,
       runningSessions,
       weightEntries,
+      nutrition: nutrition.map(row => row.data),
     });
   } catch (error) {
     next(error);

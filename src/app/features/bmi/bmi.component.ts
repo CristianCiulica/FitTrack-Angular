@@ -1,3 +1,4 @@
+import { activityFactor, calorieTarget } from '../../core/utils/nutrition-target';
 import { FitSlider } from '../../shared/glisse/controls';
 import { Component, computed, effect, inject, signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -106,14 +107,7 @@ export class BmiComponent implements OnDestroy {
     return { text: 'Obesity', color: 'red' };
   });
 
-  activityFactor = computed(() => {
-    const days = this.strengthTrainingDays();
-    if (days <= 0) return 1.2;
-    if (days <= 2) return 1.375;
-    if (days <= 4) return 1.55;
-    if (days <= 6) return 1.725;
-    return 1.9;
-  });
+  activityFactor = computed(() => activityFactor(this.strengthTrainingDays()));
 
   basalCalories = computed(() => {
     const base =
@@ -131,16 +125,15 @@ export class BmiComponent implements OnDestroy {
     Math.round((this.goalRate() * 7700) / 7),
   );
 
-  targetCalories = computed(() => {
-    if (this.goal() === 'maintain') {
-      return this.maintenanceCalories();
-    }
-    const target =
-      this.goal() === 'lose'
-        ? this.maintenanceCalories() - this.calorieAdjustment()
-        : this.maintenanceCalories() + this.calorieAdjustment();
-    return Math.max(this.basalCalories(), Math.round(target));
-  });
+  readonly calorieOverride = computed(() => this.profileService.profile()?.nutritionCalorieOverride ?? null);
+  targetCalories = computed(() => this.calorieOverride() ??
+    calorieTarget(this.basalCalories(), this.maintenanceCalories(), this.goal(), this.calorieAdjustment()));
+
+  resetCalorieOverride() {
+    this.profileService.patch({ nutritionCalorieOverride: null }).subscribe({
+      error: () => this.message.error('Your calorie target could not be reset.'),
+    });
+  }
 
   setGoal(goal: 'lose' | 'maintain' | 'gain') {
     this.goal.set(goal);

@@ -130,7 +130,7 @@ export class FitAction {
 const primaryNavigation = [
   ['/dashboard', 'Home', 'ft:home'], ['/workouts', 'History', 'ft:history'],
   ['/start-workout', 'Workout', 'ft:workout'], ['/running', 'Run', 'ft:run'],
-  ['/bmi', 'Nutrition', 'ft:nutrition'],
+  ['/nutrition', 'Nutrition', 'ft:nutrition'],
 ];
 const tabs = primaryNavigation.map(([value, label, icon]) => ({
   value, label, icon: h('span', {dangerouslySetInnerHTML: {__html: FT_ICONS[icon]}}),

@@ -59,7 +59,7 @@ describe('Mobile navigation lifecycle', () => {
     first.nativeElement.querySelector('.hamburger').click();
     first.detectChanges();
     expect(document.querySelector('.ant-drawer-open')).not.toBeNull();
-    expect(document.querySelectorAll('#mobile-navigation .menu-link')).toHaveLength(4);
+    expect(document.querySelectorAll('#mobile-navigation .menu-link')).toHaveLength(5);
     first.destroy();
     const refreshed = TestBed.createComponent(AppMenuComponent);
     refreshed.detectChanges();
@@ -93,6 +93,7 @@ describe('Mobile navigation lifecycle', () => {
       '/weight',
       '/account',
       '/settings',
+      '/nutrition-goals',
     ]);
     expect(fixture.componentInstance.isCurrent('/progress')).toBe(true);
     fixture.destroy();

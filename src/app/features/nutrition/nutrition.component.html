@@ -1,0 +1,746 @@
+<header class="nutrition-header">
+  <app-menu />
+  <h1>Nutrition</h1>
+  <button
+    type="button"
+    class="quiet library"
+    [disabled]="!loaded() || busy()"
+    (click)="openLibrary()"
+  >
+    My foods
+  </button>
+</header>
+
+<main class="nutrition-shell">
+  <section class="overview" aria-labelledby="daily-nutrition">
+    <div class="date-row">
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Previous day"
+        [disabled]="busy() || date() <= '1900-01-01'"
+        (click)="step(-1)"
+      >
+        ‹
+      </button>
+      <label class="day-picker">
+        <span>{{ date() === today ? 'Today' : (date() + 'T12:00:00' | date: 'EEEE') }}</span>
+        <small>{{ date() + 'T12:00:00' | date: 'd MMM, y' }}</small>
+        <input
+          type="date"
+          aria-label="Choose diary date"
+          [value]="date()"
+          min="1900-01-01"
+          [max]="today"
+          [disabled]="busy()"
+          (change)="load($any($event.target).value)"
+        />
+      </label>
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Next day"
+        [disabled]="busy() || date() >= today"
+        (click)="step(1)"
+      >
+        ›
+      </button>
+    </div>
+    <div class="energy">
+      <div>
+        <h2 id="daily-nutrition">Calories eaten</h2>
+        <strong
+          >{{ loaded() ? (totals().values.kcal | number: '1.0-1') : '—' }}
+          @if (loaded() && totals().incomplete.kcal) {
+            <sup>+</sup>
+          }
+        </strong>
+        <small>kcal</small>
+      </div>
+      <div class="goal">
+        @if (loaded() && target() !== null && !totals().incomplete.kcal) {
+          <b>{{ (remaining() >= 0 ? remaining() : -remaining()) | number: '1.0-1' }} kcal</b>
+          <span>{{ remaining() >= 0 ? 'remaining' : 'above target' }}</span>
+        }
+        <a routerLink="/nutrition-goals">{{
+          target() === null ? 'Set a calorie goal' : (target() | number: '1.0-0') + ' kcal goal'
+        }}</a>
+      </div>
+    </div>
+    @if (loaded() && totals().incomplete.kcal) {
+      <p class="status">Some foods are missing calories. The total shown is partial.</p>
+    }
+    <div class="macro-row">
+      @for (macro of macros; track macro.key) {
+        <div>
+          <span>{{ macro.label }}</span>
+          <strong
+            >{{ loaded() ? (totals().values[macro.key] | number: '1.0-1') : '—' }}
+            @if (loaded() && totals().incomplete[macro.key]) {
+              <sup aria-label="partial total">+</sup>
+            }
+            <small>g</small></strong
+          >
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="main-actions">
+    <button
+      type="button"
+      class="primary"
+      [disabled]="!loaded() || busy()"
+      (click)="openAdd('breakfast')"
+    >
+      Add food
+    </button>
+    <button
+      type="button"
+      class="quiet scan-button"
+      [disabled]="!loaded() || busy()"
+      (click)="openAdd('breakfast', true)"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4M8 8v8m4-8v8m4-8v8" />
+      </svg>
+      Scan barcode
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="status notice" role="status">
+      {{ error() }}
+      @if (!loaded()) {
+        <button type="button" class="text-button" (click)="load(date())">Retry</button>
+      }
+    </div>
+  } @else if (!loaded()) {
+    <p class="status notice" role="status">Loading diary…</p>
+  }
+
+  @if (loaded()) {
+    <div class="details-grid">
+      <section class="meals" aria-label="Meals">
+        @for (meal of meals; track meal.id) {
+          @let items = entriesFor(date(), meal.id);
+          <section class="meal">
+            <div class="meal-heading">
+              <h2>{{ meal.name }}</h2>
+              <button
+                type="button"
+                class="icon-button"
+                [attr.aria-label]="'Add food to ' + meal.name"
+                [disabled]="busy()"
+                (click)="openAdd(meal.id)"
+              >
+                +
+              </button>
+            </div>
+            @for (entry of items; track entry.id) {
+              <button type="button" class="entry" (click)="openEdit(entry)" [disabled]="busy()">
+                <span
+                  ><b>{{ entry.food.name }}</b
+                  ><small>{{ amountText(entry) }}</small></span
+                >
+                <span>{{
+                  portionEnergy(entry) === null
+                    ? 'kcal unknown'
+                    : (portionEnergy(entry) | number: '1.0-1') + ' kcal'
+                }}</span>
+              </button>
+            }
+            <div class="meal-tools">
+              <button
+                type="button"
+                class="text-button"
+                [disabled]="busy() || date() <= '1900-01-01'"
+                (click)="openCopy(meal.id)"
+              >
+                Copy from another day
+              </button>
+              @if (items.length) {
+                <button
+                  type="button"
+                  class="text-button"
+                  [disabled]="busy()"
+                  (click)="openSaveMeal(meal.id)"
+                >
+                  Save meal
+                </button>
+              }
+            </div>
+          </section>
+        }
+        @if (complete() || entriesFor(date()).length) {
+          <button
+            class="quiet complete-day"
+            type="button"
+            [disabled]="busy()"
+            (click)="toggleComplete()"
+          >
+            {{ complete() ? 'Day complete · Reopen' : 'Mark day complete' }}
+          </button>
+        }
+      </section>
+
+      <section class="insights" aria-labelledby="weekly-nutrition">
+        <h2 id="weekly-nutrition">Last 7 days</h2>
+        <p class="status">{{ loggedDays() }} of 7 days logged</p>
+        <dl class="averages">
+          @for (fact of facts; track fact.key) {
+            @let avg = average()[fact.key];
+            <div>
+              <dt>
+                {{ fact.key === 'kcal' ? 'Calories' : fact.label }}
+                <small>{{ avg.count }} days</small>
+              </dt>
+              <dd>
+                {{ avg.count ? (avg.value | number: '1.0-1') : '—' }}
+                {{ fact.key === 'kcal' ? 'kcal' : 'g' }}
+              </dd>
+            </div>
+          }
+        </dl>
+        <div class="days">
+          @for (day of week(); track day.date) {
+            <button
+              type="button"
+              class="day-link"
+              [class.current]="date() === day.date"
+              [disabled]="busy() || day.date < '1900-01-01'"
+              (click)="load(day.date)"
+            >
+              <span>{{ day.date + 'T12:00:00' | date: 'EEE, d MMM' }}</span>
+              <small>{{
+                !day.count
+                  ? 'No entries'
+                  : day.incomplete.kcal
+                    ? 'Partial calories'
+                    : (day.values.kcal | number: '1.0-0') + ' kcal'
+              }}</small>
+            </button>
+          }
+        </div>
+        <p class="status">Each average uses days with known values for that metric.</p>
+        @if (date() === today && target() !== null) {
+          <div class="suggestion">
+            <button type="button" class="quiet" [disabled]="busy()" (click)="checkSuggestion()">
+              Review calorie target
+            </button>
+            @if (suggestion(); as value) {
+              <p>
+                Based on 21 complete days and your weight trend, your estimated target is
+                <b>{{ value | number }} kcal/day</b>.
+              </p>
+              <button type="button" class="primary" (click)="applySuggestion()" [disabled]="busy()">
+                Apply target
+              </button>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  }
+</main>
+
+<dialog
+  #editor
+  aria-labelledby="editor-title"
+  (close)="editorClosed()"
+  (cancel)="busy() && $event.preventDefault()"
+>
+  <div class="dialog-head">
+    <h2 id="editor-title">
+      @switch (pane()) {
+        @case ('find') {
+          {{ ingredientIndex === null ? 'Add food' : 'Find ingredient' }}
+        }
+        @case ('portion') {
+          {{ editId ? 'Edit food' : 'Add portion' }}
+        }
+        @case ('library') {
+          My foods
+        }
+        @case ('recipe') {
+          Recipe
+        }
+        @case ('copy') {
+          Copy a meal
+        }
+        @case ('save-meal') {
+          Save a meal
+        }
+      }
+    </h2>
+    <button
+      type="button"
+      class="icon-button"
+      aria-label="Close"
+      [disabled]="busy()"
+      (click)="close()"
+    >
+      ×
+    </button>
+  </div>
+
+  <div class="dialog-body">
+    @if (editorError()) {
+      <p class="status notice" role="status">{{ editorError() }}</p>
+    }
+    @if (pane() === 'find' || pane() === 'portion' || pane() === 'library') {
+      @if (ingredientIndex === null) {
+        <label class="field"
+          >Meal
+          <select [ngModel]="activeMeal()" (ngModelChange)="setMeal($event)" [disabled]="busy()">
+            @for (meal of meals; track meal.id) {
+              <option [value]="meal.id">{{ meal.name }}</option>
+            }
+          </select>
+        </label>
+      }
+    }
+    <video
+      #video
+      [hidden]="!scanning()"
+      autoplay
+      muted
+      playsinline
+      aria-label="Barcode scanner"
+    ></video>
+    @switch (pane()) {
+      @case ('find') {
+        @if (scanning()) {
+          <p class="status">Center the barcode in the camera view.</p>
+          <button type="button" class="quiet" (click)="stopCamera()">Stop camera</button>
+        } @else {
+          <button type="button" class="quiet" (click)="startCamera()">Open camera</button>
+        }
+        <form class="inline-fields" (ngSubmit)="search()">
+          <label class="field"
+            >Food name or barcode
+            <input
+              name="query"
+              [(ngModel)]="query"
+              maxlength="80"
+              autocomplete="off"
+              type="search"
+              placeholder="e.g. iaurt or a barcode"
+            />
+          </label>
+          <button class="primary" type="submit">Find</button>
+        </form>
+        @if (searching()) {
+          <p class="status" role="status">Searching catalog…</p>
+        }
+        @if (catalogMessage()) {
+          <p class="status" role="status">{{ catalogMessage() }}</p>
+        }
+        @if (results().length) {
+          <div class="result-list">
+            @for (food of results(); track $index) {
+              <button type="button" class="entry" (click)="chooseFood(food)">
+                <span
+                  ><b>{{ food.name }}</b
+                  ><small>{{
+                    food.brand ||
+                      food.barcode ||
+                      (food.origin === 'manual' ? 'My food' : 'Open Food Facts')
+                  }}</small></span
+                >
+                <span>{{
+                  food.values.kcal === null
+                    ? 'kcal unknown'
+                    : (food.values.kcal | number: '1.0-1') + ' kcal'
+                }}</span>
+              </button>
+            }
+          </div>
+        }
+        @if (ingredientIndex === null) {
+          <div class="editor-actions">
+            <button type="button" class="quiet" (click)="manual(missingCode)">
+              Enter from label
+            </button>
+            <button type="button" class="text-button" (click)="quickAdd()">
+              Quick add calories
+            </button>
+            <button type="button" class="text-button" (click)="stopCamera(); pane.set('library')">
+              My foods
+            </button>
+          </div>
+          @if (!results().length && recent().length) {
+            <h3>Recent foods</h3>
+            @for (food of recent(); track $index) {
+              <button type="button" class="entry" (click)="chooseFood(food)">
+                {{ food.name }}
+              </button>
+            }
+          }
+        } @else {
+          <button type="button" class="quiet" (click)="returnToRecipe()">Back to recipe</button>
+        }
+        <p class="status">
+          <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener"
+            >Catalog data by Open Food Facts</a
+          >
+        </p>
+      }
+      @case ('portion') {
+        <label class="field"
+          >Food name
+          <input
+            [ngModel]="food().name"
+            (ngModelChange)="setFood({ name: $event })"
+            [readonly]="food().origin === 'recipe'"
+            maxlength="160"
+          />
+        </label>
+        <div class="field-grid">
+          <label class="field"
+            >Amount
+            <input
+              type="number"
+              min="0.01"
+              max="100000"
+              step="any"
+              [(ngModel)]="amount"
+              inputmode="decimal"
+            />
+          </label>
+          <label class="field"
+            >Unit
+            <select
+              [ngModel]="food().basis"
+              (ngModelChange)="setFood({ basis: $event })"
+              [disabled]="food().origin === 'recipe'"
+            >
+              <option value="serving">Servings</option>
+              <option value="g">Grams</option>
+              <option value="ml">Milliliters</option>
+            </select>
+          </label>
+        </div>
+        @if (food().origin !== 'recipe') {
+          <label class="field"
+            >Barcode (optional)
+            <input
+              [ngModel]="food().barcode ?? ''"
+              (ngModelChange)="setFood({ barcode: $event.trim() || undefined })"
+              inputmode="numeric"
+              maxlength="14"
+            />
+          </label>
+        }
+        <fieldset>
+          <legend>
+            {{
+              food().basis === 'serving' ? 'Values per serving' : 'Values per 100 ' + food().basis
+            }}
+          </legend>
+          <div class="field-grid">
+            @for (fact of facts; track fact.key) {
+              <label class="field"
+                >{{ fact.label }}{{ fact.key === 'kcal' ? '' : ' (g)' }}
+                <input
+                  type="number"
+                  min="0"
+                  max="100000"
+                  step="any"
+                  [ngModel]="food().values[fact.key]"
+                  (ngModelChange)="setNutrient(fact.key, $event)"
+                  [readonly]="food().origin === 'recipe'"
+                  placeholder="Unknown"
+                  inputmode="decimal"
+                />
+              </label>
+            }
+          </div>
+        </fieldset>
+        <p class="status">
+          @if (food().origin === 'open-food-facts') {
+            <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener"
+              >Open Food Facts</a
+            >
+            · Check against your label.
+            <button type="button" class="text-button" (click)="setFood({ origin: 'manual' })">
+              Use my label
+            </button>
+          }
+          @if (amount !== null && amount > 0) {
+            <span>
+              Portion:
+              {{
+                portionEnergy({ food: food(), amount: amount }) === null
+                  ? 'calories unknown'
+                  : (portionEnergy({ food: food(), amount: amount }) | number: '1.0-1') + ' kcal'
+              }}</span
+            >
+          }
+        </p>
+        <button type="button" class="primary full" [disabled]="busy()" (click)="saveEntry()">
+          {{ editId ? 'Save changes' : 'Add to diary' }}
+        </button>
+        <div class="editor-actions">
+          @if (food().origin !== 'recipe') {
+            <button type="button" class="text-button" [disabled]="busy()" (click)="favorite()">
+              Save to My foods
+            </button>
+          }
+          @if (editId) {
+            <button
+              type="button"
+              class="text-button destructive"
+              [disabled]="busy()"
+              (click)="remove(editId)"
+            >
+              Remove from diary
+            </button>
+          }
+        </div>
+      }
+      @case ('library') {
+        <div class="editor-actions">
+          <button type="button" class="primary" (click)="openRecipe()">New recipe</button>
+          <button type="button" class="quiet" (click)="pane.set('find')">Find food</button>
+        </div>
+        @if (!library().length) {
+          <p class="status">Saved foods, meals and recipes will appear here.</p>
+        }
+        @for (row of library(); track row.id) {
+          <div class="saved-row">
+            <b>{{ row.name }}</b>
+            <div class="editor-actions">
+              @switch (row.kind) {
+                @case ('food') {
+                  <button
+                    type="button"
+                    class="text-button"
+                    [disabled]="busy()"
+                    (click)="chooseFood(row.food)"
+                  >
+                    Add portion
+                  </button>
+                }
+                @case ('meal') {
+                  <button
+                    type="button"
+                    class="text-button"
+                    [disabled]="busy()"
+                    (click)="addSavedMeal(row)"
+                  >
+                    Add meal
+                  </button>
+                }
+                @case ('recipe') {
+                  <button
+                    type="button"
+                    class="text-button"
+                    [disabled]="busy()"
+                    (click)="logRecipe(row, false)"
+                  >
+                    Add portion
+                  </button>
+                  @if (row.cookedGrams) {
+                    <button
+                      type="button"
+                      class="text-button"
+                      [disabled]="busy()"
+                      (click)="logRecipe(row, true)"
+                    >
+                      Add grams
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="text-button"
+                    [disabled]="busy()"
+                    (click)="openRecipe(row)"
+                  >
+                    Edit
+                  </button>
+                }
+              }
+              <button
+                type="button"
+                class="text-button destructive"
+                [disabled]="busy()"
+                (click)="remove(row.id)"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        }
+      }
+      @case ('copy') {
+        <label class="field"
+          >Copy from
+          <input
+            type="date"
+            [(ngModel)]="copiedDate"
+            min="1900-01-01"
+            [max]="moveDateForTemplate(date(), -1)"
+          />
+        </label>
+        <label class="field"
+          >Source meal
+          <select [(ngModel)]="copiedMeal">
+            @for (meal of meals; track meal.id) {
+              <option [value]="meal.id">{{ meal.name }}</option>
+            }
+          </select>
+        </label>
+        <button
+          type="button"
+          class="primary full"
+          [disabled]="busy() || !copiedDate || copiedDate >= date()"
+          (click)="copyMeal()"
+        >
+          Copy foods
+        </button>
+      }
+      @case ('save-meal') {
+        <label class="field">Meal name <input [(ngModel)]="name" maxlength="160" /></label>
+        <button type="button" class="primary full" [disabled]="busy()" (click)="saveMeal()">
+          Save to My foods
+        </button>
+      }
+      @case ('recipe') {
+        @if (!recipe().ingredients.length) {
+          <div class="inline-fields">
+            <label class="field"
+              >Recipe link
+              <input type="url" [(ngModel)]="recipeUrl" placeholder="https://…" maxlength="2048"
+            /></label>
+            <button
+              class="quiet"
+              type="button"
+              [disabled]="importsBusy() || !recipeUrl.trim()"
+              (click)="importRecipe()"
+            >
+              {{ importsBusy() ? 'Importing…' : 'Import' }}
+            </button>
+          </div>
+        }
+        <label class="field"
+          >Recipe name
+          <input
+            [ngModel]="recipe().name"
+            (ngModelChange)="patchRecipe({ name: $event })"
+            maxlength="160"
+        /></label>
+        <div class="field-grid">
+          <label class="field"
+            >Servings
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              [ngModel]="recipe().servings"
+              (ngModelChange)="patchRecipe({ servings: $event })"
+          /></label>
+          <label class="field"
+            >Cooked weight (g)<input
+              type="number"
+              min="0.01"
+              step="any"
+              [ngModel]="recipe().cookedGrams"
+              (ngModelChange)="patchRecipe({ cookedGrams: $event })"
+              placeholder="Optional"
+          /></label>
+        </div>
+        @if (recipe().ingredients.length) {
+          <h3>Ingredients</h3>
+          <p class="status">
+            Check quantities and fill in any known values. Find ingredient can copy values from the
+            catalog.
+          </p>
+        }
+        @for (ingredient of recipe().ingredients; track $index; let i = $index) {
+          <fieldset class="ingredient">
+            <legend>Ingredient {{ i + 1 }}</legend>
+            @if (recipeNotes[i]) {
+              <p class="status">{{ recipeNotes[i] }}</p>
+            }
+            <label class="field"
+              >Name
+              <input
+                [ngModel]="ingredient.food.name"
+                (ngModelChange)="patchIngredientFood(i, { name: $event })"
+                maxlength="160"
+            /></label>
+            <div class="field-grid">
+              <label class="field"
+                >Amount
+                <input
+                  type="number"
+                  min="0.01"
+                  step="any"
+                  [ngModel]="ingredient.amount"
+                  (ngModelChange)="patchIngredient(i, { amount: $event })"
+              /></label>
+              <label class="field"
+                >Unit
+                <select
+                  [ngModel]="ingredient.food.basis"
+                  (ngModelChange)="patchIngredientFood(i, { basis: $event })"
+                >
+                  <option value="serving">Servings</option>
+                  <option value="g">Grams</option>
+                  <option value="ml">Milliliters</option>
+                </select>
+              </label>
+            </div>
+            <span class="status">{{
+              ingredient.food.basis === 'serving'
+                ? 'Values per serving'
+                : 'Values per 100 ' + ingredient.food.basis
+            }}</span>
+            <div class="field-grid">
+              @for (fact of facts; track fact.key) {
+                <label class="field"
+                  >{{ fact.label }}{{ fact.key === 'kcal' ? '' : ' (g)' }}
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    [ngModel]="ingredient.food.values[fact.key]"
+                    (ngModelChange)="patchIngredientNutrient(i, fact.key, $event)"
+                    placeholder="Unknown"
+                  />
+                </label>
+              }
+            </div>
+            <div class="editor-actions">
+              <button type="button" class="text-button" (click)="findIngredient(i)">
+                Find ingredient
+              </button>
+              <button type="button" class="text-button destructive" (click)="removeIngredient(i)">
+                Remove
+              </button>
+            </div>
+          </fieldset>
+        }
+        <div class="editor-actions">
+          <button
+            type="button"
+            class="quiet"
+            [disabled]="importsBusy() || busy()"
+            (click)="addIngredient()"
+          >
+            Add ingredient
+          </button>
+          <button
+            type="button"
+            class="primary"
+            [disabled]="importsBusy() || busy()"
+            (click)="saveRecipe()"
+          >
+            Save recipe
+          </button>
+        </div>
+      }
+    }
+  </div>
+</dialog>

@@ -37,6 +37,7 @@ export class NavigationComponent {
   readonly desktop = signal(this.wide.matches);
   readonly secondary = [
     ['/account', 'Profile', 'user'], ['/weight', 'Weight', 'ft:weight'], ['/settings', 'Settings', 'setting'],
+    ['/nutrition-goals', 'Nutrition goals', 'ft:nutrition'],
   ];
   constructor() {
     const resize = () => { this.desktop.set(this.wide.matches); this.closeMenu(); };

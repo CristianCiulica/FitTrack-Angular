@@ -19,6 +19,8 @@ export interface UserProfile {
   // obiectivul si ritmul saptamanal alese la onboarding, refolosite in Nutrition
   goal: Goal;
   goalRate: number;
+  nutritionCalorieOverride?: number | null;
+  nutritionCalorieReviewDate?: string | null;
   // cate antrenamente pe saptamana isi propune userul
   weeklyWorkoutGoal: number;
   strengthTrainingDays?: number;
@@ -42,6 +44,8 @@ export type ProfileUpdate = Partial<
     | 'theme'
     | 'goal'
     | 'goalRate'
+    | 'nutritionCalorieOverride'
+    | 'nutritionCalorieReviewDate'
     | 'weeklyWorkoutGoal'
     | 'strengthTrainingDays'
     | 'moveGoal'

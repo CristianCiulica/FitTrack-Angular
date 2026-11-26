@@ -31,6 +31,10 @@ export class ApiService {
     );
   }
 
+  getOnce<T>(path: string, options: { params?: Record<string, string>; timeout?: number }): Observable<T> {
+    return this.http.get<T>(this.url(path), options);
+  }
+
   post<T>(path: string, body: unknown): Observable<T> {
     return this.http.post<T>(this.url(path), body);
   }

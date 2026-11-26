@@ -1,6 +1,7 @@
 import { getAuth } from '../config/firebase-admin';
 import { AccountDeletion } from '../models/account-deletion.model';
 import { UserProfile } from '../models/user-profile.model';
+import { NutritionRecord } from '../models/nutrition-record.model';
 import { WeightEntry } from '../models/weight-entry.model';
 import { Workout } from '../models/workout.model';
 import { RunningSession } from '../models/running-session.model';
@@ -33,6 +34,7 @@ async function erase(uid: string): Promise<void> {
       const legacyPosts = UserProfile.db.collection('communityworkouts');
       const legacyProfiles = UserProfile.db.collection(UserProfile.collection.collectionName);
       await Promise.all([
+        NutritionRecord.deleteMany({ userId: uid }),
         WeightEntry.deleteMany({ userId: uid }),
         Workout.deleteMany({ userId: uid }),
         RunningSession.deleteMany({ userId: uid }),

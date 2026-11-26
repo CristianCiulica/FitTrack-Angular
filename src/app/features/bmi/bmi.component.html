@@ -5,15 +5,15 @@
       <div class="header-left">
         <app-menu></app-menu>
         <h2>
-          <span class="desktop-page-title">Nutrition</span>
-          <span class="mobile-header-brand">Nutrition</span>
+          <span class="desktop-page-title">Nutrition goals</span>
+          <span class="mobile-header-brand">Nutrition goals</span>
         </h2>
       </div>
 
     </nz-header>
 
     <nz-content role="main" class="app-content">
-      <h1 class="sr-only">Nutrition</h1>
+      <h1 class="sr-only">Nutrition goals</h1>
       <div class="container">
         <div class="nutrition-page">
 
@@ -21,6 +21,9 @@
             <span>Daily Calorie Target</span>
             <strong>{{ targetCalories() | number: '1.0-0' }}</strong>
             <small>kcal/day</small>
+            @if (calorieOverride() !== null) {
+              <button nz-button nzType="link" type="button" (click)="resetCalorieOverride()">Use calculator target</button>
+            }
           </div>
 
           <div class="goal-controls">

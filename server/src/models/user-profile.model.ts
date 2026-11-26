@@ -14,6 +14,8 @@ const userProfileSchema = new Schema(
     units: { type: String, enum: ['metric', 'imperial'], default: 'metric' },
     theme: { type: String, enum: ['light', 'dark', 'system'], default: 'system' },
     goal: { type: String, enum: ['lose', 'maintain', 'gain'], default: 'maintain' },
+    nutritionCalorieOverride: { type: Number, default: null },
+    nutritionCalorieReviewDate: { type: String, default: null },
     goalRate: { type: Number, default: 0.5 },
     moveGoal: { type: Number, default: 500 },
     exerciseGoal: { type: Number, default: 30 },

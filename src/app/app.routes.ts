@@ -42,8 +42,15 @@ export const routes: Routes = [
           import('./features/start-workout/start-workout.routes').then((m) => m.startWorkoutRoutes),
       },
       {
-        path: 'bmi',
+        path: 'nutrition',
         title: 'Nutrition · FitTrack',
+        canActivate: [authGuard, onboardingGuard],
+        loadComponent: () => import('./features/nutrition/nutrition.component').then(m => m.NutritionComponent),
+      },
+      { path: 'bmi', redirectTo: 'nutrition-goals', pathMatch: 'full' },
+      {
+        path: 'nutrition-goals',
+        title: 'Nutrition goals · FitTrack',
         canActivate: [authGuard, onboardingGuard],
         loadChildren: () => import('./features/bmi/bmi.routes').then((m) => m.bmiRoutes),
       },
