@@ -310,10 +310,28 @@
     <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4M8 8v8m4-8v8m4-8v8" />
   </svg>
 </ng-template>
+<ng-template #mealPicker>
+  <fieldset class="portion-group">
+    <legend>Meal</legend>
+    <div class="portion-meals">
+      @for (meal of meals; track meal.id) {
+        <button
+          type="button"
+          [attr.aria-pressed]="activeMeal() === meal.id"
+          [disabled]="busy()"
+          (click)="setMeal(meal.id)"
+        >
+          {{ meal.id === 'snack' ? 'Snack' : meal.name }}
+        </button>
+      }
+    </div>
+  </fieldset>
+</ng-template>
 <dialog
   #editor
   [class.scanner-open]="scanning()"
-  [class.portion-sheet]="pane() === 'portion'"
+  [class.portion-sheet]="pane() === 'portion' || (pane() === 'find' && !scanning())"
+  [class.find-sheet]="pane() === 'find' && !scanning()"
   aria-labelledby="editor-title"
   (close)="editorClosed()"
   (cancel)="busy() && $event.preventDefault()"
@@ -350,6 +368,14 @@
       </h2>
       @if (pane() === 'portion') {
         <p>Log what you ate</p>
+      } @else if (pane() === 'find' && !scanning()) {
+        <p>
+          {{
+            ingredientIndex === null
+              ? 'Search, scan or enter manually'
+              : 'Search by name or barcode'
+          }}
+        </p>
       }
     </div>
     <button
@@ -367,7 +393,7 @@
     @if (editorError()) {
       <p class="status notice" role="status">{{ editorError() }}</p>
     }
-    @if (!scanning() && (pane() === 'find' || pane() === 'library')) {
+    @if (pane() === 'library') {
       @if (ingredientIndex === null) {
         <label class="field"
           >Meal
@@ -388,21 +414,46 @@
     @switch (pane()) {
       @case ('find') {
         <div class="find-panel" [hidden]="scanning()">
-          <button type="button" class="quiet" (click)="startCamera()">Open camera</button>
-          <form class="inline-fields" (ngSubmit)="search()">
-            <label class="field"
+          @if (ingredientIndex === null) {
+            <ng-container [ngTemplateOutlet]="mealPicker" />
+          }
+          <form class="inline-fields find-search" (ngSubmit)="search()">
+            <label class="field portion-field"
               >Food name or barcode
-              <input
-                name="query"
-                [(ngModel)]="query"
-                maxlength="80"
-                autocomplete="off"
-                type="search"
-                placeholder="e.g. iaurt or a barcode"
-              />
+              <span class="find-input">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="10.5" cy="10.5" r="5.5" />
+                  <path d="m15 15 4 4" />
+                </svg>
+                <input
+                  name="query"
+                  [(ngModel)]="query"
+                  maxlength="80"
+                  autocomplete="off"
+                  type="search"
+                  placeholder="e.g. iaurt or a barcode"
+                />
+              </span>
             </label>
             <button class="primary" type="submit">Find</button>
           </form>
+          <div class="find-tools" [class.single]="ingredientIndex !== null">
+            <button type="button" class="quiet" (click)="startCamera()">
+              <svg viewBox="0 0 24 24" class="barcode-icon" aria-hidden="true">
+                <path
+                  d="M5 7h3l2-3h4l2 3h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"
+                />
+                <circle cx="12" cy="13" r="3" />
+              </svg>
+              Open camera
+            </button>
+            @if (ingredientIndex === null) {
+              <button type="button" class="quiet" (click)="manual(missingCode)">
+                <ng-container [ngTemplateOutlet]="scanIcon" />
+                Enter from label
+              </button>
+            }
+          </div>
           @if (searching()) {
             <p class="status" role="status">
               {{
@@ -439,15 +490,12 @@
             </div>
           }
           @if (ingredientIndex === null) {
-            <div class="editor-actions">
-              <button type="button" class="quiet" (click)="manual(missingCode)">
-                Enter from label
+            <div class="find-links">
+              <button type="button" (click)="quickAdd()">
+                Quick add calories <span aria-hidden="true">›</span>
               </button>
-              <button type="button" class="text-button" (click)="quickAdd()">
-                Quick add calories
-              </button>
-              <button type="button" class="text-button" (click)="stopCamera(); pane.set('library')">
-                My foods
+              <button type="button" (click)="stopCamera(); pane.set('library')">
+                My foods <span aria-hidden="true">›</span>
               </button>
             </div>
             @if (!results().length && recent().length) {
@@ -461,7 +509,8 @@
           } @else {
             <button type="button" class="quiet" (click)="returnToRecipe()">Back to recipe</button>
           }
-          <p class="status">
+          <p class="status find-credit">
+            Data from
             <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener"
               >Open Food Facts</a
             >
@@ -474,21 +523,7 @@
       }
       @case ('portion') {
         <div class="portion-form">
-          <fieldset class="portion-group">
-            <legend>Meal</legend>
-            <div class="portion-meals">
-              @for (meal of meals; track meal.id) {
-                <button
-                  type="button"
-                  [attr.aria-pressed]="activeMeal() === meal.id"
-                  [disabled]="busy()"
-                  (click)="setMeal(meal.id)"
-                >
-                  {{ meal.id === 'snack' ? 'Snack' : meal.name }}
-                </button>
-              }
-            </div>
-          </fieldset>
+          <ng-container [ngTemplateOutlet]="mealPicker" />
           <div class="portion-food">
             <label class="field portion-field"
               >Food name

@@ -540,13 +540,6 @@ legend {
 .complete-day {
   margin-top: 12px;
 }
-.find-panel {
-  display: grid;
-  gap: 12px;
-}
-.find-panel > .quiet {
-  justify-self: start;
-}
 [hidden] {
   display: none !important;
 }
@@ -755,7 +748,8 @@ dialog.scanner-open {
   color: var(--sheet-secondary);
   font-size: clamp(12px, 4.1vw, 16px);
 }
-.portion-form button[aria-pressed='true'] {
+.portion-meals button[aria-pressed='true'],
+.portion-units button[aria-pressed='true'] {
   border-color: var(--sheet-accent);
   color: var(--sheet-accent);
   background: var(--sheet-active);
@@ -807,14 +801,24 @@ dialog.scanner-open {
   grid-template-columns: minmax(0, 0.84fr) minmax(0, 1fr);
   gap: 12px;
 }
-.portion-facts label {
-  min-height: 74px;
-  padding: 12px 14px 8px;
+.portion-facts {
+  gap: 0;
   border: 1px solid var(--sheet-line);
   border-radius: 14px;
   background: var(--sheet-fact);
+  overflow: hidden;
+}
+.portion-facts label {
+  min-height: 74px;
+  padding: 12px 14px 8px;
   color: var(--sheet-secondary);
   font-size: 12px;
+}
+.portion-facts label:nth-child(n + 3) {
+  border-top: 1px solid var(--sheet-line);
+}
+.portion-facts label:nth-child(even) {
+  border-inline-start: 1px solid var(--sheet-line);
 }
 .portion-facts input {
   min-height: 22px;
@@ -883,4 +887,103 @@ dialog.scanner-open {
     max-height: calc(100dvh - 24px);
     border-radius: 28px 28px 0 0;
   }
+}
+
+.find-sheet {
+  --sheet-surface: #fff;
+  --sheet-line: #e0e2e8;
+  --sheet-fact: #f5f5f7;
+  --sheet-secondary: var(--ink-secondary);
+  --sheet-text: var(--ink);
+}
+:host-context(html[data-theme='dark']) .find-sheet {
+  --sheet-surface: #17171b;
+  --sheet-line: #303036;
+  --sheet-fact: #202025;
+  --sheet-secondary: var(--ink-secondary);
+  --sheet-text: var(--ink);
+}
+.find-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 16px;
+}
+.find-search {
+  gap: 10px;
+}
+.find-search .primary {
+  min-height: 52px;
+  padding-inline: 20px;
+  border-radius: 14px;
+}
+.find-input {
+  position: relative;
+  display: block;
+}
+.find-input svg {
+  position: absolute;
+  inset: 50% auto auto 14px;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  stroke: var(--sheet-secondary);
+  stroke-width: 1.6;
+  fill: none;
+  pointer-events: none;
+}
+.find-input input {
+  padding-inline-start: 36px;
+  background: var(--sheet-fact);
+}
+.find-tools {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.find-tools.single {
+  grid-template-columns: 1fr;
+}
+.find-tools button {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 5px;
+  min-height: 70px;
+  border-radius: 15px;
+  background: var(--sheet-fact);
+  border-color: var(--sheet-line);
+}
+.find-tools .barcode-icon {
+  color: var(--sheet-accent);
+}
+.find-links {
+  display: grid;
+  border-top: 1px solid var(--sheet-line);
+  padding-top: 6px;
+}
+.find-links button {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: none;
+  border: 0;
+  text-align: start;
+  color: var(--sheet-accent);
+  padding: 0 5px;
+}
+.find-links button span {
+  color: var(--sheet-secondary);
+  font-size: 19px;
+}
+.find-credit {
+  margin-top: auto;
+  text-align: center;
+  font-size: 12px;
+  padding-top: 8px;
+}
+.find-credit a {
+  color: inherit;
 }
