@@ -12,11 +12,6 @@
    Hero Results (Large Typography, no cards)
    ------------------------------------------------------------ */
 
-.hero-results {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
 .calorie-target {
   display: flex;
   flex-direction: column;
@@ -33,7 +28,7 @@
 
   strong {
     margin: 4px 0 0;
-    font-size: clamp(64px, 8vw, 82px);
+    font-size: clamp(50px,7vw,72px);
     font-weight: 750;
     letter-spacing: -0.04em;
     line-height: 1;
@@ -50,6 +45,7 @@
 }
 
 .result-grid {
+  margin-bottom: 32px;
   display: flex;
   justify-content: center;
   gap: 24px;
@@ -186,13 +182,15 @@
    Custom controls
    ------------------------------------------------------------ */
 
+.goal-controls { margin-bottom: 20px; }
+
 .goal-segmented-large {
   display: flex;
   background: rgba(118, 118, 128, 0.12);
   border-radius: 12px;
   padding: 3px;
-  margin-bottom: 24px;
-  
+  margin-bottom: 0;
+
   .goal-segment {
     flex: 1;
     border: none;
@@ -214,6 +212,8 @@
     }
   }
 }
+
+.goal-controls .settings-card { margin-top: 8px; }
 
 .pace-row {
   display: flex;
@@ -269,4 +269,3 @@
 .result-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0; background: var(--surface-strong); border: 1px solid var(--hairline); border-radius: 16px; overflow: hidden; }
 .result-grid .metric { padding: 16px 4px; }
 .result-grid .metric + .metric { border-inline-start: 1px solid var(--hairline); }
-.hero-results .calorie-target strong { font-size: clamp(50px,7vw,72px); }

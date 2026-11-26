@@ -28,7 +28,7 @@
     </header>
     <div #scrollBody class="planner-scroll">
       @if (step() < 6) {
-        <div class="wizard-layout">
+        <div class="wizard-layout" [class.equipment-step]="step() === 2">
           <section class="wizard-main">
             <div class="step-caption">
               <span>{{ steps[step()] }}</span
@@ -47,7 +47,7 @@
               }
             </div>
             <h1 #heading tabindex="-1">{{ questions[step()].title }}</h1>
-            @if (step() === 2 || step() === 3) { <p class="question-copy">{{ questions[step()].description }}</p> }
+            @if (step() === 3) { <p class="question-copy">{{ questions[step()].description }}</p> }
             @switch (step()) {
               @case (0) {
                 <div class="choice-stack">
@@ -62,9 +62,7 @@
                     ><span
                       ><strong>Build muscle</strong
                       ></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().goal === 'muscle' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                   <button
                     type="button"
@@ -78,9 +76,7 @@
                     ><span
                       ><strong>Get stronger</strong
                       ></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().goal === 'strength' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                   <button
                     type="button"
@@ -96,9 +92,7 @@
                     ><span
                       ><strong>Build & maintain muscle</strong
                       ></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().goal === 'recomp' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                 </div>
               }
@@ -116,9 +110,7 @@
                     ><span
                       ><strong>Building my foundation</strong
                       ></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().experience === 'new' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                   <button
                     type="button"
@@ -132,9 +124,7 @@
                     ><span
                       ><strong>Training consistently</strong
                       ></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().experience === 'consistent' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                   <button
                     type="button"
@@ -147,9 +137,7 @@
                     ><span
                       ><strong>Experienced lifter</strong
                       ></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().experience === 'experienced' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                 </div>
               }
@@ -170,16 +158,10 @@
                       <span
                         ><strong>{{ option.label }}</strong
                         ><small>{{ option.detail }}</small></span
-                      ><span class="choice-check" aria-hidden="true">{{
-                        answers().equipment?.includes(option.value) ? '✓' : ''
-                      }}</span>
+                      ><span class="selection-dot" aria-hidden="true"></span>
                     </button>
                   }
                 </div>
-                <p class="field-note">
-                  Bodyweight movements are included when useful. For balanced back training, select
-                  at least one source of pulling resistance.
-                </p>
               }
               @case (3) {
                 <fieldset class="schedule-field">
@@ -234,9 +216,7 @@
                       <span
                         ><strong>{{ option.title }}</strong
                         ><small>{{ option.description }}</small></span
-                      ><span class="choice-check" aria-hidden="true">{{
-                        answers().focus === option.value ? '✓' : ''
-                      }}</span>
+                      ><span class="selection-dot" aria-hidden="true"></span>
                     </button>
                   }
                 </div>
@@ -256,9 +236,7 @@
                         >No current pain, injury or medical restriction affecting my
                         training.</small
                       ></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().readiness === 'ready' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                   <button
                     type="button"
@@ -270,9 +248,7 @@
                     <span
                       ><strong>Returning after a break</strong
                       ><small>Ready to exercise, with a gentler starting workload.</small></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().readiness === 'returning' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                   <button
                     type="button"
@@ -286,9 +262,7 @@
                       ><small
                         >I need individual guidance before following a general plan.</small
                       ></span
-                    ><span class="choice-check" aria-hidden="true">{{
-                      answers().readiness === 'restricted' ? '✓' : ''
-                    }}</span>
+                    ><span class="selection-dot" aria-hidden="true"></span>
                   </button>
                 </div>
                 <p class="field-note">

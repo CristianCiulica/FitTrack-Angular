@@ -41,6 +41,7 @@ import { finalize } from 'rxjs';
 export class SettingsComponent implements OnInit {
   private readonly confirmation = inject(ConfirmationService);
   readonly appearance = inject(ThemeService);
+  readonly effectOptions = ['glass', 'blur'] as const;
   readonly appearanceOptions = ['light', 'dark', 'system'] as const;
   private readonly profileService = inject(ProfileService);
   private readonly auth = inject(AuthService);

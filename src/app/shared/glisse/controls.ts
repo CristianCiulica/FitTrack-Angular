@@ -5,6 +5,9 @@ import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { FT_ICONS } from './icons';
 import { Button, Slider, TabBar } from 'glisse';
+import type { ButtonProps } from 'glisse';
+import { ThemeService } from '../../core/services/theme.service';
+import { BlurTabBar } from './blur-tab-bar';
 
 function mount(element: HTMLElement) {
   const zone = inject(NgZone);
@@ -62,12 +65,18 @@ export class FitSlider {
   readonly valueText = input.required<string>();
   readonly changed = output<number>();
   private readonly zone = inject(NgZone);
+  private readonly appearance = inject(ThemeService);
   private readonly root = mount(inject(ElementRef).nativeElement);
   constructor() {
-    afterRenderEffect(() => this.root.render(h(PaceSlider, {
-      value: this.value(), max: this.max(), id: this.inputId(),
-      label: this.label(), valueText: this.valueText(), change: value => this.zone.run(() => this.changed.emit(value)),
-    })));
+    afterRenderEffect(() => {
+      const value = this.value(), max = this.max(), id = this.inputId();
+      const label = this.label(), valueText = this.valueText();
+      const change = (next: number) => this.zone.run(() => this.changed.emit(next));
+      this.root.render(this.appearance.effectStyle() === 'blur'
+        ? h('input', { className: 'ft-blur-range', id, type: 'range', min: 0.1, max, step: 0.01, value,
+            'aria-label': label, 'aria-valuetext': valueText, onChange: event => change(event.currentTarget.valueAsNumber) })
+        : h(PaceSlider, { value, max, id, label, valueText, change }));
+    });
   }
 }
 
@@ -92,6 +101,7 @@ export class FitAction {
   private readonly target = viewChild.required<ElementRef>('target');
   private readonly content = viewChild.required<ElementRef>('content');
   private readonly zone = inject(NgZone);
+  private readonly appearance = inject(ThemeService);
   constructor() {
     const zone = this.zone;
     const destroy = inject(DestroyRef);
@@ -100,12 +110,19 @@ export class FitAction {
     afterRenderEffect(() => {
       root ??= zone.runOutsideAngular(() => createRoot(this.target().nativeElement));
       const content = this.content().nativeElement;
-      zone.runOutsideAngular(() => root!.render(h(Button, {
+      const variant = this.variant(), destructive = this.destructive();
+      const props: ButtonProps = {
         type: this.kind(), disabled: this.disabled() || this.busy(),
         'aria-haspopup': this.dialogId() ? 'dialog' : undefined,
         'aria-controls': this.dialogId(), 'aria-expanded': this.expanded(),
-        variant: this.variant(), destructive: this.destructive(), 'aria-label': this.label(), 'aria-busy': this.busy(), onClick: () => zone.run(() => this.activated.emit()),
-      }, h('span', {ref: (el: HTMLSpanElement | null) => { if (el) el.append(content); }}))));
+        'aria-label': this.label(), 'aria-busy': this.busy(), onClick: () => zone.run(() => this.activated.emit()),
+      };
+      const label = h('span', {ref: (el: HTMLSpanElement | null) => { if (el) el.append(content); }});
+      const button = this.appearance.effectStyle() === 'blur'
+        ? h('button', { ...props, className: 'lg-button ft-blur-button', 'data-variant': variant,
+            'data-destructive': destructive ? '' : undefined }, label)
+        : h(Button, { ...props, variant, destructive }, label);
+      zone.runOutsideAngular(() => root!.render(button));
     });
   }
 }
@@ -129,14 +146,21 @@ export class FitTabBar {
     value: '/progress', href: this.location.prepareExternalUrl('/progress'), label: 'Progress'
   }].map(({ value, href, label }) => ({ value, href, label }));
   private readonly zone = inject(NgZone);
+  private readonly appearance = inject(ThemeService);
   private readonly root = mount(inject(ElementRef).nativeElement);
   constructor() {
     afterRenderEffect(() => {
       const links = this.desktop() ? this.desktopLinks : this.links;
       const url = this.router.lastSuccessfulNavigation?.()?.finalUrl?.toString() ?? this.router.url;
       const path = url?.split(/[?#]/)[0];
+      const selected = links.find(item => item.value === path)?.value ?? null;
+      if (this.appearance.effectStyle() === 'blur') {
+        this.root.render(h(BlurTabBar, { links, selected, desktop: this.desktop(),
+          navigate: path => this.zone.run(() => void this.router.navigateByUrl(path)) }));
+        return;
+      }
       this.root.render(h(TabBar, {
-        items: links, value: links.find(item => item.value === path)?.value ?? null,
+        items: links, value: selected,
         'aria-label': 'Main navigation',
         onClick: event => {
           if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;

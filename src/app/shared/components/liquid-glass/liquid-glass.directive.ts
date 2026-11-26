@@ -1,5 +1,6 @@
 import { supportsGlassRefraction } from '../../../core/utils/glass-support';
-import { afterNextRender, DestroyRef, Directive, ElementRef, inject, NgZone } from '@angular/core';
+import { ThemeService } from '../../../core/services/theme.service';
+import { afterRenderEffect, Directive, ElementRef, inject, NgZone } from '@angular/core';
 import { glassLensPixels } from '../../../core/utils/glass-lens';
 
 let nextLens = 0;
@@ -8,14 +9,18 @@ let nextLens = 0;
 @Directive({ selector: '[appLiquidGlass]', standalone: true, host: { class: 'liquid-panel' } })
 export class LiquidGlassDirective {
   private readonly host = inject(ElementRef<HTMLElement>).nativeElement;
-  private readonly destroy = inject(DestroyRef);
+  private readonly appearance = inject(ThemeService);
   private readonly zone = inject(NgZone);
 
   constructor() {
-    afterNextRender(() => this.zone.runOutsideAngular(() => this.connect()));
+    afterRenderEffect(onCleanup => {
+      if (this.appearance.effectStyle() === 'blur') return;
+      const disconnect = this.zone.runOutsideAngular(() => this.connect());
+      if (disconnect) onCleanup(disconnect);
+    });
   }
 
-  private connect(): void {
+  private connect(): (() => void) | undefined {
     const defs = document.querySelector('app-liquid-glass svg defs');
     if (!defs || !supportsGlassRefraction()) return;
     const canvas = document.createElement('canvas');
@@ -55,12 +60,12 @@ export class LiquidGlassDirective {
     });
     observer.observe(this.host);
     update();
-    this.destroy.onDestroy(() => {
+    return () => {
       observer.disconnect();
       cancelAnimationFrame(frame);
       filter.remove();
       this.host.style.removeProperty('--panel-lens');
       this.host.classList.remove('has-panel-lens');
-    });
+    };
   }
 }

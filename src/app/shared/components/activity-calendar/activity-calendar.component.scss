@@ -299,16 +299,6 @@ summary > span {
   font-weight: 550;
   overflow-wrap: anywhere;
 }
-.session-check {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  background: #24b5751a;
-  color: #138b50;
-}
 .journal-link {
   display: flex;
   justify-content: space-between;
@@ -333,8 +323,7 @@ summary > span {
     background: #693b41;
     color: #f3b7b9;
   }
-  .journal-status.trained,
-  .session-check {
+  .journal-status.trained {
     color: #6ce0a6;
   }
 }
@@ -427,12 +416,11 @@ summary > span {
   }
 }
 /* Neutral journal controls use the same blue accent as the rest of the app. */
-.journal-status.trained, .session-check { color: var(--accent); }
-.session-check { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.journal-status.trained { color: var(--accent); }
+
 .journal-link { margin-top: auto; border: 0; border-radius: 12px; padding: 13px 16px; background: var(--accent); color: #fff; justify-content: center; min-height: 44px; }
 .journal-link:hover { color: #fff; background: var(--accent-strong); }
-:host-context(html[data-theme='dark']) .journal-status.trained,
-:host-context(html[data-theme='dark']) .session-check { color: var(--accent); }
+:host-context(html[data-theme='dark']) .journal-status.trained { color: var(--accent); }
 
 .month-navigation { width: 100%; justify-content: space-between; }
 .day { display: grid; place-items: center; }

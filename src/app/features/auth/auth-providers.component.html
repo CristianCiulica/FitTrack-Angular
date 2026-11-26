@@ -1,0 +1,16 @@
+<ft-action
+          class="auth-provider"
+          [busy]="pending() === 'Google'" [disabled]="disabled() || pending() !== null"
+          (activated)="signIn('Google')"
+        >
+          <span class="google-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M44.5 20H24V28.5H35.7C34.2 33.4 29.8 36.5 24 36.5C17.1 36.5 11.5 30.9 11.5 24C11.5 17.1 17.1 11.5 24 11.5C27 11.5 29.8 12.6 31.9 14.4L37.9 8.4C34.2 5 29.3 3 24 3C12.4 3 3 12.4 3 24C3 35.6 12.4 45 24 45C35.6 45 45 35.6 45 24C45 22.6 44.8 21.3 44.5 20Z" fill="#4285F4"/>
+              <path d="M6.3 14.7L12.9 19.5C14.7 15 18.9 11.5 24 11.5C27 11.5 29.8 12.6 31.9 14.4L37.9 8.4C34.2 5 29.3 3 24 3C16 3 9 7.6 6.3 14.7Z" fill="#34A853"/>
+              <path d="M24 45C29.7 45 34.6 43.1 38.2 39.8L31.6 34.7C29.7 36 27 36.5 24 36.5C18.2 36.5 13.8 33.4 12.2 28.5L5.5 33.7C8.2 40.6 15.5 45 24 45Z" fill="#FBBC05"/>
+              <path d="M12.2 28.5C11.8 27.4 11.5 26.3 11.5 24C11.5 21.7 11.8 20.6 12.2 19.5L5.5 14.7C4 17.6 3 20.7 3 24C3 27.3 4 30.4 5.5 33.3L12.2 28.5Z" fill="#EA4335"/>
+            </svg>
+          </span>
+          Google
+        </ft-action>
+<ft-action class="auth-provider" [busy]="pending() === 'Apple'" [disabled]="disabled() || pending() !== null" (activated)="signIn('Apple')"><svg width="17" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.1 1c.1 1.3-.4 2.5-1.2 3.4-.9 1-2.1 1.6-3.3 1.5-.2-1.3.4-2.5 1.2-3.4C14.6 1.6 16 1 17.1 1ZM20.9 17.7c-.5 1.2-.8 1.7-1.4 2.7-.9 1.3-2.1 2.9-3.6 2.9-1.3 0-1.7-.9-3.5-.9s-2.2.9-3.6.9-2.6-1.5-3.5-2.8c-2.5-3.7-2.8-8-.9-10.7 1.3-1.9 3.3-2.9 5.1-2.9 1.5 0 2.5.9 3.7.9s2-.9 3.8-.9c1.5 0 3.1.8 4.2 2.1-3.7 2.1-3.2 7.2-.3 8.7Z"/></svg> Apple</ft-action>

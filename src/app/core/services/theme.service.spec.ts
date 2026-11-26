@@ -10,6 +10,7 @@ describe('Theme preference', () => {
   beforeEach(() => {
     window.history.replaceState({}, '', '/dashboard');
     localStorage.removeItem(THEME_STORAGE_KEY);
+    localStorage.removeItem('fittrack_effects');
     systemDark = false;
     changed = undefined;
     vi.stubGlobal('matchMedia', vi.fn(() => ({
@@ -24,7 +25,9 @@ describe('Theme preference', () => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
     localStorage.removeItem(THEME_STORAGE_KEY);
+    localStorage.removeItem('fittrack_effects');
     document.documentElement.removeAttribute('data-theme');
+    document.documentElement.removeAttribute('data-effects');
     document.documentElement.style.removeProperty('color-scheme');
     document.documentElement.style.removeProperty('background-color');
     window.history.replaceState({}, '', originalUrl);
@@ -55,6 +58,18 @@ describe('Theme preference', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('Blocked'); });
     const service = TestBed.inject(ThemeService);
     expect(() => service.setPreference('dark')).not.toThrow();
+    expect(service.theme()).toBe('dark');
+  });
+  it('restores the rendering preference and keeps it independent of the colour theme', () => {
+    localStorage.setItem('fittrack_effects', 'blur');
+    const service = TestBed.inject(ThemeService);
+    service.setPreference('dark');
+    expect(document.documentElement.dataset['effects']).toBe('blur');
+    service.setEffectStyle('glass');
+    expect(localStorage.getItem('fittrack_effects')).toBe('glass');
+    localStorage.setItem('fittrack_effects', 'blur');
+    window.dispatchEvent(new StorageEvent('storage', { key: 'fittrack_effects' }));
+    expect(service.effectStyle()).toBe('blur');
     expect(service.theme()).toBe('dark');
   });
   it('respects the saved theme on a direct visit to login', () => {

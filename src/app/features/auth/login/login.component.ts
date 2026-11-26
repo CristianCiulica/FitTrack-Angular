@@ -1,3 +1,4 @@
+import { AuthProvidersComponent } from '../auth-providers.component';
 import { FitAction } from '../../../shared/glisse/controls';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
@@ -17,6 +18,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
   standalone: true,
   imports: [
     FitAction,
+    AuthProvidersComponent,
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
@@ -32,7 +34,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 export class LoginComponent {
   form: FormGroup;
   loading = false;
-  googleLoading = false;
+  providerBusy = false;
   passwordVisible = false;
 
   constructor(
@@ -50,6 +52,7 @@ export class LoginComponent {
   }
 
   submit() {
+    if (this.providerBusy || this.loading) return;
     if (this.form.invalid) {
       for (const control of Object.values(this.form.controls)) {
         control.markAsDirty();
@@ -97,46 +100,4 @@ export class LoginComponent {
     });
   }
 
-  // sign in with google
-  signInWithProvider(provider: 'Google' | 'Apple') {
-    this.googleLoading = true;
-    (provider === 'Google' ? this.auth.signInWithGoogle() : this.auth.signInWithApple()).subscribe({
-      next: () => {
-        this.loadingService.showAfterNextNavigation(1000);
-        this.router.navigate(['/dashboard']);
-      },
-      error: (error) => {
-        this.showProviderError(provider, error);
-        this.googleLoading = false;
-      },
-    });
-  }
-
-  private showProviderError(provider: string, error: { code?: string }) {
-    if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
-      this.message.warning(`${provider} sign-in was cancelled.`);
-      return;
-    }
-    if (error?.code === 'auth/popup-blocked') {
-      this.message.error(`The ${provider} window was blocked. Allow popups and try again.`);
-      return;
-    }
-    if (error?.code === 'auth/unauthorized-domain') {
-      this.message.error('This website domain must be authorized in Firebase Authentication.');
-      return;
-    }
-    if (error?.code === 'auth/operation-not-allowed') {
-      this.message.error(`${provider} sign-in is unavailable.`);
-      return;
-    }
-    if (error?.code === 'auth/network-request-failed') {
-      this.message.error('Network error. Check your connection and try again.');
-      return;
-    }
-    if (error?.code === 'auth/account-exists-with-different-credential') {
-      this.message.error('This email is already registered with a password. Sign in with your email and password instead.');
-      return;
-    }
-    this.message.error(`${provider} sign-in failed${error?.code ? ' (' + error.code + ')' : ''}. Please try again.`);
-  }
 }

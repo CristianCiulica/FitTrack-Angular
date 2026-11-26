@@ -45,9 +45,7 @@
                   <span class="appearance-label">{{
                     option === 'system' ? 'Auto' : (option | titlecase)
                   }}</span>
-                  <span class="appearance-check" aria-hidden="true">{{
-                    appearance.preference() === option ? '✓' : ''
-                  }}</span>
+                  <span class="selection-dot" aria-hidden="true"></span>
                 </button>
               }
             </div>
@@ -58,6 +56,25 @@
                   : 'Saved on this device.'
               }}
             </p>
+          </section>
+
+          <section class="appearance-section effects-section" aria-labelledby="effects-title">
+            <div class="setting-copy">
+              <strong id="effects-title">Glass effects</strong>
+              <small>Disable glass effects with Blur for smoother scrolling on slower phones.</small>
+            </div>
+            <div class="appearance-options effect-options" role="group" aria-labelledby="effects-title">
+              @for (option of effectOptions; track option) {
+                <button type="button" class="appearance-option" [class.selected]="appearance.effectStyle() === option"
+                  [attr.aria-pressed]="appearance.effectStyle() === option" (click)="appearance.setEffectStyle(option)">
+                  <span class="appearance-preview effect-preview" [class.blur-preview]="option === 'blur'" aria-hidden="true">
+                    <span class="preview-pill"><i></i><i></i><i></i></span>
+                  </span>
+                  <span class="appearance-label">{{ option | titlecase }}</span>
+                  <span class="selection-dot" aria-hidden="true"></span>
+                </button>
+              }
+            </div>
           </section>
 
           <div class="setting-row">

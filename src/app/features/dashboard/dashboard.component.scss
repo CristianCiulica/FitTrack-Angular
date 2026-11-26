@@ -37,8 +37,9 @@
   background: repeating-radial-gradient(circle at 96% 126%, transparent 0 48px, var(--dash-ring-line) 49px, transparent 51px);
   mask-image: linear-gradient(105deg, transparent 66%, #000);
 }
-.planner-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.planner-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
 .start-cta {
+  grid-column: 1 / -1; justify-self: start;
   display: inline-flex; justify-content: center; align-items: center; gap: 10px;
   min-height: 51px; padding: 0 29px; border-radius: 16px; background: var(--dash-blue);
   color: #fff; font-weight: 650; font-size: 15px;
@@ -120,7 +121,7 @@
   .dashboard-hero::before { display: none; }
   .dashboard-hero h1 { font-size: clamp(27px, 7.6vw, 37px); }
   .dashboard-hero p { margin: 8px 0 21px; font-size: 16px; }
-  .planner-actions { gap: 10px 5px; }
+  .planner-actions { gap: 10px 8px; }
   .start-cta { width: 100%; min-height: 54px; font-size: 17px; }
   .calendar-card { margin: 19px 0 15px; padding: 12px 12px 10px; }
   .week-controls button { width: 34px; height: 34px; }

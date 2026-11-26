@@ -1,9 +1,9 @@
+import { AuthProvidersComponent } from '../auth-providers.component';
 import { FitAction } from '../../../shared/glisse/controls';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { LoadingService } from '../../../core/services/loading.service';
 import { CommonModule } from '@angular/common';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -16,6 +16,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
   standalone: true,
   imports: [
     FitAction,
+    AuthProvidersComponent,
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
@@ -30,7 +31,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 export class RegisterComponent {
   form: FormGroup;
   loading = false;
-  googleLoading = false;
+  providerBusy = false;
   passwordVisible = false;
   confirmPasswordVisible = false;
 
@@ -39,7 +40,6 @@ export class RegisterComponent {
     private auth: AuthService,
     private router: Router,
     private message: NzMessageService,
-    private loadingService: LoadingService,
   ) {
     this.form = this.fb.group({
       firstName: ['', Validators.required],
@@ -56,6 +56,7 @@ export class RegisterComponent {
   }
 
   submit() {
+    if (this.providerBusy || this.loading) return;
     if (this.form.invalid) {
       for (const control of Object.values(this.form.controls)) {
         control.markAsDirty();
@@ -81,47 +82,6 @@ export class RegisterComponent {
     this.confirmPasswordVisible = !this.confirmPasswordVisible;
   }
 
-  signInWithGoogle() {
-    this.googleLoading = true;
-    this.auth.signInWithGoogle().subscribe({
-      next: () => {
-        this.loadingService.showAfterNextNavigation(1000);
-        this.router.navigate(['/dashboard']);
-      },
-      error: (error) => {
-        this.showGoogleError(error);
-        this.googleLoading = false;
-      },
-    });
-  }
-
-  private showGoogleError(error: { code?: string }) {
-    if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
-      this.message.warning('Google sign-in was cancelled.');
-      return;
-    }
-    if (error?.code === 'auth/popup-blocked') {
-      this.message.error('The Google window was blocked. Allow popups and try again.');
-      return;
-    }
-    if (error?.code === 'auth/unauthorized-domain') {
-      this.message.error('This website domain must be authorized in Firebase Authentication.');
-      return;
-    }
-    if (error?.code === 'auth/operation-not-allowed') {
-      this.message.error('Google sign-in is not enabled in Firebase Authentication.');
-      return;
-    }
-    if (error?.code === 'auth/network-request-failed') {
-      this.message.error('Network error. Check your connection and try again.');
-      return;
-    }
-    if (error?.code === 'auth/account-exists-with-different-credential') {
-      this.message.error('This email is already registered with a password. Sign in with your email and password instead.');
-      return;
-    }
-    this.message.error(`Google sign-in failed${error?.code ? ' (' + error.code + ')' : ''}. Please try again.`);
-  }
 }
 
 function passwordMatchValidator(group: AbstractControl): ValidationErrors | null {

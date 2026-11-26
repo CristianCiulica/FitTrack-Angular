@@ -96,8 +96,6 @@ export class TrainingPlannerComponent {
     },
     {
       title: 'What equipment can you use?',
-      description:
-        'Select what you can actually use. Every exercise and alternative will respect this list.',
     },
     {
       title: 'When can you train?',

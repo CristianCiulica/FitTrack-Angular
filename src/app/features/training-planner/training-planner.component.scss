@@ -204,7 +204,7 @@
   transition:
     border-color 160ms ease,
     background 160ms ease;
-  > span:not(.choice-check):not(.choice-symbol):not(.level-symbol) {
+  > span:not(.selection-dot):not(.choice-symbol):not(.level-symbol) {
     flex: 1;
     min-width: 0;
   }
@@ -228,24 +228,7 @@
   &.selected {
     border-color: var(--accent);
     background: color-mix(in srgb, var(--accent) 5%, var(--planner-card));
-    .choice-check {
-      color: white;
-      background: var(--planner-action);
-      border-color: var(--planner-action);
-    }
   }
-}
-.choice-check {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 21px;
-  height: 21px;
-  margin-left: auto;
-  border: 1.5px solid var(--hairline);
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: 750;
 }
 .choice-symbol {
   display: grid;
@@ -578,11 +561,6 @@ fieldset {
       small {
         font-size: 10px;
       }
-      .choice-check {
-        width: 17px;
-        height: 17px;
-        font-size: 10px;
-      }
     }
   }
   .weekday-picker {
@@ -788,3 +766,9 @@ fieldset {
 .training-screen .planner-header > div { flex: 1; }
 
 .training-screen .back-action { display: inline-grid; place-items: center; min-width: 76px; height: 48px; padding: 0 16px; line-height: 1; }
+
+@media (max-width: 600px) {
+  .training-screen .equipment-step { display: flex; flex-direction: column; min-height: 100%; }
+  .equipment-step .wizard-main { display: flex; flex: 1; flex-direction: column; width: 100%; }
+  .equipment-step .equipment-grid { flex: 1; grid-auto-rows: 1fr; }
+}

@@ -92,16 +92,11 @@
                   <strong>{{ badge.label }}</strong>
                   <small>{{ badge.detail }}</small>
                   <span class="badge-selection">
-                    <span
-                      nz-icon
-                      [nzType]="
-                        badge.earned
-                          ? achievements.isFeatured(badge.id)
-                            ? 'check'
-                            : 'plus'
-                          : 'lock'
-                      "
-                    ></span>
+                    @if (badge.earned && achievements.isFeatured(badge.id)) {
+                      <span class="selection-dot filled" aria-hidden="true"></span>
+                    } @else {
+                      <span nz-icon [nzType]="badge.earned ? 'plus' : 'lock'" aria-hidden="true"></span>
+                    }
                     {{
                       badge.earned
                         ? achievements.isFeatured(badge.id)

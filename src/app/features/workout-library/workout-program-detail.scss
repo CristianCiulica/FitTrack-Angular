@@ -261,12 +261,11 @@
 .day-check {
   position: absolute;
   right: 4px;
-  top: 1px;
-  font-size: 9px;
-  color: var(--accent);
+  top: 4px;
+  width: 6px; height: 6px;
 }
 .month-map .selected .day-check {
-  color: white;
+  --selection-ink: currentColor;
 }
 :host-context(html[data-theme='dark']) .month-map button.selected {
   background: #f5f5f7;
@@ -274,9 +273,7 @@
   small {
     color: #515154;
   }
-  .day-check {
-    color: #1c1c1e;
-  }
+
 }
 .new-block-action {
   margin-top: 16px;

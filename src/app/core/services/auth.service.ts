@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   getRedirectResult,
   sendPasswordResetEmail,
   User,
@@ -54,7 +55,7 @@ export class AuthService {
         .subscribe({ error: (err) => console.warn('[auth] Failed to load profile', err) });
     });
 
-  // Handle redirect result when returning from Google sign-in (PWA standalone mode)
+  // Firebase restores the session when returning from provider sign-in.
   private readonly redirectSub = getRedirectResult(this.auth)
     .then((result) => {
       if (result?.user) {
@@ -111,7 +112,15 @@ export class AuthService {
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email');
     provider.addScope('name');
-    return from(signInWithPopup(this.auth, provider));
+    provider.setCustomParameters({ locale: navigator.language.replace('-', '_') });
+    const attempt = signInWithPopup(this.auth, provider).catch((error: { code?: string }) => {
+      // A same-origin auth helper can recover the redirect session even with partitioned storage.
+      if (error.code === 'auth/popup-blocked' && location.host === this.auth.config.authDomain) {
+        return signInWithRedirect(this.auth, provider);
+      }
+      throw error;
+    });
+    return from(attempt);
   }
 
   get currentUserId(): string {

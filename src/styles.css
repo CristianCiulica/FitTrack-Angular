@@ -331,16 +331,34 @@ a:hover {
   padding-top: 3px;
 }
 
-/* Checkbox */
-.ant-checkbox-inner {
-  border-radius: 6px;
-  border-color: rgba(0, 0, 0, 0.18);
+/* Filled markers share the same theme contrast across selection controls. */
+:root { --selection-ink: #171719; }
+html[data-theme='dark'] { --selection-ink: #fff; }
+.selection-dot {
+  display: inline-block;
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--ink-tertiary);
+  border-radius: 50%;
 }
-
+[aria-pressed="true"] .selection-dot, .selection-dot.filled {
+  background: var(--selection-ink);
+  border-color: var(--selection-ink);
+}
+.ant-message-success > nz-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--selection-ink);
+}
+.ant-message-success > nz-icon svg { display: none; }
+.ant-checkbox .ant-checkbox-inner { border-radius: 50%; }
 .ant-checkbox-checked .ant-checkbox-inner {
-  background-color: var(--accent);
-  border-color: var(--accent);
+  background: var(--selection-ink);
+  border-color: var(--selection-ink);
 }
+.ant-checkbox-checked .ant-checkbox-inner::after { display: none; }
 
 /* Select dropdown */
 .ant-select-dropdown {
@@ -918,3 +936,27 @@ img[data-athlete="dorian"] { --portrait-y: 12%; }
   color: var(--ink-secondary); background: transparent !important; border: 0;
 }
 :is(#training-planner-screen .footer-inner, #nutrition-assistant-screen .assistant-footer) > button { font-size: 15px !important; }
+
+/* Blur mode uses ordinary controls and one small frost layer on the dock. */
+html[data-effects='blur'] {
+  --glass-blur: none;
+  --glass-bg: var(--surface-strong);
+  --glass-shadow: none;
+}
+html[data-effects='blur'] .liquid-panel::after { display: none; }
+html[data-effects='blur'] .liquid-panel::before {
+  background: var(--surface-strong);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.ft-blur-button { background: var(--surface-strong); box-shadow: inset 0 0 0 1px var(--hairline); }
+.ft-blur-button[data-variant='filled'] { box-shadow: none; }
+.ft-blur-range { width: 100%; min-height: 44px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.ft-blur-tabs {
+  background: var(--surface-strong);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.ft-blur-tabs .lg-tab { border-radius: inherit; }
+.ft-blur-tabs .lg-tab[aria-current='page'] { background: var(--hairline); color: var(--accent); }

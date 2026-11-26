@@ -16,30 +16,54 @@
       <h1 class="sr-only">Nutrition</h1>
       <div class="container">
         <div class="nutrition-page">
-          
-          <div class="hero-results">
-            <div class="calorie-target">
-              <span>Daily Calorie Target</span>
-              <strong>{{ targetCalories() | number: '1.0-0' }}</strong>
-              <small>kcal/day</small>
+
+          <div class="calorie-target">
+            <span>Daily Calorie Target</span>
+            <strong>{{ targetCalories() | number: '1.0-0' }}</strong>
+            <small>kcal/day</small>
+          </div>
+
+          <div class="goal-controls">
+            <div class="settings-header">Your goal</div>
+
+            <div class="goal-segmented-large" role="group" aria-label="Nutrition goal">
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'lose'" [attr.aria-pressed]="goal() === 'lose'" (click)="setGoal('lose')">
+                Lose Fat
+              </button>
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'maintain'" [attr.aria-pressed]="goal() === 'maintain'" (click)="setGoal('maintain')">
+                Maintain
+              </button>
+              <button type="button" class="goal-segment" [class.selected]="goal() === 'gain'" [attr.aria-pressed]="goal() === 'gain'" (click)="setGoal('gain')">
+                Bulk Up
+              </button>
             </div>
 
-            <div class="result-grid">
-              <div class="metric">
-                <span>BMI</span>
-                <strong>{{ bmi() }}</strong>
-                <span class="bmi-category" [attr.data-tone]="bmiCategory().color">{{ bmiCategory().text }}</span>
+            <div class="settings-card" *ngIf="goal() !== 'maintain'">
+              <div class="calc-row pace-row">
+                <div class="pace-header">
+                  <label for="nutrition-pace">Weekly pace</label>
+                  <strong>{{ goalRateDisplay() | number: '1.2-2' }} {{ weightUnit() }}/wk</strong>
+                </div>
+                <ft-slider inputId="nutrition-pace" [valueText]="(goalRateDisplay() | number: '1.2-2') + ' ' + weightUnit() + ' per week'" label="Weekly weight change pace" [max]="goal() === 'lose' ? 1 : 0.5" [value]="goalRate()" (changed)="onGoalRate($event)" />
               </div>
-              <div class="metric">
-                <span>Maintenance</span>
-                <strong>{{ maintenanceCalories() }}</strong>
-                <small>kcal</small>
-              </div>
-              <div class="metric">
-                <span>Basal Met.</span>
-                <strong>{{ basalCalories() }}</strong>
-                <small>kcal</small>
-              </div>
+            </div>
+          </div>
+
+          <div class="result-grid">
+            <div class="metric">
+              <span>BMI</span>
+              <strong>{{ bmi() }}</strong>
+              <span class="bmi-category" [attr.data-tone]="bmiCategory().color">{{ bmiCategory().text }}</span>
+            </div>
+            <div class="metric">
+              <span>Maintenance</span>
+              <strong>{{ maintenanceCalories() }}</strong>
+              <small>kcal</small>
+            </div>
+            <div class="metric">
+              <span>Basal Met.</span>
+              <strong>{{ basalCalories() }}</strong>
+              <small>kcal</small>
             </div>
           </div>
 
@@ -88,42 +112,15 @@
           </div>
 
           <div class="settings-group">
-            <div class="settings-header">TRAINING & GOALS</div>
+            <div class="settings-header">TRAINING</div>
             <div class="settings-card">
               <label class="calc-row">
                 <span>Strength sessions / week</span>
                 <nz-input-number [ngModel]="strengthTrainingDays()" (ngModelChange)="onStrengthDays($event)" [nzMin]="0" [nzMax]="7" [nzStep]="1" nzBorderless></nz-input-number>
               </label>
             </div>
-          </div>
-
-          <div class="settings-group">
-            <div class="settings-group-title">YOUR GOAL</div>
-            
-            <div class="goal-segmented-large" role="group" aria-label="Nutrition goal">
-              <button type="button" class="goal-segment" [class.selected]="goal() === 'lose'" [attr.aria-pressed]="goal() === 'lose'" (click)="setGoal('lose')">
-                Lose Fat
-              </button>
-              <button type="button" class="goal-segment" [class.selected]="goal() === 'maintain'" [attr.aria-pressed]="goal() === 'maintain'" (click)="setGoal('maintain')">
-                Maintain
-              </button>
-              <button type="button" class="goal-segment" [class.selected]="goal() === 'gain'" [attr.aria-pressed]="goal() === 'gain'" (click)="setGoal('gain')">
-                Bulk Up
-              </button>
-            </div>
-
-            <div class="settings-card" *ngIf="goal() !== 'maintain'">
-              <div class="calc-row pace-row">
-                <div class="pace-header">
-                  <label for="nutrition-pace">Weekly pace</label>
-                  <strong>{{ goalRateDisplay() | number: '1.2-2' }} {{ weightUnit() }}/wk</strong>
-                </div>
-                <ft-slider inputId="nutrition-pace" [valueText]="(goalRateDisplay() | number: '1.2-2') + ' ' + weightUnit() + ' per week'" label="Weekly weight change pace" [max]="goal() === 'lose' ? 1 : 0.5" [value]="goalRate()" (changed)="onGoalRate($event)" />
-              </div>
-            </div>
             <p class="settings-footer">Calculated using the Mifflin-St Jeor equation combined with your weekly weight-training frequency.</p>
           </div>
-
         </div>
       </div>
     </nz-content>
