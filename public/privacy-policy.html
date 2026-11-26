@@ -30,11 +30,15 @@
     <p>FitTrack uses the information you enter to keep your training log, track your progress and sync saved activities across your devices. What we collect depends on which features you use.</p>
 
     <h2>Your account and profile</h2>
-    <p>Google Firebase handles sign-in. FitTrack uses your account identifier to associate your profile, workouts, weight entries and runs with your account. Your profile can include your name, email address, age, height, weight and activity goals.</p>
+    <p>Google Firebase handles sign-in. FitTrack uses your account identifier to associate your profile, workouts, weight entries, runs and food diary with your account. Your profile can include your name, email address, age, height, weight and activity goals.</p>
     <p>Height and weight are used to calculate BMI. Nutrition estimates also use profile details and your chosen goal. When you change your daily Move or Exercise target or your weekly workout target, the activity rings use those values to show your progress.</p>
 
     <h2>Your training log</h2>
     <p>Saving a strength workout records details such as the session date, exercises, sets, repetitions and weights. FitTrack uses this history to show previous lifts, calculate total volume and compare sessions. A workout image you export can include the date, calories, total weight lifted and the change since your previous session.</p>
+
+    <h2>Your food diary</h2>
+    <p>FitTrack stores the foods, portions, meals, recipes and nutrition values you save. If you review your calorie target, it uses completed diary days and recent weigh-ins to estimate a change. You decide whether to apply it.</p>
+    <p>If you use the scanner, your browser decodes the barcode from the camera on your device. FitTrack sends the decoded code or your search terms to Open Food Facts. If you import a recipe, the server requests the public page you provide and extracts recipe details for your review.</p>
 
     <h2>Location during a run</h2>
     <p>With location permission, FitTrack uses GPS readings to draw your route and calculate distance and pace. For new runs it also records when you cross each kilometre, so you can review your splits afterwards. Saving the run adds its route, times and statistics to your history.</p>
@@ -50,7 +54,7 @@
 
     <h2>Access, export and deletion</h2>
     <p>You can review workouts and runs in History. In <a href="settings">Settings</a>, use “Export to JSON” for a copy of your data or “Export to PDF” for an achievements report. If you share a file, its recipient can keep a copy.</p>
-    <p>“Delete account” in Settings removes your account, profile, workouts, runs and weight entries. FitTrack clears the account cache on the device where you request deletion. If server-side deletion is interrupted, the request remains pending for retry. Files you have already downloaded remain under your control.</p>
+    <p>“Delete account” in Settings removes your account, profile, workouts, runs, weight entries and food diary. FitTrack clears the account cache on the device where you request deletion. If server-side deletion is interrupted, the request remains pending for retry. Files you have already downloaded remain under your control.</p>
   </main>
   <script>
     const back = document.getElementById('back');
