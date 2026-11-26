@@ -1,3 +1,4 @@
+import { WorkoutWakeLockDirective } from './workout-wake-lock.directive';
 import { vibrate } from '../../core/utils/haptics';
 import { ConfirmationService } from '../../shared/components/confirmation';
 import { FitAction } from '../../shared/glisse/controls';
@@ -744,6 +745,7 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
     CommonModule,
     WorkoutLibraryComponent,
     WorkoutRestPickerComponent,
+    WorkoutWakeLockDirective,
     RouterLink,
     NzLayoutModule,
     NzButtonModule,

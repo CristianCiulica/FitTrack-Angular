@@ -175,7 +175,7 @@
 
 <!-- Antrenament activ: mod fullscreen, ca la running. Acopera navigarea si
      ramane deschis pana cand userul opreste manual antrenamentul. -->
-<div role="main" class="workout-live" *ngIf="workoutInProgress()">
+<div role="main" class="workout-live" *ngIf="workoutInProgress()" ftWorkoutWakeLock>
   <div class="live-top">
     <div class="live-routine">
       <h2>{{ currentRoutine().name }}</h2>
