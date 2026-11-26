@@ -7,7 +7,7 @@
 
 .nutrition-header,
 .nutrition-shell {
-  width: min(calc(100% - 32px), 1000px);
+  width: min(calc(100% - 28px), 850px);
   margin-inline: auto;
 }
 
@@ -59,12 +59,12 @@ h3 {
 .overview {
   padding: 12px clamp(14px, 4vw, 28px) 16px;
 }
-.date-row {
+.calendar-header {
   display: grid;
   grid-template-columns: 44px 1fr 44px;
   align-items: center;
 }
-.date-row button {
+.calendar-header button {
   font-size: 23px;
 }
 .day-picker {
@@ -100,52 +100,6 @@ h3 {
 .day-picker:focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
-}
-
-.energy {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 18px 0 12px;
-}
-.energy h2 {
-  font-size: 0.9rem;
-  letter-spacing: 0;
-}
-.energy strong {
-  font-size: clamp(2rem, 9vw, 4.2rem);
-  font-weight: 760;
-  letter-spacing: -0.065em;
-  line-height: 1.1;
-}
-strong,
-dd,
-.goal {
-  font-variant-numeric: tabular-nums;
-}
-.energy small {
-  margin-inline-start: 5px;
-}
-.energy sup {
-  font-size: 0.43em;
-  vertical-align: super;
-  margin-inline-start: 3px;
-}
-.goal {
-  display: grid;
-  justify-items: end;
-  text-align: right;
-  font-size: 0.85rem;
-  padding-bottom: 3px;
-}
-.goal b {
-  font-size: 1rem;
-}
-.goal a {
-  margin-top: 4px;
-  color: var(--accent-deep);
-  white-space: nowrap;
 }
 
 .macro-row {
@@ -228,12 +182,14 @@ a:focus-visible {
   line-height: 1;
 }
 .scan-button {
+  white-space: nowrap;
+  padding-inline: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
 }
-.scan-button svg {
+.barcode-icon {
   width: 19px;
   height: 19px;
   stroke: currentColor;
@@ -252,12 +208,6 @@ a:focus-visible {
   color: var(--red);
 }
 
-.details-grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  align-items: start;
-}
 .meals {
   display: grid;
   gap: 10px;
@@ -429,25 +379,328 @@ legend {
   padding-top: 8px;
   overflow-wrap: anywhere;
 }
-video {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 230px;
-  background: #000;
-  object-fit: cover;
-  border-radius: 12px;
-}
-video[hidden] {
-  display: none;
-}
-
 @media (min-width: 901px) {
   .nutrition-header app-menu {
     display: none;
   }
 }
-@media (max-width: 675px) {
-  .details-grid {
-    grid-template-columns: minmax(0, 1fr);
+:host {
+  --protein-color: #008579;
+  --carbs-color: #d14956;
+  --fat-color: #ad630b;
+  --nutrition-panel: #fff;
+}
+:host-context(html[data-theme='dark']) {
+  --protein-color: #55ccc1;
+  --carbs-color: #ff858f;
+  --fat-color: #f1ab58;
+  --nutrition-panel: var(--surface);
+}
+.overview,
+.meal,
+.insights {
+  background: var(--nutrition-panel);
+}
+.diary-week {
+  margin-bottom: 12px;
+}
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin-top: 6px;
+}
+.week-strip button {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  min-height: 56px;
+  border: 0;
+  background: none;
+  padding: 0;
+}
+.week-strip button b {
+  display: grid;
+  place-items: center;
+  width: min(33px, 90%);
+  aspect-ratio: 1;
+  border: 1px solid var(--hairline);
+  border-radius: 50%;
+  font-variant-numeric: tabular-nums;
+}
+.week-strip button.selected b {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: transparent;
+}
+.daily-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.daily-heading .text-button {
+  color: var(--ink-secondary);
+}
+.daily-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 3px 2px 14px;
+}
+.daily-numbers {
+  display: grid;
+  gap: 8px;
+}
+.daily-numbers dt {
+  color: var(--ink-tertiary);
+  font-size: 0.82rem;
+}
+.daily-numbers dd {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1rem;
+}
+.daily-numbers a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--hairline);
+}
+.calorie-ring,
+.meal-calorie {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  aspect-ratio: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.calorie-ring {
+  flex: none;
+  width: clamp(96px, 29vw, 120px);
+  padding: 7px;
+  background: conic-gradient(var(--protein-color) var(--progress), var(--hairline) 0);
+}
+.calorie-ring.over-goal {
+  background: var(--carbs-color);
+}
+.calorie-ring > div,
+.meal-calorie > div {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-content: center;
+  border-radius: 50%;
+  line-height: 1.1;
+  background: var(--nutrition-panel);
+}
+.calorie-ring strong {
+  font-size: 1.5rem;
+  font-weight: 750;
+  letter-spacing: -0.05em;
+}
+.calorie-ring small {
+  font-size: 0.72rem;
+}
+.macro-row div {
+  gap: 3px;
+}
+[data-macro='protein'] {
+  --macro-color: var(--protein-color);
+}
+[data-macro='carbs'] {
+  --macro-color: var(--carbs-color);
+}
+[data-macro='fat'] {
+  --macro-color: var(--fat-color);
+}
+.macro-track {
+  height: 4px;
+  background: var(--hairline);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.macro-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--macro-color);
+}
+.meal-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+  gap: 6px;
+  padding: 9px 5px;
+  margin: 2px 0 8px;
+  border-radius: 12px;
+  background: var(--hairline);
+}
+.meal-calorie {
+  width: min(58px, 100%);
+  padding: 3px;
+  margin: auto;
+  background: conic-gradient(
+    var(--protein-color) var(--protein-stop),
+    var(--carbs-color) 0 var(--carb-stop),
+    var(--fat-color) 0
+  );
+}
+.meal-calorie.empty-macros {
+  background: var(--hairline);
+}
+.meal-calorie strong,
+.meal-macro strong {
+  font-size: 0.84rem;
+}
+.meal-calorie small,
+.meal-macro small {
+  font-size: 0.72rem;
+}
+.meal-macro {
+  display: grid;
+  gap: 1px;
+  text-align: center;
+}
+.meal-macro b,
+.entry-macros small {
+  color: var(--macro-color);
+}
+.entry-macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+}
+.entry-energy {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.empty-meal {
+  color: var(--ink-tertiary);
+  padding: 5px 0;
+  font-size: 0.85rem;
+}
+.meal-tools {
+  justify-content: space-between;
+}
+.meal-heading .icon-button {
+  border: 0;
+  background: transparent;
+  color: var(--accent-deep);
+}
+.meal-menu summary {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  font-size: 20px;
+  cursor: pointer;
+  list-style: none;
+}
+.meal-menu summary::-webkit-details-marker {
+  display: none;
+}
+.meal-menu[open] {
+  flex: 1 0 100%;
+}
+.meal-menu[open] summary {
+  justify-content: end;
+}
+.complete-day,
+.insights {
+  margin-bottom: 12px;
+}
+.complete-day {
+  margin-top: 12px;
+}
+.find-panel {
+  display: grid;
+  gap: 12px;
+}
+.find-panel > .quiet {
+  justify-self: start;
+}
+[hidden] {
+  display: none !important;
+}
+dialog.scanner-open {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: #08090a;
+  color: white;
+  overflow: hidden;
+}
+.scanner-open .dialog-head {
+  background: #08090a;
+  border: 0;
+  z-index: 2;
+}
+.scanner-open .dialog-head .icon-button,
+.scanner-preview button {
+  background: #1f2327;
+  color: white;
+  border-color: #ffffff30;
+}
+.scanner-open .dialog-body {
+  padding: 0;
+  display: contents;
+}
+.scanner-preview {
+  position: absolute;
+  inset: 58px 0 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.scanner-preview video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.scanner-frame {
+  position: relative;
+  width: min(76%, 460px);
+  aspect-ratio: 2;
+  border: 2px solid #63dbce;
+  border-radius: 16px;
+  box-shadow: 0 0 0 100vmax #0007;
+  pointer-events: none;
+}
+.scanner-frame::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: #63dbce;
+}
+.scanner-preview p,
+.scanner-preview button {
+  position: absolute;
+  justify-self: center;
+  z-index: 1;
+}
+.scanner-preview p {
+  top: calc(50% + min(19vw, 115px) + 15px);
+}
+.scanner-preview button {
+  bottom: calc(16px + env(safe-area-inset-bottom));
+}
+@media (min-width: 700px) {
+  .meals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
   }
 }

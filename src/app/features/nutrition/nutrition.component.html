@@ -10,22 +10,21 @@
     My foods
   </button>
 </header>
-
 <main class="nutrition-shell">
-  <section class="overview" aria-labelledby="daily-nutrition">
-    <div class="date-row">
+  <section class="diary-week" aria-label="Diary calendar">
+    <div class="calendar-header">
       <button
         type="button"
         class="icon-button"
-        aria-label="Previous day"
-        [disabled]="busy() || date() <= '1900-01-01'"
-        (click)="step(-1)"
+        aria-label="Previous week"
+        [disabled]="busy() || moveDateForTemplate(date(), -7) < '1900-01-01'"
+        (click)="step(-7)"
       >
         ‹
       </button>
       <label class="day-picker">
-        <span>{{ date() === today ? 'Today' : (date() + 'T12:00:00' | date: 'EEEE') }}</span>
-        <small>{{ date() + 'T12:00:00' | date: 'd MMM, y' }}</small>
+        <b>{{ date() === today ? 'Today' : (date() + 'T12:00:00' | date: 'd MMMM') }}</b>
+        <small>{{ date() + 'T12:00:00' | date: 'MMMM y' }}</small>
         <input
           type="date"
           aria-label="Choose diary date"
@@ -39,41 +38,86 @@
       <button
         type="button"
         class="icon-button"
-        aria-label="Next day"
-        [disabled]="busy() || date() >= today"
-        (click)="step(1)"
+        aria-label="Next week"
+        [disabled]="busy() || calendarWeek()[6] >= today"
+        (click)="step(7)"
       >
         ›
       </button>
     </div>
-    <div class="energy">
-      <div>
-        <h2 id="daily-nutrition">Calories eaten</h2>
-        <strong
-          >{{ loaded() ? (totals().values.kcal | number: '1.0-1') : '—' }}
-          @if (loaded() && totals().incomplete.kcal) {
-            <sup>+</sup>
+    <div class="week-strip">
+      @for (day of calendarWeek(); track day) {
+        <button
+          type="button"
+          [disabled]="busy() || day > today || day < '1900-01-01'"
+          [class.selected]="day === date()"
+          [attr.aria-pressed]="day === date()"
+          [attr.aria-label]="day + 'T12:00:00' | date: 'EEEE, d MMMM y'"
+          (click)="load(day)"
+        >
+          <small>{{ day + 'T12:00:00' | date: 'EEE' }}</small>
+          <b>{{ day + 'T12:00:00' | date: 'd' }}</b>
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="overview" aria-labelledby="daily-nutrition">
+    <div class="daily-heading">
+      <h2 id="daily-nutrition">Daily summary</h2>
+      <button
+        type="button"
+        class="text-button"
+        aria-controls="nutrition-report"
+        [attr.aria-expanded]="reportOpen()"
+        [disabled]="!loaded()"
+        (click)="reportOpen.set(!reportOpen())"
+      >
+        {{ reportOpen() ? 'Hide report' : 'Report' }}
+      </button>
+    </div>
+    <div class="daily-summary">
+      <dl class="daily-numbers">
+        <div>
+          <dt>Calorie goal</dt>
+          <dd>
+            <a routerLink="/nutrition-goals">{{
+              target() === null ? 'Set goal' : (target() | number: '1.0-0') + ' kcal'
+            }}</a>
+          </dd>
+        </div>
+        <div>
+          <dt>Calories eaten</dt>
+          <dd class="energy">
+            <strong>{{ loaded() ? (totals().values.kcal | number: '1.0-1') : '—' }}</strong> kcal
+          </dd>
+        </div>
+      </dl>
+      <div
+        class="calorie-ring"
+        [class.over-goal]="remaining() < 0"
+        [style.--progress]="calorieProgress() + '%'"
+      >
+        <div>
+          @if (loaded() && target() !== null && !totals().incomplete.kcal) {
+            <strong>{{ (remaining() >= 0 ? remaining() : -remaining()) | number: '1.0-0' }}</strong>
+            <small>{{ remaining() >= 0 ? 'kcal left' : 'kcal over' }}</small>
+          } @else {
+            <strong>—</strong><small>kcal left</small>
           }
-        </strong>
-        <small>kcal</small>
-      </div>
-      <div class="goal">
-        @if (loaded() && target() !== null && !totals().incomplete.kcal) {
-          <b>{{ (remaining() >= 0 ? remaining() : -remaining()) | number: '1.0-1' }} kcal</b>
-          <span>{{ remaining() >= 0 ? 'remaining' : 'above target' }}</span>
-        }
-        <a routerLink="/nutrition-goals">{{
-          target() === null ? 'Set a calorie goal' : (target() | number: '1.0-0') + ' kcal goal'
-        }}</a>
+        </div>
       </div>
     </div>
     @if (loaded() && totals().incomplete.kcal) {
-      <p class="status">Some foods are missing calories. The total shown is partial.</p>
+      <p class="status">Add calories to older entries to complete this total.</p>
     }
     <div class="macro-row">
       @for (macro of macros; track macro.key) {
-        <div>
+        <div [attr.data-macro]="macro.key">
           <span>{{ macro.label }}</span>
+          <span class="macro-track" aria-hidden="true"
+            ><i [style.width.%]="loaded() ? macroShare(totals().values, macro.key) : 0"></i
+          ></span>
           <strong
             >{{ loaded() ? (totals().values[macro.key] | number: '1.0-1') : '—' }}
             @if (loaded() && totals().incomplete[macro.key]) {
@@ -85,7 +129,6 @@
       }
     </div>
   </section>
-
   <div class="main-actions">
     <button
       type="button"
@@ -101,13 +144,9 @@
       [disabled]="!loaded() || busy()"
       (click)="openAdd('breakfast', true)"
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4M8 8v8m4-8v8m4-8v8" />
-      </svg>
-      Scan barcode
+      <ng-container [ngTemplateOutlet]="scanIcon" /> Scan barcode
     </button>
   </div>
-
   @if (error()) {
     <div class="status notice" role="status">
       {{ error() }}
@@ -118,73 +157,9 @@
   } @else if (!loaded()) {
     <p class="status notice" role="status">Loading diary…</p>
   }
-
   @if (loaded()) {
-    <div class="details-grid">
-      <section class="meals" aria-label="Meals">
-        @for (meal of meals; track meal.id) {
-          @let items = entriesFor(date(), meal.id);
-          <section class="meal">
-            <div class="meal-heading">
-              <h2>{{ meal.name }}</h2>
-              <button
-                type="button"
-                class="icon-button"
-                [attr.aria-label]="'Add food to ' + meal.name"
-                [disabled]="busy()"
-                (click)="openAdd(meal.id)"
-              >
-                +
-              </button>
-            </div>
-            @for (entry of items; track entry.id) {
-              <button type="button" class="entry" (click)="openEdit(entry)" [disabled]="busy()">
-                <span
-                  ><b>{{ entry.food.name }}</b
-                  ><small>{{ amountText(entry) }}</small></span
-                >
-                <span>{{
-                  portionEnergy(entry) === null
-                    ? 'kcal unknown'
-                    : (portionEnergy(entry) | number: '1.0-1') + ' kcal'
-                }}</span>
-              </button>
-            }
-            <div class="meal-tools">
-              <button
-                type="button"
-                class="text-button"
-                [disabled]="busy() || date() <= '1900-01-01'"
-                (click)="openCopy(meal.id)"
-              >
-                Copy from another day
-              </button>
-              @if (items.length) {
-                <button
-                  type="button"
-                  class="text-button"
-                  [disabled]="busy()"
-                  (click)="openSaveMeal(meal.id)"
-                >
-                  Save meal
-                </button>
-              }
-            </div>
-          </section>
-        }
-        @if (complete() || entriesFor(date()).length) {
-          <button
-            class="quiet complete-day"
-            type="button"
-            [disabled]="busy()"
-            (click)="toggleComplete()"
-          >
-            {{ complete() ? 'Day complete · Reopen' : 'Mark day complete' }}
-          </button>
-        }
-      </section>
-
-      <section class="insights" aria-labelledby="weekly-nutrition">
+    @if (reportOpen()) {
+      <section id="nutrition-report" class="insights" aria-labelledby="weekly-nutrition">
         <h2 id="weekly-nutrition">Last 7 days</h2>
         <p class="status">{{ loggedDays() }} of 7 days logged</p>
         <dl class="averages">
@@ -216,7 +191,7 @@
                 !day.count
                   ? 'No entries'
                   : day.incomplete.kcal
-                    ? 'Partial calories'
+                    ? '—'
                     : (day.values.kcal | number: '1.0-0') + ' kcal'
               }}</small>
             </button>
@@ -240,12 +215,142 @@
           </div>
         }
       </section>
-    </div>
+    }
+    <section class="meals" aria-label="Meals">
+      @for (meal of meals; track meal.id) {
+        @let items = entriesFor(date(), meal.id);
+        @let summary = summarize(items);
+        <section class="meal">
+          <div class="meal-heading">
+            <h2>{{ meal.name }}</h2>
+            <button
+              type="button"
+              class="icon-button"
+              [attr.aria-label]="'Scan for ' + meal.name"
+              [disabled]="busy()"
+              (click)="openAdd(meal.id, true)"
+            >
+              <ng-container [ngTemplateOutlet]="scanIcon" />
+            </button>
+          </div>
+          @if (items.length) {
+            <div class="meal-summary">
+              <div
+                class="meal-calorie"
+                [style.--protein-stop]="macroShare(summary.values, 'protein') + '%'"
+                [style.--carb-stop]="
+                  macroShare(summary.values, 'protein') + macroShare(summary.values, 'carbs') + '%'
+                "
+                [class.empty-macros]="
+                  !summary.values.protein && !summary.values.carbs && !summary.values.fat
+                "
+              >
+                <div>
+                  <strong>{{
+                    summary.incomplete.kcal && !summary.values.kcal
+                      ? '—'
+                      : (summary.values.kcal | number: '1.0-1')
+                  }}</strong
+                  ><small>kcal</small>
+                </div>
+              </div>
+              @for (macro of macros; track macro.key) {
+                <div class="meal-macro" [attr.data-macro]="macro.key">
+                  <b>{{
+                    summary.incomplete[macro.key]
+                      ? '—'
+                      : (macroShare(summary.values, macro.key) | number: '1.0-0') + '%'
+                  }}</b>
+                  <strong>{{
+                    summary.incomplete[macro.key] && !summary.values[macro.key]
+                      ? '—'
+                      : (summary.values[macro.key] | number: '1.0-1') + ' g'
+                  }}</strong>
+                  <small>{{ macro.label }}</small>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="empty-meal">Nothing logged yet</p>
+          }
+          @for (entry of items; track entry.id) {
+            @let nutrients = portionNutrients(entry);
+            <button type="button" class="entry" (click)="openEdit(entry)" [disabled]="busy()">
+              <span
+                ><b>{{ entry.food.name }}</b
+                ><small>{{ amountText(entry) }}</small>
+                <span class="entry-macros">
+                  @for (macro of macros; track macro.key) {
+                    @if (nutrients[macro.key] !== null) {
+                      <small [attr.data-macro]="macro.key"
+                        >{{ macro.label }} {{ nutrients[macro.key] | number: '1.0-1' }} g</small
+                      >
+                    }
+                  }
+                </span>
+              </span>
+              @if (nutrients.kcal !== null) {
+                <small class="entry-energy">{{ nutrients.kcal | number: '1.0-1' }} kcal</small>
+              }
+            </button>
+          }
+          <div class="meal-tools">
+            <button
+              type="button"
+              class="text-button"
+              (click)="openAdd(meal.id)"
+              [disabled]="busy()"
+            >
+              + Add food
+            </button>
+            <details class="meal-menu">
+              <summary [attr.aria-label]="meal.name + ' options'">⋯</summary>
+              <div>
+                <button
+                  type="button"
+                  class="text-button"
+                  [disabled]="busy() || date() <= '1900-01-01'"
+                  (click)="openCopy(meal.id)"
+                >
+                  Copy from another day
+                </button>
+                @if (items.length) {
+                  <button
+                    type="button"
+                    class="text-button"
+                    [disabled]="busy()"
+                    (click)="openSaveMeal(meal.id)"
+                  >
+                    Save meal
+                  </button>
+                }
+              </div>
+            </details>
+          </div>
+        </section>
+      }
+    </section>
+    @if (complete() || entriesFor(date()).length) {
+      <button
+        type="button"
+        class="quiet complete-day"
+        [disabled]="busy()"
+        (click)="toggleComplete()"
+      >
+        {{ complete() ? 'Day complete · Reopen' : 'Mark day complete' }}
+      </button>
+    }
   }
 </main>
 
+<ng-template #scanIcon>
+  <svg class="barcode-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M8 4H4v4m12-4h4v4M4 16v4h4m12-4v4h-4M8 8v8m4-8v8m4-8v8" />
+  </svg>
+</ng-template>
 <dialog
   #editor
+  [class.scanner-open]="scanning()"
   aria-labelledby="editor-title"
   (close)="editorClosed()"
   (cancel)="busy() && $event.preventDefault()"
@@ -254,7 +359,9 @@
     <h2 id="editor-title">
       @switch (pane()) {
         @case ('find') {
-          {{ ingredientIndex === null ? 'Add food' : 'Find ingredient' }}
+          {{
+            scanning() ? 'Scan barcode' : ingredientIndex === null ? 'Add food' : 'Find ingredient'
+          }}
         }
         @case ('portion') {
           {{ editId ? 'Edit food' : 'Add portion' }}
@@ -288,7 +395,7 @@
     @if (editorError()) {
       <p class="status notice" role="status">{{ editorError() }}</p>
     }
-    @if (pane() === 'find' || pane() === 'portion' || pane() === 'library') {
+    @if (!scanning() && (pane() === 'find' || pane() === 'portion' || pane() === 'library')) {
       @if (ingredientIndex === null) {
         <label class="field"
           >Meal
@@ -300,91 +407,94 @@
         </label>
       }
     }
-    <video
-      #video
-      [hidden]="!scanning()"
-      autoplay
-      muted
-      playsinline
-      aria-label="Barcode scanner"
-    ></video>
+    <div class="scanner-preview" [hidden]="!scanning()">
+      <video #video autoplay muted playsinline aria-label="Barcode scanner"></video>
+      <div class="scanner-frame" aria-hidden="true"></div>
+      <p>Center the barcode in the frame</p>
+      <button type="button" class="quiet" (click)="stopCamera()">Enter code instead</button>
+    </div>
     @switch (pane()) {
       @case ('find') {
-        @if (scanning()) {
-          <p class="status">Center the barcode in the camera view.</p>
-          <button type="button" class="quiet" (click)="stopCamera()">Stop camera</button>
-        } @else {
+        <div class="find-panel" [hidden]="scanning()">
           <button type="button" class="quiet" (click)="startCamera()">Open camera</button>
-        }
-        <form class="inline-fields" (ngSubmit)="search()">
-          <label class="field"
-            >Food name or barcode
-            <input
-              name="query"
-              [(ngModel)]="query"
-              maxlength="80"
-              autocomplete="off"
-              type="search"
-              placeholder="e.g. iaurt or a barcode"
-            />
-          </label>
-          <button class="primary" type="submit">Find</button>
-        </form>
-        @if (searching()) {
-          <p class="status" role="status">Searching catalog…</p>
-        }
-        @if (catalogMessage()) {
-          <p class="status" role="status">{{ catalogMessage() }}</p>
-        }
-        @if (results().length) {
-          <div class="result-list">
-            @for (food of results(); track $index) {
-              <button type="button" class="entry" (click)="chooseFood(food)">
-                <span
-                  ><b>{{ food.name }}</b
-                  ><small>{{
-                    food.brand ||
-                      food.barcode ||
-                      (food.origin === 'manual' ? 'My food' : 'Open Food Facts')
-                  }}</small></span
-                >
-                <span>{{
-                  food.values.kcal === null
-                    ? 'kcal unknown'
-                    : (food.values.kcal | number: '1.0-1') + ' kcal'
-                }}</span>
-              </button>
-            }
-          </div>
-        }
-        @if (ingredientIndex === null) {
-          <div class="editor-actions">
-            <button type="button" class="quiet" (click)="manual(missingCode)">
-              Enter from label
-            </button>
-            <button type="button" class="text-button" (click)="quickAdd()">
-              Quick add calories
-            </button>
-            <button type="button" class="text-button" (click)="stopCamera(); pane.set('library')">
-              My foods
-            </button>
-          </div>
-          @if (!results().length && recent().length) {
-            <h3>Recent foods</h3>
-            @for (food of recent(); track $index) {
-              <button type="button" class="entry" (click)="chooseFood(food)">
-                {{ food.name }}
-              </button>
-            }
+          <form class="inline-fields" (ngSubmit)="search()">
+            <label class="field"
+              >Food name or barcode
+              <input
+                name="query"
+                [(ngModel)]="query"
+                maxlength="80"
+                autocomplete="off"
+                type="search"
+                placeholder="e.g. iaurt or a barcode"
+              />
+            </label>
+            <button class="primary" type="submit">Find</button>
+          </form>
+          @if (searching()) {
+            <p class="status" role="status">
+              {{
+                detectedCode()
+                  ? 'Barcode detected · ' + detectedCode() + ' · Finding product…'
+                  : 'Searching catalog…'
+              }}
+            </p>
           }
-        } @else {
-          <button type="button" class="quiet" (click)="returnToRecipe()">Back to recipe</button>
-        }
-        <p class="status">
-          <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener"
-            >Catalog data by Open Food Facts</a
-          >
-        </p>
+          @if (catalogMessage()) {
+            <p class="status" role="status">{{ catalogMessage() }}</p>
+          }
+          @if (results().length) {
+            <div class="result-list">
+              @for (food of results(); track $index) {
+                <button type="button" class="entry" (click)="chooseFood(food)">
+                  <span
+                    ><b>{{ food.name }}</b
+                    ><small>{{
+                      food.brand ||
+                        food.barcode ||
+                        (food.origin === 'manual'
+                          ? 'My food'
+                          : food.origin === 'usda'
+                            ? 'USDA FoodData Central'
+                            : 'Open Food Facts')
+                    }}</small></span
+                  >
+                  @if (food.values.kcal !== null) {
+                    <span>{{ food.values.kcal | number: '1.0-1' }} kcal</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+          @if (ingredientIndex === null) {
+            <div class="editor-actions">
+              <button type="button" class="quiet" (click)="manual(missingCode)">
+                Enter from label
+              </button>
+              <button type="button" class="text-button" (click)="quickAdd()">
+                Quick add calories
+              </button>
+              <button type="button" class="text-button" (click)="stopCamera(); pane.set('library')">
+                My foods
+              </button>
+            </div>
+            @if (!results().length && recent().length) {
+              <h3>Recent foods</h3>
+              @for (food of recent(); track $index) {
+                <button type="button" class="entry" (click)="chooseFood(food)">
+                  {{ food.name }}
+                </button>
+              }
+            }
+          } @else {
+            <button type="button" class="quiet" (click)="returnToRecipe()">Back to recipe</button>
+          }
+          <p class="status">
+            <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener"
+              >Catalog data by Open Food Facts</a
+            >
+          </p>
+        </div>
       }
       @case ('portion') {
         <label class="field"
@@ -450,7 +560,7 @@
                   [ngModel]="food().values[fact.key]"
                   (ngModelChange)="setNutrient(fact.key, $event)"
                   [readonly]="food().origin === 'recipe'"
-                  placeholder="Unknown"
+                  placeholder="—"
                   inputmode="decimal"
                 />
               </label>
@@ -458,6 +568,15 @@
           </div>
         </fieldset>
         <p class="status">
+          @if (food().origin === 'usda') {
+            <a
+              [href]="'https://fdc.nal.usda.gov/food-details/' + food().fdcId + '/nutrients'"
+              target="_blank"
+              rel="noopener"
+              >USDA FoodData Central</a
+            >
+            · Reference values per 100 g
+          }
           @if (food().origin === 'open-food-facts') {
             <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener"
               >Open Food Facts</a
@@ -468,14 +587,10 @@
             </button>
           }
           @if (amount !== null && amount > 0) {
-            <span>
-              Portion:
-              {{
-                portionEnergy({ food: food(), amount: amount }) === null
-                  ? 'calories unknown'
-                  : (portionEnergy({ food: food(), amount: amount }) | number: '1.0-1') + ' kcal'
-              }}</span
-            >
+            @let kcal = portionEnergy({ food: food(), amount });
+            @if (kcal !== null) {
+              <span>Portion: {{ kcal | number: '1.0-1' }} kcal</span>
+            }
           }
         </p>
         <button type="button" class="primary full" [disabled]="busy()" (click)="saveEntry()">
@@ -707,7 +822,7 @@
                     step="any"
                     [ngModel]="ingredient.food.values[fact.key]"
                     (ngModelChange)="patchIngredientNutrient(i, fact.key, $event)"
-                    placeholder="Unknown"
+                    placeholder="—"
                   />
                 </label>
               }

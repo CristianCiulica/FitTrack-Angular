@@ -15,7 +15,8 @@ export interface Food {
   barcode?: string;
   brand?: string;
   basis: 'g' | 'ml' | 'serving';
-  origin: 'manual' | 'open-food-facts' | 'recipe';
+  origin: 'manual' | 'open-food-facts' | 'recipe' | 'usda';
+  fdcId?: number;
   values: Nutrients;
 }
 

@@ -1,3 +1,4 @@
+import { findUsdaFoods } from './usda-catalog';
 import { barcodeSchema } from '../validation/nutrition';
 
 interface CatalogProduct {
@@ -15,7 +16,13 @@ const fields = 'code,product_name,product_name_ro,brands,product_quantity_unit,n
 const origin = 'https://world.openfoodfacts.org';
 const cache = new Map<
   string,
-  { expires: number; foods: NonNullable<ReturnType<typeof mapProduct>>[] }
+  {
+    expires: number;
+    foods: (
+      | NonNullable<ReturnType<typeof mapProduct>>
+      | ReturnType<typeof findUsdaFoods>[number]
+    )[];
+  }
 >();
 
 export function mapProduct(product: CatalogProduct) {
@@ -77,6 +84,7 @@ export async function findFoods(query: string, exactCode: boolean) {
     params.set('page_size', '30');
     if (!params.get('q')) return [];
   }
+  const generic = exactCode ? [] : findUsdaFoods(query);
   const unavailable = () =>
     Object.assign(new Error('The food catalog is temporarily unavailable.'), { status: 503 });
   let products: CatalogProduct[];
@@ -90,15 +98,18 @@ export async function findFoods(query: string, exactCode: boolean) {
     const json = (await response.json()) as { product?: CatalogProduct; hits?: CatalogProduct[] };
     products = exactCode ? (json.product ? [json.product] : []) : (json.hits ?? []);
   } catch {
+    if (generic.length) return generic;
     throw unavailable();
   }
   const soldInRomania = (product: CatalogProduct) =>
     Number(product.countries?.includes('en:romania') ?? false);
   if (!exactCode) products.sort((a, b) => soldInRomania(b) - soldInRomania(a));
-  const foods = products
+  const packaged = products
     .map(mapProduct)
     .filter((food) => food !== null)
+    .filter((food) => exactCode || Object.values(food.values).every((value) => value !== null))
     .slice(0, 15);
+  const foods = [...packaged, ...generic];
   if (cache.size >= 250) {
     const oldest = cache.keys().next().value;
     if (oldest) cache.delete(oldest);

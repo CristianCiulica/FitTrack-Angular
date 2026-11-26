@@ -1,8 +1,9 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import {
   Component,
   DestroyRef,
   ElementRef,
+  NgZone,
   computed,
   inject,
   signal,
@@ -53,11 +54,12 @@ const fromApi = '/nutrition';
 
 @Component({
   selector: 'app-nutrition',
-  imports: [AppMenuComponent, DatePipe, DecimalPipe, FormsModule, RouterLink],
+  imports: [AppMenuComponent, DatePipe, DecimalPipe, NgTemplateOutlet, FormsModule, RouterLink],
   templateUrl: './nutrition.component.html',
   styleUrl: './nutrition.component.scss',
 })
 export class NutritionComponent {
+  private readonly zone = inject(NgZone);
   private readonly api = inject(ApiService);
   private readonly profile = inject(ProfileService);
   private readonly weight = inject(WeightService);
@@ -90,6 +92,16 @@ export class NutritionComponent {
     const profile = this.profile.profile();
     return profile ? profileCalorieTarget(profile) : null;
   });
+  readonly reportOpen = signal(false);
+  readonly calendarWeek = computed(() => {
+    const weekday = new Date(this.date() + 'T12:00:00Z').getUTCDay();
+    const monday = moveDate(this.date(), -((weekday + 6) % 7));
+    return Array.from({ length: 7 }, (_, index) => moveDate(monday, index));
+  });
+  readonly calorieProgress = computed(() => {
+    const target = this.target();
+    return this.loaded() && target ? Math.min(100, (this.totals().values.kcal / target) * 100) : 0;
+  });
   readonly remaining = computed(() => (this.target() ?? 0) - this.totals().values.kcal);
   readonly complete = computed(() => this.records().some((row) => row.id === `day-${this.date()}`));
   readonly week = computed(() => weeklyNutrition(this.records(), this.date()));
@@ -115,6 +127,7 @@ export class NutritionComponent {
   readonly pane = signal<'find' | 'portion' | 'library' | 'recipe' | 'copy' | 'save-meal'>('find');
   readonly activeMeal = signal<Meal>('breakfast');
   readonly scanning = signal(false);
+  readonly detectedCode = signal('');
   readonly results = signal<Food[]>([]);
   readonly editorError = signal('');
   readonly catalogMessage = signal('');
@@ -129,6 +142,7 @@ export class NutritionComponent {
     const entries = this.records().filter((row) => row.kind === 'entry');
     const foods = new Map<string, Food>();
     for (const entry of [...entries].reverse().sort((a, b) => b.date.localeCompare(a.date))) {
+      if (entry.food.values.kcal === null) continue;
       const key = entry.food.barcode ?? entry.food.name.toLocaleLowerCase();
       if (!foods.has(key)) foods.set(key, entry.food);
     }
@@ -204,8 +218,20 @@ export class NutritionComponent {
         this.error.set('Your diary could not load. Try again.');
     }
   }
+  macroShare(
+    values: { protein: number; carbs: number; fat: number },
+    key: 'protein' | 'carbs' | 'fat',
+  ) {
+    const energy = values.protein * 4 + values.carbs * 4 + values.fat * 9;
+    return energy ? ((values[key] * (key === 'fat' ? 9 : 4)) / energy) * 100 : 0;
+  }
+  readonly summarize = summarize;
+  readonly portionNutrients = portionNutrients;
+
   step(days: number) {
-    void this.load(moveDate(this.date(), days));
+    void this.load(
+      moveDate(this.date(), days) > this.today ? this.today : moveDate(this.date(), days),
+    );
   }
 
   openAdd(meal: Meal, camera = false) {
@@ -239,6 +265,7 @@ export class NutritionComponent {
     this.query = '';
     this.results.set([]);
     this.missingCode = '';
+    this.detectedCode.set('');
     this.editId = null;
     this.ingredientIndex = null;
     this.transfer = undefined;
@@ -303,12 +330,15 @@ export class NutritionComponent {
     this.editorError.set('');
     const request = new AbortController();
     this.scanner = request;
+    this.detectedCode.set('');
     this.scanning.set(true);
     try {
       await scanFood(this.video().nativeElement, request.signal, (code) => {
-        this.stopCamera();
-        this.query = code;
-        void this.search();
+        this.zone.run(() => {
+          if (request.signal.aborted) return;
+          this.detectedCode.set(code);
+          void this.search(code, true);
+        });
       });
     } catch {
       if (!request.signal.aborted) {
@@ -329,10 +359,11 @@ export class NutritionComponent {
     this.searching.set(false);
   }
 
-  async search() {
+  async search(value = this.query, scanned = false) {
     this.stopCamera();
     this.invalidateCatalog();
-    const query = this.query.trim();
+    const query = value.trim();
+    this.query = query;
     const code = barcodePattern.test(query);
     this.results.set([]);
     this.editorError.set('');
@@ -350,7 +381,9 @@ export class NutritionComponent {
     }
     const local = this.library().filter(
       (row): row is SavedFood =>
-        row.kind === 'food' && row.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
+        row.kind === 'food' &&
+        row.food.values.kcal !== null &&
+        row.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
     );
     this.catalogMessage.set('');
     this.searching.set(true);
@@ -367,10 +400,21 @@ export class NutritionComponent {
       }
       const choices = [...local.map((row) => row.food), ...response.foods];
       this.results.set(choices);
-      if (!choices.length)
-        this.catalogMessage.set('Food not found. You can add it from the label.');
+      if (!choices.length) {
+        if (scanned && this.ingredientIndex === null) {
+          this.manual(query);
+          this.editorError.set('Barcode detected. Add the product name and values from the label.');
+        } else this.catalogMessage.set('Food not found. You can add it from the label.');
+      }
     } catch {
       if (version !== this.catalogVersion) return;
+      if (scanned && this.ingredientIndex === null) {
+        this.manual(query);
+        this.editorError.set(
+          'Barcode detected. The catalog did not respond. You can enter the label here.',
+        );
+        return;
+      }
       this.results.set(local.map((row) => row.food));
       this.catalogMessage.set(
         'Catalog unavailable. You can still use a saved food or add it from the label.',
@@ -429,8 +473,8 @@ export class NutritionComponent {
   }
   async saveEntry() {
     const food = this.food();
-    if (!this.validFood(food) || !this.validAmount(this.amount)) {
-      this.editorError.set('Enter a name, a valid portion and any values you know from the label.');
+    if (!this.validFood(food) || food.values.kcal === null || !this.validAmount(this.amount)) {
+      this.editorError.set('Enter the food name, portion and calories from the label.');
       return;
     }
     const existing = this.library().find(
@@ -457,8 +501,8 @@ export class NutritionComponent {
   }
   async favorite() {
     const food = this.food();
-    if (!this.validFood(food)) {
-      this.editorError.set('Enter a name and valid details for this food.');
+    if (!this.validFood(food) || food.values.kcal === null) {
+      this.editorError.set('Enter the food name and calories before saving.');
       return;
     }
     const existing = this.library().find(

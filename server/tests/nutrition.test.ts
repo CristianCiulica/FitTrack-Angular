@@ -1,3 +1,4 @@
+import { findUsdaFoods } from '../src/services/usda-catalog';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mapProduct } from '../src/services/food-catalog';
@@ -156,4 +157,14 @@ test('nutrition routes keep a saved entry private and retry a write without crea
     NutritionRecord.find = find;
     NutritionRecord.deleteOne = remove;
   }
+});
+
+test('Romanian food queries find USDA reference foods with all nutrition values', () => {
+  const results = findUsdaFoods('piept de pui');
+  assert.ok(results.length);
+  assert.ok(results[0].name.toLowerCase().includes('chicken'));
+  assert.ok(results[0].name.toLowerCase().includes('breast'));
+  assert.ok(
+    results.every((food) => food.fdcId > 0 && Object.values(food.values).every(Number.isFinite)),
+  );
 });

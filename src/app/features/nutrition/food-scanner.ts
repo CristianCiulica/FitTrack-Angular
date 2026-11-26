@@ -4,7 +4,7 @@ export async function scanFood(
   onBarcode: (barcode: string) => void,
 ): Promise<void> {
   const { BrowserMultiFormatReader } = await import('@zxing/browser');
-  const { BarcodeFormat } = await import('@zxing/library');
+  const { BarcodeFormat, DecodeHintType } = await import('@zxing/library');
   if (signal.aborted) return;
   const devices = navigator.mediaDevices;
   if (!devices) throw new Error('Camera access is unavailable.');
@@ -25,7 +25,20 @@ export async function scanFood(
   };
   signal.addEventListener('abort', stop, { once: true });
   try {
-    const reader = new BrowserMultiFormatReader(undefined, { delayBetweenScanAttempts: 160 });
+    const formats = [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.ITF,
+      BarcodeFormat.CODE_128,
+    ];
+    const reader = new BrowserMultiFormatReader(
+      new Map([[DecodeHintType.POSSIBLE_FORMATS, formats]]),
+      {
+        delayBetweenScanAttempts: 160,
+      },
+    );
     const controls = await reader.decodeFromStream(
       stream,
       video,

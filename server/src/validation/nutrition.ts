@@ -12,7 +12,8 @@ const food = z.object({
   values: nutrients,
   brand: z.string().max(120).optional(),
   basis: z.enum(['g', 'ml', 'serving']),
-  origin: z.enum(['manual', 'open-food-facts', 'recipe']),
+  origin: z.enum(['manual', 'open-food-facts', 'recipe', 'usda']),
+  fdcId: z.number().int().positive().optional(),
   barcode: barcodeSchema.optional(),
 });
 const portion = z.object({ food, amount });
