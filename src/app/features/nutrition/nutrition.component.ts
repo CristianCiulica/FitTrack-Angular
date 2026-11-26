@@ -90,6 +90,11 @@ export class NutritionComponent {
   readonly error = signal('');
   readonly busy = signal(false);
   readonly meals = meals;
+  readonly portionUnits = [
+    { id: 'g', label: 'Grams' },
+    { id: 'ml', label: 'ml' },
+    { id: 'serving', label: 'Servings' },
+  ] as const;
   readonly moveDateForTemplate = moveDate;
   readonly macros = [
     { key: 'protein', label: 'Protein' },

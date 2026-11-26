@@ -313,35 +313,45 @@
 <dialog
   #editor
   [class.scanner-open]="scanning()"
+  [class.portion-sheet]="pane() === 'portion'"
   aria-labelledby="editor-title"
   (close)="editorClosed()"
   (cancel)="busy() && $event.preventDefault()"
 >
   <div class="dialog-head">
-    <h2 id="editor-title">
-      @switch (pane()) {
-        @case ('find') {
-          {{
-            scanning() ? 'Scan barcode' : ingredientIndex === null ? 'Add food' : 'Find ingredient'
-          }}
+    <div class="editor-heading">
+      <h2 id="editor-title">
+        @switch (pane()) {
+          @case ('find') {
+            {{
+              scanning()
+                ? 'Scan barcode'
+                : ingredientIndex === null
+                  ? 'Add food'
+                  : 'Find ingredient'
+            }}
+          }
+          @case ('portion') {
+            {{ editId ? 'Edit food' : 'Add portion' }}
+          }
+          @case ('library') {
+            My foods
+          }
+          @case ('recipe') {
+            Recipe
+          }
+          @case ('copy') {
+            Copy a meal
+          }
+          @case ('save-meal') {
+            Save a meal
+          }
         }
-        @case ('portion') {
-          {{ editId ? 'Edit food' : 'Add portion' }}
-        }
-        @case ('library') {
-          My foods
-        }
-        @case ('recipe') {
-          Recipe
-        }
-        @case ('copy') {
-          Copy a meal
-        }
-        @case ('save-meal') {
-          Save a meal
-        }
+      </h2>
+      @if (pane() === 'portion') {
+        <p>Log what you ate</p>
       }
-    </h2>
+    </div>
     <button
       type="button"
       class="icon-button"
@@ -357,7 +367,7 @@
     @if (editorError()) {
       <p class="status notice" role="status">{{ editorError() }}</p>
     }
-    @if (!scanning() && (pane() === 'find' || pane() === 'portion' || pane() === 'library')) {
+    @if (!scanning() && (pane() === 'find' || pane() === 'library')) {
       @if (ingredientIndex === null) {
         <label class="field"
           >Meal
@@ -463,121 +473,161 @@
         </div>
       }
       @case ('portion') {
-        <label class="field"
-          >Food name
-          <input
-            [ngModel]="food().name"
-            (ngModelChange)="setFood({ name: $event })"
-            [readonly]="food().origin === 'recipe'"
-            maxlength="160"
-          />
-        </label>
-        <div class="field-grid">
-          <label class="field"
-            >Amount
-            <input
-              type="number"
-              min="0.01"
-              max="100000"
-              step="any"
-              [(ngModel)]="amount"
-              inputmode="decimal"
-            />
-          </label>
-          <label class="field"
-            >Unit
-            <select
-              [ngModel]="food().basis"
-              (ngModelChange)="setFood({ basis: $event })"
-              [disabled]="food().origin === 'recipe'"
-            >
-              <option value="serving">Servings</option>
-              <option value="g">Grams</option>
-              <option value="ml">Milliliters</option>
-            </select>
-          </label>
-        </div>
-        @if (food().origin !== 'recipe') {
-          <label class="field"
-            >Barcode (optional)
-            <input
-              [ngModel]="food().barcode ?? ''"
-              (ngModelChange)="setFood({ barcode: $event.trim() || undefined })"
-              inputmode="numeric"
-              maxlength="14"
-            />
-          </label>
-        }
-        <fieldset>
-          <legend>
-            {{
-              food().basis === 'serving' ? 'Values per serving' : 'Values per 100 ' + food().basis
-            }}
-          </legend>
-          <div class="field-grid">
-            @for (fact of facts; track fact.key) {
-              <label class="field"
-                >{{ fact.label }}{{ fact.key === 'kcal' ? '' : ' (g)' }}
+        <div class="portion-form">
+          <fieldset class="portion-group">
+            <legend>Meal</legend>
+            <div class="portion-meals">
+              @for (meal of meals; track meal.id) {
+                <button
+                  type="button"
+                  [attr.aria-pressed]="activeMeal() === meal.id"
+                  [disabled]="busy()"
+                  (click)="setMeal(meal.id)"
+                >
+                  {{ meal.id === 'snack' ? 'Snack' : meal.name }}
+                </button>
+              }
+            </div>
+          </fieldset>
+          <div class="portion-food">
+            <label class="field portion-field"
+              >Food name
+              <input
+                [ngModel]="food().name"
+                (ngModelChange)="setFood({ name: $event })"
+                [readonly]="food().origin === 'recipe'"
+                maxlength="160"
+              />
+            </label>
+            @if (food().origin !== 'recipe' && (food().barcode || food().origin === 'manual')) {
+              <label class="portion-code">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M3 3v10m2-10v10m3-10v10m2-10v10m3-10v10" />
+                </svg>
                 <input
-                  type="number"
-                  min="0"
-                  max="100000"
-                  step="any"
-                  [ngModel]="food().values[fact.key]"
-                  (ngModelChange)="setNutrient(fact.key, $event)"
-                  [readonly]="food().origin === 'recipe'"
-                  placeholder="—"
-                  inputmode="decimal"
+                  aria-label="Barcode (optional)"
+                  [ngModel]="food().barcode ?? ''"
+                  (ngModelChange)="setFood({ barcode: $event.trim() || undefined })"
+                  inputmode="numeric"
+                  maxlength="14"
+                  placeholder="Add barcode"
                 />
               </label>
             }
           </div>
-        </fieldset>
-        <p class="status">
-          @if (food().origin === 'usda') {
-            <a
-              [href]="'https://fdc.nal.usda.gov/food-details/' + food().fdcId + '/nutrients'"
-              target="_blank"
-              rel="noopener"
-              >USDA FoodData Central</a
-            >
-            · Reference values per 100 g
-          }
-          @if (food().origin === 'open-food-facts') {
-            <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener"
-              >Open Food Facts</a
-            >
-            · Check against your label.
-            <button type="button" class="text-button" (click)="setFood({ origin: 'manual' })">
-              Use my label
-            </button>
+          <div class="portion-amount">
+            <label class="field portion-field"
+              >Amount
+              <input
+                type="number"
+                min="0.01"
+                max="100000"
+                step="any"
+                [(ngModel)]="amount"
+                inputmode="decimal"
+              />
+            </label>
+            <fieldset class="portion-group">
+              <legend>Unit</legend>
+              <div class="portion-units">
+                @for (unit of portionUnits; track unit.id) {
+                  @if (
+                    food().origin === 'recipe'
+                      ? unit.id === food().basis
+                      : unit.id !== 'serving' ||
+                        food().origin === 'manual' ||
+                        food().basis === 'serving'
+                  ) {
+                    <button
+                      type="button"
+                      [attr.aria-pressed]="food().basis === unit.id"
+                      [disabled]="busy()"
+                      (click)="setFood({ basis: unit.id })"
+                    >
+                      {{ unit.label }}
+                    </button>
+                  }
+                }
+              </div>
+            </fieldset>
+          </div>
+          <fieldset class="portion-group">
+            <legend>
+              {{
+                food().basis === 'serving' ? 'Values per serving' : 'Values per 100 ' + food().basis
+              }}
+            </legend>
+            <div class="portion-facts">
+              @for (fact of facts; track fact.key) {
+                <label class="field"
+                  >{{ fact.label }}{{ fact.key === 'kcal' ? '' : ' (g)' }}
+                  <input
+                    type="number"
+                    min="0"
+                    max="100000"
+                    step="any"
+                    [ngModel]="food().values[fact.key]"
+                    (ngModelChange)="setNutrient(fact.key, $event)"
+                    [readonly]="food().origin === 'recipe'"
+                    [required]="fact.key === 'kcal'"
+                    placeholder="—"
+                    inputmode="decimal"
+                  />
+                </label>
+              }
+            </div>
+          </fieldset>
+          @if (food().origin === 'usda' || food().origin === 'open-food-facts') {
+            <div class="portion-source">
+              @if (food().origin === 'usda') {
+                <p>
+                  <a
+                    [href]="'https://fdc.nal.usda.gov/food-details/' + food().fdcId + '/nutrients'"
+                    target="_blank"
+                    rel="noopener"
+                    >USDA FoodData Central</a
+                  >
+                  · Reference values
+                </p>
+              } @else {
+                <p>
+                  <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener"
+                    >Open Food Facts</a
+                  >
+                  · check against your label
+                </p>
+                <button type="button" class="text-button" (click)="setFood({ origin: 'manual' })">
+                  Use my label
+                </button>
+              }
+            </div>
           }
           @if (amount !== null && amount > 0) {
             @let kcal = portionEnergy({ food: food(), amount });
             @if (kcal !== null) {
-              <span>Portion: {{ kcal | number: '1.0-1' }} kcal</span>
+              <p class="portion-energy">Portion · {{ kcal | number: '1.0-1' }} kcal</p>
             }
           }
-        </p>
-        <button type="button" class="primary full" [disabled]="busy()" (click)="saveEntry()">
-          {{ editId ? 'Save changes' : 'Add to diary' }}
-        </button>
-        <div class="editor-actions">
-          @if (food().origin !== 'recipe') {
-            <button type="button" class="text-button" [disabled]="busy()" (click)="favorite()">
-              Save to My foods
+          <div class="portion-footer">
+            <button type="button" class="primary" [disabled]="busy()" (click)="saveEntry()">
+              {{ editId ? 'Save changes' : 'Add to diary' }}
             </button>
-          }
-          @if (editId) {
-            <button
-              type="button"
-              class="text-button destructive"
-              [disabled]="busy()"
-              (click)="remove(editId)"
-            >
-              Remove from diary
-            </button>
-          }
+            @if (food().origin !== 'recipe') {
+              <button type="button" class="text-button" [disabled]="busy()" (click)="favorite()">
+                Save to My foods
+              </button>
+            }
+            @if (editId) {
+              <button
+                type="button"
+                class="text-button destructive"
+                [disabled]="busy()"
+                (click)="remove(editId)"
+              >
+                Remove from diary
+              </button>
+            }
+          </div>
         </div>
       }
       @case ('library') {
