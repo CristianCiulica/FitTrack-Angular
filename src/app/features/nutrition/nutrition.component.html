@@ -329,6 +329,7 @@
 </ng-template>
 <dialog
   #editor
+  class="nutrition-editor"
   [class.scanner-open]="scanning()"
   [class.portion-sheet]="pane() === 'portion' || (pane() === 'find' && !scanning())"
   [class.find-sheet]="pane() === 'find' && !scanning()"
