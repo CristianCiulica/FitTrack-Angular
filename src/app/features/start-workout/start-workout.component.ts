@@ -1524,7 +1524,10 @@ export class StartWorkoutComponent implements OnInit, OnDestroy {
     if (this.state() !== 'rest') return;
     const remaining = Math.max(0, Math.ceil((this.restDeadline - Date.now()) / 1000));
     this.restTimeRemaining.set(remaining);
-    if (remaining === 0) this.skipRest();
+    if (remaining === 0) {
+      this.skipRest();
+      navigator.vibrate?.(200);
+    }
   }
 
   previousSet() {

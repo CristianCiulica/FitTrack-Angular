@@ -27,6 +27,24 @@ describe('Workout session recovery', () => {
   });
   afterEach(() => { component.ngOnDestroy(); vi.useRealTimers(); });
 
+  it('vibrates once when rest expires, including added time, and stays silent on skip', () => {
+    const vibrate = vi.fn();
+    vi.stubGlobal('navigator', { vibrate });
+    try {
+      component.finishSet();
+      component.skipRest();
+      component.finishSet();
+      component.addTime(15);
+      vi.advanceTimersByTime(104_000);
+      expect(vibrate).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(2_000);
+      component.updateRestTime();
+      expect(vibrate).toHaveBeenCalledExactlyOnceWith(200);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('counts session time across exercise and rest, including a suspended clock', () => {
     vi.advanceTimersByTime(12_000);
     component.finishSet();
