@@ -1,3 +1,4 @@
+import { WeekCalendarComponent } from '../../shared/components/week-calendar/week-calendar.component';
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import {
   Component,
@@ -54,7 +55,15 @@ const fromApi = '/nutrition';
 
 @Component({
   selector: 'app-nutrition',
-  imports: [AppMenuComponent, DatePipe, DecimalPipe, NgTemplateOutlet, FormsModule, RouterLink],
+  imports: [
+    AppMenuComponent,
+    WeekCalendarComponent,
+    DatePipe,
+    DecimalPipe,
+    NgTemplateOutlet,
+    FormsModule,
+    RouterLink,
+  ],
   templateUrl: './nutrition.component.html',
   styleUrl: './nutrition.component.scss',
 })
@@ -93,11 +102,9 @@ export class NutritionComponent {
     return profile ? profileCalorieTarget(profile) : null;
   });
   readonly reportOpen = signal(false);
-  readonly calendarWeek = computed(() => {
-    const weekday = new Date(this.date() + 'T12:00:00Z').getUTCDay();
-    const monday = moveDate(this.date(), -((weekday + 6) % 7));
-    return Array.from({ length: 7 }, (_, index) => moveDate(monday, index));
-  });
+  readonly foodDates = computed(
+    () => new Set(this.records().flatMap((row) => (row.kind === 'entry' ? [row.date] : []))),
+  );
   readonly calorieProgress = computed(() => {
     const target = this.target();
     return this.loaded() && target ? Math.min(100, (this.totals().values.kcal / target) * 100) : 0;
@@ -198,6 +205,9 @@ export class NutritionComponent {
     this.error.set('');
     this.loaded.set(false);
     this.suggestion.set(null);
+    const weekday = new Date(date + 'T12:00:00Z').getUTCDay();
+    const weekEnd = moveDate(date, (7 - weekday) % 7);
+    const to = weekEnd < this.today ? weekEnd : this.today;
     const from = moveDate(
       date,
       -Math.min(28, Math.round((Date.parse(date) - Date.parse('1900-01-01')) / 86_400_000)),
@@ -207,7 +217,7 @@ export class NutritionComponent {
         this.api
           .get<{
             records: NutritionRecord[];
-          }>(fromApi, { params: { from, to: date }, timeout: 20_000 })
+          }>(fromApi, { params: { from, to }, timeout: 20_000 })
           .pipe(takeUntilDestroyed(this.destroy)),
       );
       if (!this.alive || version !== this.loadVersion) return;
@@ -227,12 +237,6 @@ export class NutritionComponent {
   }
   readonly summarize = summarize;
   readonly portionNutrients = portionNutrients;
-
-  step(days: number) {
-    void this.load(
-      moveDate(this.date(), days) > this.today ? this.today : moveDate(this.date(), days),
-    );
-  }
 
   openAdd(meal: Meal, camera = false) {
     this.open(meal, 'find');

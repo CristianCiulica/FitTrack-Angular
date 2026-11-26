@@ -25,25 +25,8 @@
         <a class="run-recovery-notice" routerLink="/running"><span>Run recovered</span><strong>Resume or save ›</strong></a>
       }
 
-      <section class="calendar-card dash-card" aria-label="Activity calendar">
-        <div class="dash-card-header">
-          <h2><span class="desktop-month">{{ selectedDate() | date:'MMMM y' }}</span><span class="mobile-week">{{ weekLabel() }}</span></h2>
-          <div class="week-controls">
-            <button type="button" aria-label="Previous week" (click)="shiftWeek(-1)">‹</button>
-            <button type="button" aria-label="Next week" (click)="shiftWeek(1)">›</button>
-          </div>
-        </div>
-        <div class="calendar-days">
-          @for (day of weekDays(); track day.key) {
-            <button type="button" class="calendar-day" [attr.aria-pressed]="day.selected"
-              [attr.aria-label]="(day.date | date:'fullDate') + (day.hasActivity ? ', activity recorded' : '')"
-              [attr.aria-current]="day.isToday ? 'date' : null" (click)="selectDay(day.date)">
-              <small>{{ day.label }}</small><b>{{ day.dayNum }}</b>
-              @if (day.hasActivity) { <i aria-hidden="true"></i> }
-            </button>
-          }
-        </div>
-      </section>
+      <ft-week-calendar [selected]="selectedDateKey()" [markedDates]="activityDates()"
+        (selectedChange)="selectCalendarDate($event)" />
 
       <div class="dashboard-metrics">
         <section class="dash-card activity-panel" aria-labelledby="activity-title">

@@ -11,56 +11,18 @@
   </button>
 </header>
 <main class="nutrition-shell">
-  <section class="diary-week" aria-label="Diary calendar">
-    <div class="calendar-header">
-      <button
-        type="button"
-        class="icon-button"
-        aria-label="Previous week"
-        [disabled]="busy() || moveDateForTemplate(date(), -7) < '1900-01-01'"
-        (click)="step(-7)"
-      >
-        ‹
-      </button>
-      <label class="day-picker">
-        <b>{{ date() === today ? 'Today' : (date() + 'T12:00:00' | date: 'd MMMM') }}</b>
-        <small>{{ date() + 'T12:00:00' | date: 'MMMM y' }}</small>
-        <input
-          type="date"
-          aria-label="Choose diary date"
-          [value]="date()"
-          min="1900-01-01"
-          [max]="today"
-          [disabled]="busy()"
-          (change)="load($any($event.target).value)"
-        />
-      </label>
-      <button
-        type="button"
-        class="icon-button"
-        aria-label="Next week"
-        [disabled]="busy() || calendarWeek()[6] >= today"
-        (click)="step(7)"
-      >
-        ›
-      </button>
-    </div>
-    <div class="week-strip">
-      @for (day of calendarWeek(); track day) {
-        <button
-          type="button"
-          [disabled]="busy() || day > today || day < '1900-01-01'"
-          [class.selected]="day === date()"
-          [attr.aria-pressed]="day === date()"
-          [attr.aria-label]="day + 'T12:00:00' | date: 'EEEE, d MMMM y'"
-          (click)="load(day)"
-        >
-          <small>{{ day + 'T12:00:00' | date: 'EEE' }}</small>
-          <b>{{ day + 'T12:00:00' | date: 'd' }}</b>
-        </button>
-      }
-    </div>
-  </section>
+  <ft-week-calendar
+    label="Diary calendar"
+    markerLabel="food logged"
+    [selected]="date()"
+    [today]="today"
+    min="1900-01-01"
+    [max]="today"
+    [datePicker]="true"
+    [disabled]="busy()"
+    [markedDates]="foodDates()"
+    (selectedChange)="load($event)"
+  />
 
   <section class="overview" aria-labelledby="daily-nutrition">
     <div class="daily-heading">

@@ -59,49 +59,6 @@ h3 {
 .overview {
   padding: 12px clamp(14px, 4vw, 28px) 16px;
 }
-.calendar-header {
-  display: grid;
-  grid-template-columns: 44px 1fr 44px;
-  align-items: center;
-}
-.calendar-header button {
-  font-size: 23px;
-}
-.day-picker {
-  position: relative;
-  display: grid;
-  width: fit-content;
-  min-width: 96px;
-  line-height: 1.25;
-  margin: auto;
-  text-align: center;
-  font-weight: 650;
-}
-.day-picker small {
-  font-weight: 450;
-}
-.day-picker input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-.day-picker input::-webkit-calendar-picker-indicator {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-.day-picker:focus-within {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
-}
-
 .macro-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -400,38 +357,6 @@ legend {
 .meal,
 .insights {
   background: var(--nutrition-panel);
-}
-.diary-week {
-  margin-bottom: 12px;
-}
-.week-strip {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  margin-top: 6px;
-}
-.week-strip button {
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 3px;
-  min-height: 56px;
-  border: 0;
-  background: none;
-  padding: 0;
-}
-.week-strip button b {
-  display: grid;
-  place-items: center;
-  width: min(33px, 90%);
-  aspect-ratio: 1;
-  border: 1px solid var(--hairline);
-  border-radius: 50%;
-  font-variant-numeric: tabular-nums;
-}
-.week-strip button.selected b {
-  background: var(--ink);
-  color: var(--bg);
-  border-color: transparent;
 }
 .daily-heading {
   display: flex;

@@ -1,3 +1,4 @@
+import { WeekCalendarComponent } from '../../shared/components/week-calendar/week-calendar.component';
 import { CircularDialogMotion } from '../../shared/components/circular-dialog-motion';
 import { FitAction } from '../../shared/glisse/controls';
 import { isTimedCardioOnly, treadmillSeconds, timedSession } from '../../core/utils/timed-cardio';
@@ -38,6 +39,7 @@ import {
     NzLayoutModule,
     NzIconModule,
     AppMenuComponent,
+    WeekCalendarComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss', './nutrition-assistant.scss']
@@ -113,52 +115,16 @@ export class DashboardComponent implements OnInit {
     return `${date.getFullYear()}-${m}-${d}`;
   }
 
-  // saptamana afisata incepe luni, in jurul zilei selectate
-  readonly weekDays = computed(() => {
-    const selected = this.selectedDate();
-    const monday = new Date(selected);
-    monday.setDate(selected.getDate() - ((selected.getDay() + 6) % 7));
-
-    const workoutKeys = new Set(this.workouts().map((w) => (w.date ?? '').slice(0, 10)));
-    const runKeys = new Set(this.runningSessions().map((s) => this.toKey(new Date(s.startedAt))));
-    const todayKey = this.toKey(new Date());
-    const selectedKey = this.toKey(selected);
-
-    return Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      const key = this.toKey(date);
-      return {
-        date,
-        key,
-        label: ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
-        dayNum: date.getDate(),
-        selected: key === selectedKey,
-        isToday: key === todayKey,
-        hasActivity: workoutKeys.has(key) || runKeys.has(key),
-      };
-    });
-  });
-
-  readonly weekLabel = computed(() => {
-    const week = this.weekDays();
-    const first = week[0].date;
-    const last = week[6].date;
-    const month = new Intl.DateTimeFormat('en', { month: 'long' });
-    return month.format(first) + ' ' + first.getDate() + '–' +
-      (first.getMonth() === last.getMonth() ? '' : month.format(last) + ' ') + last.getDate();
-  });
+  readonly selectedDateKey = computed(() => this.toKey(this.selectedDate()));
+  readonly activityDates = computed(() => new Set([
+    ...this.workouts().map(workout => (workout.date ?? '').slice(0, 10)),
+    ...this.runningSessions().map(session => this.toKey(new Date(session.startedAt))),
+  ]));
 
   trackWorkout(_index: number, workout: Workout) { return workout.id ?? workout; }
 
-  selectDay(date: Date) {
-    this.selectedDate.set(new Date(date));
-  }
-
-  shiftWeek(direction: -1 | 1) {
-    const next = new Date(this.selectedDate());
-    next.setDate(next.getDate() + direction * 7);
-    this.selectedDate.set(next);
+  selectCalendarDate(date: string) {
+    this.selectedDate.set(new Date(date + 'T12:00:00'));
   }
 
   private readonly sessionsForDay = computed(() => {

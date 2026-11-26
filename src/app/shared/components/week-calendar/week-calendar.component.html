@@ -1,0 +1,53 @@
+<section class="calendar-card" [attr.aria-label]="label()">
+  <div class="calendar-header">
+    <h2 [class.date-picker]="datePicker()">
+      <span class="desktop-month">{{ selectedDate() | date: 'MMMM y' }}</span>
+      <span class="mobile-week">{{ weekLabel() }}</span>
+      @if (datePicker()) {
+        <input
+          type="date"
+          aria-label="Choose diary date"
+          [value]="selected()"
+          [min]="min()"
+          [max]="max()"
+          [disabled]="disabled()"
+          (change)="select($any($event.target).value)"
+        />
+      }
+    </h2>
+    <div class="week-controls">
+      <button
+        type="button"
+        aria-label="Previous week"
+        [disabled]="!canGoBack()"
+        (click)="shift(-1)"
+      >
+        ‹
+      </button>
+      <button type="button" aria-label="Next week" [disabled]="!canGoForward()" (click)="shift(1)">
+        ›
+      </button>
+    </div>
+  </div>
+  <div class="calendar-days">
+    @for (day of days(); track day.key) {
+      <button
+        type="button"
+        class="calendar-day"
+        [disabled]="isDisabled(day.key)"
+        [attr.aria-pressed]="day.key === selected()"
+        [attr.aria-current]="day.key === today() ? 'date' : null"
+        [attr.aria-label]="
+          (day.date | date: 'fullDate') + (markedDates().has(day.key) ? ', ' + markerLabel() : '')
+        "
+        (click)="select(day.key)"
+      >
+        <small>{{ day.label }}</small
+        ><b>{{ day.date.getDate() }}</b>
+        @if (markedDates().has(day.key)) {
+          <i aria-hidden="true"></i>
+        }
+      </button>
+    }
+  </div>
+</section>
