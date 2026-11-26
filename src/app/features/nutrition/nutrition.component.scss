@@ -988,3 +988,76 @@ dialog.scanner-open {
 .find-credit a {
   color: inherit;
 }
+
+.library-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 20px;
+}
+.library-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.library-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 52px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+}
+.library-actions .quiet {
+  border-color: var(--sheet-line);
+  background: var(--sheet-fact);
+}
+.library-actions svg,
+.library-empty svg {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.library-actions .quiet svg,
+.library-empty svg {
+  color: var(--sheet-accent);
+}
+.library-empty {
+  display: grid;
+  flex: 1;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  min-height: 240px;
+  padding: 20px;
+  border: 1px dashed var(--sheet-line);
+  border-radius: 20px;
+  text-align: center;
+}
+.library-empty span {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 1px;
+  border-radius: 18px;
+  background: var(--sheet-fact);
+}
+.library-empty svg {
+  width: 28px;
+  height: 28px;
+}
+.library-empty h3 {
+  font-size: 18px;
+}
+.library-empty p {
+  max-width: 25ch;
+  color: var(--sheet-secondary);
+  font-size: 14px;
+}

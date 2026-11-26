@@ -218,17 +218,16 @@
 
 .effects-section { padding-top: 22px; border-top: 1px solid var(--hairline); }
 .effect-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.effect-preview {
-  display: grid; place-items: center;
-  background: linear-gradient(125deg, #233451 12%, #5375ad 40%, #7089c2 50%, #beacd7 53%, #514e80 83%);
+.appearance-preview.effect-preview {
+  display: block;
+  height: auto;
+  padding: 0;
+  aspect-ratio: 756 / 286;
+  background: var(--settings-surface, var(--surface-strong));
 }
-.preview-pill {
-  display: flex; justify-content: space-around; align-items: center; width: 82%; height: 32px;
-  border-radius: 20px; background: linear-gradient(145deg, #ffffff65, #ffffff10 45%, #b3d4fa50);
-  border: 1px solid #ffffffa8; box-shadow: inset 0 2px 2px #ffffff70, inset 0 -2px 4px #47619e80, 0 4px 8px #1d264f40;
-  i { width: 6px; height: 6px; border-radius: 50%; background: #fff; }
-}
-.blur-preview {
-  background: linear-gradient(125deg, #233451 12%, #5375ad 36%, #7089c2 45%, #beacd7 60%, #514e80 83%);
-  .preview-pill { background: #7789b5d9; box-shadow: none; border-color: #ffffff50; }
+.effect-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
